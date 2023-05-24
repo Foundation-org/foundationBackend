@@ -3,7 +3,6 @@ const route = require("express").Router();
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 
@@ -124,11 +123,11 @@ route.post("/sendVerifyEmail", async (req, res) => {
 
     var mailOptions = {
       from: process.env.EMAIL_USERNAME,
-      //   to: req.body.email,
-      to: "abdullahyaqoob380@gmail.com",
+      to: req.body.email,
+      //   to: "abdullahyaqoob380@gmail.com",
       subject: "Verify Account",
       html: `Click <a href = '${url}'>here</a> to confirm your email <br /> <br /> <br />
-        And Copy the this code <b>${verificationToken}</b> and paste in App`,
+        And confirm this code <b>${verificationToken}</b> from the App`,
       //   html: `Please Copy the code and Paste in App <b>${verificationToken}</b>`,
     };
 
