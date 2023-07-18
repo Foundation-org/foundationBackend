@@ -23,10 +23,12 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     walletAddr: {
       type: String,
     },
+    startStatus: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );
 
 module.exports = mongoose.model("InfoQuestQuestions", InfoQuestQuestionsSchema);
-
-

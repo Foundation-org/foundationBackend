@@ -39,6 +39,7 @@ route.post("/getAllBookmarkQuests", async (req, res) => {
     const Questions = await BookmarkQuests.find({
       walletAddr: req.body.walletAddr,
     });
+    // console.log(Questions);
     res.status(200).json(Questions);
   } catch (err) {
     res.status(500).send(err);

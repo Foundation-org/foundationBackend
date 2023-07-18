@@ -9,6 +9,7 @@ const connectDB = require("./config/db");
 const AuthRoute = require("./routes/AuthRoute");
 const InfoQuestQuestion = require("./routes/InfoQuestQuestion");
 const BookmarkQuest = require("./routes/BookmarkQuest");
+const StartQuest = require("./routes/StartQuest");
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(morgan("common"));
 app.use("/user", AuthRoute);
 app.use("/infoquestions", InfoQuestQuestion);
 app.use("/bookmarkQuest", BookmarkQuest);
+app.use("/startQuest", StartQuest);
 
 let port = 8800;
 
