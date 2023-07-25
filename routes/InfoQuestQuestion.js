@@ -55,8 +55,8 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
       await allQuestions.map(async function (rcrd) {
         await startedQuestions.map(function (rec) {
           if (rec.questForeignKey === rcrd._id.toString()) {
-            // console.log("matched");
-            if (rcrd.QuestionCorrect === "Not Selected") {
+            console.log("matched", rcrd);
+            if (rcrd.QuestionCorrect === "Not Selected" || rcrd.whichTypeQuestion === "ranked choise") {
               rcrd.startStatus = "change answer";
             } else {
               rcrd.startStatus = "completed";

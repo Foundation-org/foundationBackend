@@ -48,7 +48,7 @@ route.post("/signInUser", async (req, res) => {
 
 route.post("/userInfo", async (req, res) => {
   try {
-    const user = await User.findOne({ walletAddr: req.body.walletAddr });
+    const user = await User.findOne({ uuid: req.body.uuid });
 
     res.status(200).json(user);
   } catch (err) {
