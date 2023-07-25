@@ -72,7 +72,7 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
       let AnswerAddedOrNot = "";
       req.body.changeAnswerAddedObj.selected.map((option) => {
         if (option.addedAnswerByUser === true) {
-          // AnswerAddedOrNot = option.question;
+          AnswerAddedOrNot = option.question;
           const addAnswer = {
             question: option.question,
             selected: true
