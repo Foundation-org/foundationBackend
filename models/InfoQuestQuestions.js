@@ -20,7 +20,10 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     QuestAnswersSelected: {
       type: Array,
     },
-    walletAddr: {
+    uuid: {
+      type: String,
+    },
+    uuid: {
       type: String,
     },
     startStatus: {

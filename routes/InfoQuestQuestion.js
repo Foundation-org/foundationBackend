@@ -16,7 +16,7 @@ route.post("/createInfoQuestQuest", async (req, res) => {
         req.body.QuestAnswersSelected === undefined
           ? []
           : req.body.QuestAnswersSelected,
-      walletAddr: req.body.walletAddr,
+      uuid: req.body.uuid,
     });
 
     const questions = await question.save();
@@ -43,12 +43,12 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
   try {
     const allQuestions = await InfoQuestQuestions.find();
 
-    if (req.body.walletAddr === "" || req.body.walletAddr === undefined) {
+    if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
     } else {
       const startedQuestions = await StartQuests.find({
-        walletAddr: req.body.walletAddr,
-        // walletAddr: "0x81597438fdd366b90971a73f39d56eea4702c43a",
+        uuid: req.body.uuid,
+        // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
       let Result = [];
@@ -79,12 +79,12 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
   try {
     const allQuestions = await InfoQuestQuestions.find();
 
-    if (req.body.walletAddr === "" || req.body.walletAddr === undefined) {
+    if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
     } else {
       const startedQuestions = await StartQuests.find({
-        walletAddr: req.body.walletAddr,
-        // walletAddr: "0x81597438fdd366b90971a73f39d56eea4702c43a",
+        uuid: req.body.uuid,
+        // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
       let Result = [];
@@ -112,12 +112,12 @@ route.post("/getAllQuestsWithCompletedStatus", async (req, res) => {
   try {
     const allQuestions = await InfoQuestQuestions.find();
 
-    if (req.body.walletAddr === "" || req.body.walletAddr === undefined) {
+    if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
     } else {
       const startedQuestions = await StartQuests.find({
-        walletAddr: req.body.walletAddr,
-        // walletAddr: "0x81597438fdd366b90971a73f39d56eea4702c43a",
+        uuid: req.body.uuid,
+        // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
       let Result = [];
@@ -148,12 +148,12 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
   try {
     const allQuestions = await InfoQuestQuestions.find();
 
-    if (req.body.walletAddr === "" || req.body.walletAddr === undefined) {
+    if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
     } else {
       const startedQuestions = await StartQuests.find({
-        walletAddr: req.body.walletAddr,
-        // walletAddr: "0x81597438fdd366b90971a73f39d56eea4702c43a",
+        uuid: req.body.uuid,
+        // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
       let Result = [];

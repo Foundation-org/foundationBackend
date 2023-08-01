@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const StartQuestsSchema = mongoose.Schema(
   {
-    walletAddr: {
+    uuid: {
       type: String,
     },
     questForeignKey: {

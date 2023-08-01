@@ -9,7 +9,7 @@ route.post("/createBookmarkQuest", async (req, res) => {
     const question = await new BookmarkQuests({
       Question: req.body.Question,
       questForeignKey: req.body.questForeignKey,
-      walletAddr: req.body.walletAddr,
+      uuid: req.body.uuid,
     });
 
     const questions = await question.save();
@@ -37,7 +37,7 @@ route.post("/deleteBookmarkQuest", async (req, res) => {
 route.post("/getAllBookmarkQuests", async (req, res) => {
   try {
     const Questions = await BookmarkQuests.find({
-      walletAddr: req.body.walletAddr,
+      uuid: req.body.uuid,
     });
     // console.log(Questions);
     res.status(200).json(Questions);
@@ -50,7 +50,7 @@ route.post("/getAllBookmarkQuests", async (req, res) => {
 route.post("/getAllBookmarkQuestions", async (req, res) => {
   try {
     const Questions = await BookmarkQuests.find({
-      walletAddr: req.body.walletAddr,
+      uuid: req.body.uuid,
     });
 
     let response = [];

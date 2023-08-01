@@ -12,7 +12,7 @@ route.post("/createStartQuest", async (req, res) => {
     //   },
     //   {
     //     where: {
-    //       walletAddr: req.body.walletAddr,
+    //       uuid: req.body.uuid,
     //     },
     //   }
     // )
@@ -23,14 +23,14 @@ route.post("/createStartQuest", async (req, res) => {
       },
       {
         where: {
-          walletAddr: req.body.walletAddr,
+          uuid: req.body.uuid,
         },
       }
     );
 
     const question = await new StartQuests({
       questForeignKey: req.body.questForeignKey,
-      walletAddr: req.body.walletAddr,
+      uuid: req.body.uuid,
       addedAnswer: req.body.addedAnswer,
       data: req.body.data,
     });
@@ -50,7 +50,7 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
   try {
     const startQuestQuestion = await StartQuests.findOne({
       questForeignKey: req.body.questId,
-      walletAddr: req.body.walletAddr,
+      uuid: req.body.uuid,
     });
 
     let startQuestAnswersSelected = startQuestQuestion.data;
@@ -335,7 +335,7 @@ route.post("/getStartQuestInfo", async (req, res) => {
   try {
     const startQuestQuestion = await StartQuests.findOne({
       questForeignKey: req.body.questForeignKey,
-      walletAddr: req.body.walletAddr,
+      uuid: req.body.uuid,
     });
 
     res.status(200).json(startQuestQuestion);
