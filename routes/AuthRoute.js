@@ -25,7 +25,9 @@ route.post("/signUpUser", async (req, res) => {
     const users = await user.save();
     !users && res.status(404).send("Not Created 1");
 
-    res.status(201).send("User has been Created");
+    res.status(200).json(user);
+
+
   } catch (err) {
     res.status(500).send("Not Created 2");
   }
@@ -40,7 +42,7 @@ route.post("/signInUser", async (req, res) => {
     const compPass = await bcrypt.compare(req.body.password, user.password);
     !compPass && res.status(400).json("Wrong Password");
 
-    res.status(200).json(user);
+    res.status(201).send("Signed in Successfully");
   } catch (err) {
     res.status(500).send(err);
   }
