@@ -178,17 +178,19 @@ route.post("/getStartQuestPercent", async (req, res) => {
 
         if (res.data[res.data.length - 1].selected) {
           res.data[res.data.length - 1].selected.map((option) => {
-            if (selectedOptionsCount[option.question]) {
-              selectedOptionsCount[option.question]++;
-            }
-            else if (selectedOptionsCount[option.question] === 0) {
-              selectedOptionsCount[option.question] = 1;
-            }
-            else {
-              selectedOptionsCount[option.question] = 1;
+            const question = option.question.trim();
+            if (selectedOptionsCount[question]) {
+              selectedOptionsCount[question]++;
+              console.log("selected option" + selectedOptionsCount[question]);
+              console.log(question);
             }
 
-            // console.log(selectedOptionsCount[option.question] + " " + option.question);
+            else {
+              selectedOptionsCount[question] = 1;
+              console.log("selected option first" + selectedOptionsCount[question]);
+              console.log(question);
+            }
+
 
 
           })
@@ -199,23 +201,27 @@ route.post("/getStartQuestPercent", async (req, res) => {
 
         if (res.data[res.data.length - 1].contended) {
           res.data[res.data.length - 1].contended.map((option) => {
-            if (contendedOptionsCount[option.question]) {
-              contendedOptionsCount[option.question]++;
-            }
-            else if (contendedOptionsCount[option.question] === 0) {
-              contendedOptionsCount[option.question] = 1;
-            }
-            else {
-              contendedOptionsCount[option.question] = 1;
+            const question = option.question.trim();
+            if (contendedOptionsCount[question]) {
+              contendedOptionsCount[question]++;
+              console.log("contended option" + contendedOptionsCount[question]);
+              console.log(question);
             }
 
-            // console.log(selectedOptionsCount[option.question] + " " + option.question);
+            else {
+              contendedOptionsCount[question] = 1;
+              console.log("First contended option" + contendedOptionsCount[question]);
+              console.log(question);
+
+            }
+
 
 
           })
           totalContendedResponses++;
 
         }
+        console.log("Total Contended responses :" + totalContendedResponses);
       }
     });
 
@@ -245,7 +251,7 @@ route.post("/getStartQuestPercent", async (req, res) => {
     //   });
     // });
     return Promise.all(mapExecution).then(() => {
-      if (questype == 1) {
+      if (questype === 1) {
         let TotalNumberOfAns =
           startQuestWithPositiveAns + startQuestWithNagativeAns;
         console.log("TotalNumberOfAns", TotalNumberOfAns);
@@ -298,17 +304,24 @@ route.post("/getStartQuestPercent", async (req, res) => {
       else {
         const percentageOfSelectedOptions = {};
         const percentageOfContendedOptions = {};
+        let responses;
+        if (totalSelectedResponses > totalContendedResponses) {
+          responses = totalSelectedResponses;
 
+        }
+        else {
+          responses = totalContendedResponses;
+        }
         // Calculate the percentage for each option
         for (const option in selectedOptionsCount) {
-          const percentage = (selectedOptionsCount[option] / totalSelectedResponses) * 100;
+          const percentage = (selectedOptionsCount[option] / responses) * 100;
 
           percentageOfSelectedOptions[option] = isNaN(percentage) ? 0 : Number(percentage.toFixed(2));
 
         }
 
         for (const option in contendedOptionsCount) {
-          const percentage = (contendedOptionsCount[option] / totalContendedResponses) * 100;
+          const percentage = (contendedOptionsCount[option] / responses) * 100;
           Number(percentage.toFixed(2));
           percentageOfContendedOptions[option] = isNaN(percentage) ? 0 : Number(percentage.toFixed(2));
 
