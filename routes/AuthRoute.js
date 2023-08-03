@@ -42,7 +42,8 @@ route.post("/signInUser", async (req, res) => {
     const compPass = await bcrypt.compare(req.body.password, user.password);
     !compPass && res.status(400).json("Wrong Password");
 
-    res.status(201).send("Signed in Successfully");
+    res.status(200).json(user);
+    // res.status(201).send("Signed in Successfully");
   } catch (err) {
     res.status(500).send(err);
   }
