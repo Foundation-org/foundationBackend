@@ -68,19 +68,18 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
 
     console.log("dateFinal", dateFinal);
 
-    // if (dateFinal > 86400000) {
+    if (dateFinal > 86400000) {
       let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
       req.body.changeAnswerAddedObj.selected.map((option) => {
         if (option.addedAnswerByUser === true) {
           AnswerAddedOrNot = option.question;
           const addAnswer = {
             question: option.question,
-            selected: true
-          }
+            selected: true,
+          };
           InfoQuestQuestions.findByIdAndUpdate(
             { _id: req.body.questId },
-            { $push: { QuestAnswers: addAnswer } },
-
+            { $push: { QuestAnswers: addAnswer } }
           ).exec(),
             (err, data) => {
               if (err) {
@@ -109,10 +108,10 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
             return res.status(200).send(data);
           }
         };
-    // } else {
-    //   console.log("Wait 24 hours to update answer");
-    //   responseMsg = "Wait 24 hours to update answer";
-    // }
+    } else {
+      console.log("Wait 24 hours to update answer");
+      responseMsg = "Wait 24 hours to update answer";
+    }
 
     res.status(200).json(responseMsg);
   } catch (err) {
@@ -137,7 +136,7 @@ route.post("/getStartQuestPercent", async (req, res) => {
     let totalContendedResponses = 0;
     let questype;
 
-    ``
+    ``;
     const mapExecution = StartQuestsData.map(async (res) => {
       if (typeof res.data[res.data.length - 1].selected === "string") {
         questype = 1;
@@ -146,36 +145,35 @@ route.post("/getStartQuestPercent", async (req, res) => {
           res.data[res.data.length - 1].selected === "Agree"
         ) {
           startQuestWithPositiveAns += 1;
-          if (res.data[res.data.length - 1].contended === "Yes" ||
-            res.data[res.data.length - 1].contended === "Agree") {
+          if (
+            res.data[res.data.length - 1].contended === "Yes" ||
+            res.data[res.data.length - 1].contended === "Agree"
+          ) {
             startQuestWithPositiveConAns += 1;
-
-          }
-          else if (res.data[res.data.length - 1].contended === "No" ||
-            res.data[res.data.length - 1].contended === "Disagree") {
+          } else if (
+            res.data[res.data.length - 1].contended === "No" ||
+            res.data[res.data.length - 1].contended === "Disagree"
+          ) {
             startQuestWithNagativeConAns += 1;
-
           }
         } else if (
           res.data[res.data.length - 1].selected === "No" ||
           res.data[res.data.length - 1].selected === "Disagree"
         ) {
           startQuestWithNagativeAns += 1;
-          if (res.data[res.data.length - 1].contended === "No" ||
-            res.data[res.data.length - 1].contended === "Disagree") {
+          if (
+            res.data[res.data.length - 1].contended === "No" ||
+            res.data[res.data.length - 1].contended === "Disagree"
+          ) {
             startQuestWithNagativeConAns += 1;
-
-          }
-          else if (res.data[res.data.length - 1].contended === "Yes" ||
-            res.data[res.data.length - 1].contended === "Agree") {
+          } else if (
+            res.data[res.data.length - 1].contended === "Yes" ||
+            res.data[res.data.length - 1].contended === "Agree"
+          ) {
             startQuestWithPositiveConAns += 1;
-
           }
-
-
         }
       } else {
-
         if (res.data[res.data.length - 1].selected) {
           res.data[res.data.length - 1].selected.map((option) => {
             const question = option.question.trim();
@@ -183,19 +181,15 @@ route.post("/getStartQuestPercent", async (req, res) => {
               selectedOptionsCount[question]++;
               console.log("selected option" + selectedOptionsCount[question]);
               console.log(question);
-            }
-
-            else {
+            } else {
               selectedOptionsCount[question] = 1;
-              console.log("selected option first" + selectedOptionsCount[question]);
+              console.log(
+                "selected option first" + selectedOptionsCount[question]
+              );
               console.log(question);
             }
-
-
-
-          })
+          });
           totalSelectedResponses++;
-
         }
         console.log("Total Selected responses :" + totalSelectedResponses);
 
@@ -206,20 +200,15 @@ route.post("/getStartQuestPercent", async (req, res) => {
               contendedOptionsCount[question]++;
               console.log("contended option" + contendedOptionsCount[question]);
               console.log(question);
-            }
-
-            else {
+            } else {
               contendedOptionsCount[question] = 1;
-              console.log("First contended option" + contendedOptionsCount[question]);
+              console.log(
+                "First contended option" + contendedOptionsCount[question]
+              );
               console.log(question);
-
             }
-
-
-
-          })
+          });
           totalContendedResponses++;
-
         }
         console.log("Total Contended responses :" + totalContendedResponses);
       }
@@ -286,58 +275,47 @@ route.post("/getStartQuestPercent", async (req, res) => {
         const responseObj = {
           selectedPercentage: {
             Yes: percentageOfYesAns === NaN ? 0 : percentageOfYesAns,
-            No: percentageOfNoAns === NaN ? 0 : percentageOfNoAns
+            No: percentageOfNoAns === NaN ? 0 : percentageOfNoAns,
           },
           contendedPercentage: {
             Yes: percentageOfYesConAns === NaN ? 0 : percentageOfYesConAns,
-            No: percentageOfNoConAns === NaN ? 0 : percentageOfNoConAns
+            No: percentageOfNoConAns === NaN ? 0 : percentageOfNoConAns,
           },
-        }
+        };
 
-        res
-          .status(200)
-          .json([responseObj
-
-          ]);
-
-      }
-      else {
+        res.status(200).json([responseObj]);
+      } else {
         const percentageOfSelectedOptions = {};
         const percentageOfContendedOptions = {};
         let responses;
         if (totalSelectedResponses > totalContendedResponses) {
           responses = totalSelectedResponses;
-
-        }
-        else {
+        } else {
           responses = totalContendedResponses;
         }
         // Calculate the percentage for each option
         for (const option in selectedOptionsCount) {
           const percentage = (selectedOptionsCount[option] / responses) * 100;
 
-          percentageOfSelectedOptions[option] = isNaN(percentage) ? 0 : Number(percentage.toFixed(2));
-
+          percentageOfSelectedOptions[option] = isNaN(percentage)
+            ? 0
+            : Number(percentage.toFixed(2));
         }
 
         for (const option in contendedOptionsCount) {
           const percentage = (contendedOptionsCount[option] / responses) * 100;
           Number(percentage.toFixed(2));
-          percentageOfContendedOptions[option] = isNaN(percentage) ? 0 : Number(percentage.toFixed(2));
-
+          percentageOfContendedOptions[option] = isNaN(percentage)
+            ? 0
+            : Number(percentage.toFixed(2));
         }
 
         const responseObj = {
           selectedPercentage: percentageOfSelectedOptions,
           contendedPercentage: percentageOfContendedOptions,
-        }
-        res.status(200).json([responseObj
-
-        ]);
+        };
+        res.status(200).json([responseObj]);
       }
-
-
-
     });
   } catch (err) {
     res.status(500).send("Not Created 2");
