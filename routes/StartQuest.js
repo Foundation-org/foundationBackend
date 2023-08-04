@@ -68,8 +68,8 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
 
     console.log("dateFinal", dateFinal);
 
-    if (dateFinal > 86400000) {
-      let AnswerAddedOrNot = "";
+    // if (dateFinal > 86400000) {
+      let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
       req.body.changeAnswerAddedObj.selected.map((option) => {
         if (option.addedAnswerByUser === true) {
           AnswerAddedOrNot = option.question;
@@ -109,10 +109,10 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
             return res.status(200).send(data);
           }
         };
-    } else {
-      console.log("Wait 24 hours to update answer");
-      responseMsg = "Wait 24 hours to update answer";
-    }
+    // } else {
+    //   console.log("Wait 24 hours to update answer");
+    //   responseMsg = "Wait 24 hours to update answer";
+    // }
 
     res.status(200).json(responseMsg);
   } catch (err) {

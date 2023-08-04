@@ -26,8 +26,6 @@ route.post("/signUpUser", async (req, res) => {
     !users && res.status(404).send("Not Created 1");
 
     res.status(200).json(user);
-
-
   } catch (err) {
     res.status(500).send("Not Created 2");
   }

@@ -30,7 +30,7 @@ route.post("/deleteBookmarkQuest", async (req, res) => {
 
     res.status(201).send("Quest has been deleted");
   } catch (err) {
-    res.status(500).send("Not Deleted 2");
+    res.status(500).send("Not Deleted 2");
   }
 });
 
