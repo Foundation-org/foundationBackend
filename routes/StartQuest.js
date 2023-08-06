@@ -118,12 +118,79 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
     res.status(500).send("Not Created 2");
   }
 });
+route.post("/getRankedQuestPercent", async (req, res) => {
+  try {
+    const StartQuestsData = await StartQuests.find({
+      questForeignKey: req.body.questForeignKey,
+    });
+    const optionsCount = {};
+    let totalCount = 0;
+    const mapExecution = StartQuestsData.map(async (res) => {
+      let i = 1;
+
+
+      res.data[res.data.length - 1].selected.map((option) => {
+        const question = option.question.trim();
+        if (optionsCount[question]) {
+          optionsCount[question] += res.data[res.data.length - 1].selected.length - i;
+          console.log("selected option" + optionsCount[question]);
+          console.log(question);
+        } else {
+          optionsCount[question] = res.data[res.data.length - 1].selected.length - i;
+          console.log(
+            "selected option first" + optionsCount[question]
+          );
+          console.log(question);
+        }
+        totalCount += res.data[res.data.length - 1].selected.length - i;
+        i++;
+        console.log("Total responses :" + totalCount);
+
+
+
+
+
+      })
+
+
+
+    });
+
+    return Promise.all(mapExecution).then(() => {
+
+      const percentageOfOptions = {};
+
+
+      for (const option in optionsCount) {
+        const percentage = (optionsCount[option] / totalCount) * 100;
+
+        percentageOfOptions[option] = isNaN(percentage)
+          ? 0
+          : Number(percentage.toFixed(2));
+      }
+
+      const responseObj = {
+        rankedPercentage: percentageOfOptions,
+
+      };
+      res.status(200).json([responseObj]);
+
+    })
+
+
+  }
+  catch (err) {
+    res.status(500).send("Not Created 2");
+  }
+
+})
 route.post("/getStartQuestPercent", async (req, res) => {
   try {
     const StartQuestsData = await StartQuests.find({
       questForeignKey: req.body.questForeignKey,
       // questForeignKey: "64a6d5a9313105966b9682f2",
     });
+
     // console.log("StartQuestsData", StartQuestsData);
 
     let startQuestWithNagativeAns = 0,
@@ -136,7 +203,6 @@ route.post("/getStartQuestPercent", async (req, res) => {
     let totalContendedResponses = 0;
     let questype;
 
-    ``;
     const mapExecution = StartQuestsData.map(async (res) => {
       if (typeof res.data[res.data.length - 1].selected === "string") {
         questype = 1;
