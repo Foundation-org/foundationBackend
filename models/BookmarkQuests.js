@@ -6,7 +6,7 @@ const BookmarkQuestsSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    walletAddr: {
+    uuid: {
       type: String,
     },
     questForeignKey: {

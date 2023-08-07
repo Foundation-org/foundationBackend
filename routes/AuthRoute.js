@@ -25,7 +25,7 @@ route.post("/signUpUser", async (req, res) => {
     const users = await user.save();
     !users && res.status(404).send("Not Created 1");
 
-    res.status(201).send("User has been Created");
+    res.status(200).json(user);
   } catch (err) {
     res.status(500).send("Not Created 2");
   }
@@ -41,6 +41,7 @@ route.post("/signInUser", async (req, res) => {
     !compPass && res.status(400).json("Wrong Password");
 
     res.status(200).json(user);
+    // res.status(201).send("Signed in Successfully");
   } catch (err) {
     res.status(500).send(err);
   }
@@ -110,7 +111,7 @@ route.post("/sendVerifyEmail", async (req, res) => {
     console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
-    const url = `http://localhost:3000/VerifyCode?${verificationTokenFull}`;
+    const url = `http://146.190.213.137/VerifyCode?${verificationTokenFull}`;
     // console.log("url", url);
 
     const transporter = nodemailer.createTransport({
