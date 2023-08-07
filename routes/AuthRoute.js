@@ -111,7 +111,7 @@ route.post("/sendVerifyEmail", async (req, res) => {
     console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
-    const url = `http://localhost:3000/VerifyCode?${verificationTokenFull}`;
+    const url = `http://146.190.213.137/VerifyCode?${verificationTokenFull}`;
     // console.log("url", url);
 
     const transporter = nodemailer.createTransport({

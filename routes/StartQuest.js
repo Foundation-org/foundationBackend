@@ -17,16 +17,16 @@ route.post("/createStartQuest", async (req, res) => {
     //   }
     // )
 
-    await StartQuests.updateOne(
-      {
-        btnStatus: "completed",
-      },
-      {
-        where: {
-          uuid: req.body.uuid,
-        },
-      }
-    );
+    // await StartQuests.updateOne(
+    //   {
+    //     btnStatus: "completed",
+    //   },
+    //   {
+    //     where: {
+    //       uuid: req.body.uuid,
+    //     },
+    //   }
+    // );
 
     const question = await new StartQuests({
       questForeignKey: req.body.questForeignKey,
@@ -35,12 +35,36 @@ route.post("/createStartQuest", async (req, res) => {
       data: req.body.data,
     });
 
-    console.log(req.body.addedAnswer);
-
     const questions = await question.save();
     !questions && res.status(404).send("Not Created 1");
 
-    res.status(201).send("Quest has been Created");
+    if (req.body.addedAnswer !== "") {
+      InfoQuestQuestions.findByIdAndUpdate(
+        { _id: req.body.questForeignKey },
+        {
+          $push: {
+            QuestAnswers: {
+              question: req.body.addedAnswer,
+              selected: true,
+            },
+          },
+        }
+      ).exec(),
+        (err, data) => {
+          if (err) {
+            return res.status(500).send(err);
+          } else {
+            return res.status(200).send(data);
+          }
+        };
+    }
+
+    res.status(200).json("Updated");
+
+    // const questions = await question.save();
+    // !questions && res.status(404).send("Not Created 1");
+
+    // res.status(201).send("Quest has been Created");
   } catch (err) {
     res.status(500).send("Not Created 2");
   }
@@ -128,38 +152,27 @@ route.post("/getRankedQuestPercent", async (req, res) => {
     const mapExecution = StartQuestsData.map(async (res) => {
       let i = 1;
 
-
       res.data[res.data.length - 1].selected.map((option) => {
         const question = option.question.trim();
         if (optionsCount[question]) {
-          optionsCount[question] += res.data[res.data.length - 1].selected.length - i;
+          optionsCount[question] +=
+            res.data[res.data.length - 1].selected.length - i;
           console.log("selected option" + optionsCount[question]);
           console.log(question);
         } else {
-          optionsCount[question] = res.data[res.data.length - 1].selected.length - i;
-          console.log(
-            "selected option first" + optionsCount[question]
-          );
+          optionsCount[question] =
+            res.data[res.data.length - 1].selected.length - i;
+          console.log("selected option first" + optionsCount[question]);
           console.log(question);
         }
         totalCount += res.data[res.data.length - 1].selected.length - i;
         i++;
         console.log("Total responses :" + totalCount);
-
-
-
-
-
-      })
-
-
-
+      });
     });
 
     return Promise.all(mapExecution).then(() => {
-
       const percentageOfOptions = {};
-
 
       for (const option in optionsCount) {
         const percentage = (optionsCount[option] / totalCount) * 100;
@@ -171,26 +184,19 @@ route.post("/getRankedQuestPercent", async (req, res) => {
 
       const responseObj = {
         rankedPercentage: percentageOfOptions,
-
       };
       res.status(200).json([responseObj]);
-
-    })
-
-
-  }
-  catch (err) {
+    });
+  } catch (err) {
     res.status(500).send("Not Created 2");
   }
-
-})
+});
 route.post("/getStartQuestPercent", async (req, res) => {
   try {
     const StartQuestsData = await StartQuests.find({
       questForeignKey: req.body.questForeignKey,
       // questForeignKey: "64a6d5a9313105966b9682f2",
     });
-
     // console.log("StartQuestsData", StartQuestsData);
 
     let startQuestWithNagativeAns = 0,
