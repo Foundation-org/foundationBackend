@@ -133,7 +133,6 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
           }
         };
     } else {
-
       console.log("You can change your answer once every 24 hours");
       responseMsg = "You can change your answer once every 24 hours";
     }
