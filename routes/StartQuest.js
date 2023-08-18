@@ -69,7 +69,6 @@ route.post("/createStartQuest", async (req, res) => {
     res.status(500).send("Not Created 2");
   }
 });
-
 route.post("/updateChangeAnsStartQuest", async (req, res) => {
   try {
     const startQuestQuestion = await StartQuests.findOne({
@@ -92,28 +91,30 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
 
     console.log("dateFinal", dateFinal);
 
-    if (dateFinal > 86400000) {
+    if (dateFinal > 3600000) {
       let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
-      req.body.changeAnswerAddedObj.selected.map((option) => {
-        if (option.addedAnswerByUser === true) {
-          AnswerAddedOrNot = option.question;
-          const addAnswer = {
-            question: option.question,
-            selected: true,
-          };
-          InfoQuestQuestions.findByIdAndUpdate(
-            { _id: req.body.questId },
-            { $push: { QuestAnswers: addAnswer } }
-          ).exec(),
-            (err, data) => {
-              if (err) {
-                return res.status(500).send(err);
-              } else {
-                return res.status(200).send(data);
-              }
+      if (typeof req.body.changeAnswerAddedObj.selected !== "string") {
+        req.body.changeAnswerAddedObj.selected.map((option) => {
+          if (option.addedAnswerByUser === true) {
+            AnswerAddedOrNot = option.question;
+            const addAnswer = {
+              question: option.question,
+              selected: true,
             };
-        }
-      });
+            InfoQuestQuestions.findByIdAndUpdate(
+              { _id: req.body.questId },
+              { $push: { QuestAnswers: addAnswer } }
+            ).exec(),
+              (err, data) => {
+                if (err) {
+                  return res.status(500).send(err);
+                } else {
+                  return res.status(200).send(data);
+                }
+              };
+          }
+        });
+      }
 
       responseMsg = "Updated";
       // console.log(startQuestAnswersSelected);
@@ -133,10 +134,8 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
           }
         };
     } else {
-      // console.log("Wait 24 hours to update answer");
-      // responseMsg = "Wait 24 hours to update answer";
-      console.log("You can change your answer once every 24 hours");
-      responseMsg = "You can change your answer once every 24 hours";
+      console.log("You can change your answer once every 1 hour");
+      responseMsg = "You can change your answer once every 1 hour";
     }
 
     res.status(200).json(responseMsg);
