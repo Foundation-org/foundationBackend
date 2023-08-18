@@ -130,7 +130,14 @@ route.post("/getAllQuestsWithCompletedStatus", async (req, res) => {
         let startedOrNot = false;
         await startedQuestions.map(function (rec) {
           if (rec.questForeignKey === rcrd._id.toString()) {
-            startedOrNot = true;
+
+            if (
+              rcrd.QuestionCorrect === "Not Selected" ||
+              rcrd.whichTypeQuestion === "ranked choise"
+            ) {
+            } else {
+              startedOrNot = true;
+            }
           }
         });
         if (startedOrNot === true) {
@@ -171,7 +178,8 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
         });
         if (startedOrNot === true) {
           // if (rcrd.QuestionCorrect === "Not Selected") {
-          if (rcrd.QuestionCorrect === "Not Selected") {
+          if (rcrd.QuestionCorrect === "Not Selected" ||
+            rcrd.whichTypeQuestion === "ranked choise") {
             rcrd.startStatus = "change answer";
             Result.push(rcrd);
             // }
