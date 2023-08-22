@@ -179,7 +179,7 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
         if (startedOrNot === true) {
           // if (rcrd.QuestionCorrect === "Not Selected") {
           if (rcrd.QuestionCorrect === "Not Selected" ||
-          rcrd.whichTypeQuestion === "ranked choise") {
+            rcrd.whichTypeQuestion === "ranked choise") {
             rcrd.startStatus = "change answer";
             Result.push(rcrd);
             // }
