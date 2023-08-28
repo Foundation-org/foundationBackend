@@ -77,8 +77,14 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
     });
 
     let startQuestAnswersSelected = startQuestQuestion.data;
-    console.log("startQuestQuestion.data", startQuestQuestion.data[startQuestQuestion.data.length - 1]);
-    console.log("req.body.changeAnswerAddedObj ", req.body.changeAnswerAddedObj );
+    console.log(
+      "startQuestQuestion.data",
+      startQuestQuestion.data[startQuestQuestion.data.length - 1]
+    );
+    console.log(
+      "req.body.changeAnswerAddedObj ",
+      req.body.changeAnswerAddedObj
+    );
     let responseMsg = "";
 
     let timeWhenUserUpdated = new Date(
@@ -92,56 +98,59 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
 
     console.log("dateFinal", dateFinal);
 
-    if (dateFinal > 0) {
-      if(Compare(startQuestQuestion.data[startQuestQuestion.data.length - 1],req.body.changeAnswerAddedObj )){ //Comparing old and new answer
+    if (dateFinal > 3600000) {
+      if (
+        Compare(
+          startQuestQuestion.data[startQuestQuestion.data.length - 1],
+          req.body.changeAnswerAddedObj
+        )
+      ) {
+        //Comparing old and new answer
 
-      let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
-      if (typeof req.body.changeAnswerAddedObj.selected !== "string") {
-        req.body.changeAnswerAddedObj.selected.map((option) => {
-          
-          if (option.addedAnswerByUser === true) {
-            
-            AnswerAddedOrNot = option.question;
-            const addAnswer = {
-              question: option.question,
-              selected: true,
-            };
-            InfoQuestQuestions.findByIdAndUpdate(
-              { _id: req.body.questId },
-              { $push: { QuestAnswers: addAnswer } }
-            ).exec(),
-              (err, data) => {
-                if (err) {
-                  return res.status(500).send(err);
-                } else {
-                  return res.status(200).send(data);
-                }
+        let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
+
+        if (typeof req.body.changeAnswerAddedObj.selected !== "string") {
+          req.body.changeAnswerAddedObj.selected.map((option) => {
+            if (option.addedAnswerByUser === true) {
+              AnswerAddedOrNot = option.question;
+              const addAnswer = {
+                question: option.question,
+                selected: true,
               };
-          }
-        });
-      }
-      
-      responseMsg = "Updated";
-      // console.log(startQuestAnswersSelected);
-      startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
-      // console.log(startQuestAnswersSelected);
-      
-      await StartQuests.findByIdAndUpdate(
-        { _id: startQuestQuestion._id },
-        { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
-        { upsert: true }
+              InfoQuestQuestions.findByIdAndUpdate(
+                { _id: req.body.questId },
+                { $push: { QuestAnswers: addAnswer } }
+              ).exec(),
+                (err, data) => {
+                  if (err) {
+                    return res.status(500).send(err);
+                  } else {
+                    return res.status(200).send(data);
+                  }
+                };
+            }
+          });
+        }
+
+        responseMsg = "Updated";
+        // console.log(startQuestAnswersSelected);
+        startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
+        // console.log(startQuestAnswersSelected);
+
+        await StartQuests.findByIdAndUpdate(
+          { _id: startQuestQuestion._id },
+          { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
+          { upsert: true }
         ).exec(),
-        (err, data) => {
-          if (err) {
-            return res.status(500).send(err);
-          } else {
-            return res.status(200).send(data);
-          }
-        };
-      }
-      else
-      {
-        responseMsg="Answer has not changed"
+          (err, data) => {
+            if (err) {
+              return res.status(500).send(err);
+            } else {
+              return res.status(200).send(data);
+            }
+          };
+      } else {
+        responseMsg = "Answer has not changed";
       }
     } else {
       console.log("You can change your answer once every 1 hour");
@@ -152,19 +161,20 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
   } catch (err) {
     res.status(500).send("Not Created 2");
   }
+
   function Compare(obj1, obj2) {
     // Clone the objects to prevent modifying the original objects
     const clonedObj1 = { ...obj1 };
     const clonedObj2 = { ...obj2 };
-  
+
     // Remove the 'created' property from the cloned objects as it can be different
     delete clonedObj1.created;
     delete clonedObj2.created;
-  
+
     // Convert the modified objects to JSON strings and compare them
     const stringifiedObj1 = JSON.stringify(clonedObj1);
     const stringifiedObj2 = JSON.stringify(clonedObj2);
-  
+
     // Compare the JSON strings
     if (stringifiedObj1 === stringifiedObj2) {
       return false; // Objects match
@@ -172,8 +182,6 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
       return true; // Objects do not match
     }
   }
-
-  
 });
 
 // route.post("/updateChangeAnsStartQuest", async (req, res) => {
@@ -200,46 +208,61 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
 
 //     if (dateFinal > 3600000) {
 //       let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
-//       if (typeof req.body.changeAnswerAddedObj.selected !== "string") {
-//         req.body.changeAnswerAddedObj.selected.map((option) => {
-//           if (option.addedAnswerByUser === true) {
-//             AnswerAddedOrNot = option.question;
-//             const addAnswer = {
-//               question: option.question,
-//               selected: true,
-//             };
-//             InfoQuestQuestions.findByIdAndUpdate(
-//               { _id: req.body.questId },
-//               { $push: { QuestAnswers: addAnswer } }
-//             ).exec(),
-//               (err, data) => {
-//                 if (err) {
-//                   return res.status(500).send(err);
-//                 } else {
-//                   return res.status(200).send(data);
-//                 }
+
+//       console.log(req.body.changeAnswerAddedObj.selected);
+//       console.log(startQuestAnswersSelected);
+//       console.log(JSON.stringify(startQuestAnswersSelected));
+
+//       // Check if the new answer is different from the existing answer
+//       if (
+//         typeof req.body.changeAnswerAddedObj.selected !== "string" &&
+//         JSON.stringify(
+//           req.body.changeAnswerAddedObj.selected.toLowerCase().trim()
+//         ) !== JSON.stringify(startQuestAnswersSelected.toLowerCase().trim())
+//       ) {
+//         if (typeof req.body.changeAnswerAddedObj.selected !== "string") {
+//           req.body.changeAnswerAddedObj.selected.map((option) => {
+//             if (option.addedAnswerByUser === true) {
+//               AnswerAddedOrNot = option.question;
+//               const addAnswer = {
+//                 question: option.question,
+//                 selected: true,
 //               };
-//           }
-//         });
+//               InfoQuestQuestions.findByIdAndUpdate(
+//                 { _id: req.body.questId },
+//                 { $push: { QuestAnswers: addAnswer } }
+//               ).exec(),
+//                 (err, data) => {
+//                   if (err) {
+//                     return res.status(500).send(err);
+//                   } else {
+//                     return res.status(200).send(data);
+//                   }
+//                 };
+//             }
+//           });
+//         }
+
+//         responseMsg = "Updated";
+//         startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
+
+//         await StartQuests.findByIdAndUpdate(
+//           { _id: startQuestQuestion._id },
+//           { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
+//           { upsert: true }
+//         ).exec(),
+//           (err, data) => {
+//             if (err) {
+//               return res.status(500).send(err);
+//             } else {
+//               return res.status(200).send(data);
+//             }
+//           };
+//       } else {
+//         // Answer has not changed
+//         console.log("Answer has not changed");
+//         responseMsg = "Answer has not changed";
 //       }
-
-//       responseMsg = "Updated";
-//       // console.log(startQuestAnswersSelected);
-//       startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
-//       // console.log(startQuestAnswersSelected);
-
-//       await StartQuests.findByIdAndUpdate(
-//         { _id: startQuestQuestion._id },
-//         { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
-//         { upsert: true }
-//       ).exec(),
-//         (err, data) => {
-//           if (err) {
-//             return res.status(500).send(err);
-//           } else {
-//             return res.status(200).send(data);
-//           }
-//         };
 //     } else {
 //       console.log("You can change your answer once every 1 hour");
 //       responseMsg = "You can change your answer once every 1 hour";
