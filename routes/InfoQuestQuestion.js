@@ -261,6 +261,7 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
     res.status(500).send(err);
   }
 });
+
 route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
   try {
     const allQuestions = await InfoQuestQuestions.find();
@@ -333,7 +334,6 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
   }
 });
 
-
 // Get all questions of user have with status Change answer
 route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
   try {
@@ -370,6 +370,45 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
     }
   } catch (err) {
     res.status(500).send(err);
+  }
+});
+
+// Get all questions In the accending order
+route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
+  try {
+    // const oldestRecords = await InfoQuestQuestions.find().sort('date').limit(10);
+    const oldestRecords = await InfoQuestQuestions.find().sort('createdAt');
+
+    res.status(200).json(oldestRecords);
+  } catch (error) {
+    console.error('Error fetching oldest records:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Get all questions In the deccending order
+route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
+  try {
+    // const oldestRecords = await InfoQuestQuestions.find().sort('date').limit(10);
+    const oldestRecords = await InfoQuestQuestions.find().sort({ createdAt: -1 });
+
+    res.status(200).json(oldestRecords);
+  } catch (error) {
+    console.error('Error fetching oldest records:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Get all questions last updated
+route.post("/getAllQuestsWithTheLastUpdatedOnes", async (req, res) => {
+  try {
+    // const oldestRecords = await InfoQuestQuestions.find().sort('date').limit(10);
+    const oldestRecords = await InfoQuestQuestions.find().sort({ updatedAt: -1 });
+
+    res.status(200).json(oldestRecords);
+  } catch (error) {
+    console.error('Error fetching oldest records:', error);
+    res.status(500).json({ error: 'Database error' });
   }
 });
 
