@@ -115,6 +115,7 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
               AnswerAddedOrNot = option.question;
               const addAnswer = {
                 question: option.question,
+                // someOneAdded: true,
                 selected: true,
               };
               InfoQuestQuestions.findByIdAndUpdate(
