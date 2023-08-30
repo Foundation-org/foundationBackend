@@ -113,16 +113,13 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
 //   }
 // });
 
-// Get all questions of user have with status Not Answer Yet
-route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
+async function getQuestionsWithStatus(allQuestions, uuid) {
   try {
-    const allQuestions = await InfoQuestQuestions.find();
-
-    if (req.body.uuid === "" || req.body.uuid === undefined) {
-      res.status(200).json(allQuestions);
+    if (uuid === "" || uuid === undefined) {
+      return allQuestions;
     } else {
       const startedQuestions = await StartQuests.find({
-        uuid: req.body.uuid,
+        uuid: uuid,
       });
 
       let Result = [];
@@ -135,45 +132,34 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
             ) {
               rcrd.startStatus = "change answer";
             } else {
-              // rcrd.startStatus = "completed";
               if (rcrd.whichTypeQuestion === "yes/no" || rcrd.whichTypeQuestion === "agree/disagree") {
                 const selectedAnswers1 = rec.data[rec.data.length - 1].selected.toLowerCase().trim();
                 const selectedAnswers2 = rcrd.QuestionCorrect.toLowerCase().trim();
 
                 const isCorrect = JSON.stringify(selectedAnswers1) === JSON.stringify(selectedAnswers2);
 
-                // Update the startStatus based on whether answers are correct or not
-
                 if (!isCorrect) {
                   rcrd.startStatus = "incorrect";
                 }
-                else
-                {
+                else {
                   rcrd.startStatus = "correct";
                 }
               }
               else {
-
                 const selectedAnswers1 = rec.data[rec.data.length - 1].selected.map(item => item.question.toLowerCase().trim());
                 const selectedAnswers2 = rcrd.QuestAnswersSelected.map(item => item.answers.toLowerCase().trim());
                 selectedAnswers1.sort();
                 selectedAnswers2.sort();
 
-                // Compare the selected answers
                 const isCorrect = JSON.stringify(selectedAnswers1) === JSON.stringify(selectedAnswers2);
-
-                // Update the startStatus based on whether answers are correct or not
 
                 if (!isCorrect) {
                   rcrd.startStatus = "incorrect";
                 }
-                else
-                {
+                else {
                   rcrd.startStatus = "correct";
                 }
-
               }
-              
             }
           }
         });
@@ -181,11 +167,21 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
         Result.push(rcrd);
       });
 
-      res.status(200).json(Result);
+      return Result;
     }
   } catch (err) {
-    res.status(500).send(err);
+    throw err;
   }
+}
+
+
+
+
+// Get all questions of user have with status Not Answer Yet
+route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
+  const allQuestions = await InfoQuestQuestions.find();
+  const result = await getQuestionsWithStatus(allQuestions,req.body.uuid);
+  res.status(200).json(result);
 });
 
 // Get all questions of user have with status with completed status
@@ -244,7 +240,7 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
                 }
 
               }
-              
+
             }
           }
         });
@@ -316,7 +312,7 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
                 }
 
               }
-              
+
             }
           }
         });
@@ -358,7 +354,7 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
         if (startedOrNot === true) {
           // if (rcrd.QuestionCorrect === "Not Selected") {
           if (rcrd.QuestionCorrect === "Not Selected" ||
-          rcrd.whichTypeQuestion === "ranked choise") {
+            rcrd.whichTypeQuestion === "ranked choise") {
             rcrd.startStatus = "change answer";
             Result.push(rcrd);
             // }
@@ -377,12 +373,16 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
 route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
   try {
     // const oldestRecords = await InfoQuestQuestions.find().sort('date').limit(10);
-    const oldestRecords = await InfoQuestQuestions.find().sort('createdAt');
+    const newestRecords = await InfoQuestQuestions.find().sort('createdAt');
+    const result = await getQuestionsWithStatus(newestRecords,req.body.uuid);
+  res.status(200).json(result);
 
-    res.status(200).json(oldestRecords);
+    
   } catch (error) {
-    console.error('Error fetching oldest records:', error);
+    console.error('Error fetching newest records:', error);
     res.status(500).json({ error: 'Database error' });
+    const result = await getQuestionsWithStatus(allQuestions,req.body.uuid);
+  res.status(200).json(result);
   }
 });
 
@@ -391,8 +391,8 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
   try {
     // const oldestRecords = await InfoQuestQuestions.find().sort('date').limit(10);
     const oldestRecords = await InfoQuestQuestions.find().sort({ createdAt: -1 });
-
-    res.status(200).json(oldestRecords);
+    const result = await getQuestionsWithStatus(oldestRecords,req.body.uuid);
+  res.status(200).json(result);
   } catch (error) {
     console.error('Error fetching oldest records:', error);
     res.status(500).json({ error: 'Database error' });
@@ -403,11 +403,11 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
 route.post("/getAllQuestsWithTheLastUpdatedOnes", async (req, res) => {
   try {
     // const oldestRecords = await InfoQuestQuestions.find().sort('date').limit(10);
-    const oldestRecords = await InfoQuestQuestions.find().sort({ updatedAt: -1 });
-
-    res.status(200).json(oldestRecords);
+    const updatedRecords = await InfoQuestQuestions.find().sort({ updatedAt: -1 });
+    const result = await getQuestionsWithStatus(updatedRecords,req.body.uuid);
+  res.status(200).json(result);
   } catch (error) {
-    console.error('Error fetching oldest records:', error);
+    console.error('Error fetching recently updated records:', error);
     res.status(500).json({ error: 'Database error' });
   }
 });
