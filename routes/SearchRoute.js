@@ -4,8 +4,8 @@ const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 
 // SIGN UP
 route.post("/easySearch", async (req, res) => {
-//   const searchTerm = req.query.term;
-  const searchTerm = "like";
+  const searchTerm = req.query.term;
+  // const searchTerm = "like";
   try {
     const results = await InfoQuestQuestions.find({
       Question: { $regex: searchTerm, $options: "i" },
