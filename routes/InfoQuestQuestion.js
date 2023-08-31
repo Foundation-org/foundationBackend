@@ -39,6 +39,9 @@ route.post("/getAllQuests", async (req, res) => {
 });
 
 route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
+  const { uuid, _page, _limit } = req.body;
+  const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+  const pageSize = parseInt(_limit) || 10; // Convert query param to integer, default to 10 if not provided
   try {
     const allQuestions = await InfoQuestQuestions.find();
 
@@ -63,7 +66,9 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
         }
       });
 
-      res.status(200).json(Result);
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      res.status(200).json(Result.slice(startIndex, endIndex));
     }
   } catch (err) {
     res.status(500).send(err);
@@ -113,7 +118,7 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
 //   }
 // });
 
-async function getQuestionsWithStatus(allQuestions, uuid) {
+async function getQuestionsWithStatus(allQuestions, uuid, page, pageSize) {
   try {
     if (uuid === "" || uuid === undefined) {
       return allQuestions;
@@ -167,7 +172,10 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
         Result.push(rcrd);
       });
 
-      return Result;
+      // Paginate the result
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      return Result.slice(startIndex, endIndex);
     }
   } catch (err) {
     throw err;
@@ -179,21 +187,29 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
 
 // Get all questions of user have with status Not Answer Yet
 route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
+
+  const { uuid, _page, _limit } = req.body;
+  const page = parseInt(_page); // Convert query param to integer, default to 1 if not provided
+  const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
   const allQuestions = await InfoQuestQuestions.find();
-  const result = await getQuestionsWithStatus(allQuestions,req.body.uuid);
+  const result = await getQuestionsWithStatus(allQuestions, uuid, page, pageSize);
+  console.log(result);
   res.status(200).json(result);
 });
 
 // Get all questions of user have with status with completed status
 route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
+  const { uuid, _page, _limit } = req.body;
+  const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+  const pageSize = parseInt(_limit) || 10; // Convert query param to integer, default to 10 if not provided
   try {
     const allQuestions = await InfoQuestQuestions.find();
 
-    if (req.body.uuid === "" || req.body.uuid === undefined) {
+    if (uuid === "" || uuid === undefined) {
       res.status(200).json(allQuestions);
     } else {
       const startedQuestions = await StartQuests.find({
-        uuid: req.body.uuid,
+        uuid: uuid,
         // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
@@ -251,7 +267,12 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
 
       });
 
-      res.status(200).json(Result);
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      res.status(200).json(Result.slice(startIndex, endIndex));
+
+
+
     }
   } catch (err) {
     res.status(500).send(err);
@@ -259,14 +280,17 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
 });
 
 route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
+  const { uuid, _page, _limit } = req.body;
+  const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+  const pageSize = parseInt(_limit) || 10; // Convert query param to integer, default to 10 if not provided
   try {
     const allQuestions = await InfoQuestQuestions.find();
 
-    if (req.body.uuid === "" || req.body.uuid === undefined) {
+    if (uuid === "" || uuid === undefined) {
       res.status(200).json(allQuestions);
     } else {
       const startedQuestions = await StartQuests.find({
-        uuid: req.body.uuid,
+        uuid: uuid,
         // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
@@ -323,7 +347,9 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
 
       });
 
-      res.status(200).json(Result);
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      res.status(200).json(Result.slice(startIndex, endIndex));
     }
   } catch (err) {
     res.status(500).send(err);
@@ -332,14 +358,17 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
 
 // Get all questions of user have with status Change answer
 route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
+  const { uuid, _page, _limit } = req.body;
+  const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+  const pageSize = parseInt(_limit) || 10; // Convert query param to integer, default to 10 if not provided
   try {
     const allQuestions = await InfoQuestQuestions.find();
 
-    if (req.body.uuid === "" || req.body.uuid === undefined) {
+    if (uuid === "" || uuid === undefined) {
       res.status(200).json(allQuestions);
     } else {
       const startedQuestions = await StartQuests.find({
-        uuid: req.body.uuid,
+        uuid: uuid,
         // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
@@ -362,7 +391,9 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
         }
       });
 
-      res.status(200).json(Result);
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      res.status(200).json(Result.slice(startIndex, endIndex));
     }
   } catch (err) {
     res.status(500).send(err);
@@ -372,27 +403,32 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
 // Get all questions In the accending order
 route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
   try {
-    // const oldestRecords = await InfoQuestQuestions.find().sort('date').limit(10);
+    const { uuid, _page, _limit } = req.body;
+    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+    const pageSize = parseInt(_limit) || 10;
     const newestRecords = await InfoQuestQuestions.find().sort('createdAt');
-    const result = await getQuestionsWithStatus(newestRecords,req.body.uuid);
-  res.status(200).json(result);
+    const result = await getQuestionsWithStatus(newestRecords, uuid, page, pageSize);
+    res.status(200).json(result);
 
-    
+
   } catch (error) {
     console.error('Error fetching newest records:', error);
     res.status(500).json({ error: 'Database error' });
-    const result = await getQuestionsWithStatus(allQuestions,req.body.uuid);
-  res.status(200).json(result);
+    const result = await getQuestionsWithStatus(allQuestions, uuid);
+    res.status(200).json(result);
   }
 });
 
 // Get all questions In the deccending order
 route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
   try {
-    // const oldestRecords = await InfoQuestQuestions.find().sort('date').limit(10);
+
+    const { uuid, _page, _limit } = req.body;
+    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+    const pageSize = parseInt(_limit) || 10;
     const oldestRecords = await InfoQuestQuestions.find().sort({ createdAt: -1 });
-    const result = await getQuestionsWithStatus(oldestRecords,req.body.uuid);
-  res.status(200).json(result);
+    const result = await getQuestionsWithStatus(oldestRecords, uuid, page, pageSize);
+    res.status(200).json(result);
   } catch (error) {
     console.error('Error fetching oldest records:', error);
     res.status(500).json({ error: 'Database error' });
@@ -402,10 +438,14 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
 // Get all questions last updated
 route.post("/getAllQuestsWithTheLastUpdatedOnes", async (req, res) => {
   try {
-    // const oldestRecords = await InfoQuestQuestions.find().sort('date').limit(10);
+
+    const { uuid, _page, _limit } = req.body;
+    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+    const pageSize = parseInt(_limit) || 10;
+
     const updatedRecords = await InfoQuestQuestions.find().sort({ updatedAt: -1 });
-    const result = await getQuestionsWithStatus(updatedRecords,req.body.uuid);
-  res.status(200).json(result);
+    const result = await getQuestionsWithStatus(updatedRecords, uuid, page, pageSize);
+    res.status(200).json(result);
   } catch (error) {
     console.error('Error fetching recently updated records:', error);
     res.status(500).json({ error: 'Database error' });
