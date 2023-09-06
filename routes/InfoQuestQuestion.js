@@ -41,14 +41,26 @@ route.post("/getAllQuests", async (req, res) => {
 route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
   try {
     const { uuid, _page, _limit } = req.body;
-    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
-    const pageSize = parseInt(_limit) || 10; // Convert query param to integer, default to 10 if not provided
+    const page = parseInt(_page) ; // Convert query param to integer, default to 1 if not provided
+    const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
 
-    const skip = (page - 1) * pageSize;
+    let Result = []; // Initialize the result array
+    let totalFetched = 0; // Track the number of fetched incorrect responses
+    let currentPage = page;
 
-    const allQuestions = await InfoQuestQuestions.find()
-      .skip(skip).limit(pageSize)
-      ;
+    while (totalFetched < _limit) {
+      // Calculate the number of documents to skip to get to the desired page
+      const skip = (currentPage - 1) * pageSize;
+
+      // Query the database with skip and limit options to get questions for the current page
+      const allQuestions = await InfoQuestQuestions.find()
+        .skip(skip)
+        .limit(pageSize);
+        
+      if (allQuestions.length === 0) {
+        // No more questions to fetch, break the loop
+        break;
+      }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -58,7 +70,7 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
         // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
-      let Result = [];
+     
       await allQuestions.map(async function (rcrd) {
         let startedOrNot = false;
         await startedQuestions.map(function (rec) {
@@ -68,12 +80,21 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
         });
         if (startedOrNot === false) {
           Result.push(rcrd);
+          totalFetched++;
         }
       });
 
 
-      res.status(200).json(Result);
+    
     }
+    currentPage++;
+  }
+  const responseObj = {
+    Result: Result,
+    currentPage: currentPage,
+  };
+
+  res.status(200).json(responseObj);
   } catch (err) {
     res.status(500).send(err);
   }
@@ -202,7 +223,13 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
     .limit(pageSize);
   const result = await getQuestionsWithStatus(allQuestions, uuid);
   console.log(result);
-  res.status(200).json(result);
+  const responseObj = {
+    Result: result,
+    currentPage: page,
+  };
+
+  res.status(200).json(responseObj);
+  
 });
 
 // Get all questions of user have with status with completed status
@@ -213,13 +240,23 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
     const page = parseInt(_page); // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
 
-    // Calculate the number of documents to skip to get to the desired page
-    const skip = (page - 1) * pageSize;
+    let Result = []; // Initialize the result array
+    let totalFetched = 0; // Track the number of fetched incorrect responses
+    let currentPage = page;
 
-    // Query the database with skip and limit options to get questions for the first page
-    const allQuestions = await InfoQuestQuestions.find()
-      .skip(skip)
-      .limit(pageSize);
+    while (totalFetched < _limit) {
+      // Calculate the number of documents to skip to get to the desired page
+      const skip = (currentPage - 1) * pageSize;
+
+      // Query the database with skip and limit options to get questions for the current page
+      const allQuestions = await InfoQuestQuestions.find()
+        .skip(skip)
+        .limit(pageSize);
+        
+      if (allQuestions.length === 0) {
+        // No more questions to fetch, break the loop
+        break;
+      }
 
     if (uuid === "" || uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -229,7 +266,6 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
         // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
-      let Result = [];
       await allQuestions.map(async function (rcrd) {
         let startedOrNot = false;
         await startedQuestions.map(function (rec) {
@@ -252,6 +288,7 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
                 if (isCorrect) {
                   rcrd.startStatus = "correct";
                   Result.push(rcrd);
+                  totalFetched++;
                 }
               }
               else {
@@ -269,6 +306,7 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
                 if (isCorrect) {
                   rcrd.startStatus = "correct";
                   Result.push(rcrd);
+                  totalFetched++;
                 }
 
               }
@@ -283,11 +321,20 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
 
       });
 
-      res.status(200).json(result);
+      
 
 
 
     }
+    currentPage++;
+  }
+  const responseObj = {
+    Result: Result,
+    currentPage: currentPage,
+  };
+
+  res.status(200).json(responseObj);
+
   } catch (err) {
     res.status(500).send(err);
   }
@@ -299,82 +346,96 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
     const page = parseInt(_page); // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
 
-    // Calculate the number of documents to skip to get to the desired page
-    const skip = (page - 1) * pageSize;
+    let Result = []; // Initialize the result array
+    let totalFetched = 0; // Track the number of fetched incorrect responses
+    let currentPage = page;
 
-    // Query the database with skip and limit options to get questions for the first page
-    const allQuestions = await InfoQuestQuestions.find()
-      .skip(skip)
-      .limit(pageSize);
+    while (totalFetched < _limit) {
+      // Calculate the number of documents to skip to get to the desired page
+      const skip = (currentPage - 1) * pageSize;
 
-    if (uuid === "" || uuid === undefined) {
-      res.status(200).json(allQuestions);
-    } else {
-      const startedQuestions = await StartQuests.find({
-        uuid: uuid,
-        // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
-      });
+      // Query the database with skip and limit options to get questions for the current page
+      const allQuestions = await InfoQuestQuestions.find()
+        .skip(skip)
+        .limit(pageSize);
+        
+      if (allQuestions.length === 0) {
+        // No more questions to fetch, break the loop
+        break;
+      }
 
-      let Result = [];
-      await allQuestions.map(async function (rcrd) {
-        await startedQuestions.map(function (rec) {
-          if (rec.questForeignKey === rcrd._id.toString()) {
-
-            if (
-              rcrd.QuestionCorrect === "Not Selected" ||
-              rcrd.whichTypeQuestion === "ranked choise"
-            ) {
-            } else {
-              // rcrd.startStatus = "completed";
-              if (rcrd.whichTypeQuestion === "yes/no" || rcrd.whichTypeQuestion === "agree/disagree") {
-                const selectedAnswers1 = rec.data[rec.data.length - 1].selected.toLowerCase().trim();
-                const selectedAnswers2 = rcrd.QuestionCorrect.toLowerCase().trim();
-
-                const isCorrect = JSON.stringify(selectedAnswers1) === JSON.stringify(selectedAnswers2);
-
-                // Update the startStatus based on whether answers are correct or not
-
-                if (!isCorrect) {
-                  rcrd.startStatus = "incorrect";
-                  Result.push(rcrd);
-                }
-              }
-              else {
-
-                const selectedAnswers1 = rec.data[rec.data.length - 1].selected.map(item => item.question.toLowerCase().trim());
-                const selectedAnswers2 = rcrd.QuestAnswersSelected.map(item => item.answers.toLowerCase().trim());
-                selectedAnswers1.sort();
-                selectedAnswers2.sort();
-
-                // Compare the selected answers
-                const isCorrect = JSON.stringify(selectedAnswers1) === JSON.stringify(selectedAnswers2);
-
-                // Update the startStatus based on whether answers are correct or not
-
-                if (!isCorrect) {
-                  rcrd.startStatus = "incorrect";
-                  Result.push(rcrd);
-                }
-
-              }
-
-            }
-          }
+      if (uuid === "" || uuid === undefined) {
+        res.status(200).json(allQuestions);
+      } else {
+        const startedQuestions = await StartQuests.find({
+          uuid: uuid,
+          // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
         });
 
+        await allQuestions.map(async function (rcrd) {
+          await startedQuestions.map(function (rec) {
+            if (rec.questForeignKey === rcrd._id.toString()) {
 
+              if (
+                rcrd.QuestionCorrect === "Not Selected" ||
+                rcrd.whichTypeQuestion === "ranked choise"
+              ) {
+              } else {
+                // rcrd.startStatus = "completed";
+                if (rcrd.whichTypeQuestion === "yes/no" || rcrd.whichTypeQuestion === "agree/disagree") {
+                  const selectedAnswers1 = rec.data[rec.data.length - 1].selected.toLowerCase().trim();
+                  const selectedAnswers2 = rcrd.QuestionCorrect.toLowerCase().trim();
 
+                  const isCorrect = JSON.stringify(selectedAnswers1) === JSON.stringify(selectedAnswers2);
 
+                  // Update the startStatus based on whether answers are correct or not
 
-      });
+                  if (!isCorrect) {
+                    rcrd.startStatus = "incorrect";
+                    Result.push(rcrd);
+                    totalFetched++;
+                  }
+                }
+                else {
 
+                  const selectedAnswers1 = rec.data[rec.data.length - 1].selected.map(item => item.question.toLowerCase().trim());
+                  const selectedAnswers2 = rcrd.QuestAnswersSelected.map(item => item.answers.toLowerCase().trim());
+                  selectedAnswers1.sort();
+                  selectedAnswers2.sort();
 
-      res.status(200).json(Result);
+                  // Compare the selected answers
+                  const isCorrect = JSON.stringify(selectedAnswers1) === JSON.stringify(selectedAnswers2);
+
+                  // Update the startStatus based on whether answers are correct or not
+
+                  if (!isCorrect) {
+                    rcrd.startStatus = "incorrect";
+                    Result.push(rcrd);
+                    totalFetched++;
+                  }
+
+                }
+
+              }
+            }
+          });
+
+        });
+      }
+      currentPage++;
     }
+
+    const responseObj = {
+      Result: Result,
+      currentPage: currentPage,
+    };
+  
+    res.status(200).json(responseObj);
   } catch (err) {
     res.status(500).send(err);
   }
 });
+
 
 // Get all questions of user have with status Change answer
 route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
@@ -383,13 +444,23 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
     const page = parseInt(_page); // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
 
-    // Calculate the number of documents to skip to get to the desired page
-    const skip = (page - 1) * pageSize;
+    let Result = []; // Initialize the result array
+    let totalFetched = 0; // Track the number of fetched incorrect responses
+    let currentPage = page;
 
-    // Query the database with skip and limit options to get questions for the first page
-    const allQuestions = await InfoQuestQuestions.find()
-      .skip(skip)
-      .limit(pageSize);
+    while (totalFetched < _limit) {
+      // Calculate the number of documents to skip to get to the desired page
+      const skip = (currentPage - 1) * pageSize;
+
+      // Query the database with skip and limit options to get questions for the current page
+      const allQuestions = await InfoQuestQuestions.find()
+        .skip(skip)
+        .limit(pageSize);
+        
+      if (allQuestions.length === 0) {
+        // No more questions to fetch, break the loop
+        break;
+      }
 
     if (uuid === "" || uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -399,7 +470,6 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
         // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
       });
 
-      let Result = [];
       await allQuestions.map(async function (rcrd) {
         let startedOrNot = false;
         await startedQuestions.map(function (rec) {
@@ -413,14 +483,24 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
             rcrd.whichTypeQuestion === "ranked choise") {
             rcrd.startStatus = "change answer";
             Result.push(rcrd);
+            totalFetched++;
             // }
           }
         }
       });
 
 
-      res.status(200).json(Result);
+      
     }
+    currentPage++;
+  }
+
+  const responseObj = {
+    Result: Result,
+    currentPage: currentPage,
+  };
+
+  res.status(200).json(responseObj);
   } catch (err) {
     res.status(500).send(err);
   }
@@ -438,7 +518,7 @@ route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
 
     // Query the database with skip and limit options to get questions for the first page
 
-    const newestRecords = await InfoQuestQuestions.find().skip(skip).limit(pageSize).sort('createdAt');
+    const newestRecords = await InfoQuestQuestions.find().sort('createdAt').skip(skip).limit(pageSize);
     const result = await getQuestionsWithStatus(newestRecords, uuid);
     res.status(200).json(result);
 
@@ -447,7 +527,12 @@ route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
     console.error('Error fetching newest records:', error);
     res.status(500).json({ error: 'Database error' });
     const result = await getQuestionsWithStatus(allQuestions, uuid);
-    res.status(200).json(result);
+    const responseObj = {
+      Result: result,
+      currentPage: page+1,
+    };
+  
+    res.status(200).json(responseObj);
   }
 });
 
@@ -459,9 +544,14 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
     const page = parseInt(_page); // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit);
     const skip = (page - 1) * pageSize;
-    const oldestRecords = await InfoQuestQuestions.find().skip(skip).limit(pageSize).sort({ createdAt: -1 });
+    const oldestRecords = await InfoQuestQuestions.find().sort({ createdAt: -1 }).skip(skip).limit(pageSize);
     const result = await getQuestionsWithStatus(oldestRecords, uuid);
-    res.status(200).json(result);
+    const responseObj = {
+      Result: result,
+      currentPage: page+1,
+    };
+  
+    res.status(200).json(responseObj);
   } catch (error) {
     console.error('Error fetching oldest records:', error);
     res.status(500).json({ error: 'Database error' });
@@ -476,9 +566,14 @@ route.post("/getAllQuestsWithTheLastUpdatedOnes", async (req, res) => {
     const page = parseInt(_page); // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit);
     const skip = (page - 1) * pageSize;
-    const updatedRecords = await InfoQuestQuestions.find().skip(skip).limit(pageSize).sort({ updatedAt: -1 });
+    const updatedRecords = await InfoQuestQuestions.find().sort({ updatedAt: -1 }).skip(skip).limit(pageSize);
     const result = await getQuestionsWithStatus(updatedRecords, uuid);
-    res.status(200).json(result);
+    const responseObj = {
+      Result: result,
+      currentPage: page+1,
+    };
+  
+    res.status(200).json(responseObj);
   } catch (error) {
     console.error('Error fetching recently updated records:', error);
     res.status(500).json({ error: 'Database error' });
