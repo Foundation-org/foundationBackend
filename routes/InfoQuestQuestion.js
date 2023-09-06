@@ -206,8 +206,10 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
 
   // Query the database with skip and limit options to get questions for the first page
   const allQuestions = await InfoQuestQuestions.find()
-    .skip(skip)
-    .limit(pageSize);
+  .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+  .skip(skip)
+  .limit(pageSize);
+
   const result = await getQuestionsWithStatus(allQuestions, uuid);
 
   res.status(200).json(result);
@@ -227,7 +229,7 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
       const startedQuestions = await StartQuests.find({
         uuid: req.body.uuid,
         // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
-      });
+      }).sort({ createdAt: -1 }) ;
 
       let Result = [];
       await allQuestions.map(async function (rcrd) {
@@ -309,7 +311,7 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
       const startedQuestions = await StartQuests.find({
         uuid: req.body.uuid,
         // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
-      });
+      }).sort({ createdAt: -1 }) ;
       let Result = [];
       await allQuestions.map(async function (rcrd) {
         await startedQuestions.map(function (rec) {
@@ -388,7 +390,7 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
       const startedQuestions = await StartQuests.find({
         uuid: req.body.uuid,
         // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
-      });
+      }).sort({ createdAt: -1 }) ;
       let Result = [];
 
       await allQuestions.map(async function (rcrd) {
@@ -438,7 +440,7 @@ route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
 
     // Query the database with skip and limit options to get questions for the first page
 
-    const newestRecords = await InfoQuestQuestions.find().sort('createdAt').skip(skip).limit(pageSize);
+    const newestRecords = await InfoQuestQuestions.find().sort({ createdAt: -1 }) .skip(skip).limit(pageSize);
     const result = await getQuestionsWithStatus(newestRecords, uuid);
     res.status(200).json(result);
 
@@ -461,7 +463,7 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit);
     const skip = (page - 1) * pageSize;
-    const oldestRecords = await InfoQuestQuestions.find().sort({ createdAt: -1 }).skip(skip).limit(pageSize);
+    const oldestRecords = await InfoQuestQuestions.find().sort("createdAt").skip(skip).limit(pageSize);
     const result = await getQuestionsWithStatus(oldestRecords, uuid);
 
     res.status(200).json(result);
