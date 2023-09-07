@@ -51,18 +51,18 @@ route.post("/getAllBookmarkQuests", async (req, res) => {
 route.post("/getAllBookmarkQuestions", async (req, res) => {
   try {
     const { uuid, _page, _limit } = req.body;
-    const page = parseInt(_page) 
-    const pageSize = parseInt(_limit); 
-  
+    const page = parseInt(_page)
+    const pageSize = parseInt(_limit);
+
     // Calculate the number of documents to skip to get to the desired page
     const skip = (page - 1) * pageSize;
 
 
     const Questions = await BookmarkQuests.find({
-      uuid:uuid,
-    }).sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-    .skip(skip)
-    .limit(pageSize);
+      uuid: uuid,
+    }) // Sort by createdAt field in descending order
+      .skip(skip)
+      .limit(pageSize);
 
     let response = [];
     const mapReq = await Questions.map(async function (record) {
