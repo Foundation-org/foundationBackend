@@ -72,7 +72,11 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
       const end = req.body.end
       console.log("Start" + start + "end" + end);
 
-      res.status(200).json(Result.slice(start, end));
+      res.status(200).json({
+        data: Result.slice(start, end),
+        message: Result.length,
+        // You can include other properties here if needed
+      });
 
 
 
@@ -288,7 +292,11 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
       const end = req.body.end
       console.log("Start" + start + "end" + end);
 
-      res.status(200).json(Result.slice(start, end));
+      res.status(200).json({
+        data: Result.slice(start, end),
+        message: Result.length,
+        // You can include other properties here if needed
+      });
     }
   } catch (err) {
     res.status(500).send(err);
@@ -366,7 +374,11 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
       const start = req.body.start
       const end = req.body.end
       console.log("Start" + start + "end" + end);
-      res.status(200).json(Result.slice(start, end));
+      res.status(200).json({
+        data: Result.slice(start, end),
+        message: Result.length,
+        // You can include other properties here if needed
+      });
     }
 
   } catch (err) {
@@ -413,7 +425,11 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
       const start = req.body.start
       const end = req.body.end
 
-      res.status(200).json(Result.slice(start, end));
+      res.status(200).json({
+        data: Result.slice(start, end),
+        message: Result.length,
+        // You can include other properties here if needed
+      });
 
 
 
