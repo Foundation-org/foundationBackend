@@ -60,7 +60,7 @@ route.post("/getAllBookmarkQuestions", async (req, res) => {
 
     const Questions = await BookmarkQuests.find({
       uuid: uuid,
-    }) // Sort by createdAt field in descending order
+    })
       .skip(skip)
       .limit(pageSize);
 
