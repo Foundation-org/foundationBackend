@@ -43,7 +43,20 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
 
 
     // Query the database with skip and limit options to get questions for the current page
-    const allQuestions = await InfoQuestQuestions.find().sort({ createdAt: -1 }) 
+    let allQuestions;
+
+    // Query the database with skip and limit options to get questions for the first page
+    if(req.body.filter===true){
+  
+       allQuestions = await InfoQuestQuestions.find({uuid:req.body.uuid})
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+  
+    }else
+    {
+       allQuestions = await InfoQuestQuestions.find()
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+    
+    }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -201,18 +214,29 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
 // Get all questions of user have with status Not Answer Yet
 route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
 
-  const { uuid, _page, _limit } = req.body;
+  const { uuid, _page, _limit ,filter} = req.body;
   const page = parseInt(_page) 
   const pageSize = parseInt(_limit); 
 
   // Calculate the number of documents to skip to get to the desired page
   const skip = (page - 1) * pageSize;
+  let allQuestions=[];
 
   // Query the database with skip and limit options to get questions for the first page
-  const allQuestions = await InfoQuestQuestions.find()
-  .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-  .skip(skip)
-  .limit(pageSize);
+  if(filter===true){
+
+     allQuestions = await InfoQuestQuestions.find({uuid:uuid})
+    .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+    .skip(skip)
+    .limit(pageSize);
+  }else
+  {
+     allQuestions = await InfoQuestQuestions.find()
+    .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+    .skip(skip)
+    .limit(pageSize);
+
+  }
 
   const result = await getQuestionsWithStatus(allQuestions, uuid);
 
@@ -225,7 +249,21 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
 route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
   try {
 
-    const allQuestions = await InfoQuestQuestions.find().sort({ createdAt: -1 }) 
+
+    let allQuestions;
+
+    // Query the database with skip and limit options to get questions for the first page
+    if(req.body.filter===true){
+  
+       allQuestions = await InfoQuestQuestions.find({uuid:req.body.uuid})
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+  
+    }else
+    {
+       allQuestions = await InfoQuestQuestions.find()
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+    
+    }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -308,7 +346,20 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
 
 
     // Query the database with skip and limit options to get questions for the current page
-    const allQuestions = await InfoQuestQuestions.find().sort({ createdAt: -1 })
+    let allQuestions;
+
+    // Query the database with skip and limit options to get questions for the first page
+    if(req.body.filter===true){
+  
+       allQuestions = await InfoQuestQuestions.find({uuid:req.body.uuid})
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+  
+    }else
+    {
+       allQuestions = await InfoQuestQuestions.find()
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+    
+    }
 
 
 
@@ -392,7 +443,22 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
   try {
 
     // Query the database with skip and limit options to get questions for the current page
-    const allQuestions = await InfoQuestQuestions.find().sort({ createdAt: -1 }) 
+
+    
+    let allQuestions;
+
+    // Query the database with skip and limit options to get questions for the first page
+    if(req.body.filter===true){
+  
+       allQuestions = await InfoQuestQuestions.find({uuid:req.body.uuid})
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+  
+    }else
+    {
+       allQuestions = await InfoQuestQuestions.find()
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+    
+    }
 
 
 
@@ -447,7 +513,7 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
 // Get all questions In the accending order
 route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
   try {
-    const { uuid, _page, _limit } = req.body;
+    const { uuid, _page, _limit,filter } = req.body;
     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
 
@@ -455,8 +521,21 @@ route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
     const skip = (page - 1) * pageSize;
 
     // Query the database with skip and limit options to get questions for the first page
+    let newestRecords;
+    if(filter===true){
 
-    const newestRecords = await InfoQuestQuestions.find().sort({ createdAt: -1 }) .skip(skip).limit(pageSize);
+      newestRecords = await InfoQuestQuestions.find({uuid:uuid})
+     .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+     .skip(skip)
+     .limit(pageSize);
+   }else
+   {
+    newestRecords = await InfoQuestQuestions.find()
+     .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+     .skip(skip)
+     .limit(pageSize);
+ 
+   } 
     const result = await getQuestionsWithStatus(newestRecords, uuid);
     res.status(200).json(result);
 
@@ -475,11 +554,27 @@ route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
 route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
   try {
 
-    const { uuid, _page, _limit } = req.body;
+    const { uuid, _page, _limit,filter } = req.body;
     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit);
     const skip = (page - 1) * pageSize;
-    const oldestRecords = await InfoQuestQuestions.find().sort("createdAt").skip(skip).limit(pageSize);
+
+    let oldestRecords;
+    if(filter===true){
+
+      oldestRecords = await InfoQuestQuestions.find({uuid:uuid})
+     .sort("createdAt") // Sort by createdAt field in descending order
+     .skip(skip)
+     .limit(pageSize);
+   }else
+   {
+    oldestRecords = await InfoQuestQuestions.find()
+     .sort("createdAt") // Sort by createdAt field in descending order
+     .skip(skip)
+     .limit(pageSize);
+ 
+   }
+
     const result = await getQuestionsWithStatus(oldestRecords, uuid);
 
     res.status(200).json(result);
@@ -493,11 +588,25 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
 route.post("/getAllQuestsWithTheLastUpdatedOnes", async (req, res) => {
   try {
 
-    const { uuid, _page, _limit } = req.body;
+    const { uuid, _page, _limit ,filter} = req.body;
     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit);
     const skip = (page - 1) * pageSize;
-    const updatedRecords = await InfoQuestQuestions.find().sort({ updatedAt: -1 }).skip(skip).limit(pageSize);
+    let updatedRecords;
+    if(filter===true){
+
+      updatedRecords = await InfoQuestQuestions.find({uuid:uuid})
+     .sort({ updatedAt: -1}) // Sort by createdAt field in descending order
+     .skip(skip)
+     .limit(pageSize);
+   }else
+   {
+    updatedRecords = await InfoQuestQuestions.find()
+     .sort({ updatedAt: -1}) // Sort by createdAt field in descending order
+     .skip(skip)
+     .limit(pageSize);
+ 
+   }
     const result = await getQuestionsWithStatus(updatedRecords, uuid);
 
 
