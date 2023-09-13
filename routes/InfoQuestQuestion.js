@@ -90,15 +90,115 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
         message: Result.length,
         // You can include other properties here if needed
       });
+    }
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
 
 
 
+route.post("/getAllQuestsWithAnsweredStatus", async (req, res) => {
+  try {
+
+
+    // Query the database with skip and limit options to get questions for the current page
+    let allQuestions;
+
+    // Query the database with skip and limit options to get questions for the first page
+    if(req.body.filter===true){
+  
+       allQuestions = await InfoQuestQuestions.find({uuid:req.body.uuid})
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+  
+    }else
+    {
+       allQuestions = await InfoQuestQuestions.find()
+      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+    
     }
 
+    if (req.body.uuid === "" || req.body.uuid === undefined) {
+      res.status(200).json(allQuestions);
+
+    } else {
+      let Records=[];
+      const startedQuestions = await StartQuests.find({
+        uuid: req.body.uuid,
+        // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
+      });
+
+
+      await allQuestions.map(async function (rcrd) {
+        let startedOrNot = false;
+        await startedQuestions.map(function (rec) {
+          if (rec.questForeignKey === rcrd._id.toString()) {
+            startedOrNot = true;
+          }
+        });
+        if (startedOrNot === true) {
+          Records.push(rcrd);
+
+        }
+      });
 
 
 
+      let Result = [];
+      await Records.map(async function (rcrd) {
+        await startedQuestions.map(function (rec) {
+          if (rec.questForeignKey === rcrd._id.toString()) {
+            if (
+              rcrd.QuestionCorrect === "Not Selected" ||
+              rcrd.whichTypeQuestion === "ranked choise"
+            ) {
+              rcrd.startStatus = "change answer";
+            } else {
+              if (rcrd.whichTypeQuestion === "yes/no" || rcrd.whichTypeQuestion === "agree/disagree") {
+                const selectedAnswers1 = rec.data[rec.data.length - 1].selected.toLowerCase().trim();
+                const selectedAnswers2 = rcrd.QuestionCorrect.toLowerCase().trim();
 
+                const isCorrect = JSON.stringify(selectedAnswers1) === JSON.stringify(selectedAnswers2);
+
+                if (!isCorrect) {
+                  rcrd.startStatus = "incorrect";
+                }
+                else {
+                  rcrd.startStatus = "correct";
+                }
+              }
+              else {
+                const selectedAnswers1 = rec.data[rec.data.length - 1].selected.map(item => item.question.toLowerCase().trim());
+                const selectedAnswers2 = rcrd.QuestAnswersSelected.map(item => item.answers.toLowerCase().trim());
+                selectedAnswers1.sort();
+                selectedAnswers2.sort();
+
+                const isCorrect = JSON.stringify(selectedAnswers1) === JSON.stringify(selectedAnswers2);
+
+                if (!isCorrect) {
+                  rcrd.startStatus = "incorrect";
+                }
+                else {
+                  rcrd.startStatus = "correct";
+                }
+              }
+            }
+          }
+        });
+
+        Result.push(rcrd);
+      });
+
+      const start = req.body.start
+      const end = req.body.end
+      console.log("Start" + start + "end" + end);
+
+      res.status(200).json({
+        data: Result.slice(start, end),
+        message: Result.length,
+        // You can include other properties here if needed
+      });
+    }
   } catch (err) {
     res.status(500).send(err);
   }
@@ -588,29 +688,47 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
 route.post("/getAllQuestsWithTheLastUpdatedOnes", async (req, res) => {
   try {
 
-    const { uuid, _page, _limit ,filter} = req.body;
-    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
-    const pageSize = parseInt(_limit);
-    const skip = (page - 1) * pageSize;
+    
+    
     let updatedRecords;
-    if(filter===true){
+    const latestQuestions = [];
+    if(req.body.filter===true){
 
-      updatedRecords = await InfoQuestQuestions.find({uuid:uuid})
-     .sort({ updatedAt: -1}) // Sort by createdAt field in descending order
-     .skip(skip)
-     .limit(pageSize);
+      updatedRecords = await InfoQuestQuestions.find({uuid:req.body.uuid})
+  
    }else
    {
     updatedRecords = await InfoQuestQuestions.find()
-     .sort({ updatedAt: -1}) // Sort by createdAt field in descending order
-     .skip(skip)
-     .limit(pageSize);
+ 
  
    }
-    const result = await getQuestionsWithStatus(updatedRecords, uuid);
+   for (const question of updatedRecords) {
+    const latestStartQuest = await StartQuests.findOne({ questForeignKey: question._id });
+
+    if (latestStartQuest) {
+        question.updatedAt = latestStartQuest.updatedAt;
+      
+    }
+
+    latestQuestions.push(question); 
+    console.log(question.updatedAt);
+    
+  }
+  latestQuestions.sort((a, b) => {
+    return b.updatedAt - a.updatedAt;
+    });
+  
+    const result = await getQuestionsWithStatus(latestQuestions, req.body.uuid);
 
 
-    res.status(200).json(result);
+    const start = req.body.start
+      const end = req.body.end
+      console.log("Start" + start + "end" + end);
+      res.status(200).json({
+        data: result.slice(start, end),
+        message: result.length,
+        // You can include other properties here if needed
+      });
   } catch (error) {
     console.error('Error fetching recently updated records:', error);
     res.status(500).json({ error: 'Database error' });
