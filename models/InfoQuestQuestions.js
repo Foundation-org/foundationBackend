@@ -23,12 +23,17 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     uuid: {
       type: String,
     },
-    uuid: {
-      type: String,
-    },
     startStatus: {
       type: String,
       default: "",
+    },
+    lastInteractedAt: {
+      type: Date,
+      default: "",
+    },
+    interactingCounter: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }
