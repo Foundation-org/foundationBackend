@@ -76,6 +76,24 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
       uuid: req.body.uuid,
     });
 
+    // Get the current date and time
+    const currentDate = new Date();
+
+    InfoQuestQuestions.findByIdAndUpdate(
+      { _id: req.body.questId },
+      { 
+        $set: { lastInteractedAt: currentDate.toISOString() },
+        $inc: { interactingCounter: 1 }
+       }
+    ).exec(),
+      (err, data) => {
+        if (err) {
+          return res.status(500).send(err);
+        } else {
+          return res.status(200).send(data);
+        }
+      };
+
     let startQuestAnswersSelected = startQuestQuestion.data;
     console.log(
       "startQuestQuestion.data",
@@ -98,7 +116,8 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
 
     console.log("dateFinal", dateFinal);
 
-    if (dateFinal > 3600000) {
+    // if (dateFinal > 3600000) {
+    if (dateFinal > 2) {
       if (
         Compare(
           startQuestQuestion.data[startQuestQuestion.data.length - 1],
