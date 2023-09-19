@@ -712,45 +712,165 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
 });
 
 // Get all questions last updated
-route.post("/getAllQuestsWithTheLastUpdatedOnes", async (req, res) => {
-  try {
-    let updatedRecords;
-    const latestQuestions = [];
-    if (req.body.filter === true) {
-      updatedRecords = await InfoQuestQuestions.find({ uuid: req.body.uuid });
+// route.post("/getAllQuestsWithTheLastUpdatedOnes", async (req, res) => {
+//   try {
+//     let updatedRecords;
+//     const latestQuestions = [];
+//     if (req.body.filter === true) {
+//       updatedRecords = await InfoQuestQuestions.find({ uuid: req.body.uuid });
+//     } else {
+//       updatedRecords = await InfoQuestQuestions.find();
+//     }
+//     for (const question of updatedRecords) {
+//       const latestStartQuest = await StartQuests.findOne({
+//         questForeignKey: question._id,
+//       });
+
+//       if (latestStartQuest) {
+//         question.updatedAt = latestStartQuest.updatedAt;
+//       }
+
+//       latestQuestions.push(question);
+//       console.log(question.updatedAt);
+//     }
+//     latestQuestions.sort((a, b) => {
+//       return b.updatedAt - a.updatedAt;
+//     });
+
+//     const result = await getQuestionsWithStatus(latestQuestions, req.body.uuid);
+
+//     const start = req.body.start;
+//     const end = req.body.end;
+//     console.log("Start" + start + "end" + end);
+//     res.status(200).json({
+//       data: result.slice(start, end),
+//       message: result.length,
+//       // You can include other properties here if needed
+//     });
+//   } catch (error) {
+//     console.error("Error fetching recently updated records:", error);
+//     res.status(500).json({ error: "Database error" });
+//   }
+// });
+route.post("/getAllYesNoQuestions",async(req,res)=>{
+  try{
+    const { uuid, _page, _limit, filter } = req.body;
+    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+    const pageSize = parseInt(_limit);
+    const skip = (page - 1) * pageSize;
+    let Records;
+    if (filter === true) {
+        Records = await InfoQuestQuestions.find({ uuid: uuid,
+        whichTypeQuestion:"yes/no" })
+        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+        .skip(skip)
+        .limit(pageSize);
     } else {
-      updatedRecords = await InfoQuestQuestions.find();
+      Records = await InfoQuestQuestions.find({whichTypeQuestion:"yes/no"})
+        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+        .skip(skip)
+        .limit(pageSize);
     }
-    for (const question of updatedRecords) {
-      const latestStartQuest = await StartQuests.findOne({
-        questForeignKey: question._id,
-      });
+    const result = await getQuestionsWithStatus(Records, uuid);
 
-      if (latestStartQuest) {
-        question.updatedAt = latestStartQuest.updatedAt;
-      }
+    res.status(200).json(result);
 
-      latestQuestions.push(question);
-      console.log(question.updatedAt);
-    }
-    latestQuestions.sort((a, b) => {
-      return b.updatedAt - a.updatedAt;
-    });
-
-    const result = await getQuestionsWithStatus(latestQuestions, req.body.uuid);
-
-    const start = req.body.start;
-    const end = req.body.end;
-    console.log("Start" + start + "end" + end);
-    res.status(200).json({
-      data: result.slice(start, end),
-      message: result.length,
-      // You can include other properties here if needed
-    });
   } catch (error) {
-    console.error("Error fetching recently updated records:", error);
+    console.error("Error fetching oldest records:", error);
     res.status(500).json({ error: "Database error" });
   }
-});
+
+})
+
+route.post("/getAllAgreeDisagreeQuestions",async(req,res)=>{
+  try{
+    const { uuid, _page, _limit, filter } = req.body;
+    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+    const pageSize = parseInt(_limit);
+    const skip = (page - 1) * pageSize;
+    let Records;
+    if (filter === true) {
+        Records = await InfoQuestQuestions.find({ uuid: uuid,
+        whichTypeQuestion:"agree/disagree" })
+        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+        .skip(skip)
+        .limit(pageSize);
+    } else {
+      Records = await InfoQuestQuestions.find({whichTypeQuestion:"agree/disagree"})
+        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+        .skip(skip)
+        .limit(pageSize);
+    }
+    const result = await getQuestionsWithStatus(Records, uuid);
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.error("Error fetching oldest records:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+
+})
+
+route.post("/getAllMultipleChoiceQuestions",async(req,res)=>{
+  try{
+    const { uuid, _page, _limit, filter } = req.body;
+    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+    const pageSize = parseInt(_limit);
+    const skip = (page - 1) * pageSize;
+    let Records;
+    if (filter === true) {
+        Records = await InfoQuestQuestions.find({ uuid: uuid,
+        whichTypeQuestion:"multiple choise" })
+        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+        .skip(skip)
+        .limit(pageSize);
+    } else {
+      Records = await InfoQuestQuestions.find({whichTypeQuestion:"multiple choise"})
+        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+        .skip(skip)
+        .limit(pageSize);
+    }
+    const result = await getQuestionsWithStatus(Records, uuid);
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.error("Error fetching oldest records:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+
+})
+route.post("/getAllRankedChoiceQuestions",async(req,res)=>{
+  try{
+    const { uuid, _page, _limit, filter } = req.body;
+    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+    const pageSize = parseInt(_limit);
+    const skip = (page - 1) * pageSize;
+    let Records;
+    if (filter === true) {
+        Records = await InfoQuestQuestions.find({ uuid: uuid,
+        whichTypeQuestion:"ranked choise" })
+        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+        .skip(skip)
+        .limit(pageSize);
+    } else {
+      Records = await InfoQuestQuestions.find({whichTypeQuestion:"ranked choise"})
+        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+        .skip(skip)
+        .limit(pageSize);
+    }
+    const result = await getQuestionsWithStatus(Records, uuid);
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.error("Error fetching oldest records:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+
+})
+
+
 
 module.exports = route;
