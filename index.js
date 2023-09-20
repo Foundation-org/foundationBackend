@@ -11,6 +11,7 @@ const InfoQuestQuestion = require("./routes/InfoQuestQuestion");
 const BookmarkQuest = require("./routes/BookmarkQuest");
 const StartQuest = require("./routes/StartQuest");
 const SearchRoute = require("./routes/SearchRoute");
+const AiValidation = require("./routes/AiValidation");
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use("/infoquestions", InfoQuestQuestion);
 app.use("/bookmarkQuest", BookmarkQuest);
 app.use("/startQuest", StartQuest);
 app.use("/search", SearchRoute);
+app.use("/ai-validation", AiValidation);
 
 let port = 8801;
 
