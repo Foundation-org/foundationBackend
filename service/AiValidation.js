@@ -1,22 +1,39 @@
+const { STATEMENT } = require("../constants");
 
-module.exports.checkStatementsInSentence = (statements, sentence) => {
-    const lowerCaseSentence = sentence.toLowerCase();
-    return statements.some(statement => lowerCaseSentence.includes(statement.toLowerCase()));
-}
+module.exports.checkViolationInSentence = (sentence) => {
+  const lowerCaseSentence = sentence.toLowerCase();
+  return STATEMENT.some((statement) =>
+    lowerCaseSentence.includes(statement.toLowerCase())
+  );
+};
 
+module.exports.capitalizeFirstLetter = (sentence) => {
+  if (sentence.length === 0) {
+    return sentence;
+  }
+
+  const firstLetter = sentence.charAt(0).toUpperCase();
+  const restOfSentence = sentence.slice(1);
+
+  return firstLetter + restOfSentence;
+};
+
+module.exports.removePeriod = (paragraph) => {
+  const sentences = paragraph.split(". ");
+
+  if (sentences.length === 1 && paragraph.endsWith(".")) {
+    return this.removeTrailingPeriods(paragraph);
+  }
+
+  return paragraph;
+};
+
+module.exports.removeTrailingPeriods = (sentence) => {
+  const regex = /\.*$/;
+  return sentence.replace(regex, "");
+};
 
 module.exports.removeCorrected = (inputString) => {
-    const regex = /Corrected: /gi;
-    return inputString.replace(regex, '');
-}
-
-
-module.exports.removeLastPeriod = (paragraph) => {
-    const sentences = paragraph.split('. ');
-
-    if (sentences.length === 1 && paragraph.endsWith('.')) {
-        return paragraph.slice(0, -1);
-    }
-
-    return paragraph;
-}
+  const regex = /Corrected: /gi;
+  return inputString.replace(regex, "");
+};

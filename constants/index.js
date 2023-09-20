@@ -12,9 +12,9 @@ module.exports = {
     "unable to provide assistance",
     "not able to provide assistance",
   ],
-  SYSTEM_MESSAGE_ONE:
-    "Correct provided statements to standard English. Shortest responses only.", // validate question grammar
-    SYSTEM_MESSAGE_TWO:
-    "Correct provided words to standard English. Shortest responses only.", // validate answer grammar
-    SYSTEM_MESSAGE_THREE: "Tell me if the reply is relevant. Shortest answer only.", // validate question-answer related
+  SYSTEM_MESSAGES: [
+    "Correct provided statements to standard English. Shortest responses only.",
+    "Correct provided words to standard English. Shortest responses only.",
+    "Tell me if the reply is relevant. Shortest answer only.",
+  ],
 };
