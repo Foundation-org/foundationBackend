@@ -40,17 +40,21 @@ route.post("/getAllQuests", async (req, res) => {
 
 route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
   try {
-    // Query the database with skip and limit options to get questions for the current page
     let allQuestions;
-
-    // Query the database with skip and limit options to get questions for the first page
+    // Add the uuid condition to the filter object if filter is true
+    let filterObj = {};
     if (req.body.filter === true) {
-      allQuestions = await InfoQuestQuestions.find({
-        uuid: req.body.uuid,
-      }).sort({ createdAt: -1 }); // Sort by createdAt field in descending order
-    } else {
-      allQuestions = await InfoQuestQuestions.find().sort({ createdAt: -1 }); // Sort by createdAt field in descending order
+      filterObj.uuid = req.body.uuid;
     }
+
+    // Add the type condition to the filter object if type is sent from the frontend
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+    // Query the database with skip and limit options to get questions for the first page
+    allQuestions = await InfoQuestQuestions.find(filterObj)
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -89,17 +93,20 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
 
 route.post("/getAllQuestsWithAnsweredStatus", async (req, res) => {
   try {
-    // Query the database with skip and limit options to get questions for the current page
     let allQuestions;
-
-    // Query the database with skip and limit options to get questions for the first page
+    // Add the uuid condition to the filter object if filter is true
+    let filterObj = {};
     if (req.body.filter === true) {
-      allQuestions = await InfoQuestQuestions.find({
-        uuid: req.body.uuid,
-      }).sort({ createdAt: -1 }); // Sort by createdAt field in descending order
-    } else {
-      allQuestions = await InfoQuestQuestions.find().sort({ createdAt: -1 }); // Sort by createdAt field in descending order
+      filterObj.uuid = req.body.uuid;
     }
+
+    // Add the type condition to the filter object if type is sent from the frontend
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+    // Query the database with skip and limit options to get questions for the first page
+    allQuestions = await InfoQuestQuestions.find(filterObj)
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') 
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -309,26 +316,30 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
 
 // Get all questions of user have with status Not Answer Yet
 route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
-  const { uuid, _page, _limit, filter } = req.body;
+  const { uuid, _page, _limit, filter, sort, type } = req.body;
   const page = parseInt(_page);
   const pageSize = parseInt(_limit);
 
   // Calculate the number of documents to skip to get to the desired page
   const skip = (page - 1) * pageSize;
   let allQuestions = [];
+  let filterObj = {};
 
-  // Query the database with skip and limit options to get questions for the first page
+  // Add the uuid condition to the filter object if filter is true
   if (filter === true) {
-    allQuestions = await InfoQuestQuestions.find({ uuid: uuid })
-      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-      .skip(skip)
-      .limit(pageSize);
-  } else {
-    allQuestions = await InfoQuestQuestions.find()
-      .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-      .skip(skip)
-      .limit(pageSize);
+    filterObj.uuid = uuid;
   }
+
+  // Add the type condition to the filter object if type is sent from the frontend
+  if (type) {
+    filterObj.whichTypeQuestion = type;
+  }
+  // Query the database with skip and limit options to get questions for the first page
+  allQuestions = await InfoQuestQuestions.find(filterObj)
+    .sort(sort === "Newest First" ? { createdAt: -1 } : sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+    .skip(skip)
+    .limit(pageSize);
+
 
   const result = await getQuestionsWithStatus(allQuestions, uuid);
 
@@ -339,15 +350,20 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
 route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
   try {
     let allQuestions;
-
-    // Query the database with skip and limit options to get questions for the first page
+    // Add the uuid condition to the filter object if filter is true
+    let filterObj = {};
     if (req.body.filter === true) {
-      allQuestions = await InfoQuestQuestions.find({
-        uuid: req.body.uuid,
-      }).sort({ createdAt: -1 }); // Sort by createdAt field in descending order
-    } else {
-      allQuestions = await InfoQuestQuestions.find().sort({ createdAt: -1 }); // Sort by createdAt field in descending order
+      filterObj.uuid = req.body.uuid;
     }
+
+    // Add the type condition to the filter object if type is sent from the frontend
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+    // Query the database with skip and limit options to get questions for the first page
+    allQuestions = await InfoQuestQuestions.find(filterObj)
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -433,15 +449,20 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
   try {
     // Query the database with skip and limit options to get questions for the current page
     let allQuestions;
-
-    // Query the database with skip and limit options to get questions for the first page
+    // Add the uuid condition to the filter object if filter is true
+    let filterObj = {};
     if (req.body.filter === true) {
-      allQuestions = await InfoQuestQuestions.find({
-        uuid: req.body.uuid,
-      }).sort({ createdAt: -1 }); // Sort by createdAt field in descending order
-    } else {
-      allQuestions = await InfoQuestQuestions.find().sort({ createdAt: -1 }); // Sort by createdAt field in descending order
+      filterObj.uuid = req.body.uuid;
     }
+
+    // Add the type condition to the filter object if type is sent from the frontend
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+    // Query the database with skip and limit options to get questions for the first page
+    allQuestions = await InfoQuestQuestions.find(filterObj)
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -525,17 +546,21 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
 route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
   try {
     // Query the database with skip and limit options to get questions for the current page
-
     let allQuestions;
-
-    // Query the database with skip and limit options to get questions for the first page
+    // Add the uuid condition to the filter object if filter is true
+    let filterObj = {};
     if (req.body.filter === true) {
-      allQuestions = await InfoQuestQuestions.find({
-        uuid: req.body.uuid,
-      }).sort({ createdAt: -1 }); // Sort by createdAt field in descending order
-    } else {
-      allQuestions = await InfoQuestQuestions.find().sort({ createdAt: -1 }); // Sort by createdAt field in descending order
+      filterObj.uuid = req.body.uuid;
     }
+
+    // Add the type condition to the filter object if type is sent from the frontend
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+    // Query the database with skip and limit options to get questions for the first page
+    allQuestions = await InfoQuestQuestions.find(filterObj)
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -752,21 +777,23 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
 //     res.status(500).json({ error: "Database error" });
 //   }
 // });
-route.post("/getAllYesNoQuestions",async(req,res)=>{
-  try{
+route.post("/getAllYesNoQuestions", async (req, res) => {
+  try {
     const { uuid, _page, _limit, filter } = req.body;
     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit);
     const skip = (page - 1) * pageSize;
     let Records;
     if (filter === true) {
-        Records = await InfoQuestQuestions.find({ uuid: uuid,
-        whichTypeQuestion:"yes/no" })
+      Records = await InfoQuestQuestions.find({
+        uuid: uuid,
+        whichTypeQuestion: "yes/no"
+      })
         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
         .skip(skip)
         .limit(pageSize);
     } else {
-      Records = await InfoQuestQuestions.find({whichTypeQuestion:"yes/no"})
+      Records = await InfoQuestQuestions.find({ whichTypeQuestion: "yes/no" })
         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
         .skip(skip)
         .limit(pageSize);
@@ -782,21 +809,23 @@ route.post("/getAllYesNoQuestions",async(req,res)=>{
 
 })
 
-route.post("/getAllAgreeDisagreeQuestions",async(req,res)=>{
-  try{
+route.post("/getAllAgreeDisagreeQuestions", async (req, res) => {
+  try {
     const { uuid, _page, _limit, filter } = req.body;
     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit);
     const skip = (page - 1) * pageSize;
     let Records;
     if (filter === true) {
-        Records = await InfoQuestQuestions.find({ uuid: uuid,
-        whichTypeQuestion:"agree/disagree" })
+      Records = await InfoQuestQuestions.find({
+        uuid: uuid,
+        whichTypeQuestion: "agree/disagree"
+      })
         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
         .skip(skip)
         .limit(pageSize);
     } else {
-      Records = await InfoQuestQuestions.find({whichTypeQuestion:"agree/disagree"})
+      Records = await InfoQuestQuestions.find({ whichTypeQuestion: "agree/disagree" })
         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
         .skip(skip)
         .limit(pageSize);
@@ -812,21 +841,23 @@ route.post("/getAllAgreeDisagreeQuestions",async(req,res)=>{
 
 })
 
-route.post("/getAllMultipleChoiceQuestions",async(req,res)=>{
-  try{
+route.post("/getAllMultipleChoiceQuestions", async (req, res) => {
+  try {
     const { uuid, _page, _limit, filter } = req.body;
     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit);
     const skip = (page - 1) * pageSize;
     let Records;
     if (filter === true) {
-        Records = await InfoQuestQuestions.find({ uuid: uuid,
-        whichTypeQuestion:"multiple choise" })
+      Records = await InfoQuestQuestions.find({
+        uuid: uuid,
+        whichTypeQuestion: "multiple choise"
+      })
         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
         .skip(skip)
         .limit(pageSize);
     } else {
-      Records = await InfoQuestQuestions.find({whichTypeQuestion:"multiple choise"})
+      Records = await InfoQuestQuestions.find({ whichTypeQuestion: "multiple choise" })
         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
         .skip(skip)
         .limit(pageSize);
@@ -841,21 +872,23 @@ route.post("/getAllMultipleChoiceQuestions",async(req,res)=>{
   }
 
 })
-route.post("/getAllRankedChoiceQuestions",async(req,res)=>{
-  try{
+route.post("/getAllRankedChoiceQuestions", async (req, res) => {
+  try {
     const { uuid, _page, _limit, filter } = req.body;
     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
     const pageSize = parseInt(_limit);
     const skip = (page - 1) * pageSize;
     let Records;
     if (filter === true) {
-        Records = await InfoQuestQuestions.find({ uuid: uuid,
-        whichTypeQuestion:"ranked choise" })
+      Records = await InfoQuestQuestions.find({
+        uuid: uuid,
+        whichTypeQuestion: "ranked choise"
+      })
         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
         .skip(skip)
         .limit(pageSize);
     } else {
-      Records = await InfoQuestQuestions.find({whichTypeQuestion:"ranked choise"})
+      Records = await InfoQuestQuestions.find({ whichTypeQuestion: "ranked choise" })
         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
         .skip(skip)
         .limit(pageSize);
