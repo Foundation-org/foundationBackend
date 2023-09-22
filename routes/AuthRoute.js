@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const { createToken } = require("../service/auth");
 
 // SIGN UP
 route.post("/signUpUser", async (req, res) => {
@@ -25,9 +26,15 @@ route.post("/signUpUser", async (req, res) => {
     const users = await user.save();
     !users && res.status(404).send("Not Created 1");
 
-    res.status(200).json(user);
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
+    // res.status(200).json(user);
+    res.status(200).json({ ...user._doc, token });
+
   } catch (err) {
     res.status(500).send("Not Created 2");
+    console.log(err.message);
   }
 });
 
@@ -40,7 +47,11 @@ route.post("/signInUser", async (req, res) => {
     const compPass = await bcrypt.compare(req.body.password, user.password);
     !compPass && res.status(400).json("Wrong Password");
 
-    res.status(200).json(user);
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
+    // res.status(200).json(user);
+    res.status(200).json({ ...user._doc, token });
     // res.status(201).send("Signed in Successfully");
   } catch (err) {
     res.status(500).send(err);
