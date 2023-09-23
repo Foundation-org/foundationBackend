@@ -53,7 +53,9 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : req.body.sort === "Most Popular" ? { interactingCounter: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
 
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -106,7 +108,9 @@ route.post("/getAllQuestsWithAnsweredStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') 
+
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : req.body.sort === "Most Popular" ? { interactingCounter: -1 } : 'createdAt')
+
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -336,7 +340,9 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
   }
   // Query the database with skip and limit options to get questions for the first page
   allQuestions = await InfoQuestQuestions.find(filterObj)
-    .sort(sort === "Newest First" ? { createdAt: -1 } : sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
+    .sort(sort === "Newest First" ? { createdAt: -1 } : sort === "Last Updated" ? { lastInteractedAt: -1 } : req.body.sort === "Most Popular" ? { interactingCounter: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
     .skip(skip)
     .limit(pageSize);
 
@@ -362,7 +368,9 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : req.body.sort === "Most Popular" ? { interactingCounter: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
 
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -461,7 +469,9 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : req.body.sort === "Most Popular" ? { interactingCounter: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
 
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -559,7 +569,9 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : req.body.sort === "Most Popular" ? { interactingCounter: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
 
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
