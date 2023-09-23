@@ -27,7 +27,22 @@ route.post("/createStartQuest", async (req, res) => {
     //     },
     //   }
     // );
+    const currentDate = new Date();
 
+    InfoQuestQuestions.findByIdAndUpdate(
+      { _id: req.body.questForeignKey },
+      { 
+        $set: { lastInteractedAt: currentDate.toISOString() },
+        $inc: { interactingCounter: 1 }
+       }
+    ).exec(),
+      (err, data) => {
+        if (err) {
+          return res.status(500).send(err);
+        } else {
+          return res.status(200).send(data);
+        }
+      };
     const question = await new StartQuests({
       questForeignKey: req.body.questForeignKey,
       uuid: req.body.uuid,
@@ -58,6 +73,7 @@ route.post("/createStartQuest", async (req, res) => {
           }
         };
     }
+    
 
     res.status(200).json("Updated");
 
