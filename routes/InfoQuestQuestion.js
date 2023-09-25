@@ -53,8 +53,15 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
-
+    .sort(
+      req.body.sort === "Newest First"
+        ? { createdAt: -1 }
+        : req.body.sort === "Last Updated"
+        ? { lastInteractedAt: -1 }
+        : req.body.sort === "Most Popular"
+        ? { interactingCounter: -1 }
+        : "createdAt"
+    ); // Sort by createdAt field in descending order
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -106,7 +113,15 @@ route.post("/getAllQuestsWithAnsweredStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') 
+    .sort(
+      req.body.sort === "Newest First"
+        ? { createdAt: -1 }
+        : req.body.sort === "Last Updated"
+        ? { lastInteractedAt: -1 }
+        : req.body.sort === "Most Popular"
+        ? { interactingCounter: -1 }
+        : "createdAt"
+    );
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -336,10 +351,19 @@ route.post("/getAllQuestsWithDefaultStatus", async (req, res) => {
   }
   // Query the database with skip and limit options to get questions for the first page
   allQuestions = await InfoQuestQuestions.find(filterObj)
-    .sort(sort === "Newest First" ? { createdAt: -1 } : sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
+
+    .sort(
+      sort === "Newest First"
+        ? { createdAt: -1 }
+        : sort === "Last Updated"
+        ? { lastInteractedAt: -1 }
+        : req.body.sort === "Most Popular"
+        ? { interactingCounter: -1 }
+        : "createdAt"
+    ) // Sort by createdAt field in descending order
+
     .skip(skip)
     .limit(pageSize);
-
 
   const result = await getQuestionsWithStatus(allQuestions, uuid);
 
@@ -362,8 +386,15 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
-
+    .sort(
+      req.body.sort === "Newest First"
+        ? { createdAt: -1 }
+        : req.body.sort === "Last Updated"
+        ? { lastInteractedAt: -1 }
+        : req.body.sort === "Most Popular"
+        ? { interactingCounter: -1 }
+        : "createdAt"
+    ); // Sort by createdAt field in descending order
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -461,8 +492,15 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
-
+    .sort(
+      req.body.sort === "Newest First"
+        ? { createdAt: -1 }
+        : req.body.sort === "Last Updated"
+        ? { lastInteractedAt: -1 }
+        : req.body.sort === "Most Popular"
+        ? { interactingCounter: -1 }
+        : "createdAt"
+    ); // Sort by createdAt field in descending order
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -559,8 +597,15 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
     }
     // Query the database with skip and limit options to get questions for the first page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : req.body.sort === "Last Updated" ? { lastInteractedAt: -1 } : 'createdAt') // Sort by createdAt field in descending order
-
+    .sort(
+      req.body.sort === "Newest First"
+        ? { createdAt: -1 }
+        : req.body.sort === "Last Updated"
+        ? { lastInteractedAt: -1 }
+        : req.body.sort === "Most Popular"
+        ? { interactingCounter: -1 }
+        : "createdAt"
+    ); // Sort by createdAt field in descending order
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
       res.status(200).json(allQuestions);
@@ -636,105 +681,102 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
 //     res.status(200).json(result);
 //   }
 // });
-route.post("/getAllQuestslastInteractedAt", async (req, res) => {
-  try {
-    const { uuid, _page, _limit, filter } = req.body;
-    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
-    const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
+// route.post("/getAllQuestslastInteractedAt", async (req, res) => {
+//   try {
+//     const { uuid, _page, _limit, filter } = req.body;
+//     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+//     const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
 
-    // Calculate the number of documents to skip to get to the desired page
-    const skip = (page - 1) * pageSize;
+//     // Calculate the number of documents to skip to get to the desired page
+//     const skip = (page - 1) * pageSize;
 
-    // Query the database with skip and limit options to get questions for the first page
-    let newestRecords;
-    if (filter === true) {
-      newestRecords = await InfoQuestQuestions.find({ uuid: uuid })
-        .sort({ lastInteractedAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    } else {
-      newestRecords = await InfoQuestQuestions.find()
-        .sort({ lastInteractedAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    }
-    const result = await getQuestionsWithStatus(newestRecords, uuid);
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error fetching newest records:", error);
-    res.status(500).json({ error: "Database error" });
-    const result = await getQuestionsWithStatus(allQuestions, uuid);
+//     // Query the database with skip and limit options to get questions for the first page
+//     let newestRecords;
+//     if (filter === true) {
+//       newestRecords = await InfoQuestQuestions.find({ uuid: uuid })
+//         .sort({ lastInteractedAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     } else {
+//       newestRecords = await InfoQuestQuestions.find()
+//         .sort({ lastInteractedAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     }
+//     const result = await getQuestionsWithStatus(newestRecords, uuid);
+//     res.status(200).json(result);
+//   } catch (error) {
+//     console.error("Error fetching newest records:", error);
+//     res.status(500).json({ error: "Database error" });
+//     const result = await getQuestionsWithStatus(allQuestions, uuid);
 
-    res.status(200).json(result);
-  }
-});
-
-
-
+//     res.status(200).json(result);
+//   }
+// });
 
 // Get all questions In the accending order
-route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
-  try {
-    const { uuid, _page, _limit, filter } = req.body;
-    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
-    const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
+// route.post("/getAllQuestsWithTheNewestOnes", async (req, res) => {
+//   try {
+//     const { uuid, _page, _limit, filter } = req.body;
+//     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+//     const pageSize = parseInt(_limit); // Convert query param to integer, default to 10 if not provided
 
-    // Calculate the number of documents to skip to get to the desired page
-    const skip = (page - 1) * pageSize;
+//     // Calculate the number of documents to skip to get to the desired page
+//     const skip = (page - 1) * pageSize;
 
-    // Query the database with skip and limit options to get questions for the first page
-    let newestRecords;
-    if (filter === true) {
-      newestRecords = await InfoQuestQuestions.find({ uuid: uuid })
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    } else {
-      newestRecords = await InfoQuestQuestions.find()
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    }
-    const result = await getQuestionsWithStatus(newestRecords, uuid);
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error fetching newest records:", error);
-    res.status(500).json({ error: "Database error" });
-    const result = await getQuestionsWithStatus(allQuestions, uuid);
+//     // Query the database with skip and limit options to get questions for the first page
+//     let newestRecords;
+//     if (filter === true) {
+//       newestRecords = await InfoQuestQuestions.find({ uuid: uuid })
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     } else {
+//       newestRecords = await InfoQuestQuestions.find()
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     }
+//     const result = await getQuestionsWithStatus(newestRecords, uuid);
+//     res.status(200).json(result);
+//   } catch (error) {
+//     console.error("Error fetching newest records:", error);
+//     res.status(500).json({ error: "Database error" });
+//     const result = await getQuestionsWithStatus(allQuestions, uuid);
 
-    res.status(200).json(result);
-  }
-});
+//     res.status(200).json(result);
+//   }
+// });
 
 // Get all questions In the deccending order
-route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
-  try {
-    const { uuid, _page, _limit, filter } = req.body;
-    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
-    const pageSize = parseInt(_limit);
-    const skip = (page - 1) * pageSize;
+// route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
+//   try {
+//     const { uuid, _page, _limit, filter } = req.body;
+//     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+//     const pageSize = parseInt(_limit);
+//     const skip = (page - 1) * pageSize;
 
-    let oldestRecords;
-    if (filter === true) {
-      oldestRecords = await InfoQuestQuestions.find({ uuid: uuid })
-        .sort("createdAt") // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    } else {
-      oldestRecords = await InfoQuestQuestions.find()
-        .sort("createdAt") // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    }
+//     let oldestRecords;
+//     if (filter === true) {
+//       oldestRecords = await InfoQuestQuestions.find({ uuid: uuid })
+//         .sort("createdAt") // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     } else {
+//       oldestRecords = await InfoQuestQuestions.find()
+//         .sort("createdAt") // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     }
 
-    const result = await getQuestionsWithStatus(oldestRecords, uuid);
+//     const result = await getQuestionsWithStatus(oldestRecords, uuid);
 
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error fetching oldest records:", error);
-    res.status(500).json({ error: "Database error" });
-  }
-});
+//     res.status(200).json(result);
+//   } catch (error) {
+//     console.error("Error fetching oldest records:", error);
+//     res.status(500).json({ error: "Database error" });
+//   }
+// });
 
 // Get all questions last updated
 // route.post("/getAllQuestsWithTheLastUpdatedOnes", async (req, res) => {
@@ -777,133 +819,131 @@ route.post("/getAllQuestsWithTheOldestOnes", async (req, res) => {
 //     res.status(500).json({ error: "Database error" });
 //   }
 // });
-route.post("/getAllYesNoQuestions", async (req, res) => {
-  try {
-    const { uuid, _page, _limit, filter } = req.body;
-    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
-    const pageSize = parseInt(_limit);
-    const skip = (page - 1) * pageSize;
-    let Records;
-    if (filter === true) {
-      Records = await InfoQuestQuestions.find({
-        uuid: uuid,
-        whichTypeQuestion: "yes/no"
-      })
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    } else {
-      Records = await InfoQuestQuestions.find({ whichTypeQuestion: "yes/no" })
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    }
-    const result = await getQuestionsWithStatus(Records, uuid);
+// route.post("/getAllYesNoQuestions", async (req, res) => {
+//   try {
+//     const { uuid, _page, _limit, filter } = req.body;
+//     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+//     const pageSize = parseInt(_limit);
+//     const skip = (page - 1) * pageSize;
+//     let Records;
+//     if (filter === true) {
+//       Records = await InfoQuestQuestions.find({
+//         uuid: uuid,
+//         whichTypeQuestion: "yes/no"
+//       })
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     } else {
+//       Records = await InfoQuestQuestions.find({ whichTypeQuestion: "yes/no" })
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     }
+//     const result = await getQuestionsWithStatus(Records, uuid);
 
-    res.status(200).json(result);
+//     res.status(200).json(result);
 
-  } catch (error) {
-    console.error("Error fetching oldest records:", error);
-    res.status(500).json({ error: "Database error" });
-  }
+//   } catch (error) {
+//     console.error("Error fetching oldest records:", error);
+//     res.status(500).json({ error: "Database error" });
+//   }
 
-})
+// })
 
-route.post("/getAllAgreeDisagreeQuestions", async (req, res) => {
-  try {
-    const { uuid, _page, _limit, filter } = req.body;
-    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
-    const pageSize = parseInt(_limit);
-    const skip = (page - 1) * pageSize;
-    let Records;
-    if (filter === true) {
-      Records = await InfoQuestQuestions.find({
-        uuid: uuid,
-        whichTypeQuestion: "agree/disagree"
-      })
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    } else {
-      Records = await InfoQuestQuestions.find({ whichTypeQuestion: "agree/disagree" })
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    }
-    const result = await getQuestionsWithStatus(Records, uuid);
+// route.post("/getAllAgreeDisagreeQuestions", async (req, res) => {
+//   try {
+//     const { uuid, _page, _limit, filter } = req.body;
+//     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+//     const pageSize = parseInt(_limit);
+//     const skip = (page - 1) * pageSize;
+//     let Records;
+//     if (filter === true) {
+//       Records = await InfoQuestQuestions.find({
+//         uuid: uuid,
+//         whichTypeQuestion: "agree/disagree"
+//       })
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     } else {
+//       Records = await InfoQuestQuestions.find({ whichTypeQuestion: "agree/disagree" })
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     }
+//     const result = await getQuestionsWithStatus(Records, uuid);
 
-    res.status(200).json(result);
+//     res.status(200).json(result);
 
-  } catch (error) {
-    console.error("Error fetching oldest records:", error);
-    res.status(500).json({ error: "Database error" });
-  }
+//   } catch (error) {
+//     console.error("Error fetching oldest records:", error);
+//     res.status(500).json({ error: "Database error" });
+//   }
 
-})
+// })
 
-route.post("/getAllMultipleChoiceQuestions", async (req, res) => {
-  try {
-    const { uuid, _page, _limit, filter } = req.body;
-    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
-    const pageSize = parseInt(_limit);
-    const skip = (page - 1) * pageSize;
-    let Records;
-    if (filter === true) {
-      Records = await InfoQuestQuestions.find({
-        uuid: uuid,
-        whichTypeQuestion: "multiple choise"
-      })
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    } else {
-      Records = await InfoQuestQuestions.find({ whichTypeQuestion: "multiple choise" })
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    }
-    const result = await getQuestionsWithStatus(Records, uuid);
+// route.post("/getAllMultipleChoiceQuestions", async (req, res) => {
+//   try {
+//     const { uuid, _page, _limit, filter } = req.body;
+//     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+//     const pageSize = parseInt(_limit);
+//     const skip = (page - 1) * pageSize;
+//     let Records;
+//     if (filter === true) {
+//       Records = await InfoQuestQuestions.find({
+//         uuid: uuid,
+//         whichTypeQuestion: "multiple choise"
+//       })
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     } else {
+//       Records = await InfoQuestQuestions.find({ whichTypeQuestion: "multiple choise" })
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     }
+//     const result = await getQuestionsWithStatus(Records, uuid);
 
-    res.status(200).json(result);
+//     res.status(200).json(result);
 
-  } catch (error) {
-    console.error("Error fetching oldest records:", error);
-    res.status(500).json({ error: "Database error" });
-  }
+//   } catch (error) {
+//     console.error("Error fetching oldest records:", error);
+//     res.status(500).json({ error: "Database error" });
+//   }
 
-})
-route.post("/getAllRankedChoiceQuestions", async (req, res) => {
-  try {
-    const { uuid, _page, _limit, filter } = req.body;
-    const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
-    const pageSize = parseInt(_limit);
-    const skip = (page - 1) * pageSize;
-    let Records;
-    if (filter === true) {
-      Records = await InfoQuestQuestions.find({
-        uuid: uuid,
-        whichTypeQuestion: "ranked choise"
-      })
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    } else {
-      Records = await InfoQuestQuestions.find({ whichTypeQuestion: "ranked choise" })
-        .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
-        .skip(skip)
-        .limit(pageSize);
-    }
-    const result = await getQuestionsWithStatus(Records, uuid);
+// })
+// route.post("/getAllRankedChoiceQuestions", async (req, res) => {
+//   try {
+//     const { uuid, _page, _limit, filter } = req.body;
+//     const page = parseInt(_page) || 1; // Convert query param to integer, default to 1 if not provided
+//     const pageSize = parseInt(_limit);
+//     const skip = (page - 1) * pageSize;
+//     let Records;
+//     if (filter === true) {
+//       Records = await InfoQuestQuestions.find({
+//         uuid: uuid,
+//         whichTypeQuestion: "ranked choise"
+//       })
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     } else {
+//       Records = await InfoQuestQuestions.find({ whichTypeQuestion: "ranked choise" })
+//         .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
+//         .skip(skip)
+//         .limit(pageSize);
+//     }
+//     const result = await getQuestionsWithStatus(Records, uuid);
 
-    res.status(200).json(result);
+//     res.status(200).json(result);
 
-  } catch (error) {
-    console.error("Error fetching oldest records:", error);
-    res.status(500).json({ error: "Database error" });
-  }
+//   } catch (error) {
+//     console.error("Error fetching oldest records:", error);
+//     res.status(500).json({ error: "Database error" });
+//   }
 
-})
-
-
+// })
 
 module.exports = route;
