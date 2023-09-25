@@ -30,6 +30,9 @@ app.use("/infoquestions", InfoQuestQuestion);
 app.use("/bookmarkQuest", BookmarkQuest);
 app.use("/startQuest", StartQuest);
 app.use("/search", SearchRoute);
+// All Routes
+require("./start/routes")(app)
+
 
 let port = 8800;
 
