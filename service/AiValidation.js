@@ -37,3 +37,18 @@ module.exports.removeCorrected = (inputString) => {
   const regex = /Corrected: /gi;
   return inputString.replace(regex, "");
 };
+
+
+module.exports.replaceWithPeriod = (inputString) => {
+  console.log("🚀 ~ file: AiValidation.js:43 ~ inputString:", inputString)
+  // Use a regular expression to check the last character
+  const regex = /[^\s.]$/;
+  
+  // If the last character is not a period or whitespace, add a period
+  if (regex.test(inputString)) {
+    return inputString + '.';
+  }
+  
+  // Otherwise, return the input string as is
+  return inputString;
+}

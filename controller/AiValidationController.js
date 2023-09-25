@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { STATEMENT, SYSTEM_MESSAGES } = require('../constants/index')
 const { OPEN_AI_KEY, OPEN_AI_URL } = require("../config/env");
-const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod } = require("../service/AiValidation");
+const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod } = require("../service/AiValidation");
 
 
 const minApiCallDelay = 3000; // 1 call allowed every 3 seconds;
@@ -57,11 +57,15 @@ async function handleRequest(
     callType
   ) {
     try {
-      const userMessage = req.query.userMessage;
+      let userMessage = req.query.userMessage;
+      // console.log("🚀 ~ file: AiValidationController.js:61 ~ userMessage:", userMessage)
   
       if (!userMessage) {
         res.status(400).json({ message: "Empty Message", status: "ERROR" });
         return;
+      }
+      if (callType == 3 ) {
+        userMessage = replaceWithPeriod(userMessage)
       }
   
       const response = await axios.post(
@@ -85,7 +89,7 @@ async function handleRequest(
           },
         }
       );
-      console.log("🚀 ~ file: AiValidationController.js:88 ~ response.data:", response.data)
+      // console.log("🚀 ~ file: AiValidationController.js:88 ~ response.data:", response.data)
   
       const modifiedResponse = checkResponse(
         response.data,
