@@ -52,3 +52,17 @@ module.exports.replaceWithPeriod = (inputString) => {
   // Otherwise, return the input string as is
   return inputString;
 }
+
+
+module.exports.extractAlphabetic = (inputString) => {
+  // Use a regular expression to match alphabetic characters
+  const alphabeticCharacters = inputString.match(/[a-zA-Z]+/g);
+
+  // Check if alphabetic characters are found
+  if (alphabeticCharacters) {
+    const resultString = alphabeticCharacters.join(''); // Join the matched characters
+    return resultString;
+  } else {
+    return "No alphabetic characters found";
+  }
+}

@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { STATEMENT, SYSTEM_MESSAGES } = require('../constants/index')
 const { OPEN_AI_KEY, OPEN_AI_URL } = require("../config/env");
-const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod } = require("../service/AiValidation");
+const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic } = require("../service/AiValidation");
 
 
 const minApiCallDelay = 3000; // 1 call allowed every 3 seconds;
@@ -66,6 +66,10 @@ async function handleRequest(
       }
       if (callType == 3 ) {
         userMessage = replaceWithPeriod(userMessage)
+      }
+      if (callType == 2 ) {
+        const extractedAlphabets = extractAlphabetic(userMessage)
+        userMessage = extractedAlphabets
       }
   
       const response = await axios.post(
