@@ -11,6 +11,8 @@ module.exports = {
     "do not have the ability",
     "unable to provide assistance",
     "not able to provide assistance",
+    "unable to assist",
+    "not able to assist"
   ],
   SYSTEM_MESSAGES: [
     "Correct provided statements to standard English. Shortest responses only.",
