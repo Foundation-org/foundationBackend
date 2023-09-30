@@ -15,7 +15,7 @@ let apiCallCount = 0;
 // Signup Controller
 const validation = async (req, res) => {
     const callType = req.params.callType;
-    if (callType >= 1 && callType <= 4) {
+    if (callType >= 1 && callType <= 3) {
       const now = Date.now();
       const timeSinceLastCall = now - lastApiCallTimestamp;
   
@@ -82,7 +82,7 @@ async function handleRequest(
           ],
           temperature: 0,
           max_tokens: 256,
-          top_p: 0.1,
+          top_p: 1,
           frequency_penalty: 0,
           presence_penalty: 0,
         },
@@ -110,23 +110,12 @@ async function handleRequest(
     let filtered = responseData.choices[0].message.content;
     let status = "OK";
   
-    let found
-
-    found = checkViolationInSentence(filtered);
+    const found = checkViolationInSentence(filtered);
   
     if (found) {
       filtered = userMessage;
       status = "VIOLATION";
     }
-
-    // new
-    found = checkNonsenseInSentence(filtered);
-
-    if (found) {
-      filtered = userMessage;
-      status = 'FAIL';
-    }
-  // end new
   
     if (callType == 2) {
       filtered = removeCorrected(filtered);
@@ -139,12 +128,6 @@ async function handleRequest(
       if (filtered == "No.") status = "FAIL";
       filtered = userMessage;
     }
-    // new
-    if (callType == 4) {
-      if (filtered == 'Non-sensical' || filtered == 'Fragment' || filtered == 'Non-sensical.' || filtered == 'Fragment.' ) status = 'FAIL'; // added period cases
-      filtered = userMessage;
-    }
-  // end new
   
     return { message: filtered, status: status };
   }
@@ -166,57 +149,32 @@ async function handleRequest(
       .status(500)
       .json({ message: "GPT Request Error", status: "ERROR" });
   }
-
-
-  // new
-function checkNonsenseInSentence(sentence) {
-  const statements = ["i don't understand the provided words",
-                      "i do not understand the provided words",
-		      "i cannot understand the provided statement",
-		      "i can't understand the provided statement",
-		      "i don't understand what you're trying to say",
-                      "i do not understand what you're trying to say",
-		      "i don't understand what you are trying to say",
-                      "i do not understand what you are trying to say",
-                      "i cannot understand the statement you provided",
-		      "i can't understand the statement you provided",
-		      "i don't understand your message",
-		      "i do not understand your message",
-		      "can you please provide a clear statement or question",
-                      "i cannot correct gibberish",
-                      "i can't correct gibberish",
-		     ];
-
-  const lowerCaseSentence = sentence.toLowerCase();
-  return statements.some(statement => lowerCaseSentence.includes(statement.toLowerCase()));
-}
-// end new
   
-  // function checkResponse(responseData, userMessage, callType) {
-  //   let filtered = responseData.choices[0].message.content;
-  //   let status = "OK";
+  function checkResponse(responseData, userMessage, callType) {
+    let filtered = responseData.choices[0].message.content;
+    let status = "OK";
   
-  //   const found = checkViolationInSentence(filtered);
+    const found = checkViolationInSentence(filtered);
   
-  //   if (found) {
-  //     filtered = userMessage;
-  //     status = "VIOLATION";
-  //   }
+    if (found) {
+      filtered = userMessage;
+      status = "VIOLATION";
+    }
   
-  //   if (callType == 2) {
-  //     filtered = removeCorrected(filtered);
-  //     if (filtered == "Correct.") filtered = userMessage;
-  //     filtered = capitalizeFirstLetter(filtered);
-  //     filtered = removePeriod(filtered);
-  //   }
+    if (callType == 2) {
+      filtered = removeCorrected(filtered);
+      if (filtered == "Correct.") filtered = userMessage;
+      filtered = capitalizeFirstLetter(filtered);
+      filtered = removePeriod(filtered);
+    }
   
-  //   if (callType == 3) {
-  //     if (filtered == "No.") status = "FAIL";
-  //     filtered = userMessage;
-  //   }
+    if (callType == 3) {
+      if (filtered == "No.") status = "FAIL";
+      filtered = userMessage;
+    }
   
-  //   return { message: filtered, status: status };
-  // }
+    return { message: filtered, status: status };
+  }
   
   // Reset the API call count daily
   setInterval(() => {
