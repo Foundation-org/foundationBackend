@@ -164,6 +164,10 @@ async function handleRequest(
       filtered = userMessage;
     }
   // end new
+  if (checkForDomainsAndEmails(filtered)) {
+    filtered = userMessage;
+    status = 'VIOLATION';
+  }
   
     return { message: filtered, status: status };
   }
@@ -204,6 +208,15 @@ function checkNonsenseInSentence(sentence) {
 		      "can you please provide a clear statement or question",
                       "i cannot correct gibberish",
                       "i can't correct gibberish",
+                      "not a recognizable word in any language",
+                      "please provide more information",
+                      "it does not make sense in any language",
+                      "it doesn't make sense in any language",
+                      "please provide more information",
+                      "no alphabetic characters were found",
+                      "please provide a valid sentence",
+            "does not contain any standard english",
+                    "doesn't contain any standard english",
 		     ];
 
   const lowerCaseSentence = sentence.toLowerCase();
