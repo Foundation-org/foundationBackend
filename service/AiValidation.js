@@ -18,15 +18,6 @@ module.exports.capitalizeFirstLetter = (sentence) => {
   return firstLetter + restOfSentence;
 };
 
-module.exports.removePeriod = (paragraph) => {
-  const sentences = paragraph.split(". ");
-
-  if (sentences.length === 1 && paragraph.endsWith(".")) {
-    return this.removeTrailingPeriods(paragraph);
-  }
-
-  return paragraph;
-};
 
 module.exports.removeTrailingPeriods = (sentence) => {
   const regex = /\.*$/;
@@ -66,3 +57,10 @@ module.exports.extractAlphabetic = (inputString) => {
     return "No alphabetic characters found";
   }
 }
+
+
+
+module.exports.removeTrailingQuestionMarks = (sentence) => {
+  const regex = /\?*$/;
+  return sentence.replace(regex, "");
+};

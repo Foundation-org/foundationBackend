@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { STATEMENT, SYSTEM_MESSAGES } = require('../constants/index')
 const { OPEN_AI_KEY, OPEN_AI_URL } = require("../config/env");
-const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic } = require("../service/AiValidation");
+const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks } = require("../service/AiValidation");
 
 const tldjs = require('tldjs');
 const emailValidator = require('email-validator');
@@ -77,12 +77,15 @@ async function handleRequest(
         res.status(400).json({ message: "Empty Message", status: "ERROR" });
         return;
       }
-      if (callType == 3 ) {
-        userMessage = replaceWithPeriod(userMessage)
+
+      if(callType == 1 || callType == 2){
+        userMessage = removeTrailingPeriods(userMessage);
+        userMessage = removeTrailingQuestionMarks(userMessage);
       }
-      if (callType == 2 ) {
-        const extractedAlphabets = extractAlphabetic(userMessage)
-        userMessage = extractedAlphabets
+
+      if(callType == 3) {
+        userMessage = removeTrailingPeriods(userMessage);
+        userMessage = userMessage + "."
       }
 
       // new *check BEFORE gpt response
@@ -101,7 +104,7 @@ async function handleRequest(
           ],
           temperature: 0,
           max_tokens: 256,
-          top_p: 0.1,
+          top_p: 0,
           frequency_penalty: 0,
           presence_penalty: 0,
         },
@@ -151,7 +154,8 @@ async function handleRequest(
       filtered = removeCorrected(filtered);
       if (filtered == "Correct.") filtered = userMessage;
       filtered = capitalizeFirstLetter(filtered);
-      filtered = removePeriod(filtered);
+      filtered = removeTrailingPeriods(filtered);
+      filtered = removeTrailingQuestionMarks(filtered);
     }
   
     if (callType == 3) {
@@ -217,6 +221,8 @@ function checkNonsenseInSentence(sentence) {
                       "please provide a valid sentence",
             "does not contain any standard english",
                     "doesn't contain any standard english",
+                    "I cannot understand the text you provided",
+                    "Please provide more context or clarify your request"
 		     ];
 
   const lowerCaseSentence = sentence.toLowerCase();
