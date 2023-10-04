@@ -51,30 +51,45 @@ route.post("/getAllBookmarkQuests", async (req, res) => {
 route.post("/getAllBookmarkQuestions", async (req, res) => {
   try {
     const { uuid, _page, _limit } = req.body;
-    const page = parseInt(_page)
+    const page = parseInt(_page);
     const pageSize = parseInt(_limit);
 
     // Calculate the number of documents to skip to get to the desired page
     const skip = (page - 1) * pageSize;
 
-
     const Questions = await BookmarkQuests.find({
       uuid: uuid,
     })
+      .sort( req.body.sort==="Newest First"?{createdAt:-1}:"createdAt" )
       .skip(skip)
       .limit(pageSize);
 
-    let response = [];
-    const mapReq = await Questions.map(async function (record) {
+    // console.log("Allbookmarks", Questions);
 
-      let rec = await InfoQuestQuestions.findOne({
+    // let response = [];
+    // const mapReq = await Questions.map(async function (record) {
+    //   let rec = await InfoQuestQuestions.findOne({
+    //     _id: record.questForeignKey,
+    //   });
+
+    //   response = [...response, rec];
+    // });
+
+    // return Promise.all(mapReq).then(() => {
+    //   response.sort((a, b) => b.createdAt - a.createdAt);
+    //   console.log("response", response);
+    //   res.status(200).json(response);
+    // });
+
+    const mapPromises = Questions.map(async function (record) {
+      return InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
       });
-
-      response = [...response, rec];
     });
 
-    return Promise.all(mapReq).then(() => {
+    const response = await Promise.all(mapPromises);
+    return Promise.all(mapPromises).then(() => {
+    //   console.log("response", response);
       res.status(200).json(response);
     });
   } catch (err) {
