@@ -27,7 +27,7 @@ module.exports = {
   ],
   SYSTEM_MESSAGES: [
     "Correct provided statements to standard English. Shortest responses only.",
-    "Correct provided text to standard English. Shortest responses only.",
+    "Correct provided text to standard English. Shortest responses only. Do not use quotes.",
     // "Tell me if the reply is relevant. Shortest answer only.",
     'I will give you a statement and a reply. Tell me if the reply is relevant. Shortest answer only.', // new
     'Reject the statement if it is a fragment or non-sensical. Shortest answer only.' // new

@@ -85,6 +85,7 @@ async function handleRequest(
 
       if(callType == 3) {
         userMessage = removeTrailingPeriods(userMessage);
+        userMessage = removeTrailingQuestionMarks(userMessage);
         userMessage = userMessage + "."
       }
 
@@ -222,7 +223,8 @@ function checkNonsenseInSentence(sentence) {
             "does not contain any standard english",
                     "doesn't contain any standard english",
                     "I cannot understand the text you provided",
-                    "Please provide more context or clarify your request"
+                    "Please provide more context or clarify your request",
+                    "Please provide a valid email address"
 		     ];
 
   const lowerCaseSentence = sentence.toLowerCase();
