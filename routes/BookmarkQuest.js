@@ -10,6 +10,7 @@ route.post("/createBookmarkQuest", async (req, res) => {
       Question: req.body.Question,
       questForeignKey: req.body.questForeignKey,
       uuid: req.body.uuid,
+      whichTypeQuestion:req.body.whichTypeQuestion
     });
 
     const questions = await question.save();
@@ -56,10 +57,12 @@ route.post("/getAllBookmarkQuestions", async (req, res) => {
 
     // Calculate the number of documents to skip to get to the desired page
     const skip = (page - 1) * pageSize;
+    let filterObj = {uuid:uuid};
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
 
-    const Questions = await BookmarkQuests.find({
-      uuid: uuid,
-    })
+    const Questions = await BookmarkQuests.find(filterObj)
       .sort( req.body.sort==="Newest First"?{createdAt:-1}:"createdAt" )
       .skip(skip)
       .limit(pageSize);

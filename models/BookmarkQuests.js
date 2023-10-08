@@ -11,6 +11,10 @@ const BookmarkQuestsSchema = mongoose.Schema(
     },
     questForeignKey: {
       type: String,
+    },
+    whichTypeQuestion: {
+      type: String,
+      required: true,
     }
   },
   { timestamps: true }
