@@ -31,6 +31,9 @@ const userSchema = mongoose.Schema(
     uuid: {
       type: String,
     },
+    violationCounter:{
+      type:Number,
+    },
     walletAddr: {
       type: String,
     },

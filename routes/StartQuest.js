@@ -2,6 +2,21 @@ const route = require("express").Router();
 
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const StartQuests = require("../models/StartQuests");
+const User = require("../models/UserModel");
+
+//VIOLATION
+route.post("/updateViolationCounter", async (req, res) => {
+  try {
+      const result = await User.updateOne({ uuid: req.body.uuid }, { $inc: { violationCounter: 1 } });
+      if (result.nModified === 0) {
+          return res.status(404).send("User not found");
+      }
+      return res.status(200).send(result);
+  } catch (error) {
+      return res.status(500).send(error);
+  }
+});
+
 
 // SIGN UP
 route.post("/createStartQuest", async (req, res) => {
@@ -34,7 +49,7 @@ route.post("/createStartQuest", async (req, res) => {
       { 
         $set: { lastInteractedAt: currentDate.toISOString() },
         $inc: { interactingCounter: 1 }
-       }
+      }
     ).exec(),
       (err, data) => {
         if (err) {

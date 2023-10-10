@@ -7,7 +7,7 @@ const tldjs = require('tldjs');
 const emailValidator = require('email-validator');
 
 
-const minApiCallDelay = 3000; // 1 call allowed every 3 seconds;
+const minApiCallDelay = 500; // 2 call allowed every 1 seconds;
 const maxApiCallsPerDay = 2200; // total calls per oneDayInMillis
 const oneDayInMillis = 24 * 60 * 60 * 1000; // 24hr period
 

@@ -22,6 +22,7 @@ route.post("/signUpUser", async (req, res) => {
       email: req.body.userEmail,
       password: hashPassword,
       uuid: uuid,
+      violationCounter:0
     });
     const users = await user.save();
     !users && res.status(404).send("Not Created 1");
