@@ -7,6 +7,34 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const { createToken } = require("../service/auth");
 
+// Add this route to your existing code
+route.put("/changePassword", async (req, res) => {
+  try {
+    const user = await User.findOne({ uuid: req.body.uuid });
+    !user && res.status(404).json("User not Found");
+
+    const currentPasswordValid = await bcrypt.compare(
+      req.body.currentPassword,
+      user.password
+    );
+    if (!currentPasswordValid) {
+      return res.status(400).json("Current password is incorrect");
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newHashedPassword = await bcrypt.hash(req.body.newPassword, salt);
+
+    // Update the user's password
+    user.password = newHashedPassword;
+    await user.save();
+
+    res.status(200).json("Password changed successfully");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+
 // SIGN UP
 route.post("/signUpUser", async (req, res) => {
   try {

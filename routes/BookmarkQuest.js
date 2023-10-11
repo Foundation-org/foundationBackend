@@ -61,6 +61,9 @@ route.post("/getAllBookmarkQuestions", async (req, res) => {
     if (req.body.type) {
       filterObj.whichTypeQuestion = req.body.type;
     }
+    if (req.body.filter === true) {
+      filterObj.uuid = req.body.uuid;
+    }
 
     const Questions = await BookmarkQuests.find(filterObj)
       .sort( req.body.sort==="Newest First"?{createdAt:-1}:"createdAt" )
