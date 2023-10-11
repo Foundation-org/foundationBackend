@@ -59,8 +59,8 @@ route.post("/getAllBookmarkQuestions", async (req, res) => {
     const skip = (page - 1) * pageSize;
     let filterObj = {uuid:uuid};
     
-    if (req.body.filter === true) {
-      filterObj.uuid = req.body.uuid;
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
     }
 
     const Questions = await BookmarkQuests.find(filterObj)
