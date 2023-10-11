@@ -58,9 +58,7 @@ route.post("/getAllBookmarkQuestions", async (req, res) => {
     // Calculate the number of documents to skip to get to the desired page
     const skip = (page - 1) * pageSize;
     let filterObj = {uuid:uuid};
-    if (req.body.type) {
-      filterObj.whichTypeQuestion = req.body.type;
-    }
+    
     if (req.body.filter === true) {
       filterObj.uuid = req.body.uuid;
     }
