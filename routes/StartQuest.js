@@ -19,57 +19,188 @@ route.post("/updateViolationCounter", async (req, res) => {
 
 
 // SIGN UP
+// route.post("/createStartQuest", async (req, res) => {
+//   try {
+//     const currentDate = new Date();
+
+//     InfoQuestQuestions.findByIdAndUpdate(
+//       { _id: req.body.questForeignKey },
+//       {
+//         $set: { lastInteractedAt: currentDate.toISOString() },
+//         $inc: { interactingCounter: 1 },
+//       }
+//     ).exec(),
+//       (err, data) => {
+//         if (err) {
+//           return res.status(500).send(err);
+//         } else {
+//           return res.status(200).send(data);
+//         }
+//       };
+
+//     // Check req.body.data and the last element's contended and selected arrays objects
+//     const lastDataElement = req.body.data;
+
+//     // Function to process an array
+//     const processArray = async (array, fieldToUpdate) => {
+//       if (array && Array.isArray(array)) {
+//         for (const item of array) {
+//           // Check if item.question matches addedAnswer in StartQuests
+//           const matchingStartQuest = await StartQuests.findOne({
+//             addedAnswer: item.question,
+//           });
+
+//           if (matchingStartQuest) {
+//             // Get the uuid of the matching record
+//             const matchingUuid = matchingStartQuest.uuid;
+
+//             // Define the field to update based on the provided fieldToUpdate parameter
+//             const updateField = {};
+//             updateField[fieldToUpdate] = 1;
+
+//             // Increment the specified field in the User table
+//             await User.findOneAndUpdate(
+//               { uuid: matchingUuid },
+//               { $inc: updateField }
+//             );
+//           }
+//         }
+//       }
+//     };
+
+//     // Process both 'contended' and 'selected' arrays
+//     await Promise.all([
+//       processArray(lastDataElement.contended, "contentionsOnAddedAns"),
+//       processArray(lastDataElement.selected, "selectionsOnAddedAns"),
+//     ]);
+
+//     const question = await new StartQuests({
+//       questForeignKey: req.body.questForeignKey,
+//       uuid: req.body.uuid,
+//       addedAnswer: req.body.addedAnswer,
+//       data: req.body.data,
+//     });
+
+//     const questions = await question.save();
+//     !questions && res.status(404).send("Not Created 1");
+
+//     if (req.body.addedAnswer !== "") {
+//       InfoQuestQuestions.findByIdAndUpdate(
+//         { _id: req.body.questForeignKey },
+//         {
+//           $push: {
+//             QuestAnswers: {
+//               question: req.body.addedAnswer,
+//               selected: true,
+//             },
+//           },
+//         }
+//       ).exec(),
+//         (err, data) => {
+//           if (err) {
+//             return res.status(500).send(err);
+//           } else {
+//             return res.status(200).send(data);
+//           }
+//         };
+//     }
+
+//     res.status(200).json("Updated");
+
+//     // const questions = await question.save();
+//     // !questions && res.status(404).send("Not Created 1");
+
+//     // res.status(201).send("Quest has been Created");
+//   } catch (err) {
+//     res.status(500).send("Not Created 2");
+//   }
+// });
+
 route.post("/createStartQuest", async (req, res) => {
   try {
-    // const updateQuestion = await InfoQuestQuestions.StartQuests(
-    //   {
-    //     btnStatus: "completed",
-    //   },
-    //   {
-    //     where: {
-    //       uuid: req.body.uuid,
-    //     },
-    //   }
-    // )
-
-    // await StartQuests.updateOne(
-    //   {
-    //     btnStatus: "completed",
-    //   },
-    //   {
-    //     where: {
-    //       uuid: req.body.uuid,
-    //     },
-    //   }
-    // );
     const currentDate = new Date();
 
-    InfoQuestQuestions.findByIdAndUpdate(
+    // Update InfoQuestQuestions and get the data
+    const data = await InfoQuestQuestions.findByIdAndUpdate(
       { _id: req.body.questForeignKey },
-      { 
+      {
         $set: { lastInteractedAt: currentDate.toISOString() },
-        $inc: { interactingCounter: 1 }
-      }
-    ).exec(),
-      (err, data) => {
-        if (err) {
-          return res.status(500).send(err);
-        } else {
-          return res.status(200).send(data);
+        $inc: { interactingCounter: 1 },
+      },
+      { new: true } // To get the updated document
+    );
+
+    if (!data) {
+      return res.status(404).send("InfoQuestQuestions not found");
+    }
+
+    // Get the UUID of the matching record in InfoQuestQuestions
+    const matchingUuid = data.uuid;
+
+    // Update the User table with the matching UUID and increment 'userAnswered'
+    await User.findOneAndUpdate(
+      { uuid: matchingUuid },
+      { $inc: { usersAnswered: 1 } }
+    );
+
+    // Process the 'contended' array and increment 'contentionsGiven'
+    const contendedArray = req.body.data?.contended || [];
+    const contentionsGivenIncrement = contendedArray.length;
+
+    await User.findOneAndUpdate(
+      { uuid: req.body.uuid },
+      { $inc: { contentionsGiven: contentionsGivenIncrement } }
+    );
+
+    // Function to process an array
+    const processArray = async (array, fieldToUpdate) => {
+      if (array && Array.isArray(array)) {
+        for (const item of array) {
+          // Check if item.question matches addedAnswer in StartQuests
+          const matchingStartQuest = await StartQuests.findOne({
+            addedAnswer: item.question,
+          });
+
+          if (matchingStartQuest) {
+            // Get the uuid of the matching record
+            const matchingUuid = matchingStartQuest.uuid;
+
+            // Define the field to update based on the provided fieldToUpdate parameter
+            const updateField = {};
+            updateField[fieldToUpdate] = 1;
+
+            // Increment the specified field in the User table
+            await User.findOneAndUpdate(
+              { uuid: matchingUuid },
+              { $inc: updateField }
+            );
+          }
         }
-      };
-    const question = await new StartQuests({
+      }
+    };
+
+    // Process the 'selected' array
+    await processArray(req.body.data?.selected, "selectionsOnAddedAns");
+
+    // Create a new StartQuests document
+    const question = new StartQuests({
       questForeignKey: req.body.questForeignKey,
       uuid: req.body.uuid,
       addedAnswer: req.body.addedAnswer,
       data: req.body.data,
     });
 
-    const questions = await question.save();
-    !questions && res.status(404).send("Not Created 1");
+    await question.save();
 
     if (req.body.addedAnswer !== "") {
-      InfoQuestQuestions.findByIdAndUpdate(
+      // Increment 'addedAnswers' for the user
+      await User.findOneAndUpdate(
+        { uuid: req.body.uuid },
+        { $inc: { addedAnswers: 1 } }
+      );
+
+      // Push the added answer to InfoQuestQuestions
+      await InfoQuestQuestions.findByIdAndUpdate(
         { _id: req.body.questForeignKey },
         {
           $push: {
@@ -79,27 +210,187 @@ route.post("/createStartQuest", async (req, res) => {
             },
           },
         }
-      ).exec(),
-        (err, data) => {
-          if (err) {
-            return res.status(500).send(err);
-          } else {
-            return res.status(200).send(data);
-          }
-        };
+      );
     }
-    
 
     res.status(200).json("Updated");
-
-    // const questions = await question.save();
-    // !questions && res.status(404).send("Not Created 1");
-
-    // res.status(201).send("Quest has been Created");
   } catch (err) {
-    res.status(500).send("Not Created 2");
+    console.error(err);
+    res.status(500).send("Internal Server Error");
   }
 });
+
+// route.post("/updateChangeAnsStartQuest", async (req, res) => {
+//   try {
+//     const startQuestQuestion = await StartQuests.findOne({
+//       questForeignKey: req.body.questId,
+//       uuid: req.body.uuid,
+//     });
+
+//     // Get the current date and time
+//     const currentDate = new Date();
+
+//     InfoQuestQuestions.findByIdAndUpdate(
+//       { _id: req.body.questId },
+//       {
+//         $set: { lastInteractedAt: currentDate.toISOString() },
+//         $inc: { interactingCounter: 1 },
+//       }
+//     ).exec(),
+//       (err, data) => {
+//         if (err) {
+//           return res.status(500).send(err);
+//         } else {
+//           return res.status(200).send(data);
+//         }
+//       };
+
+//     // Check req.body.data and the last element's contended and selected arrays objects
+//     const lastDataElement = req.body.changeAnswerAddedObj;
+
+//     // Function to process an array
+//     const processArray = async (array, fieldToUpdate) => {
+//       if (array && Array.isArray(array)) {
+//         for (const item of array) {
+//           // Check if item.question matches addedAnswer in StartQuests
+//           const matchingStartQuest = await StartQuests.findOne({
+//             addedAnswer: item.question,
+//           });
+
+//           if (matchingStartQuest) {
+//             // Get the uuid of the matching record
+//             const matchingUuid = matchingStartQuest.uuid;
+
+//             // Define the field to update based on the provided fieldToUpdate parameter
+//             const updateField = {};
+//             updateField[fieldToUpdate] = 1;
+
+//             // Increment the specified field in the User table
+//             await User.findOneAndUpdate(
+//               { uuid: matchingUuid },
+//               { $inc: updateField }
+//             );
+//           }
+//         }
+//       }
+//     };
+
+//     // Process both 'contended' and 'selected' arrays
+//     await Promise.all([
+//       processArray(lastDataElement.contended, "contentionsOnAddedAns"),
+//       processArray(lastDataElement.selected, "selectionsOnAddedAns"),
+//     ]);
+
+//     let startQuestAnswersSelected = startQuestQuestion.data;
+//     console.log(
+//       "startQuestQuestion.data",
+//       startQuestQuestion.data[startQuestQuestion.data.length - 1]
+//     );
+//     console.log(
+//       "req.body.changeAnswerAddedObj ",
+//       req.body.changeAnswerAddedObj
+//     );
+//     let responseMsg = "";
+
+//     let timeWhenUserUpdated = new Date(
+//       startQuestQuestion.data[startQuestQuestion.data.length - 1].created
+//     );
+
+//     let date1 = new Date();
+//     let date2 = date1.getTime();
+
+//     let dateFinal = date2 - timeWhenUserUpdated.getTime();
+
+//     console.log("dateFinal", dateFinal);
+
+//     // if (dateFinal > 3600000) {
+//     if (dateFinal > 2) {
+//       if (
+//         Compare(
+//           startQuestQuestion.data[startQuestQuestion.data.length - 1],
+//           req.body.changeAnswerAddedObj
+//         )
+//       ) {
+//         //Comparing old and new answer
+
+//         let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
+
+//         if (typeof req.body.changeAnswerAddedObj.selected !== "string") {
+//           req.body.changeAnswerAddedObj.selected.map((option) => {
+//             if (option.addedAnswerByUser === true) {
+//               AnswerAddedOrNot = option.question;
+//               const addAnswer = {
+//                 question: option.question,
+//                 // someOneAdded: true,
+//                 selected: true,
+//               };
+//               InfoQuestQuestions.findByIdAndUpdate(
+//                 { _id: req.body.questId },
+//                 { $push: { QuestAnswers: addAnswer } }
+//               ).exec(),
+//                 (err, data) => {
+//                   if (err) {
+//                     return res.status(500).send(err);
+//                   } else {
+//                     return res.status(200).send(data);
+//                   }
+//                 };
+//             }
+//           });
+//         }
+
+//         responseMsg = "Updated";
+//         // console.log(startQuestAnswersSelected);
+//         startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
+//         // console.log(startQuestAnswersSelected);
+
+//         await StartQuests.findByIdAndUpdate(
+//           { _id: startQuestQuestion._id },
+//           { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
+//           { upsert: true }
+//         ).exec(),
+//           (err, data) => {
+//             if (err) {
+//               return res.status(500).send(err);
+//             } else {
+//               return res.status(200).send(data);
+//             }
+//           };
+//       } else {
+//         responseMsg = "Answer has not changed";
+//       }
+//     } else {
+//       console.log("You can change your answer once every 1 hour");
+//       responseMsg = "You can change your answer once every 1 hour";
+//     }
+
+//     res.status(200).json(responseMsg);
+//   } catch (err) {
+//     res.status(500).send("Not Created 2");
+//   }
+
+//   function Compare(obj1, obj2) {
+//     // Clone the objects to prevent modifying the original objects
+//     const clonedObj1 = { ...obj1 };
+//     const clonedObj2 = { ...obj2 };
+
+//     // Remove the 'created' property from the cloned objects as it can be different
+//     delete clonedObj1.created;
+//     delete clonedObj2.created;
+
+//     // Convert the modified objects to JSON strings and compare them
+//     const stringifiedObj1 = JSON.stringify(clonedObj1);
+//     const stringifiedObj2 = JSON.stringify(clonedObj2);
+
+//     // Compare the JSON strings
+//     if (stringifiedObj1 === stringifiedObj2) {
+//       return false; // Objects match
+//     } else {
+//       return true; // Objects do not match
+//     }
+//   }
+// });
+
 route.post("/updateChangeAnsStartQuest", async (req, res) => {
   try {
     const startQuestQuestion = await StartQuests.findOne({
@@ -112,28 +403,63 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
 
     InfoQuestQuestions.findByIdAndUpdate(
       { _id: req.body.questId },
-      { 
+      {
         $set: { lastInteractedAt: currentDate.toISOString() },
-        $inc: { interactingCounter: 1 }
-       }
-    ).exec(),
-      (err, data) => {
-        if (err) {
-          return res.status(500).send(err);
-        } else {
-          return res.status(200).send(data);
+        $inc: { interactingCounter: 1 },
+      }
+    ).exec();
+
+    User.findOneAndUpdate(
+      { uuid: req.body.uuid },
+      { $inc: { changedAnswers: 1 } }
+    ).exec();
+
+    // Check req.body.data and the last element's contended and selected arrays objects
+    const lastDataElement = req.body.changeAnswerAddedObj;
+
+    // Function to process an array
+    const processArray = async (array, fieldToUpdate) => {
+      if (array && Array.isArray(array)) {
+        for (const item of array) {
+          // Check if item.question matches addedAnswer in StartQuests
+          const matchingStartQuest = await StartQuests.findOne({
+            addedAnswer: item.question,
+          });
+
+          if (matchingStartQuest) {
+            // Get the uuid of the matching record
+            const matchingUuid = matchingStartQuest.uuid;
+
+            // Define the field to update based on the provided fieldToUpdate parameter
+            const updateField = {};
+            updateField[fieldToUpdate] = 1;
+
+            // Increment the specified field in the User table
+            await User.findOneAndUpdate(
+              { uuid: matchingUuid },
+              { $inc: updateField }
+            );
+          }
         }
-      };
+      }
+    };
+
+    // Process both 'contended' and 'selected' arrays
+    await Promise.all([
+      processArray(lastDataElement.contended, "contentionsOnAddedAns"),
+      processArray(lastDataElement.selected, "selectionsOnAddedAns"),
+    ]);
+
+    // Increment 'contentionsGiven' based on the length of 'contended' array
+    const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
+    const contentionsGivenIncrement = contendedArray.length;
+
+    await User.findOneAndUpdate(
+      { uuid: req.body.uuid },
+      { $inc: { contentionsGiven: contentionsGivenIncrement } }
+    );
 
     let startQuestAnswersSelected = startQuestQuestion.data;
-    console.log(
-      "startQuestQuestion.data",
-      startQuestQuestion.data[startQuestQuestion.data.length - 1]
-    );
-    console.log(
-      "req.body.changeAnswerAddedObj ",
-      req.body.changeAnswerAddedObj
-    );
     let responseMsg = "";
 
     let timeWhenUserUpdated = new Date(
@@ -145,9 +471,6 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
 
     let dateFinal = date2 - timeWhenUserUpdated.getTime();
 
-    console.log("dateFinal", dateFinal);
-
-    // if (dateFinal > 3600000) {
     if (dateFinal > 2) {
       if (
         Compare(
@@ -155,82 +478,62 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
           req.body.changeAnswerAddedObj
         )
       ) {
-        //Comparing old and new answer
-
         let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
 
         if (typeof req.body.changeAnswerAddedObj.selected !== "string") {
-          req.body.changeAnswerAddedObj.selected.map((option) => {
+          req.body.changeAnswerAddedObj.selected.map(async (option) => {
             if (option.addedAnswerByUser === true) {
+              await User.findOneAndUpdate(
+                { uuid: req.body.uuid },
+                { $inc: { addedAnswers: 1 } }
+              );
               AnswerAddedOrNot = option.question;
               const addAnswer = {
                 question: option.question,
-                // someOneAdded: true,
                 selected: true,
               };
               InfoQuestQuestions.findByIdAndUpdate(
                 { _id: req.body.questId },
                 { $push: { QuestAnswers: addAnswer } }
-              ).exec(),
-                (err, data) => {
-                  if (err) {
-                    return res.status(500).send(err);
-                  } else {
-                    return res.status(200).send(data);
-                  }
-                };
+              ).exec();
             }
           });
         }
 
         responseMsg = "Updated";
-        // console.log(startQuestAnswersSelected);
         startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
-        // console.log(startQuestAnswersSelected);
 
         await StartQuests.findByIdAndUpdate(
           { _id: startQuestQuestion._id },
           { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
           { upsert: true }
-        ).exec(),
-          (err, data) => {
-            if (err) {
-              return res.status(500).send(err);
-            } else {
-              return res.status(200).send(data);
-            }
-          };
+        ).exec();
       } else {
         responseMsg = "Answer has not changed";
       }
     } else {
-      console.log("You can change your answer once every 1 hour");
       responseMsg = "You can change your answer once every 1 hour";
     }
 
     res.status(200).json(responseMsg);
   } catch (err) {
-    res.status(500).send("Not Created 2");
+    res.status(500).send("Not Created 2");
   }
 
   function Compare(obj1, obj2) {
-    // Clone the objects to prevent modifying the original objects
     const clonedObj1 = { ...obj1 };
     const clonedObj2 = { ...obj2 };
 
-    // Remove the 'created' property from the cloned objects as it can be different
     delete clonedObj1.created;
     delete clonedObj2.created;
 
-    // Convert the modified objects to JSON strings and compare them
     const stringifiedObj1 = JSON.stringify(clonedObj1);
     const stringifiedObj2 = JSON.stringify(clonedObj2);
 
-    // Compare the JSON strings
     if (stringifiedObj1 === stringifiedObj2) {
-      return false; // Objects match
+      return false;
     } else {
-      return true; // Objects do not match
+      return true;
     }
   }
 });

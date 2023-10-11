@@ -2,6 +2,7 @@ const route = require("express").Router();
 
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const StartQuests = require("../models/StartQuests");
+const User = require("../models/UserModel");
 
 // SIGN UP
 route.post("/createInfoQuestQuest", async (req, res) => {
@@ -20,7 +21,24 @@ route.post("/createInfoQuestQuest", async (req, res) => {
     });
 
     const questions = await question.save();
-    !questions && res.status(404).send("Not Created 1");
+    if (!questions) {
+      return res.status(404).send("Not Created 1");
+    }
+
+
+    // Find the user by uuid
+    const user = await User.findOne({ uuid: req.body.uuid });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Increment the questsCreated field by one
+    user.questsCreated += 1;
+
+    // Save the updated user object
+    await user.save();
+
 
     res.status(201).send("Quest has been Created");
   } catch (err) {

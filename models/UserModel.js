@@ -33,12 +33,41 @@ const userSchema = mongoose.Schema(
     },
     violationCounter:{
       type:Number,
+      default:0,
     },
     walletAddr: {
       type: String,
     },
     signedUuid: {
       type: String,
+    },
+    contentionsOnAddedAns: {
+      type: Number,
+      default: 0,
+    },
+    selectionsOnAddedAns: {
+      type: Number,
+      default: 0,
+    },
+    questsCreated: {
+      type: Number,
+      default: 0,
+    },
+    contentionsGiven: {
+      type: Number,
+      default: 0,
+    },
+    usersAnswered: {
+      type: Number,
+      default: 0,
+    },
+    addedAnswers: {
+      type: Number,
+      default: 0,
+    },
+    changedAnswers: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }
