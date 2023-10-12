@@ -15,7 +15,10 @@ const BookmarkQuestsSchema = mongoose.Schema(
     whichTypeQuestion: {
       type: String,
       required: true,
-    }
+    },
+    createdBy:{
+      type:String,
+    },
   },
   { timestamps: true }
 );

@@ -6,11 +6,20 @@ const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 // SIGN UP
 route.post("/createBookmarkQuest", async (req, res) => {
   try {
+
+    const owner = await InfoQuestQuestions.findOne({ _id: req.body.questForeignKey });
+
+    if (!owner) {
+      return res.status(404).send("Owner not found");
+    }
+
+
     const question = await new BookmarkQuests({
       Question: req.body.Question,
       questForeignKey: req.body.questForeignKey,
       uuid: req.body.uuid,
-      whichTypeQuestion:req.body.whichTypeQuestion
+      whichTypeQuestion:req.body.whichTypeQuestion,
+      createdBy:owner.uuid
     });
 
     const questions = await question.save();
@@ -61,6 +70,9 @@ route.post("/getAllBookmarkQuestions", async (req, res) => {
     
     if (req.body.type) {
       filterObj.whichTypeQuestion = req.body.type;
+    }
+    if(req.body.filter===true){
+      filterObj.createdBy=req.body.uuid;
     }
 
     const Questions = await BookmarkQuests.find(filterObj)
