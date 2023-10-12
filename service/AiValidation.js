@@ -1,4 +1,5 @@
 const { STATEMENT } = require("../constants");
+const User = require("../models/UserModel");
 
 module.exports.checkViolationInSentence = (sentence) => {
   const lowerCaseSentence = sentence.toLowerCase();
@@ -64,3 +65,19 @@ module.exports.removeTrailingQuestionMarks = (sentence) => {
   const regex = /\?*$/;
   return sentence.replace(regex, "");
 };
+
+module.exports.incrementCounter = async() => {
+  try {
+    const result = await User.updateOne(
+      { uuid: req.body.uuid },
+      { $inc: { violationCounter: 1 } }
+    );
+    if (result.nModified === 0) {
+      return res.status(404).send("User not found");
+    }
+    return res.status(200).send(result);
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+};
+
