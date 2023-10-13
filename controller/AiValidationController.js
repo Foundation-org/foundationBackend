@@ -1,13 +1,13 @@
 const axios = require("axios");
 const { STATEMENT, SYSTEM_MESSAGES } = require('../constants/index')
 const { OPEN_AI_KEY, OPEN_AI_URL } = require("../config/env");
-const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks, incrementCounter } = require("../service/AiValidation");
+const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks, incrementCounter, removeQuotes, isAllNumbers } = require("../service/AiValidation");
 
 const tldjs = require('tldjs');
 const emailValidator = require('email-validator');
 
 
-const minApiCallDelay = 500; // 2 call allowed every 1 seconds;
+const minApiCallDelay = 500;
 const maxApiCallsPerDay = 2200; // total calls per oneDayInMillis
 const oneDayInMillis = 24 * 60 * 60 * 1000; // 24hr period
 
@@ -15,7 +15,6 @@ let lastApiCallTimestamp = 0;
 let apiCallCount = 0;
 
 
-// Signup Controller
 const validation = async (req, res) => {
     const callType = req.params.callType;
     if (callType >= 1 && callType <= 4) {
@@ -82,19 +81,23 @@ async function handleRequest(
         userMessage = removeTrailingPeriods(userMessage);
         userMessage = removeTrailingQuestionMarks(userMessage);
       }
+      if(callType == 2) {
+        isAllNumbers(userMessage) &&  { message: userMessage, status: "OK" }
+      }
 
       if(callType == 3) {
         userMessage = removeTrailingPeriods(userMessage);
         userMessage = removeTrailingQuestionMarks(userMessage);
         userMessage = userMessage + "."
       }
-
+      
       // new *check BEFORE gpt response
       if (checkForDomainsAndEmails(userMessage)) {
         res.json({ message: userMessage, status: 'VIOLATION' });
         return;
-     }
-  
+      }
+      
+    //  throw new Error("custom");
       const response = await axios.post(
         OPEN_AI_URL,
         {
@@ -134,6 +137,9 @@ async function handleRequest(
     let status = "OK";
   
     let found
+    if(callType == 2) {
+      filtered = removeQuotes(userMessage)
+    }
 
     found = checkViolationInSentence(filtered);
   
@@ -152,6 +158,7 @@ async function handleRequest(
       incrementCounter()
     }
   // end new
+
   
     if (callType == 2) {
       filtered = removeCorrected(filtered);
@@ -200,33 +207,26 @@ async function handleRequest(
 
   // new
 function checkNonsenseInSentence(sentence) {
-  const statements = ["i don't understand the provided words",
-                      "i do not understand the provided words",
-		      "i cannot understand the provided statement",
-		      "i can't understand the provided statement",
-		      "i don't understand what you're trying to say",
-                      "i do not understand what you're trying to say",
-		      "i don't understand what you are trying to say",
-                      "i do not understand what you are trying to say",
-                      "i cannot understand the statement you provided",
-		      "i can't understand the statement you provided",
-		      "i don't understand your message",
-		      "i do not understand your message",
-		      "can you please provide a clear statement or question",
-                      "i cannot correct gibberish",
-                      "i can't correct gibberish",
-                      "not a recognizable word in any language",
-                      "please provide more information",
-                      "it does not make sense in any language",
-                      "it doesn't make sense in any language",
-                      "please provide more information",
-                      "no alphabetic characters were found",
-                      "please provide a valid sentence",
-            "does not contain any standard english",
-                    "doesn't contain any standard english",
-                    "I cannot understand the text you provided",
-                    "Please provide more context or clarify your request",
-                    "Please provide a valid email address"
+  const statements = [
+      "clarify your request",
+      "contain any standard english",
+      "correct gibberish",
+      "make sense in any language",
+      "no alphabetic characters were found",
+      "not a recognized word",
+      "provide a clear statement or question",
+      "provide a valid email address",
+      "provide a valid sentence",
+      "provide more context",
+      "provide more information",
+      "understand the provided statement",
+      "understand the provided words",
+      "understand the statement you provided",
+      "understand the text you provided",
+      "understand what you are trying to say",
+      "understand what you're trying to say",
+      "understand your message",
+      "phrase for me to correct"
 		     ];
 
   const lowerCaseSentence = sentence.toLowerCase();
