@@ -81,3 +81,9 @@ module.exports.incrementCounter = async() => {
   }
 };
 
+module.exports.removeQuotes = (sentence) => {
+  if (sentence.startsWith('"') && sentence.endsWith('"')) {
+      return sentence.slice(1, -1);
+  }
+  return sentence;
+}
