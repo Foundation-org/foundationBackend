@@ -98,6 +98,8 @@ async function handleRequest(
       }
       
     //  throw new Error("custom");
+      console.log("🚀 ~ file: AiValidationController.js:107 ~ SYSTEM_MESSAGES:", SYSTEM_MESSAGES)
+      console.log("🚀 ~ file: AiValidationController.js:109 ~ userMessage:", userMessage)
       const response = await axios.post(
         OPEN_AI_URL,
         {
@@ -134,11 +136,12 @@ async function handleRequest(
   
   function checkResponse(responseData, userMessage, callType) {
     let filtered = responseData.choices[0].message.content;
+    console.log("🚀 ~ file: AiValidationController.js:139 ~ checkResponse ~ filtered:", filtered)
     let status = "OK";
   
     let found
     if(callType == 2) {
-      filtered = removeQuotes(userMessage)
+      filtered = removeQuotes(filtered)
     }
 
     found = checkViolationInSentence(filtered);
