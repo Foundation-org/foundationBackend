@@ -32,7 +32,7 @@ module.exports = {
     // "not able to provide assistance",
   ],
   SYSTEM_MESSAGES: [
-    "Correct provided statements to standard English. Shortest responses only.",
+    "Correct provided statement to standard English. Shortest responses only.",
     "Correct provided text to standard English. Shortest responses only.",
     // "Tell me if the reply is relevant. Shortest answer only.",
     'I will give you a statement and a reply. Tell me if the reply is relevant. Shortest answer only.', // new

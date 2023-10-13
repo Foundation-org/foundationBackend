@@ -87,3 +87,7 @@ module.exports.removeQuotes = (sentence) => {
   }
   return sentence;
 }
+
+module.exports.isAllNumbers = (input) => {
+  return /^\d+$/.test(input);
+}

@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { STATEMENT, SYSTEM_MESSAGES } = require('../constants/index')
 const { OPEN_AI_KEY, OPEN_AI_URL } = require("../config/env");
-const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks, incrementCounter, removeQuotes } = require("../service/AiValidation");
+const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks, incrementCounter, removeQuotes, isAllNumbers } = require("../service/AiValidation");
 
 const tldjs = require('tldjs');
 const emailValidator = require('email-validator');
@@ -81,21 +81,23 @@ async function handleRequest(
         userMessage = removeTrailingPeriods(userMessage);
         userMessage = removeTrailingQuestionMarks(userMessage);
       }
+      if(callType == 2) {
+        isAllNumbers(userMessage) &&  { message: userMessage, status: "OK" }
+      }
 
       if(callType == 3) {
         userMessage = removeTrailingPeriods(userMessage);
         userMessage = removeTrailingQuestionMarks(userMessage);
         userMessage = userMessage + "."
       }
-
+      
       // new *check BEFORE gpt response
       if (checkForDomainsAndEmails(userMessage)) {
         res.json({ message: userMessage, status: 'VIOLATION' });
         return;
-     }
-
-     throw new Error("custom");
-  
+      }
+      
+    //  throw new Error("custom");
       const response = await axios.post(
         OPEN_AI_URL,
         {
@@ -223,7 +225,8 @@ function checkNonsenseInSentence(sentence) {
       "understand the text you provided",
       "understand what you are trying to say",
       "understand what you're trying to say",
-      "understand your message"
+      "understand your message",
+      "phrase for me to correct"
 		     ];
 
   const lowerCaseSentence = sentence.toLowerCase();
