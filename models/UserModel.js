@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 
 const userSchema = mongoose.Schema(
   {
@@ -31,9 +32,9 @@ const userSchema = mongoose.Schema(
     uuid: {
       type: String,
     },
-    violationCounter:{
-      type:Number,
-      default:0,
+    violationCounter: {
+      type: Number,
+      default: 0,
     },
     walletAddr: {
       type: String,
@@ -69,6 +70,18 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    createdQuests: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: InfoQuestQuestions,
+      },
+    ],
+    completedQuests: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: InfoQuestQuestions,
+      },
+    ],
   },
   { timestamps: true }
 );

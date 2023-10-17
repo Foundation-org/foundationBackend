@@ -20,11 +20,10 @@ route.post("/createInfoQuestQuest", async (req, res) => {
       uuid: req.body.uuid,
     });
 
-    const questions = await question.save();
-    if (!questions) {
+    const createdQuestion = await question.save();
+    if (!createdQuestion) {
       return res.status(404).send("Not Created 1");
     }
-
 
     // Find the user by uuid
     const user = await User.findOne({ uuid: req.body.uuid });
@@ -36,13 +35,46 @@ route.post("/createInfoQuestQuest", async (req, res) => {
     // Increment the questsCreated field by one
     user.questsCreated += 1;
 
+    // Push the ID of the created question into the createdQuests array
+    user.createdQuests.push(createdQuestion._id);
+    // await User.findOneAndUpdate(
+    //   { uuid: req.body.uuid },
+    //   {
+    //     $push: { createdQuests: createdQuestion._id },
+    //   }
+    // );
+
     // Save the updated user object
     await user.save();
-
 
     res.status(201).send("Quest has been Created");
   } catch (err) {
     res.status(500).send("Not Created 2");
+  }
+});
+
+// constraint so no duplicates can be added
+route.get("/constraintForUniqueQuestion", async (req, res) => {
+  try {
+    // Get the question from the query parameters and create a case-insensitive regex
+    const queryQuestion = req.query.question;
+    const regex = new RegExp("^" + queryQuestion + "$", "i");
+
+    // Check for a matching question in a case-insensitive manner
+    const matchingQuestion = await InfoQuestQuestions.findOne({
+      Question: regex,
+    });
+
+    if (matchingQuestion) {
+      // If a matching question is found, it's not unique
+      return res.status(200).json({ isUnique: false });
+    }
+
+    // If no matching question is found, it's unique
+    return res.status(200).json({ isUnique: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal Server Error");
   }
 });
 
@@ -70,8 +102,7 @@ route.post("/getAllQuestsWithOpenInfoQuestStatus", async (req, res) => {
       filterObj.whichTypeQuestion = req.body.type;
     }
     // Query the database with skip and limit options to get questions for the first page
-    allQuestions = await InfoQuestQuestions.find(filterObj)
-    .sort(
+    allQuestions = await InfoQuestQuestions.find(filterObj).sort(
       req.body.sort === "Newest First"
         ? { createdAt: -1 }
         : req.body.sort === "Last Updated"
@@ -130,8 +161,7 @@ route.post("/getAllQuestsWithAnsweredStatus", async (req, res) => {
       filterObj.whichTypeQuestion = req.body.type;
     }
     // Query the database with skip and limit options to get questions for the first page
-    allQuestions = await InfoQuestQuestions.find(filterObj)
-    .sort(
+    allQuestions = await InfoQuestQuestions.find(filterObj).sort(
       req.body.sort === "Newest First"
         ? { createdAt: -1 }
         : req.body.sort === "Last Updated"
@@ -403,8 +433,7 @@ route.post("/getAllQuestsWithCorrectStatus", async (req, res) => {
       filterObj.whichTypeQuestion = req.body.type;
     }
     // Query the database with skip and limit options to get questions for the first page
-    allQuestions = await InfoQuestQuestions.find(filterObj)
-    .sort(
+    allQuestions = await InfoQuestQuestions.find(filterObj).sort(
       req.body.sort === "Newest First"
         ? { createdAt: -1 }
         : req.body.sort === "Last Updated"
@@ -509,8 +538,7 @@ route.post("/getAllQuestsWithIncorrectStatus", async (req, res) => {
       filterObj.whichTypeQuestion = req.body.type;
     }
     // Query the database with skip and limit options to get questions for the first page
-    allQuestions = await InfoQuestQuestions.find(filterObj)
-    .sort(
+    allQuestions = await InfoQuestQuestions.find(filterObj).sort(
       req.body.sort === "Newest First"
         ? { createdAt: -1 }
         : req.body.sort === "Last Updated"
@@ -614,8 +642,7 @@ route.post("/getAllQuestsWithChangeAnsStatus", async (req, res) => {
       filterObj.whichTypeQuestion = req.body.type;
     }
     // Query the database with skip and limit options to get questions for the first page
-    allQuestions = await InfoQuestQuestions.find(filterObj)
-    .sort(
+    allQuestions = await InfoQuestQuestions.find(filterObj).sort(
       req.body.sort === "Newest First"
         ? { createdAt: -1 }
         : req.body.sort === "Last Updated"
