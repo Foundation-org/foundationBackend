@@ -214,12 +214,12 @@ route.post("/createStartQuest", async (req, res) => {
     }
 
     // Check if QuestionCorrect is not "Not Selected" and push the ID to completedQuests
-    if (data.QuestionCorrect !== "Not Selected") {
+    // if (data.QuestionCorrect !== "Not Selected") {
       await User.findOneAndUpdate(
         { uuid: req.body.uuid },
-        { $push: { completedQuests: data._id } }
+        { $addToSet: { completedQuests: data._id } }
       );
-    }
+    // }
 
     res.status(200).json("Updated");
   } catch (err) {

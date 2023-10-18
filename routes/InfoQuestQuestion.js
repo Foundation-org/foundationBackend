@@ -56,13 +56,12 @@ route.post("/createInfoQuestQuest", async (req, res) => {
 // constraint so no duplicates can be added
 route.get("/constraintForUniqueQuestion", async (req, res) => {
   try {
-    // Get the question from the query parameters and create a case-insensitive regex
-    const queryQuestion = req.query.question;
-    const regex = new RegExp("^" + queryQuestion + "$", "i");
+    // Get the question from the query parameters and convert it to lowercase
+    const queryQuestion = req.query.question.toLowerCase();
 
     // Check for a matching question in a case-insensitive manner
     const matchingQuestion = await InfoQuestQuestions.findOne({
-      Question: regex,
+      Question: { $regex: new RegExp(queryQuestion, "i") },
     });
 
     if (matchingQuestion) {
