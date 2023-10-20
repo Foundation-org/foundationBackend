@@ -7,16 +7,18 @@ const User = require("../models/UserModel");
 //VIOLATION
 route.post("/updateViolationCounter", async (req, res) => {
   try {
-      const result = await User.updateOne({ uuid: req.body.uuid }, { $inc: { violationCounter: 1 } });
-      if (result.nModified === 0) {
-          return res.status(404).send("User not found");
-      }
-      return res.status(200).send(result);
+    const result = await User.updateOne(
+      { uuid: req.body.uuid },
+      { $inc: { violationCounter: 1 } }
+    );
+    if (result.nModified === 0) {
+      return res.status(404).send("User not found");
+    }
+    return res.status(200).send(result);
   } catch (error) {
-      return res.status(500).send(error);
+    return res.status(500).send(error);
   }
 });
-
 
 // SIGN UP
 // route.post("/createStartQuest", async (req, res) => {
@@ -215,10 +217,10 @@ route.post("/createStartQuest", async (req, res) => {
 
     // Check if QuestionCorrect is not "Not Selected" and push the ID to completedQuests
     // if (data.QuestionCorrect !== "Not Selected") {
-      await User.findOneAndUpdate(
-        { uuid: req.body.uuid },
-        { $addToSet: { completedQuests: data._id } }
-      );
+    await User.findOneAndUpdate(
+      { uuid: req.body.uuid },
+      { $addToSet: { completedQuests: data._id } }
+    );
     // }
 
     res.status(200).json("Updated");
@@ -425,8 +427,9 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
     // Check req.body.data and the last element's contended and selected arrays objects
     const lastDataElement = req.body.changeAnswerAddedObj;
 
+    // INCREMENT
     // Function to process an array
-    const processArray = async (array, fieldToUpdate) => {
+    const incrementProcessArray = async (array, fieldToUpdate) => {
       if (array && Array.isArray(array)) {
         for (const item of array) {
           // Check if item.question matches addedAnswer in StartQuests
@@ -452,11 +455,63 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
       }
     };
 
-    // Process both 'contended' and 'selected' arrays
+    // Process both 'contended' and 'selected' arrays for increment
     await Promise.all([
-      processArray(lastDataElement.contended, "contentionsOnAddedAns"),
-      processArray(lastDataElement.selected, "selectionsOnAddedAns"),
+      incrementProcessArray(lastDataElement.contended, "contentionsOnAddedAns"),
+      incrementProcessArray(lastDataElement.selected, "selectionsOnAddedAns"),
     ]);
+
+    // DECREMENT
+    // Function to process an array
+    const decrementProcessArray = async (array, field, fieldToUpdate) => {
+      if (array && Array.isArray(array)) {
+        for (const item of array) {
+          const isMatch = lastDataElement[field].some(
+            (contendedItem) => contendedItem.question === item.question
+          );
+          if (!isMatch) {
+            // Check if item.question matches addedAnswer in StartQuests
+            const matchingStartQuest = await StartQuests.findOne({
+              addedAnswer: item.question,
+            });
+            if (matchingStartQuest) {
+              // Get the uuid of the matching record
+              const matchingUuid = matchingStartQuest.uuid;
+
+              // Define the field to update based on the provided fieldToUpdate parameter
+              const updateField = {};
+              updateField[fieldToUpdate] = -1;
+
+              // Increment the specified field in the User table
+              await User.findOneAndUpdate(
+                { uuid: matchingUuid },
+                { $inc: updateField }
+              );
+            }
+          }
+        }
+      }
+    };
+
+    // DECREMENT
+    if (startQuestQuestion.data.length > 1) {
+      let lstTimeSelectionsAndContentions =
+        startQuestQuestion.data[startQuestQuestion.data.length - 1];
+
+      // Process both 'contended' and 'selected' arrays for decrement
+      await Promise.all([
+        decrementProcessArray(
+          lstTimeSelectionsAndContentions.contended,
+          "contended",
+          "contentionsOnAddedAns"
+        ),
+        decrementProcessArray(
+          lstTimeSelectionsAndContentions.selected,
+          "selected",
+          "selectionsOnAddedAns"
+        ),
+      ]);
+    }
 
     // Increment 'contentionsGiven' based on the length of 'contended' array
     const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
