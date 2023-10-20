@@ -132,7 +132,9 @@ async function handleRequest(
       const modifiedResponse = checkResponse(
         response.data,
         userMessage,
-        callType
+        callType, 
+        req, 
+        res
       );
       res.json(modifiedResponse);
     } catch (error) {
@@ -140,7 +142,7 @@ async function handleRequest(
     }
   }
   
-  function checkResponse(responseData, userMessage, callType) {
+  function checkResponse(responseData, userMessage, callType, req, res) {
     let filtered = responseData.choices[0].message.content;
     console.log("🚀 ~ file: AiValidationController.js:139 ~ checkResponse ~ filtered:", filtered)
     let status = "OK";
@@ -155,7 +157,7 @@ async function handleRequest(
     if (found) {
       filtered = userMessage;
       status = "VIOLATION";
-      incrementCounter()
+      incrementCounter(req, res)
     }
 
     // new

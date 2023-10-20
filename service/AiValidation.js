@@ -66,18 +66,19 @@ module.exports.removeTrailingQuestionMarks = (sentence) => {
   return sentence.replace(regex, "");
 };
 
-module.exports.incrementCounter = async() => {
+module.exports.incrementCounter = async(req, res) => {
   try {
     const result = await User.updateOne(
-      { uuid: req.body.uuid },
+      { uuid: req.user.uuid },
       { $inc: { violationCounter: 1 } }
-    );
-    if (result.nModified === 0) {
+      );
+    if (result?.nModified === 0) {
       return res.status(404).send("User not found");
     }
-    return res.status(200).send(result);
+    // return res.status(200).send(result);
+    return res.status(200);
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500);
   }
 };
 
