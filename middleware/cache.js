@@ -2,7 +2,8 @@ const cache = require("memory-cache");
 
 // Cache responses for 8 minutes (480 seconds)
 module.exports = function (req, res, next) {
-  const key = "__express__" + req.originalUrl || req.url;
+  // Convert the URL to lowercase to ensure case insensitivity
+  const key = "__express__" + (req.originalUrl || req.url).toLowerCase();
   const cachedResponse = cache.get(key);
   if (cachedResponse) {
     // Parse the cached response as JSON

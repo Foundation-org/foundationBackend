@@ -69,11 +69,17 @@ async function handleRequest(
     callType
   ) {
     try {
+      const { queryType } = req.query;
+      // console.log("🚀 ~ file: AiValidationController.js:73 ~ queryType:", queryType)
       let userMessage = req.query.userMessage;
       // console.log("🚀 ~ file: AiValidationController.js:61 ~ userMessage:", userMessage)
   
       if (!userMessage) {
         res.status(400).json({ message: "Empty Message", status: "ERROR" });
+        return;
+      }
+      if (!queryType && callType == 1) {
+        res.status(400).json({ message: "QueryType Shouldn't be empty", status: "ERROR" });
         return;
       }
 
@@ -85,11 +91,11 @@ async function handleRequest(
         isAllNumbers(userMessage) &&  { message: userMessage, status: "OK" }
       }
 
-      if(callType == 3) {
-        userMessage = removeTrailingPeriods(userMessage);
-        userMessage = removeTrailingQuestionMarks(userMessage);
-        userMessage = userMessage + "."
-      }
+      // if(callType == 3) {
+      //   userMessage = removeTrailingPeriods(userMessage);
+      //   userMessage = removeTrailingQuestionMarks(userMessage);
+      //   userMessage = userMessage + "."
+      // }
       
       // new *check BEFORE gpt response
       if (checkForDomainsAndEmails(userMessage)) {
@@ -110,7 +116,7 @@ async function handleRequest(
           ],
           temperature: 0,
           max_tokens: 256,
-          top_p: 0,
+          top_p: 0.001,
           frequency_penalty: 0,
           presence_penalty: 0,
         },
@@ -153,13 +159,13 @@ async function handleRequest(
     }
 
     // new
-    found = checkNonsenseInSentence(filtered);
+    // found = checkNonsenseInSentence(filtered);
 
-    if (found) {
-      filtered = userMessage;
-      status = 'FAIL';
-      incrementCounter()
-    }
+    // if (found) {
+    //   filtered = userMessage;
+    //   status = 'FAIL';
+    //   incrementCounter()
+    // }
   // end new
 
   
@@ -171,10 +177,10 @@ async function handleRequest(
       filtered = removeTrailingQuestionMarks(filtered);
     }
   
-    if (callType == 3) {
-      if (filtered == "No.") status = "FAIL";
-      filtered = userMessage;
-    }
+    // if (callType == 3) {
+    //   if (filtered == "No.") status = "FAIL";
+    //   filtered = userMessage;
+    // }
     // new
     if (callType == 4) {
       if (filtered == 'Non-sensical' || filtered == 'Fragment' || filtered == 'Non-sensical.' || filtered == 'Fragment.' ) status = 'FAIL';
