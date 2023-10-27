@@ -70,18 +70,23 @@ async function handleRequest(
   ) {
     try {
       const { queryType } = req.query;
-      // console.log("🚀 ~ file: AiValidationController.js:73 ~ queryType:", queryType)
       let userMessage = req.query.userMessage;
-      // console.log("🚀 ~ file: AiValidationController.js:61 ~ userMessage:", userMessage)
-  
+      // Check if userMessage is empty
       if (!userMessage) {
         res.status(400).json({ message: "Empty Message", status: "ERROR" });
         return;
       }
+      // Check if queryType exist for question only
       if (!queryType && callType == 1) {
         res.status(400).json({ message: "QueryType Shouldn't be empty", status: "ERROR" });
         return;
       }
+
+      // Replace all the & with and
+      if(userMessage.includes('&')){
+        userMessage = userMessage.replace(/&/g, 'and');
+      }
+
 
       if(callType == 1 || callType == 2){
         userMessage = removeTrailingPeriods(userMessage);
@@ -104,8 +109,6 @@ async function handleRequest(
       }
       
     //  throw new Error("custom");
-      console.log("🚀 ~ file: AiValidationController.js:107 ~ SYSTEM_MESSAGES:", SYSTEM_MESSAGES)
-      console.log("🚀 ~ file: AiValidationController.js:109 ~ userMessage:", userMessage)
       const response = await axios.post(
         OPEN_AI_URL,
         {
@@ -127,7 +130,6 @@ async function handleRequest(
           },
         }
       );
-      // console.log("🚀 ~ file: AiValidationController.js:88 ~ response.data:", response.data)
   
       const modifiedResponse = checkResponse(
         response.data,
@@ -144,7 +146,6 @@ async function handleRequest(
   
   function checkResponse(responseData, userMessage, callType, req, res) {
     let filtered = responseData.choices[0].message.content;
-    console.log("🚀 ~ file: AiValidationController.js:139 ~ checkResponse ~ filtered:", filtered)
     let status = "OK";
   
     let found
