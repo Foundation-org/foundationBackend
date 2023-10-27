@@ -38,8 +38,8 @@ let port = 8800;
 
 app.get("/", (req, res) => {
   // res.json(`Server is listening on port: ${port}`);
-  res.json(`Foundation Server`);
-  // res.json(``);
+  // res.json(`Foundation Server`);
+  res.json();
 });
 
 app.listen(port, () => {
