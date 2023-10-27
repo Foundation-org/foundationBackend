@@ -33,8 +33,8 @@ app.use("/search", SearchRoute);
 // All Routes
 require("./start/routes")(app)
 
-
-let port = 8800;
+// let port = 8800;
+let port = process.env.BASE_PORT;
 
 app.get("/", (req, res) => {
   // res.json(`Server is listening on port: ${port}`);
