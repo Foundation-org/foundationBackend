@@ -8,7 +8,8 @@ module.exports = {
     "help with that",
     "unable to assist",
     "i'm sorry, ",
-    "sorry, "
+    "sorry, ",
+    "please provide"
   ],
   SYSTEM_MESSAGES: [
     "Correct provided statement to standard English. Shortest responses only.",
