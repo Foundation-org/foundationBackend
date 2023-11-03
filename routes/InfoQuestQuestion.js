@@ -11,6 +11,8 @@ route.post("/createInfoQuestQuest", async (req, res) => {
       Question: req.body.Question,
       QuestionCorrect: req.body.QuestionCorrect,
       whichTypeQuestion: req.body.whichTypeQuestion,
+      usersAddTheirAns: req.body.usersAddTheirAns,
+      usersChangeTheirAns: req.body.usersChangeTheirAns,
       QuestAnswers:
         req.body.QuestAnswers === undefined ? [] : req.body.QuestAnswers,
       QuestAnswersSelected:
