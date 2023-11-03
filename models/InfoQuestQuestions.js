@@ -23,6 +23,12 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     uuid: {
       type: String,
     },
+    usersAddTheirAns: {
+      type: Boolean
+    },
+    usersChangeTheirAns: {
+      type: String
+    },
     startStatus: {
       type: String,
       default: "",
