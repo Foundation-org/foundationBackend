@@ -3,9 +3,6 @@ const { STATEMENT, SYSTEM_MESSAGES } = require('../constants/index')
 const { OPEN_AI_KEY, OPEN_AI_URL } = require("../config/env");
 const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks, incrementCounter, removeQuotes, isAllNumbers } = require("../service/AiValidation");
 
-const tldjs = require('tldjs');
-const emailValidator = require('email-validator');
-
 
 const minApiCallDelay = 500;
 const maxApiCallsPerDay = 2200; // total calls per oneDayInMillis
@@ -48,18 +45,6 @@ const validation = async (req, res) => {
 
 }
     
-function checkForDomainsAndEmails(sentence) {
-  const words = sentence.split(' ');
-
-  const domainsAndEmails = words.filter(word => {
-    const parsedDomain = tldjs.getDomain(word);
-    return (parsedDomain && parsedDomain !== word) || emailValidator.validate(word);
-  });
-
-  return domainsAndEmails.length > 0;
-}
-
-
 async function handleRequest(
     req,
     res,
@@ -101,12 +86,6 @@ async function handleRequest(
       //   userMessage = removeTrailingQuestionMarks(userMessage);
       //   userMessage = userMessage + "."
       // }
-      
-      // new *check BEFORE gpt response
-      if (checkForDomainsAndEmails(userMessage)) {
-        res.json({ message: userMessage, status: 'VIOLATION' });
-        return;
-      }
       
     //  throw new Error("custom");
       const response = await axios.post(
@@ -189,11 +168,6 @@ async function handleRequest(
       if (filtered == 'Non-sensical' || filtered == 'Fragment' || filtered == 'Non-sensical.' || filtered == 'Fragment.' ) status = 'FAIL';
       filtered = userMessage;
     }
-  // end new
-  if (checkForDomainsAndEmails(filtered)) {
-    filtered = userMessage;
-    status = 'VIOLATION';
-  }
   
     return { message: filtered, status: status };
   }
