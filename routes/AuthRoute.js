@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const { createToken } = require("../service/auth");
+const { createLedger } = require("../utils/createLedger");
 
 // Add this route to your existing code
 route.put("/changePassword", async (req, res) => {
@@ -57,7 +58,22 @@ route.post("/signUpUser", async (req, res) => {
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
 
-    // res.status(200).json(user);
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : uuid,
+        txUserAction : "accountCreated",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : uuid,
+        txDescription : "User creates a new account"
+      }
+    )
+
+    // res.status(200).json(user);yt
     res.status(200).json({ ...user._doc, token });
 
   } catch (err) {
@@ -77,6 +93,20 @@ route.post("/signInUser", async (req, res) => {
 
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
+
+     // Create Ledger
+     await createLedger(
+      {
+        uuid : user.uuid,
+        txUserAction : "accountLogin",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : user.uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : user.uuid,
+        txDescription : "user logs in"
+      })
 
     // res.status(200).json(user);
     res.status(200).json({ ...user._doc, token });

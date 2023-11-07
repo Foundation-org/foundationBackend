@@ -6,7 +6,7 @@ const LedgerController = require("../controller/LedgerController");
 const protect = require("../middleware/protect");
 
 
-router.post("/ledger", LedgerController.create);
+// router.post("/ledger", LedgerController.create);
 
 // router.patch("/ledger/:id", LedgerController.update);
 
@@ -14,6 +14,6 @@ router.post("/ledger", LedgerController.create);
 
 // router.get("/ledger/:id", LedgerController.getById);
 
-router.delete("/ledger/:id", LedgerController.remove);
+// router.delete("/ledger/:id", LedgerController.remove);
 
 module.exports = router;
