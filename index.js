@@ -6,7 +6,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
 const connectDB = require("./config/db");
-const AuthRoute = require("./routes/AuthRoute");
+// const AuthRoute = require("./routes/AuthRoute");
 const InfoQuestQuestion = require("./routes/InfoQuestQuestion");
 const BookmarkQuest = require("./routes/BookmarkQuest");
 const StartQuest = require("./routes/StartQuest");
@@ -25,7 +25,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(morgan("common"));
 
-app.use("/user", AuthRoute);
+// app.use("/user", AuthRoute);
 app.use("/infoquestions", InfoQuestQuestion);
 app.use("/bookmarkQuest", BookmarkQuest);
 app.use("/startQuest", StartQuest);
