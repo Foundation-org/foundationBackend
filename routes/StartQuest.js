@@ -3,6 +3,8 @@ const route = require("express").Router();
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const StartQuests = require("../models/StartQuests");
 const User = require("../models/UserModel");
+const { createLedger } = require("../utils/createLedger");
+const crypto = require("crypto");
 
 //VIOLATION
 route.post("/updateViolationCounter", async (req, res) => {
@@ -213,6 +215,21 @@ route.post("/createStartQuest", async (req, res) => {
           },
         }
       );
+
+      // Create Ledger
+    await createLedger(
+      {
+        uuid : req.body.uuid,
+        txUserAction : "questOptionAdded",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : req.body.questForeignKey,
+        txTo : "dao",
+        txAmount : "0",
+        txData : question._id,
+        txDescription : "User adds an answer to a quest"
+      })
+
     }
 
     // Check if QuestionCorrect is not "Not Selected" and push the ID to completedQuests
@@ -221,12 +238,25 @@ route.post("/createStartQuest", async (req, res) => {
       { uuid: req.body.uuid },
       { $addToSet: { completedQuests: data._id } }
     );
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : req.body.uuid,
+        txUserAction : "questCompleted",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : req.body.uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : question._id,
+        txDescription : "User completes a quest"
+      })
     // }
 
     res.status(200).json("Updated");
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send("Internal Server Error" + err.message);
   }
 });
 
@@ -571,6 +601,21 @@ route.post("/updateChangeAnsStartQuest", async (req, res) => {
           { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
           { upsert: true }
         ).exec();
+
+        // Create Ledger
+        await createLedger(
+        {
+          uuid : req.body.uuid,
+          txUserAction : "questCompletedChange",
+          txID : crypto.randomBytes(11).toString("hex"),
+          txAuth : "User",
+          txFrom : req.body.uuid,
+          txTo : "dao",
+          txAmount : "0",
+          txData : startQuestQuestion._id,
+          txDescription : "User changes their answer on a quest"
+        })
+
       } else {
         responseMsg = "Answer has not changed";
       }

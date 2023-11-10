@@ -1,5 +1,8 @@
 const { STATEMENT } = require("../constants");
 const User = require("../models/UserModel");
+const crypto = require("crypto");
+const { createLedger } = require("../utils/createLedger");
+
 
 module.exports.checkViolationInSentence = (sentence) => {
   const lowerCaseSentence = sentence.toLowerCase();
@@ -66,7 +69,7 @@ module.exports.removeTrailingQuestionMarks = (sentence) => {
   return sentence.replace(regex, "");
 };
 
-module.exports.incrementCounter = async(req, res) => {
+module.exports.incrementCounter = async(req, res, data) => {
   try {
     const result = await User.updateOne(
       { uuid: req.user.uuid },
@@ -75,6 +78,19 @@ module.exports.incrementCounter = async(req, res) => {
     if (result?.nModified === 0) {
       return res.status(404).send("User not found");
     }
+    // Create Ledger
+    await createLedger(
+    {
+      uuid : req.user.uuid,
+      txUserAction : "violationCoC",
+      txID : crypto.randomBytes(11).toString("hex"),
+      txAuth : "User",
+      txFrom : req.user.uuid,
+      txTo : "dao",
+      txAmount : "0",
+      txData : data,
+      txDescription : "User triggered a CoC violation"
+    })
     // return res.status(200).send(result);
     return res.status(200);
   } catch (error) {

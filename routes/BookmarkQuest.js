@@ -1,7 +1,10 @@
 const route = require("express").Router();
 
+const crypto = require("crypto");
+
 const BookmarkQuests = require("../models/BookmarkQuests");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
+const { createLedger } = require("../utils/createLedger");
 
 // SIGN UP
 route.post("/createBookmarkQuest", async (req, res) => {
@@ -24,23 +27,52 @@ route.post("/createBookmarkQuest", async (req, res) => {
 
     const questions = await question.save();
     !questions && res.status(404).send("Not Created 1");
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : req.body.uuid,
+        txUserAction : "bookmarkAdded",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : req.body.uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : questions._id,
+        txDescription : "User adds a quest to their bookmarks"
+      })
 
     res.status(201).send("Quest has been Created");
   } catch (err) {
-    res.status(500).send("Not Created 2");
+    res.status(500).send("Not Created 2" + err.message);
   }
 });
 
 route.post("/deleteBookmarkQuest", async (req, res) => {
   try {
+    const questions = await BookmarkQuests.findOne({
+      questForeignKey: req.body.questForeignKey,
+      uuid: req.body.uuid,
+    });
     await BookmarkQuests.deleteOne({
       questForeignKey: req.body.questForeignKey,
       uuid: req.body.uuid,
     });
-
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : req.body.uuid,
+        txUserAction : "bookmarkRemoved",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : req.body.uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : questions._id,
+        txDescription : "User removes a quest from their bookmarks"
+      })
     res.status(201).send("Quest has been deleted");
   } catch (err) {
-    res.status(500).send("Not Deleted 2");
+    res.status(500).send("Not Deleted 2" + err.message);
   }
 });
 

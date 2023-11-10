@@ -82,6 +82,12 @@ const userSchema = mongoose.Schema(
         ref: InfoQuestQuestions,
       },
     ],
+    badges: [
+      {
+        accountName: { type: String },
+        isVerified: { type: Boolean },
+      }
+    ]
   },
   { timestamps: true }
 );

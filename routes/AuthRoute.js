@@ -28,6 +28,19 @@ route.put("/changePassword", async (req, res) => {
     // Update the user's password
     user.password = newHashedPassword;
     await user.save();
+    // Create Ledger
+    await createLedger(
+    {
+      uuid : user.uuid,
+      txUserAction : "accountPasswordChange",
+      txID : crypto.randomBytes(11).toString("hex"),
+      txAuth : "User",
+      txFrom : user.uuid,
+      txTo : "dao",
+      txAmount : "0",
+      txData : user.uuid,
+      txDescription : "User changes password"
+    })
 
     res.status(200).json("Password changed successfully");
   } catch (err) {
@@ -252,9 +265,24 @@ route.post("/verify", async (req, res) => {
       });
     }
 
+    // Create a Badge
+    user.badges.unshift({ accountName: "Email", isVerified: true  })
     // Step 3 - Update user verification status to true
     user.gmailVerified = true;
     await user.save();
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : user.uuid,
+        txUserAction : "accountBadgeAdded",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : user.uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : user.badges[0]._id,
+        txDescription : "User adds a verification badge"
+      })
     return res.status(200).send({
       message: "Gmail Account verified",
     });
@@ -262,5 +290,37 @@ route.post("/verify", async (req, res) => {
     return res.status(500).send(err);
   }
 });
+
+// Delete the user by id
+route.delete('/delete/:uuid', async(req, res) => {
+  
+  try {
+    const { uuid } = req.params;
+    const user = await User.deleteOne({uuid});
+    console.log("🚀 ~ file: AuthRoute.js:287 ~ route.delete ~ user:", user)
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : uuid,
+        txUserAction : "accountDeleted",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : uuid,
+        txDescription : "User deletes account"
+      }
+    )
+
+    res.status(201).send("User has been deleted");
+  } catch (err) {
+    res.status(500).send("Not Deleted");
+  }
+
+})
+
+// Logout the user
+
 
 module.exports = route;

@@ -3,6 +3,8 @@ const route = require("express").Router();
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const StartQuests = require("../models/StartQuests");
 const User = require("../models/UserModel");
+const { createLedger } = require("../utils/createLedger");
+const crypto = require("crypto");
 
 // SIGN UP
 route.post("/createInfoQuestQuest", async (req, res) => {
@@ -49,9 +51,23 @@ route.post("/createInfoQuestQuest", async (req, res) => {
     // Save the updated user object
     await user.save();
 
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : user.uuid,
+        txUserAction : "questCreated",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : user.uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : createdQuestion._id,
+        txDescription : "User creates a new quest"
+      })
+
     res.status(201).send("Quest has been Created");
   } catch (err) {
-    res.status(500).send("Not Created 2");
+    res.status(500).send("Not Created 2" + err.message);
   }
 });
 
