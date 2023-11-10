@@ -8,7 +8,7 @@ const morgan = require("morgan");
 const connectDB = require("./config/db");
 // const AuthRoute = require("./routes/AuthRoute");
 const InfoQuestQuestion = require("./routes/InfoQuestQuestion");
-const BookmarkQuest = require("./routes/BookmarkQuest");
+// const BookmarkQuest = require("./routes/BookmarkQuestRoute");
 const StartQuest = require("./routes/StartQuest");
 const SearchRoute = require("./routes/SearchRoute");
 
@@ -27,7 +27,7 @@ app.use(morgan("common"));
 
 // app.use("/user", AuthRoute);
 app.use("/infoquestions", InfoQuestQuestion);
-app.use("/bookmarkQuest", BookmarkQuest);
+// app.use("/bookmarkQuest", BookmarkQuest);
 app.use("/startQuest", StartQuest);
 app.use("/search", SearchRoute);
 // All Routes
