@@ -10,7 +10,7 @@ const connectDB = require("./config/db");
 // const InfoQuestQuestion = require("./routes/InfoQuestQuestion");
 // const BookmarkQuest = require("./routes/BookmarkQuestRoute");
 const StartQuest = require("./routes/StartQuest");
-const SearchRoute = require("./routes/SearchRoute");
+// const SearchRoute = require("./routes/SearchRoute");
 
 dotenv.config();
 
@@ -29,7 +29,7 @@ app.use(morgan("common"));
 // app.use("/infoquestions", InfoQuestQuestion);
 // app.use("/bookmarkQuest", BookmarkQuest);
 app.use("/startQuest", StartQuest);
-app.use("/search", SearchRoute);
+// app.use("/search", SearchRoute);
 // All Routes
 require("./start/routes")(app)
 

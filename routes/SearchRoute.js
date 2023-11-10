@@ -1,41 +1,12 @@
-const route = require("express").Router();
+const express = require("express");
+const router = express.Router();
+// controller
+const SearchController = require("../controller/SearchController");
+// middleware
+const protect = require("../middleware/protect");
 
-const InfoQuestQuestions = require("../models/InfoQuestQuestions");
-const BookmarkQuests = require("../models/BookmarkQuests");
 
-route.post("/easySearch", async (req, res) => {
-  const searchTerm = req.query.term;
+router.post("/easySearch", SearchController.easySearch)
+router.post("/searchBookmarks", SearchController.searchBookmarks)
 
-  try {
-    const results = await InfoQuestQuestions.find({
-      $or: [
-        { Question: { $regex: searchTerm, $options: "i" } },
-        { whichTypeQuestion: { $regex: searchTerm, $options: "i" } },
-        {
-          "QuestAnswers.question": { $regex: searchTerm, $options: "i" },
-        },
-      ],
-    });
-
-    const reversedResults = results.reverse();
-
-    res.status(200).json(reversedResults);
-  } catch (err) {
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-route.post("/searchBookmarks", async (req, res) => {
-  const searchTerm = req.query.term;
-  try {
-    const results = await BookmarkQuests.find({
-      $or: [{ Question: { $regex: searchTerm, $options: "i" } }],
-    });
-    const reversedResults = results.reverse();
-    res.status(200).json(reversedResults);
-  } catch (err) {
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-module.exports = route;
+module.exports = router;
