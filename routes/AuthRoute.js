@@ -24,4 +24,8 @@ router.post("/verify", AuthController.verify);
 
 router.delete("/delete/:uuid", AuthController.deleteByUUID);
 
+router.post("/logout/:uuid", AuthController.logout);
+
+router.delete("/badge/:id/:uuid", AuthController.deleteBadgeById);
+
 module.exports = router;

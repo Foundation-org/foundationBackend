@@ -85,6 +85,19 @@ try {
     !user && res.status(404).json("User not Found");
 
     const compPass = await bcrypt.compare(req.body.password, user.password);
+    // Create Ledger
+    await createLedger(
+      {
+          uuid : user.uuid,
+          txUserAction : "accountLoginFail",
+          txID : crypto.randomBytes(11).toString("hex"),
+          txAuth : "User",
+          txFrom : user.uuid,
+          txTo : "dao",
+          txAmount : "0",
+          txData : user.uuid,
+          txDescription : "User logs in failed"
+      })
     !compPass && res.status(400).json("Wrong Password");
 
     // Generate a JWT token
@@ -293,7 +306,62 @@ const deleteByUUID = async(req, res) => {
     }
   
   }
-
+const logout = async(req, res) => {
+    try {
+      const { uuid } = req.params;
+      const user = await User.findOne({uuid});
+      !user && res.status(404).json("User not Found");
+      // Create Ledger
+      await createLedger(
+        {
+          uuid : uuid,
+          txUserAction : "accountLogout",
+          txID : crypto.randomBytes(11).toString("hex"),
+          txAuth : "User",
+          txFrom : uuid,
+          txTo : "dao",
+          txAmount : "0",
+          txData : uuid,
+          txDescription : "User logs out"
+        }
+      )
+  
+      res.status(201).send("User has been deleted");
+    } catch (err) {
+      res.status(500).send("Not Deleted");
+    }
+  
+  }
+  const deleteBadgeById = async(req, res) => {
+  
+    try {
+      const { uuid, id } = req.params;
+      const user = await User.findOne({uuid});
+      !user && res.status(404).json("User not Found");
+      const updatedBadges = user.badges.filter(item => item._id === id)
+      user.badges = updatedBadges
+      await user.save();
+      // Create Ledger
+      await createLedger(
+        {
+          uuid : uuid,
+          txUserAction : "accountBadgeRemoved",
+          txID : crypto.randomBytes(11).toString("hex"),
+          txAuth : "User",
+          txFrom : uuid,
+          txTo : "dao",
+          txAmount : "0",
+          txData : uuid,
+          txDescription : "User removes a verification badge"
+        }
+      )
+  
+      res.status(201).send("User has been deleted");
+    } catch (err) {
+      res.status(500).send("Not Deleted");
+    }
+  
+  }
 module.exports = {
     changePassword,
     signUpUser,
@@ -304,4 +372,6 @@ module.exports = {
     sendVerifyEmail,
     verify,
     deleteByUUID,
+    logout,
+    deleteBadgeById
 }
