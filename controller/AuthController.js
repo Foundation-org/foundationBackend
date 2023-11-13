@@ -47,37 +47,49 @@ const changePassword = async (req, res) => {
   }
 
 const signUpUser = async (req, res) => {
-    try {
-      const user = await User.findOne({ email: req.body.email });
-      !user && res.status(404).json("User not Found");
-  
-      const compPass = await bcrypt.compare(req.body.password, user.password);
-      !compPass && res.status(400).json("Wrong Password");
-  
-      // Generate a JWT token
-      const token = createToken({ uuid: user.uuid });
-  
-       // Create Ledger
-       await createLedger(
-        {
-          uuid : user.uuid,
-          txUserAction : "accountLogin",
-          txID : crypto.randomBytes(11).toString("hex"),
-          txAuth : "User",
-          txFrom : user.uuid,
-          txTo : "dao",
-          txAmount : "0",
-          txData : user.uuid,
-          txDescription : "user logs in"
-        })
-  
-      // res.status(200).json(user);
-      res.status(200).json({ ...user._doc, token });
-      // res.status(201).send("Signed in Successfully");
-    } catch (err) {
-      res.status(500).send(err);
-    }
+  try {
+    // const alreadyUser = await User.findOne({ email: req.body.userEmail });
+    // alreadyUser && res.status(404).json("Email Already Exists");
+
+    const uuid = crypto.randomBytes(11).toString("hex");
+    console.log(uuid);
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(req.body.userPassword, salt);
+    const user = await new User({
+      email: req.body.userEmail,
+      password: hashPassword,
+      uuid: uuid,
+    });
+    const users = await user.save();
+    !users && res.status(404).send("Not Created 1");
+
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : uuid,
+        txUserAction : "accountCreated",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : uuid,
+        txDescription : "User creates a new account"
+      }
+    )
+
+    // res.status(200).json(user);yt
+    res.status(200).json({ ...user._doc, token });
+
+  } catch (err) {
+    res.status(500).send("Not Created 2");
+    console.log(err.message);
   }
+}
 
 const signInUser = async (req, res) => {
 try {

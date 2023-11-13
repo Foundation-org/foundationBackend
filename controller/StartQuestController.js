@@ -48,6 +48,23 @@ const createStartQuest = async (req, res) => {
       // Process the 'contended' array and increment 'contentionsGiven'
       const contendedArray = req.body.data?.contended || [];
       const contentionsGivenIncrement = contendedArray.length;
+      // if user gives contention
+      if(contendedArray.length) {
+        // Create Ledger
+        await createLedger(
+          {
+            uuid : req.body.uuid,
+            txUserAction : "questOptionContentionGiven",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "User",
+            txFrom : req.body.uuid,
+            txTo : "dao",
+            txAmount : "0",
+            txData : req.body.uuid,
+            txDescription : "User gives contention to a quest answer"
+          }
+        )
+      }
   
       await User.findOneAndUpdate(
         { uuid: req.body.uuid },
@@ -272,6 +289,22 @@ const updateChangeAnsStartQuest = async (req, res) => {
       // Increment 'contentionsGiven' based on the length of 'contended' array
       const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
       const contentionsGivenIncrement = contendedArray.length;
+      if(contendedArray.length) {
+        // Create Ledger
+        await createLedger(
+          {
+            uuid : req.body.uuid,
+            txUserAction : "questOptionContentionGiven",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "User",
+            txFrom : req.body.uuid,
+            txTo : "dao",
+            txAmount : "0",
+            txData : req.body.uuid,
+            txDescription : "User gives contention to a quest answer"
+          }
+        )
+      }
   
       await User.findOneAndUpdate(
         { uuid: req.body.uuid },
