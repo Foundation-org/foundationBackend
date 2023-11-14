@@ -10,7 +10,7 @@ const createInfoQuestQuest = async (req, res) => {
         Question: req.body.Question,
         QuestionCorrect: req.body.QuestionCorrect,
         whichTypeQuestion: req.body.whichTypeQuestion,
-        usersAddTheirAns: req.body.usersAddTheirAns,
+        usersAddTheirAns: req.body.usersAddTheirAns || false,
         usersChangeTheirAns: req.body.usersChangeTheirAns,
         QuestAnswers:
           req.body.QuestAnswers === undefined ? [] : req.body.QuestAnswers,
