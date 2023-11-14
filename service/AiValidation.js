@@ -89,7 +89,7 @@ module.exports.incrementCounter = async(req, res, data) => {
       txTo : "dao",
       txAmount : "0",
       txData : data,
-      txDescription : "User triggered a CoC violation"
+      // txDescription : "User triggered a CoC violation"
     })
     // return res.status(200).send(result);
     return res.status(200);

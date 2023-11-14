@@ -36,7 +36,7 @@ const createBookmarkQuest = async (req, res) => {
           txTo : "dao",
           txAmount : "0",
           txData : questions._id,
-          txDescription : "User adds a quest to their bookmarks"
+          // txDescription : "User adds a quest to their bookmarks"
         })
   
       res.status(201).send("Quest has been Created");
@@ -65,7 +65,7 @@ const deleteBookmarkQuest = async (req, res) => {
           txTo : "dao",
           txAmount : "0",
           txData : questions._id,
-          txDescription : "User removes a quest from their bookmarks"
+          // txDescription : "User removes a quest from their bookmarks"
         })
       res.status(201).send("Quest has been deleted");
     } catch (err) {

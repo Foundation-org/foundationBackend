@@ -59,7 +59,7 @@ const createInfoQuestQuest = async (req, res) => {
           txTo : "dao",
           txAmount : "0",
           txData : createdQuestion._id,
-          txDescription : "User creates a new quest"
+          // txDescription : "User creates a new quest"
         })
   
       res.status(201).send("Quest has been Created");

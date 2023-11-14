@@ -61,7 +61,7 @@ const createStartQuest = async (req, res) => {
             txTo : "dao",
             txAmount : "0",
             txData : req.body.uuid,
-            txDescription : "User gives contention to a quest answer"
+            // txDescription : "User gives contention to a quest answer"
           }
         )
       }
@@ -142,7 +142,7 @@ const createStartQuest = async (req, res) => {
           txTo : "dao",
           txAmount : "0",
           txData : question._id,
-          txDescription : "User adds an answer to a quest"
+          // txDescription : "User adds an answer to a quest"
         })
   
       }
@@ -164,7 +164,7 @@ const createStartQuest = async (req, res) => {
           txTo : "dao",
           txAmount : "0",
           txData : question._id,
-          txDescription : "User completes a quest"
+          // txDescription : "User completes a quest"
         })
       // }
   
@@ -301,7 +301,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
             txTo : "dao",
             txAmount : "0",
             txData : req.body.uuid,
-            txDescription : "User gives contention to a quest answer"
+            // txDescription : "User gives contention to a quest answer"
           }
         )
       }
@@ -372,7 +372,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
             txTo : "dao",
             txAmount : "0",
             txData : startQuestQuestion._id,
-            txDescription : "User changes their answer on a quest"
+            // txDescription : "User changes their answer on a quest"
           })
   
         } else {

@@ -37,7 +37,7 @@ const changePassword = async (req, res) => {
         txTo : "dao",
         txAmount : "0",
         txData : user.uuid,
-        txDescription : "User changes password"
+        // txDescription : "User changes password"
       })
   
       res.status(200).json("Password changed successfully");
@@ -78,7 +78,7 @@ const signUpUser = async (req, res) => {
         txTo : "dao",
         txAmount : "0",
         txData : uuid,
-        txDescription : "User creates a new account"
+        // txDescription : "User creates a new account"
       }
     )
 
@@ -108,7 +108,7 @@ try {
           txTo : "dao",
           txAmount : "0",
           txData : user.uuid,
-          txDescription : "User logs in failed"
+          // txDescription : "User logs in failed"
       })
     !compPass && res.status(400).json("Wrong Password");
 
@@ -126,7 +126,7 @@ try {
         txTo : "dao",
         txAmount : "0",
         txData : user.uuid,
-        txDescription : "user logs in"
+        // txDescription : "user logs in"
     })
 
     // res.status(200).json(user);
@@ -282,7 +282,7 @@ const verify = async (req, res) => {
           txTo : "dao",
           txAmount : "0",
           txData : user.badges[0]._id,
-          txDescription : "User adds a verification badge"
+          // txDescription : "User adds a verification badge"
         })
       return res.status(200).send({
         message: "Gmail Account verified",
@@ -308,7 +308,7 @@ const deleteByUUID = async(req, res) => {
           txTo : "dao",
           txAmount : "0",
           txData : uuid,
-          txDescription : "User deletes account"
+          // txDescription : "User deletes account"
         }
       )
   
@@ -334,7 +334,7 @@ const logout = async(req, res) => {
           txTo : "dao",
           txAmount : "0",
           txData : uuid,
-          txDescription : "User logs out"
+          // txDescription : "User logs out"
         }
       )
   
@@ -364,7 +364,7 @@ const logout = async(req, res) => {
           txTo : "dao",
           txAmount : "0",
           txData : uuid,
-          txDescription : "User removes a verification badge"
+          // txDescription : "User removes a verification badge"
         }
       )
   
