@@ -10,7 +10,7 @@ router.post("/ledger", LedgerController.create);
 
 // router.patch("/ledger/:id", LedgerController.update);
 
-// router.get("/ledger", LedgerController.getAll);
+router.get("/ledger", LedgerController.getAll);
 
 // router.get("/ledger/:id", LedgerController.getById);
 

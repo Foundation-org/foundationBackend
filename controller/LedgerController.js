@@ -43,16 +43,32 @@ const create = async (req, res) => {
     //   };
     
     
-    //   const getAll = async (req, res) => {
-    //     try {
-    //         const course = await Ledger.findAll({ order: [['id', 'ASC']] });
-    //         if(!course) throw new Error("No such Ledger!");
-    //         res.status(200).json({ data: course });
-    //     } catch (error) {
-    //       console.error(error);
-    //       res.status(500).json({ message: `An error occurred while getAll Ledger: ${error.message}` });
-    //     }
-    //   };
+    const getAll = async (req, res) => {
+        try {
+          const { page, limit } = req.body;
+          const skip = (page - 1) * limit;
+      
+          const ledger = await Ledgers.find({})
+            .sort({ _id: 1 }) // Adjust the sorting based on your needs
+            .skip(skip)
+            .limit(parseInt(limit));
+      
+          const totalCount = await Ledgers.countDocuments();
+          const pageCount = Math.ceil(totalCount / limit);
+      
+          res.status(200).json({
+            data: ledger,
+            pageCount,
+          });
+        } catch (error) {
+          console.error(error);
+          res
+            .status(500)
+            .json({
+              message: `An error occurred while getAll Ledger: ${error.message}`,
+            });
+        }
+      };
     
     
     const remove = async (req, res) => {
@@ -71,6 +87,6 @@ module.exports = {
     create,
     // update,
     // getById,
-    // getAll,
+    getAll,
     remove,
 }
