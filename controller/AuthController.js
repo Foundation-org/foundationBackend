@@ -18,7 +18,8 @@ const changePassword = async (req, res) => {
         user.password
       );
       if (!currentPasswordValid) {
-        return res.status(400).json("Current password is incorrect");
+         return res.status(400).json({ error: "Current password is incorrect" });
+         
       }
   
       const salt = await bcrypt.genSalt(10);
@@ -41,7 +42,8 @@ const changePassword = async (req, res) => {
         // txDescription : "User changes password"
       })
   
-      res.status(200).json("Password changed successfully");
+      res.status(200).json({ message: "Password changed successfully" });
+
     } catch (err) {
       res.status(500).send(err);
     }
