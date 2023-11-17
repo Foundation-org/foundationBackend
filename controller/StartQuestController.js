@@ -168,10 +168,11 @@ const createStartQuest = async (req, res) => {
         })
       // }
   
-      res.status(200).json("Updated");
+      res.status(200).json({ message: "Start Quest Created Successfully", startQuestID: question._id  });
     } catch (err) {
       console.error(err);
-      res.status(500).send("Internal Server Error" + err.message);
+      res.status(500).json({ message: `An error occurred while createStartQuest: ${err.message}` });
+
     }
   }
 const updateChangeAnsStartQuest = async (req, res) => {
@@ -352,7 +353,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
             });
           }
   
-          responseMsg = "Updated";
+          responseMsg = "Start Quest Updated Successfully";
           startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
   
           await StartQuests.findByIdAndUpdate(
@@ -382,9 +383,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
         responseMsg = "You can change your answer once every 1 hour";
       }
   
-      res.status(200).json(responseMsg);
+      res.status(200).json({ message: responseMsg, startQuestID: startQuestQuestion._id });
     } catch (err) {
-      res.status(500).send("Not Created 2");
+      console.error(err);
+      res.status(500).json({ message: `An error occurred while updateChangeAnsStartQuest: ${err.message}` });
     }
   
     function Compare(obj1, obj2) {

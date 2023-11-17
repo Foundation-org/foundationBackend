@@ -62,7 +62,7 @@ const createInfoQuestQuest = async (req, res) => {
           // txDescription : "User creates a new quest"
         })
   
-      res.status(201).send("Quest has been Created");
+      res.status(201).json({ message: "Quest has been Created", questID: createdQuestion._id });
     } catch (err) {
       res.status(500).send("Not Created 2" + err.message);
     }

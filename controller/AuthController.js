@@ -6,6 +6,7 @@ const AWS = require("aws-sdk")
 const crypto = require("crypto");
 const { createToken } = require("../service/auth");
 const { createLedger } = require("../utils/createLedger");
+const { isGoogleEmail } = require("../utils/checkGoogleAccount");
 
 
 const changePassword = async (req, res) => {
@@ -49,8 +50,11 @@ const changePassword = async (req, res) => {
 
 const signUpUser = async (req, res) => {
   try {
-    // const alreadyUser = await User.findOne({ email: req.body.userEmail });
-    // alreadyUser && res.status(404).json("Email Already Exists");
+    const alreadyUser = await User.findOne({ email: req.body.userEmail });
+    alreadyUser && res.status(404).json("Email Already Exists");
+
+    const checkGoogleEmail = await isGoogleEmail(req.body.userEmail)
+    if(checkGoogleEmail) res.status(404).json("Please Signup with Google Account")
 
     const uuid = crypto.randomBytes(11).toString("hex");
     console.log(uuid);
