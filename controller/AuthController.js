@@ -90,9 +90,12 @@ const signUpUser = async (req, res) => {
     // res.status(200).json(user);yt
     res.status(200).json({ ...user._doc, token });
 
-  } catch (err) {
-    res.status(500).send("Not Created 2");
-    console.log(err.message);
+  } catch (error) {
+    // res.status(500).send("Not Created 2");
+    // console.log(err.message);
+    console.error(error);
+    res.status(500).json({ message: `An error occurred while signUpUser Auth: ${error.message}` });
+    return
   }
 }
 
