@@ -14,5 +14,6 @@ module.exports = function (app) {
     app.use("/infoquestions", InfoQuestQuestionRoute)
     app.use("/search", SearchRoute)
     app.use("/startQuest", StartQuestRoute)
+    app.use("/ledger",LedgerRoute)
     // app.use(error);
   };

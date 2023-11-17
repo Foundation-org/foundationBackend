@@ -6,14 +6,16 @@ const LedgerController = require("../controller/LedgerController");
 const protect = require("../middleware/protect");
 
 
-router.post("/ledger", LedgerController.create);
+router.post("/createLedger", LedgerController.create);
 
-// router.patch("/ledger/:id", LedgerController.update);
+// router.patch("/updateLedger/:id", LedgerController.update);
 
-router.get("/ledger", LedgerController.getAll);
+router.get("/getAllLedger", LedgerController.getAll);
 
 router.get("/ledgerById", LedgerController.getById);
 
-// router.delete("/ledger/:id", LedgerController.remove);
+router.post("/searchLedger",LedgerController.search);
+
+// router.delete("/deleteLedger/:id", LedgerController.remove);
 
 module.exports = router;
