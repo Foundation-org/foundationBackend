@@ -43,18 +43,19 @@ const changePassword = async (req, res) => {
       })
   
       res.status(200).json("Password changed successfully");
-    } catch (err) {
-      res.status(500).send(err);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while changePassword Auth: ${error.message}` });
     }
   }
 
 const signUpUser = async (req, res) => {
   try {
     const alreadyUser = await User.findOne({ email: req.body.userEmail });
-    alreadyUser && res.status(404).json("Email Already Exists");
+    if(alreadyUser) throw new Error("Email Already Exists");
 
     const checkGoogleEmail = await isGoogleEmail(req.body.userEmail)
-    if(checkGoogleEmail) res.status(404).json("Please Signup with Google Account")
+    if(checkGoogleEmail) throw new Error("Please Signup with Google Account")
 
     const uuid = crypto.randomBytes(11).toString("hex");
     console.log(uuid);
@@ -67,7 +68,7 @@ const signUpUser = async (req, res) => {
       uuid: uuid,
     });
     const users = await user.save();
-    !users && res.status(404).send("Not Created 1");
+    if(!users) throw new Error("User not Created");
 
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
@@ -87,15 +88,11 @@ const signUpUser = async (req, res) => {
       }
     )
 
-    // res.status(200).json(user);yt
     res.status(200).json({ ...user._doc, token });
 
   } catch (error) {
-    // res.status(500).send("Not Created 2");
-    // console.log(err.message);
-    console.error(error);
+    console.error(error.message);
     res.status(500).json({ message: `An error occurred while signUpUser Auth: ${error.message}` });
-    return
   }
 }
 
@@ -140,8 +137,9 @@ try {
     // res.status(200).json(user);
     res.status(200).json({ ...user._doc, token });
     // res.status(201).send("Signed in Successfully");
-} catch (err) {
-    res.status(500).send(err);
+} catch (error) {
+    console.error(error.message);
+      res.status(500).json({ message: `An error occurred while signInUser Auth: ${error.message}` });
 }
 }
 
@@ -150,8 +148,9 @@ const userInfo = async (req, res) => {
       const user = await User.findOne({ uuid: req.body.uuid });
   
       res.status(200).json(user);
-    } catch (err) {
-      res.status(500).send(err);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while userInfo Auth: ${error.message}` });
     }
   }
 const setUserWallet = async (req, res) => {
@@ -165,8 +164,9 @@ const setUserWallet = async (req, res) => {
       await doc.updateOne(update);
   
       res.status(201).send("Wallet Updated");
-    } catch (err) {
-      res.status(500).send("Wallet Not Updated");
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while setUserWallet Auth: ${error.message}` });
     }
   }
 const signedUuid = async (req, res) => {
@@ -180,8 +180,9 @@ const signedUuid = async (req, res) => {
       await doc.updateOne(update);
   
       res.status(201).send("Updated");
-    } catch (err) {
-      res.status(500).send("Not Updated");
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while signedUuid Auth: ${error.message}` });
     }
   }
 const sendVerifyEmail = async (req, res) => {
@@ -282,10 +283,11 @@ const sendVerifyEmail = async (req, res) => {
     }
 
     return res.status(201).send({
-      message: `Sent a verification email to ${email}`,
+      message: `Sent a verification email to ${req.body.email}`,
     });
-  } catch (err) {
-    res.status(500).send(err);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: `An error occurred while sendVerifyEmail Auth: ${error.message}` });
   }
 }
 const verify = async (req, res) => {
@@ -309,8 +311,9 @@ const verify = async (req, res) => {
     let payload = null;
     try {
       payload = jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET);
-    } catch (err) {
-      return res.status(500).send(err);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while verify Auth: ${error.message}` });
     }
   
     try {
@@ -343,8 +346,9 @@ const verify = async (req, res) => {
       return res.status(200).send({
         message: "Gmail Account verified",
       });
-    } catch (err) {
-      return res.status(500).send(err);
+    } catch (error) {
+      return console.error(error.message);
+      res.status(500).json({ message: `An error occurred while signUpUser Auth: ${error.message}` });
     }
   }
 const deleteByUUID = async(req, res) => {
@@ -352,7 +356,6 @@ const deleteByUUID = async(req, res) => {
     try {
       const { uuid } = req.params;
       const user = await User.deleteOne({uuid});
-      console.log("🚀 ~ file: AuthRoute.js:287 ~ route.delete ~ user:", user)
       // Create Ledger
       await createLedger(
         {
@@ -369,8 +372,9 @@ const deleteByUUID = async(req, res) => {
       )
   
       res.status(201).send("User has been deleted");
-    } catch (err) {
-      res.status(500).send("Not Deleted");
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while deleteByUUID Auth: ${error.message}` });
     }
   
   }
@@ -395,13 +399,13 @@ const logout = async(req, res) => {
       )
   
       res.status(201).send("User has been deleted");
-    } catch (err) {
-      res.status(500).send("Not Deleted");
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while logout Auth: ${error.message}` });
     }
   
   }
   const deleteBadgeById = async(req, res) => {
-  
     try {
       const { uuid, id } = req.params;
       const user = await User.findOne({uuid});
@@ -425,8 +429,9 @@ const logout = async(req, res) => {
       )
   
       res.status(201).send("User has been deleted");
-    } catch (err) {
-      res.status(500).send("Not Deleted");
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while deleteBadgeById Auth: ${error.message}` });
     }
   
   }
