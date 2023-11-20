@@ -147,8 +147,8 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
   
         res.status(200).json({
           data: Result.slice(start, end),
-          message: Result.length,
-          // You can include other properties here if needed
+          hasNextPage: end<Result.length,
+         
         });
       }
     } catch (err) {
@@ -262,8 +262,8 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
   
         res.status(200).json({
           data: Result.slice(start, end),
-          message: Result.length,
-          // You can include other properties here if needed
+          hasNextPage: end<Result.length,
+         
         });
       }
     } catch (err) {
@@ -271,7 +271,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     }
   }
 
-const getAllQuestsWithDefaultStatus = async (req, res) => {
+  const getAllQuestsWithDefaultStatus = async (req, res) => {
     const { uuid, _page, _limit, filter, sort, type } = req.body;
     const page = parseInt(_page);
     const pageSize = parseInt(_limit);
@@ -290,26 +290,31 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     if (type) {
       filterObj.whichTypeQuestion = type;
     }
-    // Query the database with skip and limit options to get questions for the first page
+    
+    // Query the database with skip and limit options to get questions for the requested page
     allQuestions = await InfoQuestQuestions.find(filterObj)
-  
       .sort(
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
           ? { lastInteractedAt: -1 }
-          : req.body.sort === "Most Popular"
+          : sort === "Most Popular"
           ? { interactingCounter: -1 }
           : "createdAt"
       ) // Sort by createdAt field in descending order
-  
       .skip(skip)
       .limit(pageSize);
   
+    const totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
+  
     const result = await getQuestionsWithStatus(allQuestions, uuid);
   
-    res.status(200).json(result);
-  }
+    res.status(200).json({
+      data: result,
+      hasNextPage: skip + pageSize < totalQuestionsCount,
+    });
+  };
+  
 const getAllQuestsWithCorrectStatus = async (req, res) => {
     try {
       let allQuestions;
@@ -405,8 +410,8 @@ const getAllQuestsWithCorrectStatus = async (req, res) => {
   
         res.status(200).json({
           data: Result.slice(start, end),
-          message: Result.length,
-          // You can include other properties here if needed
+          hasNextPage: end<Result.length,
+         
         });
       }
     } catch (err) {
@@ -507,8 +512,8 @@ const getAllQuestsWithIncorrectStatus = async (req, res) => {
         console.log("Start" + start + "end" + end);
         res.status(200).json({
           data: Result.slice(start, end),
-          message: Result.length,
-          // You can include other properties here if needed
+          hasNextPage: end<Result.length,
+         
         });
       }
     } catch (err) {
@@ -572,8 +577,8 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
   
         res.status(200).json({
           data: Result.slice(start, end),
-          message: Result.length,
-          // You can include other properties here if needed
+          hasNextPage: end<Result.length,
+         
         });
       }
     } catch (err) {
