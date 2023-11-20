@@ -35,7 +35,8 @@ const getById = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const ledger = await Ledgers.find({ uuid })
-      .sort({ _id: 1 }) // Adjust the sorting based on your needs
+      // .sort({ _id: 1 }) // Adjust the sorting based on your needs
+      .sort(req.query.sort === 'newest' ? { _id: 1 } : { _id: -1 }) // Adjust the sorting based on your needs
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -49,11 +50,9 @@ const getById = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while getById Ledger: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while getById Ledger: ${error.message}`,
+    });
   }
 };
 
