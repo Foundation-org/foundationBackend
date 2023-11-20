@@ -31,7 +31,7 @@ const create = async (req, res) => {
 
 const getById = async (req, res) => {
   try {
-    const { page, limit, uuid } = req.body;
+    const { page, limit, uuid } = req.query;
     const skip = (page - 1) * limit;
 
     const ledger = await Ledgers.find({ uuid })
@@ -39,7 +39,7 @@ const getById = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
-    const totalCount = await Ledgers.countDocuments();
+    const totalCount = await Ledgers.countDocuments({ uuid });
     const pageCount = Math.ceil(totalCount / limit);
 
     res.status(200).json({
