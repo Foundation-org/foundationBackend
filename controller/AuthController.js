@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const { createToken } = require("../service/auth");
 const { createLedger } = require("../utils/createLedger");
 const { isGoogleEmail } = require("../utils/checkGoogleAccount");
+const { createTreasury, getTreasury, updateTreasury } = require("../utils/treasuryService");
 
 
 const changePassword = async (req, res) => {
@@ -101,7 +102,7 @@ const signUpUser = async (req, res) => {
 const signInUser = async (req, res) => {
 try {
     const user = await User.findOne({ email: req.body.email });
-    !user && res.status(404).json("User not Found");
+    if(!user) throw new Error("User not Found");
 
     const compPass = await bcrypt.compare(req.body.password, user.password);
     
@@ -348,16 +349,29 @@ const verify = async (req, res) => {
           txData : user.badges[0]._id,
           // txDescription : "User adds a verification badge"
         })
+      await createLedger(
+        {
+          uuid : user.uuid,
+          txUserAction : "accountBadgeAdded",
+          txID : crypto.randomBytes(11).toString("hex"),
+          txAuth : "DAO",
+          txFrom : "DAO Treasury",
+          txTo : user.uuid,
+          txAmount : 0.96,
+          // txData : user.badges[0]._id,
+          // txDescription : "Incentive for adding badges"
+        })
+        const getAmount = await getTreasury();
+        await updateTreasury({ amount: getAmount - 0.96 })
       return res.status(200).send({
         message: "Gmail Account verified",
       });
     } catch (error) {
-      return console.error(error.message);
+      console.error(error.message);
       res.status(500).json({ message: `An error occurred while signUpUser Auth: ${error.message}` });
     }
   }
 const deleteByUUID = async(req, res) => {
-  
     try {
       const { uuid } = req.params;
       const user = await User.deleteOne({uuid});
@@ -375,7 +389,6 @@ const deleteByUUID = async(req, res) => {
           // txDescription : "User deletes account"
         }
       )
-  
       res.status(201).send("User has been deleted");
     } catch (error) {
       console.error(error.message);

@@ -63,7 +63,22 @@ const createInfoQuestQuest = async (req, res) => {
           txData : createdQuestion._id,
           // txDescription : "User creates a new quest"
         })
-  
+      // Create Ledger
+      await createLedger(
+        {
+          uuid : user.uuid,
+          txUserAction : "questCreated",
+          txID : crypto.randomBytes(11).toString("hex"),
+          txAuth : "DAO",
+          txFrom : user.uuid,
+          txTo : "DAO Treasury",
+          txAmount : "2.00",
+          // txData : createdQuestion._id,
+          // txDescription : "Incentive for creating a quest"
+        })
+        const getAmount = await getTreasury();
+        await updateTreasury({ amount: getAmount + 2.00 })
+
       res.status(201).json({ message: "Quest has been Created", questID: createdQuestion._id });
     } catch (err) {
       res.status(500).send("Not Created 2" + err.message);

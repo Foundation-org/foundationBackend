@@ -3,6 +3,7 @@ const StartQuests = require("../models/StartQuests");
 const User = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
 const crypto = require("crypto");
+const { getTreasury, updateTreasury } = require("../utils/treasuryService");
 
 const updateViolationCounter = async (req, res) => {
   try {
@@ -19,243 +20,91 @@ const updateViolationCounter = async (req, res) => {
   }
 }
 const createStartQuest = async (req, res) => {
-  try {
-    const currentDate = new Date();
-
-    // Update InfoQuestQuestions and get the data
-    const data = await InfoQuestQuestions.findByIdAndUpdate(
-      { _id: req.body.questForeignKey },
-      {
-        $set: { lastInteractedAt: currentDate.toISOString() },
-        $inc: { interactingCounter: 1 },
-      },
-      { new: true } // To get the updated document
-    );
-
-    if (!data) {
-      return res.status(404).send("InfoQuestQuestions not found");
-    }
-
-    // Get the UUID of the matching record in InfoQuestQuestions
-    const matchingUuid = data.uuid;
-
-    // Update the User table with the matching UUID and increment 'userAnswered'
-    await User.findOneAndUpdate(
-      { uuid: matchingUuid },
-      { $inc: { usersAnswered: 1 } }
-    );
-
-    // Process the 'contended' array and increment 'contentionsGiven'
-    const contendedArray = req.body.data?.contended || [];
-    const contentionsGivenIncrement = contendedArray.length;
-    // if user gives contention
-    if (contendedArray.length) {
-      // Create Ledger
-      await createLedger(
-        {
-          uuid: req.body.uuid,
-          txUserAction: "questOptionContentionGiven",
-          txID: crypto.randomBytes(11).toString("hex"),
-          txAuth: "User",
-          txFrom: req.body.uuid,
-          txTo: "dao",
-          txAmount: "0",
-          txData: req.body.uuid,
-          // txDescription : "User gives contention to a quest answer"
-        }
-      )
-    }
-
-    await User.findOneAndUpdate(
-      { uuid: req.body.uuid },
-      { $inc: { contentionsGiven: contentionsGivenIncrement } }
-    );
-
-    // Function to process an array
-    const processArray = async (array, fieldToUpdate) => {
-      if (array && Array.isArray(array)) {
-        for (const item of array) {
-          // Check if item.question matches addedAnswer in StartQuests
-          const matchingStartQuest = await StartQuests.findOne({
-            addedAnswer: item.question,
-          });
-
-          if (matchingStartQuest) {
-            // Get the uuid of the matching record
-            const matchingUuid = matchingStartQuest.uuid;
-
-            // Define the field to update based on the provided fieldToUpdate parameter
-            const updateField = {};
-            updateField[fieldToUpdate] = 1;
-
-            // Increment the specified field in the User table
-            await User.findOneAndUpdate(
-              { uuid: matchingUuid },
-              { $inc: updateField }
-            );
-          }
-        }
-      }
-    };
-
-    // Process the 'selected' array
-    await processArray(req.body.data?.selected, "selectionsOnAddedAns");
-
-    // Create a new StartQuests document
-    const question = new StartQuests({
-      questForeignKey: req.body.questForeignKey,
-      uuid: req.body.uuid,
-      addedAnswer: req.body.addedAnswer,
-      data: req.body.data,
-    });
-
-    await question.save();
-
-    if (req.body.addedAnswer !== "") {
-      // Increment 'addedAnswers' for the user
-      await User.findOneAndUpdate(
-        { uuid: req.body.uuid },
-        { $inc: { addedAnswers: 1 } }
-      );
-
-      // Push the added answer to InfoQuestQuestions
-      await InfoQuestQuestions.findByIdAndUpdate(
+    try {
+      const currentDate = new Date();
+  
+      // Update InfoQuestQuestions and get the data
+      const data = await InfoQuestQuestions.findByIdAndUpdate(
         { _id: req.body.questForeignKey },
         {
-          $push: {
-            QuestAnswers: {
-              question: req.body.addedAnswer,
-              selected: true,
-            },
-          },
-        }
+          $set: { lastInteractedAt: currentDate.toISOString() },
+          $inc: { interactingCounter: 1 },
+        },
+        { new: true } // To get the updated document
       );
-
-      // Create Ledger
-      await createLedger(
-        {
-          uuid: req.body.uuid,
-          txUserAction: "questOptionAdded",
-          txID: crypto.randomBytes(11).toString("hex"),
-          txAuth: "User",
-          txFrom: req.body.questForeignKey,
-          txTo: "dao",
-          txAmount: "0",
-          txData: question._id,
-          // txDescription : "User adds an answer to a quest"
-        })
-
-    }
-
-    // Check if QuestionCorrect is not "Not Selected" and push the ID to completedQuests
-    // if (data.QuestionCorrect !== "Not Selected") {
-    await User.findOneAndUpdate(
-      { uuid: req.body.uuid },
-      { $addToSet: { completedQuests: data._id } }
-    );
-    // Create Ledger
-    await createLedger(
-      {
-        uuid: req.body.uuid,
-        txUserAction: "questCompleted",
-        txID: crypto.randomBytes(11).toString("hex"),
-        txAuth: "User",
-        txFrom: req.body.uuid,
-        txTo: "dao",
-        txAmount: "0",
-        txData: question._id,
-        // txDescription : "User completes a quest"
-      })
-    // }
-
-    res.status(200).json({ message: "Start Quest Created Successfully", startQuestID: question._id });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: `An error occurred while createStartQuest: ${err.message}` });
-
-  }
-}
-const updateChangeAnsStartQuest = async (req, res) => {
-  try {
-    const startQuestQuestion = await StartQuests.findOne({
-      questForeignKey: req.body.questId,
-      uuid: req.body.uuid,
-    });
-
-    // Get the current date and time
-    const currentDate = new Date();
-
-    InfoQuestQuestions.findByIdAndUpdate(
-      { _id: req.body.questId },
-      {
-        $set: { lastInteractedAt: currentDate.toISOString() },
-        $inc: { interactingCounter: 1 },
+  
+      if (!data) {
+        return res.status(404).send("InfoQuestQuestions not found");
       }
-    ).exec();
-
-    User.findOneAndUpdate(
-      { uuid: req.body.uuid },
-      { $inc: { changedAnswers: 1 } }
-    ).exec();
-
-    // Check req.body.data and the last element's contended and selected arrays objects
-    const lastDataElement = req.body.changeAnswerAddedObj;
-
-    // INCREMENT
-    // Function to process an array
-    const incrementProcessArray = async (array, fieldToUpdate) => {
-      if (array && Array.isArray(array)) {
-        for (const item of array) {
-          // Check if item.question matches addedAnswer in StartQuests
-          const matchingStartQuest = await StartQuests.findOne({
-            addedAnswer: item.question,
-          });
-
-          if (matchingStartQuest) {
-            // Get the uuid of the matching record
-            const matchingUuid = matchingStartQuest.uuid;
-
-            // Define the field to update based on the provided fieldToUpdate parameter
-            const updateField = {};
-            updateField[fieldToUpdate] = 1;
-
-            // Increment the specified field in the User table
-            await User.findOneAndUpdate(
-              { uuid: matchingUuid },
-              { $inc: updateField }
-            );
+  
+      // Get the UUID of the matching record in InfoQuestQuestions
+      const matchingUuid = data.uuid;
+  
+      // Update the User table with the matching UUID and increment 'userAnswered'
+      await User.findOneAndUpdate(
+        { uuid: matchingUuid },
+        { $inc: { usersAnswered: 1 } }
+      );
+  
+      // Process the 'contended' array and increment 'contentionsGiven'
+      const contendedArray = req.body.data?.contended || [];
+      const contentionsGivenIncrement = contendedArray.length;
+      // if user gives contention
+      if(contendedArray.length) {
+        // Create Ledger
+        await createLedger(
+          {
+            uuid : req.body.uuid,
+            txUserAction : "questOptionContentionGiven",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "User",
+            txFrom : req.body.uuid,
+            txTo : "dao",
+            txAmount : "0",
+            txData : req.body.uuid,
+            // txDescription : "User gives contention to a quest answer"
           }
-        }
+        )
+        // Create Ledger
+        await createLedger(
+          {
+            uuid : req.body.uuid,
+            txUserAction : "questOptionContentionGiven",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "DAO",
+            txFrom : req.body.uuid,
+            txTo : "DAO Treasury",
+            txAmount : "0.10",
+            // txData : req.body.uuid,
+            // txDescription : "DisInsentive for giving contention"
+          }
+        )
+        const getAmount = await getTreasury();
+        await updateTreasury({ amount: getAmount + 0.10 })
       }
-    };
-
-    // Process both 'contended' and 'selected' arrays for increment
-    await Promise.all([
-      incrementProcessArray(lastDataElement.contended, "contentionsOnAddedAns"),
-      incrementProcessArray(lastDataElement.selected, "selectionsOnAddedAns"),
-    ]);
-
-    // DECREMENT
-    // Function to process an array
-    const decrementProcessArray = async (array, field, fieldToUpdate) => {
-      if (array && Array.isArray(array)) {
-        for (const item of array) {
-          const isMatch = lastDataElement[field].some(
-            (contendedItem) => contendedItem.question === item.question
-          );
-          if (!isMatch) {
+  
+      await User.findOneAndUpdate(
+        { uuid: req.body.uuid },
+        { $inc: { contentionsGiven: contentionsGivenIncrement } }
+      );
+  
+      // Function to process an array
+      const processArray = async (array, fieldToUpdate) => {
+        if (array && Array.isArray(array)) {
+          for (const item of array) {
             // Check if item.question matches addedAnswer in StartQuests
             const matchingStartQuest = await StartQuests.findOne({
               addedAnswer: item.question,
             });
+  
             if (matchingStartQuest) {
               // Get the uuid of the matching record
               const matchingUuid = matchingStartQuest.uuid;
-
+  
               // Define the field to update based on the provided fieldToUpdate parameter
               const updateField = {};
-              updateField[fieldToUpdate] = -1;
-
+              updateField[fieldToUpdate] = 1;
+  
               // Increment the specified field in the User table
               await User.findOneAndUpdate(
                 { uuid: matchingUuid },
@@ -264,106 +113,318 @@ const updateChangeAnsStartQuest = async (req, res) => {
             }
           }
         }
+      };
+  
+      // Process the 'selected' array
+      await processArray(req.body.data?.selected, "selectionsOnAddedAns");
+  
+      // Create a new StartQuests document
+      const question = new StartQuests({
+        questForeignKey: req.body.questForeignKey,
+        uuid: req.body.uuid,
+        addedAnswer: req.body.addedAnswer,
+        data: req.body.data,
+      });
+  
+      await question.save();
+  
+      if (req.body.addedAnswer !== "") {
+        // Increment 'addedAnswers' for the user
+        await User.findOneAndUpdate(
+          { uuid: req.body.uuid },
+          { $inc: { addedAnswers: 1 } }
+        );
+  
+        // Push the added answer to InfoQuestQuestions
+        await InfoQuestQuestions.findByIdAndUpdate(
+          { _id: req.body.questForeignKey },
+          {
+            $push: {
+              QuestAnswers: {
+                question: req.body.addedAnswer,
+                selected: true,
+              },
+            },
+          }
+        );
+  
+          // Create Ledger
+        await createLedger(
+          {
+            uuid : req.body.uuid,
+            txUserAction : "questOptionAdded",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "User",
+            txFrom : req.body.questForeignKey,
+            txTo : "dao",
+            txAmount : "0",
+            txData : question._id,
+            // txDescription : "User adds an answer to a quest"
+          })
+          // Create Ledger
+        await createLedger(
+          {
+            uuid : req.body.uuid,
+            txUserAction : "questOptionAdded",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "DAO",
+            txFrom : "DAO Treasury",
+            txTo : req.body.uuid,
+            txAmount : "0.06",
+            // txData : question._id,
+            // txDescription : "Incentive for adding answer to quest"
+          })
+          const getAmount = await getTreasury();
+          await updateTreasury({ amount: getAmount + 2.00 })
       }
-    };
-
-    // DECREMENT
-    if (startQuestQuestion.data.length > 1) {
-      let lstTimeSelectionsAndContentions =
-        startQuestQuestion.data[startQuestQuestion.data.length - 1];
-
-      // Process both 'contended' and 'selected' arrays for decrement
-      await Promise.all([
-        decrementProcessArray(
-          lstTimeSelectionsAndContentions.contended,
-          "contended",
-          "contentionsOnAddedAns"
-        ),
-        decrementProcessArray(
-          lstTimeSelectionsAndContentions.selected,
-          "selected",
-          "selectionsOnAddedAns"
-        ),
-      ]);
-    }
-
-    // Increment 'contentionsGiven' based on the length of 'contended' array
-    const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
-    const contentionsGivenIncrement = contendedArray.length;
-    if (contendedArray.length) {
+  
+      // Check if QuestionCorrect is not "Not Selected" and push the ID to completedQuests
+      // if (data.QuestionCorrect !== "Not Selected") {
+      await User.findOneAndUpdate(
+        { uuid: req.body.uuid },
+        { $addToSet: { completedQuests: data._id } }
+      );
       // Create Ledger
       await createLedger(
         {
-          uuid: req.body.uuid,
-          txUserAction: "questOptionContentionGiven",
-          txID: crypto.randomBytes(11).toString("hex"),
-          txAuth: "User",
-          txFrom: req.body.uuid,
-          txTo: "dao",
-          txAmount: "0",
-          txData: req.body.uuid,
-          // txDescription : "User gives contention to a quest answer"
+          uuid : req.body.uuid,
+          txUserAction : "questCompleted",
+          txID : crypto.randomBytes(11).toString("hex"),
+          txAuth : "User",
+          txFrom : req.body.uuid,
+          txTo : "dao",
+          txAmount : "0",
+          txData : question._id,
+          // txDescription : "User completes a quest"
+        })
+      // Create Ledger
+      await createLedger(
+        {
+          uuid : req.body.uuid,
+          txUserAction : "questCompleted",
+          txID : crypto.randomBytes(11).toString("hex"),
+          txAuth : "DAO",
+          txFrom : "DAO Treasury",
+          txTo : req.body.uuid,
+          txAmount : "0.96",
+          // txData : question._id,
+          // txDescription : "Incentive for completing quests"
+        })
+        const getAmount = await getTreasury();
+        await updateTreasury({ amount: getAmount - 0.96 })
+  
+      res.status(200).json({ message: "Start Quest Created Successfully", startQuestID: question._id  });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: `An error occurred while createStartQuest: ${err.message}` });
+
+  }
+}
+const updateChangeAnsStartQuest = async (req, res) => {
+    try {
+      const startQuestQuestion = await StartQuests.findOne({
+        questForeignKey: req.body.questId,
+        uuid: req.body.uuid,
+      });
+  
+      // Get the current date and time
+      const currentDate = new Date();
+  
+      InfoQuestQuestions.findByIdAndUpdate(
+        { _id: req.body.questId },
+        {
+          $set: { lastInteractedAt: currentDate.toISOString() },
+          $inc: { interactingCounter: 1 },
         }
-      )
-    }
-
-    await User.findOneAndUpdate(
-      { uuid: req.body.uuid },
-      { $inc: { contentionsGiven: contentionsGivenIncrement } }
-    );
-
-    let startQuestAnswersSelected = startQuestQuestion.data;
-    let responseMsg = "";
-
-    let timeWhenUserUpdated = new Date(
-      startQuestQuestion.data[startQuestQuestion.data.length - 1].created
-    );
-
-    let date1 = new Date();
-    let date2 = date1.getTime();
-
-    let dateFinal = date2 - timeWhenUserUpdated.getTime();
-
-    if (dateFinal > 2) {
-      if (
-        Compare(
-          startQuestQuestion.data[startQuestQuestion.data.length - 1],
-          req.body.changeAnswerAddedObj
-        )
-      ) {
-        let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
-
-        if (typeof req.body.changeAnswerAddedObj.selected !== "string") {
-          req.body.changeAnswerAddedObj.selected.map(async (option) => {
-            if (option.addedAnswerByUser === true) {
+      ).exec();
+  
+      User.findOneAndUpdate(
+        { uuid: req.body.uuid },
+        { $inc: { changedAnswers: 1 } }
+      ).exec();
+  
+      // Check req.body.data and the last element's contended and selected arrays objects
+      const lastDataElement = req.body.changeAnswerAddedObj;
+  
+      // INCREMENT
+      // Function to process an array
+      const incrementProcessArray = async (array, fieldToUpdate) => {
+        if (array && Array.isArray(array)) {
+          for (const item of array) {
+            // Check if item.question matches addedAnswer in StartQuests
+            const matchingStartQuest = await StartQuests.findOne({
+              addedAnswer: item.question,
+            });
+  
+            if (matchingStartQuest) {
+              // Get the uuid of the matching record
+              const matchingUuid = matchingStartQuest.uuid;
+  
+              // Define the field to update based on the provided fieldToUpdate parameter
+              const updateField = {};
+              updateField[fieldToUpdate] = 1;
+  
+              // Increment the specified field in the User table
               await User.findOneAndUpdate(
-                { uuid: req.body.uuid },
-                { $inc: { addedAnswers: 1 } }
+                { uuid: matchingUuid },
+                { $inc: updateField }
               );
-              AnswerAddedOrNot = option.question;
-              const addAnswer = {
-                question: option.question,
-                selected: true,
-              };
-              InfoQuestQuestions.findByIdAndUpdate(
-                { _id: req.body.questId },
-                { $push: { QuestAnswers: addAnswer } }
-              ).exec();
             }
-          });
+          }
         }
-
-        responseMsg = "Start Quest Updated Successfully";
-        startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
-
-        await StartQuests.findByIdAndUpdate(
-          { _id: startQuestQuestion._id },
-          { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
-          { upsert: true }
-        ).exec();
-
+      };
+  
+      // Process both 'contended' and 'selected' arrays for increment
+      await Promise.all([
+        incrementProcessArray(lastDataElement.contended, "contentionsOnAddedAns"),
+        incrementProcessArray(lastDataElement.selected, "selectionsOnAddedAns"),
+      ]);
+  
+      // DECREMENT
+      // Function to process an array
+      const decrementProcessArray = async (array, field, fieldToUpdate) => {
+        if (array && Array.isArray(array)) {
+          for (const item of array) {
+            const isMatch = lastDataElement[field].some(
+              (contendedItem) => contendedItem.question === item.question
+            );
+            if (!isMatch) {
+              // Check if item.question matches addedAnswer in StartQuests
+              const matchingStartQuest = await StartQuests.findOne({
+                addedAnswer: item.question,
+              });
+              if (matchingStartQuest) {
+                // Get the uuid of the matching record
+                const matchingUuid = matchingStartQuest.uuid;
+  
+                // Define the field to update based on the provided fieldToUpdate parameter
+                const updateField = {};
+                updateField[fieldToUpdate] = -1;
+  
+                // Increment the specified field in the User table
+                await User.findOneAndUpdate(
+                  { uuid: matchingUuid },
+                  { $inc: updateField }
+                );
+              }
+            }
+          }
+        }
+      };
+  
+      // DECREMENT
+      if (startQuestQuestion.data.length > 1) {
+        let lstTimeSelectionsAndContentions =
+          startQuestQuestion.data[startQuestQuestion.data.length - 1];
+  
+        // Process both 'contended' and 'selected' arrays for decrement
+        await Promise.all([
+          decrementProcessArray(
+            lstTimeSelectionsAndContentions.contended,
+            "contended",
+            "contentionsOnAddedAns"
+          ),
+          decrementProcessArray(
+            lstTimeSelectionsAndContentions.selected,
+            "selected",
+            "selectionsOnAddedAns"
+          ),
+        ]);
+      }
+  
+      // Increment 'contentionsGiven' based on the length of 'contended' array
+      const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
+      const contentionsGivenIncrement = contendedArray.length;
+      if(contendedArray.length) {
         // Create Ledger
         await createLedger(
+          {
+            uuid : req.body.uuid,
+            txUserAction : "questOptionContentionGiven",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "User",
+            txFrom : req.body.uuid,
+            txTo : "dao",
+            txAmount : "0",
+            txData : req.body.uuid,
+            // txDescription : "User gives contention to a quest answer"
+          }
+        )
+        // Create Ledger
+        await createLedger(
+          {
+            uuid : req.body.uuid,
+            txUserAction : "questOptionContentionGiven",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "DAO",
+            txFrom : req.body.uuid,
+            txTo : "DAO Treasury",
+            txAmount : "0.10",
+            // txData : req.body.uuid,
+            // txDescription : "DisInsentive for giving contention"
+          }
+        )
+        const getAmount = await getTreasury();
+        await updateTreasury({ amount: getAmount + 0.10 })
+      }
+  
+      await User.findOneAndUpdate(
+        { uuid: req.body.uuid },
+        { $inc: { contentionsGiven: contentionsGivenIncrement } }
+      );
+  
+      let startQuestAnswersSelected = startQuestQuestion.data;
+      let responseMsg = "";
+  
+      let timeWhenUserUpdated = new Date(
+        startQuestQuestion.data[startQuestQuestion.data.length - 1].created
+      );
+  
+      let date1 = new Date();
+      let date2 = date1.getTime();
+  
+      let dateFinal = date2 - timeWhenUserUpdated.getTime();
+  
+      if (dateFinal > 2) {
+        if (
+          Compare(
+            startQuestQuestion.data[startQuestQuestion.data.length - 1],
+            req.body.changeAnswerAddedObj
+          )
+        ) {
+          let AnswerAddedOrNot = startQuestQuestion.addedAnswerByUser;
+  
+          if (typeof req.body.changeAnswerAddedObj.selected !== "string") {
+            req.body.changeAnswerAddedObj.selected.map(async (option) => {
+              if (option.addedAnswerByUser === true) {
+                await User.findOneAndUpdate(
+                  { uuid: req.body.uuid },
+                  { $inc: { addedAnswers: 1 } }
+                );
+                AnswerAddedOrNot = option.question;
+                const addAnswer = {
+                  question: option.question,
+                  selected: true,
+                };
+                InfoQuestQuestions.findByIdAndUpdate(
+                  { _id: req.body.questId },
+                  { $push: { QuestAnswers: addAnswer } }
+                ).exec();
+              }
+            });
+          }
+  
+          responseMsg = "Start Quest Updated Successfully";
+          startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
+  
+          await StartQuests.findByIdAndUpdate(
+            { _id: startQuestQuestion._id },
+            { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
+            { upsert: true }
+          ).exec();
+  
+          // Create Ledger
+          await createLedger(
           {
             uuid: req.body.uuid,
             txUserAction: "questCompletedChange",
@@ -375,37 +436,52 @@ const updateChangeAnsStartQuest = async (req, res) => {
             txData: startQuestQuestion._id,
             // txDescription : "User changes their answer on a quest"
           })
-
+          // Create Ledger
+          await createLedger(
+          {
+            uuid : req.body.uuid,
+            txUserAction : "questCompletedChange",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "DAO",
+            txFrom : "DAO Treasury",
+            txTo : req.body.uuid,
+            txAmount : 0.06,
+            // txData : startQuestQuestion._id,
+            // txDescription : "Incentive for changing a quest answer"
+          })
+          const getAmount = await getTreasury();
+          await updateTreasury({ amount: getAmount - 0.06 })
+  
+        } else {
+          responseMsg = "Answer has not changed";
+        }
       } else {
-        responseMsg = "Answer has not changed";
+        responseMsg = "You can change your answer once every 1 hour";
       }
-    } else {
-      responseMsg = "You can change your answer once every 1 hour";
+  
+      res.status(200).json({ message: responseMsg, startQuestID: startQuestQuestion._id });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: `An error occurred while updateChangeAnsStartQuest: ${err.message}` });
     }
-
-    res.status(200).json({ message: responseMsg, startQuestID: startQuestQuestion._id });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: `An error occurred while updateChangeAnsStartQuest: ${err.message}` });
-  }
-
-  function Compare(obj1, obj2) {
-    const clonedObj1 = { ...obj1 };
-    const clonedObj2 = { ...obj2 };
-
-    delete clonedObj1.created;
-    delete clonedObj2.created;
-
-    const stringifiedObj1 = JSON.stringify(clonedObj1);
-    const stringifiedObj2 = JSON.stringify(clonedObj2);
-
-    if (stringifiedObj1 === stringifiedObj2) {
-      return false;
-    } else {
-      return true;
+  
+    function Compare(obj1, obj2) {
+      const clonedObj1 = { ...obj1 };
+      const clonedObj2 = { ...obj2 };
+  
+      delete clonedObj1.created;
+      delete clonedObj2.created;
+  
+      const stringifiedObj1 = JSON.stringify(clonedObj1);
+      const stringifiedObj2 = JSON.stringify(clonedObj2);
+  
+      if (stringifiedObj1 === stringifiedObj2) {
+        return false;
+      } else {
+        return true;
+      }
     }
   }
-}
 const getRankedQuestPercent = async (req, res) => {
   try {
     const StartQuestsData = await StartQuests.find({
