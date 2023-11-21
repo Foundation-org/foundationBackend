@@ -1,3 +1,4 @@
+const { QUEST_CREATED_AMOUNT } = require("../constants");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const StartQuests = require("../models/StartQuests");
 const User = require("../models/UserModel");
@@ -72,12 +73,12 @@ const createInfoQuestQuest = async (req, res) => {
           txAuth : "DAO",
           txFrom : user.uuid,
           txTo : "DAO Treasury",
-          txAmount : "2.00",
+          txAmount : QUEST_CREATED_AMOUNT,
           // txData : createdQuestion._id,
           // txDescription : "Incentive for creating a quest"
         })
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount + 2.00 })
+        await updateTreasury({ amount: getAmount + QUEST_CREATED_AMOUNT })
 
       res.status(201).json({ message: "Quest has been Created", questID: createdQuestion._id });
     } catch (err) {

@@ -14,7 +14,12 @@ module.exports = {
   SYSTEM_MESSAGES: [
     "Correct provided statement to standard English. Shortest responses only.",
     "Correct provided text to standard English. Shortest responses only.",
-    // 'I will give you a statement and a reply. Tell me if the reply can be relevant. Shortest answer only.', // new
-    // 'Reject the statement if it is a fragment or non-sensical. Shortest answer only.' // new
   ],
+  ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,
+  QUEST_COMPLETED_AMOUNT: 0.96,
+  QUEST_COMPLETED_CHANGE_AMOUNT: 0.06,
+  QUEST_CREATED_AMOUNT: 2.00,
+  QUEST_OPTION_ADDED_AMOUNT: 0.06,
+  QUEST_OPTION_CONTENTION_GIVEN_AMOUNT: 0.10,
+  QUEST_OPTION_CONTENTION_REMOVED_AMOUNT: 0.10,
 };

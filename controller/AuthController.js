@@ -8,6 +8,7 @@ const { createToken } = require("../service/auth");
 const { createLedger } = require("../utils/createLedger");
 const { isGoogleEmail } = require("../utils/checkGoogleAccount");
 const { createTreasury, getTreasury, updateTreasury } = require("../utils/treasuryService");
+const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
 
 
 const changePassword = async (req, res) => {
@@ -357,12 +358,12 @@ const verify = async (req, res) => {
           txAuth : "DAO",
           txFrom : "DAO Treasury",
           txTo : user.uuid,
-          txAmount : 0.96,
+          txAmount : ACCOUNT_BADGE_ADDED_AMOUNT,
           // txData : user.badges[0]._id,
           // txDescription : "Incentive for adding badges"
         })
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount - 0.96 })
+        await updateTreasury({ amount: getAmount - ACCOUNT_BADGE_ADDED_AMOUNT })
       return res.status(200).send({
         message: "Gmail Account verified",
       });

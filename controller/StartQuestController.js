@@ -4,6 +4,7 @@ const User = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
 const crypto = require("crypto");
 const { getTreasury, updateTreasury } = require("../utils/treasuryService");
+const { QUEST_COMPLETED_AMOUNT, QUEST_COMPLETED_CHANGE_AMOUNT, QUEST_OPTION_ADDED_AMOUNT, QUEST_OPTION_CONTENTION_GIVEN_AMOUNT } = require("../constants");
 
 const updateViolationCounter = async (req, res) => {
   try {
@@ -74,13 +75,13 @@ const createStartQuest = async (req, res) => {
             txAuth : "DAO",
             txFrom : req.body.uuid,
             txTo : "DAO Treasury",
-            txAmount : "0.10",
+            txAmount : QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
             // txData : req.body.uuid,
             // txDescription : "DisInsentive for giving contention"
           }
         )
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount + 0.10 })
+        await updateTreasury({ amount: getAmount + QUEST_OPTION_CONTENTION_GIVEN_AMOUNT })
       }
   
       await User.findOneAndUpdate(
@@ -170,12 +171,12 @@ const createStartQuest = async (req, res) => {
             txAuth : "DAO",
             txFrom : "DAO Treasury",
             txTo : req.body.uuid,
-            txAmount : "0.06",
+            txAmount : QUEST_OPTION_ADDED_AMOUNT,
             // txData : question._id,
             // txDescription : "Incentive for adding answer to quest"
           })
           const getAmount = await getTreasury();
-          await updateTreasury({ amount: getAmount + 2.00 })
+          await updateTreasury({ amount: getAmount + QUEST_OPTION_ADDED_AMOUNT })
       }
   
       // Check if QuestionCorrect is not "Not Selected" and push the ID to completedQuests
@@ -206,12 +207,12 @@ const createStartQuest = async (req, res) => {
           txAuth : "DAO",
           txFrom : "DAO Treasury",
           txTo : req.body.uuid,
-          txAmount : "0.96",
+          txAmount : QUEST_COMPLETED_AMOUNT,
           // txData : question._id,
           // txDescription : "Incentive for completing quests"
         })
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount - 0.96 })
+        await updateTreasury({ amount: getAmount - QUEST_COMPLETED_AMOUNT })
   
       res.status(200).json({ message: "Start Quest Created Successfully", startQuestID: question._id  });
     } catch (err) {
@@ -359,13 +360,13 @@ const updateChangeAnsStartQuest = async (req, res) => {
             txAuth : "DAO",
             txFrom : req.body.uuid,
             txTo : "DAO Treasury",
-            txAmount : "0.10",
+            txAmount : QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
             // txData : req.body.uuid,
             // txDescription : "DisInsentive for giving contention"
           }
         )
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount + 0.10 })
+        await updateTreasury({ amount: getAmount + QUEST_OPTION_CONTENTION_GIVEN_AMOUNT })
       }
   
       await User.findOneAndUpdate(
@@ -445,12 +446,12 @@ const updateChangeAnsStartQuest = async (req, res) => {
             txAuth : "DAO",
             txFrom : "DAO Treasury",
             txTo : req.body.uuid,
-            txAmount : 0.06,
+            txAmount : QUEST_COMPLETED_CHANGE_AMOUNT,
             // txData : startQuestQuestion._id,
             // txDescription : "Incentive for changing a quest answer"
           })
           const getAmount = await getTreasury();
-          await updateTreasury({ amount: getAmount - 0.06 })
+          await updateTreasury({ amount: getAmount - QUEST_COMPLETED_CHANGE_AMOUNT })
   
         } else {
           responseMsg = "Answer has not changed";
