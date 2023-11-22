@@ -81,7 +81,7 @@ const createStartQuest = async (req, res) => {
           }
         )
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount + QUEST_OPTION_CONTENTION_GIVEN_AMOUNT })
+        await updateTreasury({ amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT, inc: true })
       }
   
       await User.findOneAndUpdate(
@@ -176,7 +176,7 @@ const createStartQuest = async (req, res) => {
             // txDescription : "Incentive for adding answer to quest"
           })
           const getAmount = await getTreasury();
-          await updateTreasury({ amount: getAmount + QUEST_OPTION_ADDED_AMOUNT })
+          await updateTreasury({ amount: QUEST_OPTION_ADDED_AMOUNT, inc: true })
       }
   
       // Check if QuestionCorrect is not "Not Selected" and push the ID to completedQuests
@@ -212,7 +212,7 @@ const createStartQuest = async (req, res) => {
           // txDescription : "Incentive for completing quests"
         })
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount - QUEST_COMPLETED_AMOUNT })
+        await updateTreasury({ amount: QUEST_COMPLETED_AMOUNT, dec: true })
   
       res.status(200).json({ message: "Start Quest Created Successfully", startQuestID: question._id  });
     } catch (err) {
@@ -314,9 +314,9 @@ const updateChangeAnsStartQuest = async (req, res) => {
       };
   
       // DECREMENT
-      if (startQuestQuestion.data.length > 1) {
+      if (startQuestQuestion?.data.length > 1) {
         let lstTimeSelectionsAndContentions =
-          startQuestQuestion.data[startQuestQuestion.data.length - 1];
+          startQuestQuestion?.data[startQuestQuestion?.data.length - 1];
   
         // Process both 'contended' and 'selected' arrays for decrement
         await Promise.all([
@@ -366,7 +366,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
           }
         )
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount + QUEST_OPTION_CONTENTION_GIVEN_AMOUNT })
+        await updateTreasury({ amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT, inc: true })
       }
   
       await User.findOneAndUpdate(
@@ -374,11 +374,11 @@ const updateChangeAnsStartQuest = async (req, res) => {
         { $inc: { contentionsGiven: contentionsGivenIncrement } }
       );
   
-      let startQuestAnswersSelected = startQuestQuestion.data;
+      let startQuestAnswersSelected = startQuestQuestion?.data;
       let responseMsg = "";
   
       let timeWhenUserUpdated = new Date(
-        startQuestQuestion.data[startQuestQuestion.data.length - 1].created
+        startQuestQuestion?.data[startQuestQuestion?.data.length - 1].created
       );
   
       let date1 = new Date();
@@ -389,7 +389,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
       if (dateFinal > 2) {
         if (
           Compare(
-            startQuestQuestion.data[startQuestQuestion.data.length - 1],
+            startQuestQuestion?.data[startQuestQuestion?.data?.length - 1],
             req.body.changeAnswerAddedObj
           )
         ) {
@@ -451,7 +451,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
             // txDescription : "Incentive for changing a quest answer"
           })
           const getAmount = await getTreasury();
-          await updateTreasury({ amount: getAmount - QUEST_COMPLETED_CHANGE_AMOUNT })
+          await updateTreasury({ amount: QUEST_COMPLETED_CHANGE_AMOUNT, dec: true })
   
         } else {
           responseMsg = "Answer has not changed";

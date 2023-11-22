@@ -4,6 +4,7 @@ const StartQuests = require("../models/StartQuests");
 const User = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
 const crypto = require("crypto");
+const { getTreasury, updateTreasury } = require("../utils/treasuryService");
 const BookmarkQuests = require("../models/BookmarkQuests");
 
 const createInfoQuestQuest = async (req, res) => {
@@ -78,7 +79,7 @@ const createInfoQuestQuest = async (req, res) => {
           // txDescription : "Incentive for creating a quest"
         })
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount + QUEST_CREATED_AMOUNT })
+        await updateTreasury({ amount: QUEST_CREATED_AMOUNT, inc: true })
 
       res.status(201).json({ message: "Quest has been Created", questID: createdQuestion._id });
     } catch (err) {

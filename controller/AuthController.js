@@ -363,7 +363,7 @@ const verify = async (req, res) => {
           // txDescription : "Incentive for adding badges"
         })
         const getAmount = await getTreasury();
-        await updateTreasury({ amount: getAmount - ACCOUNT_BADGE_ADDED_AMOUNT })
+        await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true })
       return res.status(200).send({
         message: "Gmail Account verified",
       });

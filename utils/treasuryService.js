@@ -14,20 +14,29 @@ module.exports.createTreasury = async (req, res) => {
       }
 };
 
-module.exports.updateTreasury = async ({ amount }) => {
+module.exports.updateTreasury = async ({ amount, inc, dec }) => {
     try {
-        const treasury = await Treasury.updateOne({ $set: { amount } });
+        const treasury = await Treasury.updateOne({ [inc ? '$inc' : '$dec']: { amount } });
         if(!treasury) throw new Error("No such Treasury!");
         return treasury.modifiedCount;
     } catch (error) {
       console.error(error);
     }
 };
+// module.exports.updateTreasury = async ({ amount }) => {
+//     try {
+//         const treasury = await Treasury.updateOne({ $inc: { amount } });
+//         if(!treasury) throw new Error("No such Treasury!");
+//         return treasury.modifiedCount;
+//     } catch (error) {
+//       console.error(error);
+//     }
+// };
 
 module.exports.getTreasury = async () => {
     try {
         const getTreasury = await Treasury.findOne();
-        return getTreasury.amount.toString()
+        return parseFloat(getTreasury.amount.toString())
       } catch (error) {
         console.error(error);
       }
