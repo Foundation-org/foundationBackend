@@ -105,16 +105,16 @@ const getAllBookmarkQuestions = async (req, res) => {
         .skip(skip)
         .limit(pageSize);
   
-      const mapPromises = Questions.map(async function (record) {
-        return InfoQuestQuestions.findOne({
-          _id: record.questForeignKey,
+        const mapPromises = Questions.map(async function (record) {
+          return InfoQuestQuestions.findOne({
+            _id: record.questForeignKey,
+          });
         });
-      });
-  
-      const response = await Promise.all(mapPromises);
-      return Promise.all(mapPromises).then(() => {
+        
+        const response = await Promise.all(mapPromises);
         res.status(200).json(response);
-      });
+        
+      
     } catch (err) {
       res.status(500).send(err);
     }

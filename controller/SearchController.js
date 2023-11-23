@@ -32,7 +32,10 @@ const searchBookmarks = async (req, res) => {
         $or: [{ Question: { $regex: searchTerm, $options: "i" } }],
       });
       const reversedResults = results.reverse();
-      res.status(200).json(reversedResults);
+      res.status(200).json({
+        data: reversedResults,
+        hasNextPage: false,
+      });
     } catch (err) {
       res.status(500).send("Internal Server Error");
     }

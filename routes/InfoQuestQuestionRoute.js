@@ -15,6 +15,7 @@ router.post("/getAllQuestsWithDefaultStatus", InfoQuestQuestionController.getAll
 router.post("/getAllQuestsWithCorrectStatus", InfoQuestQuestionController.getAllQuestsWithCorrectStatus)
 router.post("/getAllQuestsWithIncorrectStatus", InfoQuestQuestionController.getAllQuestsWithIncorrectStatus)
 router.post("/getAllQuestsWithChangeAnsStatus", InfoQuestQuestionController.getAllQuestsWithChangeAnsStatus)
+router.post("/testBookmarks",InfoQuestQuestionController.testBookmarks)
 
 module.exports = router;
 

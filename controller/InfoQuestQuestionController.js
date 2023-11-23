@@ -3,6 +3,7 @@ const StartQuests = require("../models/StartQuests");
 const User = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
 const crypto = require("crypto");
+const BookmarkQuests = require("../models/BookmarkQuests");
 
 const createInfoQuestQuest = async (req, res) => {
     try {
@@ -98,19 +99,37 @@ const getAllQuests = async (req, res) => {
     }
   }
 const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
-    try {
-      let allQuestions;
-      // Add the uuid condition to the filter object if filter is true
-      let filterObj = {};
-      if (req.body.filter === true) {
+  try {
+    let allQuestions;
+
+    let filterObj = {};
+    if (req.body.filter === true) {
+      if (req.body.Page === "Bookmark") {
+        filterObj.createdBy = req.body.uuid;
+      } else {
         filterObj.uuid = req.body.uuid;
       }
-  
-      // Add the type condition to the filter object if type is sent from the frontend
-      if (req.body.type) {
-        filterObj.whichTypeQuestion = req.body.type;
-      }
-      // Query the database with skip and limit options to get questions for the first page
+    }
+
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+
+    if (req.body.Page === "Bookmark") {
+      console.log("running");
+      filterObj.uuid = req.body.uuid;
+      const Questions = await BookmarkQuests.find(filterObj).sort(
+        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        });
+      });
+
+      allQuestions = await Promise.all(mapPromises);
+    } else {
       allQuestions = await InfoQuestQuestions.find(filterObj).sort(
         req.body.sort === "Newest First"
           ? { createdAt: -1 }
@@ -119,7 +138,8 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
           : req.body.sort === "Most Popular"
           ? { interactingCounter: -1 }
           : "createdAt"
-      ); // Sort by createdAt field in descending order
+      );
+    }
   
       if (req.body.uuid === "" || req.body.uuid === undefined) {
         res.status(200).json(allQuestions);
@@ -156,19 +176,37 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
     }
   }
 const getAllQuestsWithAnsweredStatus = async (req, res) => {
-    try {
-      let allQuestions;
-      // Add the uuid condition to the filter object if filter is true
-      let filterObj = {};
-      if (req.body.filter === true) {
+  try {
+    let allQuestions;
+
+    let filterObj = {};
+    if (req.body.filter === true) {
+      if (req.body.Page === "Bookmark") {
+        filterObj.createdBy = req.body.uuid;
+      } else {
         filterObj.uuid = req.body.uuid;
       }
-  
-      // Add the type condition to the filter object if type is sent from the frontend
-      if (req.body.type) {
-        filterObj.whichTypeQuestion = req.body.type;
-      }
-      // Query the database with skip and limit options to get questions for the first page
+    }
+
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+
+    if (req.body.Page === "Bookmark") {
+      console.log("running");
+      filterObj.uuid = req.body.uuid;
+      const Questions = await BookmarkQuests.find(filterObj).sort(
+        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        });
+      });
+
+      allQuestions = await Promise.all(mapPromises);
+    } else {
       allQuestions = await InfoQuestQuestions.find(filterObj).sort(
         req.body.sort === "Newest First"
           ? { createdAt: -1 }
@@ -178,6 +216,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
           ? { interactingCounter: -1 }
           : "createdAt"
       );
+    }
   
       if (req.body.uuid === "" || req.body.uuid === undefined) {
         res.status(200).json(allQuestions);
@@ -272,7 +311,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
   }
 
   const getAllQuestsWithDefaultStatus = async (req, res) => {
-    const { uuid, _page, _limit, filter, sort, type } = req.body;
+    const { uuid, _page, _limit, filter, sort, type,Page } = req.body;
     const page = parseInt(_page);
     const pageSize = parseInt(_limit);
   
@@ -280,19 +319,37 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     const skip = (page - 1) * pageSize;
     let allQuestions = [];
     let filterObj = {};
+    let totalQuestionsCount;
   
-    // Add the uuid condition to the filter object if filter is true
     if (filter === true) {
-      filterObj.uuid = uuid;
-    }
+        if (Page === "Bookmark") {
+          filterObj.createdBy = uuid;
+        } else {
+          filterObj.uuid = uuid;
+        }
+      }
   
-    // Add the type condition to the filter object if type is sent from the frontend
-    if (type) {
-      filterObj.whichTypeQuestion = type;
-    }
-    
-    // Query the database with skip and limit options to get questions for the requested page
-    allQuestions = await InfoQuestQuestions.find(filterObj)
+      if (type) {
+        filterObj.whichTypeQuestion = type;
+      }
+  
+      if (Page === "Bookmark") {
+        console.log("running");
+        filterObj.uuid = uuid;
+        const Questions = await BookmarkQuests.find(filterObj).sort(
+          sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+        );
+  
+        const mapPromises = Questions.map(async function (record) {
+          return await InfoQuestQuestions.findOne({
+            _id: record.questForeignKey,
+          });
+        });
+  
+        allQuestions = await Promise.all(mapPromises);
+        totalQuestionsCount = await BookmarkQuests.countDocuments(filterObj);
+      } else {
+        allQuestions = await InfoQuestQuestions.find(filterObj)
       .sort(
         sort === "Newest First"
           ? { createdAt: -1 }
@@ -304,8 +361,11 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       ) // Sort by createdAt field in descending order
       .skip(skip)
       .limit(pageSize);
+       totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
+      }
+    // Query the database with skip and limit options to get questions for the requested page
+    
   
-    const totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
   
     const result = await getQuestionsWithStatus(allQuestions, uuid);
   
@@ -316,19 +376,37 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
   };
   
 const getAllQuestsWithCorrectStatus = async (req, res) => {
-    try {
-      let allQuestions;
-      // Add the uuid condition to the filter object if filter is true
-      let filterObj = {};
-      if (req.body.filter === true) {
+  try {
+    let allQuestions;
+
+    let filterObj = {};
+    if (req.body.filter === true) {
+      if (req.body.Page === "Bookmark") {
+        filterObj.createdBy = req.body.uuid;
+      } else {
         filterObj.uuid = req.body.uuid;
       }
-  
-      // Add the type condition to the filter object if type is sent from the frontend
-      if (req.body.type) {
-        filterObj.whichTypeQuestion = req.body.type;
-      }
-      // Query the database with skip and limit options to get questions for the first page
+    }
+
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+
+    if (req.body.Page === "Bookmark") {
+      console.log("running");
+      filterObj.uuid = req.body.uuid;
+      const Questions = await BookmarkQuests.find(filterObj).sort(
+        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        });
+      });
+
+      allQuestions = await Promise.all(mapPromises);
+    } else {
       allQuestions = await InfoQuestQuestions.find(filterObj).sort(
         req.body.sort === "Newest First"
           ? { createdAt: -1 }
@@ -337,7 +415,8 @@ const getAllQuestsWithCorrectStatus = async (req, res) => {
           : req.body.sort === "Most Popular"
           ? { interactingCounter: -1 }
           : "createdAt"
-      ); // Sort by createdAt field in descending order
+      );
+    }
   
       if (req.body.uuid === "" || req.body.uuid === undefined) {
         res.status(200).json(allQuestions);
@@ -419,20 +498,37 @@ const getAllQuestsWithCorrectStatus = async (req, res) => {
     }
   }
 const getAllQuestsWithIncorrectStatus = async (req, res) => {
-    try {
-      // Query the database with skip and limit options to get questions for the current page
-      let allQuestions;
-      // Add the uuid condition to the filter object if filter is true
-      let filterObj = {};
-      if (req.body.filter === true) {
+  try {
+    let allQuestions;
+
+    let filterObj = {};
+    if (req.body.filter === true) {
+      if (req.body.Page === "Bookmark") {
+        filterObj.createdBy = req.body.uuid;
+      } else {
         filterObj.uuid = req.body.uuid;
       }
-  
-      // Add the type condition to the filter object if type is sent from the frontend
-      if (req.body.type) {
-        filterObj.whichTypeQuestion = req.body.type;
-      }
-      // Query the database with skip and limit options to get questions for the first page
+    }
+
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+
+    if (req.body.Page === "Bookmark") {
+      console.log("running");
+      filterObj.uuid = req.body.uuid;
+      const Questions = await BookmarkQuests.find(filterObj).sort(
+        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        });
+      });
+
+      allQuestions = await Promise.all(mapPromises);
+    } else {
       allQuestions = await InfoQuestQuestions.find(filterObj).sort(
         req.body.sort === "Newest First"
           ? { createdAt: -1 }
@@ -441,7 +537,8 @@ const getAllQuestsWithIncorrectStatus = async (req, res) => {
           : req.body.sort === "Most Popular"
           ? { interactingCounter: -1 }
           : "createdAt"
-      ); // Sort by createdAt field in descending order
+      );
+    }
   
       if (req.body.uuid === "" || req.body.uuid === undefined) {
         res.status(200).json(allQuestions);
@@ -521,20 +618,37 @@ const getAllQuestsWithIncorrectStatus = async (req, res) => {
     }
   }
 const getAllQuestsWithChangeAnsStatus = async (req, res) => {
-    try {
-      // Query the database with skip and limit options to get questions for the current page
-      let allQuestions;
-      // Add the uuid condition to the filter object if filter is true
-      let filterObj = {};
-      if (req.body.filter === true) {
+  try {
+    let allQuestions;
+
+    let filterObj = {};
+    if (req.body.filter === true) {
+      if (req.body.Page === "Bookmark") {
+        filterObj.createdBy = req.body.uuid;
+      } else {
         filterObj.uuid = req.body.uuid;
       }
-  
-      // Add the type condition to the filter object if type is sent from the frontend
-      if (req.body.type) {
-        filterObj.whichTypeQuestion = req.body.type;
-      }
-      // Query the database with skip and limit options to get questions for the first page
+    }
+
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+
+    if (req.body.Page === "Bookmark") {
+      console.log("running");
+      filterObj.uuid = req.body.uuid;
+      const Questions = await BookmarkQuests.find(filterObj).sort(
+        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        });
+      });
+
+      allQuestions = await Promise.all(mapPromises);
+    } else {
       allQuestions = await InfoQuestQuestions.find(filterObj).sort(
         req.body.sort === "Newest First"
           ? { createdAt: -1 }
@@ -543,7 +657,8 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
           : req.body.sort === "Most Popular"
           ? { interactingCounter: -1 }
           : "createdAt"
-      ); // Sort by createdAt field in descending order
+      );
+    }
   
       if (req.body.uuid === "" || req.body.uuid === undefined) {
         res.status(200).json(allQuestions);
@@ -585,6 +700,114 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       res.status(500).send(err);
     }
   }
+
+  const testBookmarks = async (req, res) => {
+    try {
+      let allQuestions;
+  
+      let filterObj = {};
+      if (req.body.filter === true) {
+        if (req.body.Page === "Bookmark") {
+          filterObj.createdBy = req.body.uuid;
+        } else {
+          filterObj.uuid = req.body.uuid;
+        }
+      }
+  
+      if (req.body.type) {
+        filterObj.whichTypeQuestion = req.body.type;
+      }
+  
+      if (req.body.Page === "Bookmark") {
+        console.log("running");
+        filterObj.uuid = req.body.uuid;
+        const Questions = await BookmarkQuests.find(filterObj).sort(
+          req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+        );
+  
+        const mapPromises = Questions.map(async function (record) {
+          return await InfoQuestQuestions.findOne({
+            _id: record.questForeignKey,
+          });
+        });
+  
+        allQuestions = await Promise.all(mapPromises);
+      } else {
+        allQuestions = await InfoQuestQuestions.find(filterObj).sort(
+          req.body.sort === "Newest First"
+            ? { createdAt: -1 }
+            : req.body.sort === "Last Updated"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
+        );
+      }
+  
+      const startedQuestions = await StartQuests.find({
+        uuid: req.body.uuid,
+      });
+  
+      let Result = [];
+      allQuestions.forEach((rcrd) => {
+        startedQuestions.forEach((rec) => {
+          if (rec.questForeignKey === rcrd._id.toString()) {
+            if (
+              rcrd.QuestionCorrect !== "Not Selected" &&
+              rcrd.whichTypeQuestion !== "ranked choise"
+            ) {
+              if (
+                rcrd.whichTypeQuestion === "yes/no" ||
+                rcrd.whichTypeQuestion === "agree/disagree"
+              ) {
+                const selectedAnswers1 = rec.data[rec.data.length - 1].selected
+                  .toLowerCase()
+                  .trim();
+                const selectedAnswers2 = rcrd.QuestionCorrect.toLowerCase().trim();
+  
+                const isCorrect =
+                  JSON.stringify(selectedAnswers1) ===
+                  JSON.stringify(selectedAnswers2);
+  
+                if (isCorrect) {
+                  rcrd.startStatus = "correct";
+                  Result.push(rcrd);
+                }
+              } else {
+                const selectedAnswers1 = rec.data[rec.data.length - 1].selected
+                  .map((item) => item.question.toLowerCase().trim())
+                  .sort();
+                const selectedAnswers2 = rcrd.QuestAnswersSelected.map((item) =>
+                  item.answers.toLowerCase().trim()
+                ).sort();
+  
+                const isCorrect =
+                  JSON.stringify(selectedAnswers1) ===
+                  JSON.stringify(selectedAnswers2);
+  
+                if (isCorrect) {
+                  rcrd.startStatus = "correct";
+                  Result.push(rcrd);
+                }
+              }
+            }
+          }
+        });
+      });
+  
+      const start = req.body.start;
+      const end = req.body.end;
+  
+      res.status(200).json({
+        data: Result.slice(start, end),
+        hasNextPage: end < Result.length,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send(err.message || "Internal Server Error");
+    }
+  };
+  
 
 async function getQuestionsWithStatus(allQuestions, uuid) {
     try {
@@ -668,4 +891,5 @@ module.exports = {
     getAllQuestsWithCorrectStatus,
     getAllQuestsWithIncorrectStatus,
     getAllQuestsWithChangeAnsStatus,
+    testBookmarks,
 }
