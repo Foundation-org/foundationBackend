@@ -16,7 +16,7 @@ module.exports.createTreasury = async (req, res) => {
 
 module.exports.updateTreasury = async ({ amount, inc, dec }) => {
     try {
-        const treasury = await Treasury.updateOne({ [inc ? '$inc' : '$dec']: { amount } });
+        const treasury = await Treasury.updateOne({ $inc: { amount: inc ? amount : -amount } });
         if(!treasury) throw new Error("No such Treasury!");
         return treasury.modifiedCount;
     } catch (error) {

@@ -8,7 +8,8 @@ const { createToken } = require("../service/auth");
 const { createLedger } = require("../utils/createLedger");
 const { isGoogleEmail } = require("../utils/checkGoogleAccount");
 const { createTreasury, getTreasury, updateTreasury } = require("../utils/treasuryService");
-const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
+const { ACCOUNT_BADGE_ADDED_AMOUNT, ACCOUNT_SIGNUP_AMOUNT } = require("../constants");
+const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 
 
 const changePassword = async (req, res) => {
@@ -362,8 +363,13 @@ const verify = async (req, res) => {
           // txData : user.badges[0]._id,
           // txDescription : "Incentive for adding badges"
         })
-        const getAmount = await getTreasury();
+        // 
+        // Decrement the Treasury
         await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true })
+        await updateTreasury({ amount: ACCOUNT_SIGNUP_AMOUNT, dec: true })
+        
+        // Increment the UserBalance
+        await updateUserBalance({ uuid: user.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT+ACCOUNT_SIGNUP_AMOUNT, inc: true })
       return res.status(200).send({
         message: "Gmail Account verified",
       });
@@ -375,7 +381,6 @@ const verify = async (req, res) => {
 const deleteByUUID = async(req, res) => {
     try {
       const { uuid } = req.params;
-      const user = await User.deleteOne({uuid});
       // Create Ledger
       await createLedger(
         {
@@ -390,6 +395,14 @@ const deleteByUUID = async(req, res) => {
           // txDescription : "User deletes account"
         }
       )
+      const userBalance = await getUserBalance(uuid)
+      if(userBalance > 0){
+        // Increment the Treasury
+        await updateTreasury({ amount: userBalance, inc: true })
+        // Decrement the UserBalance
+        await updateUserBalance({ uuid, amount: QUEST_CREATED_AMOUNT, dec: true })
+      }
+      await User.deleteOne({uuid});
       res.status(201).send("User has been deleted");
     } catch (error) {
       console.error(error.message);

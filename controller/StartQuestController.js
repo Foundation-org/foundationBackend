@@ -80,8 +80,10 @@ const createStartQuest = async (req, res) => {
             // txDescription : "DisInsentive for giving contention"
           }
         )
-        const getAmount = await getTreasury();
+        // Increment the Treasury
         await updateTreasury({ amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT, inc: true })
+        // Decrement the UserBalance
+        await updateUserBalance({ uuid: req.body.uuid, amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT, dec: true })
       }
   
       await User.findOneAndUpdate(

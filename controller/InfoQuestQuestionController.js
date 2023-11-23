@@ -5,10 +5,13 @@ const User = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
 const crypto = require("crypto");
 const { getTreasury, updateTreasury } = require("../utils/treasuryService");
+const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const BookmarkQuests = require("../models/BookmarkQuests");
 
 const createInfoQuestQuest = async (req, res) => {
     try {
+      const userBalance = await getUserBalance(req.body.uuid);
+      if(userBalance < QUEST_CREATED_AMOUNT) throw new Error("The balance is insufficient to create a Quest!")
       const question = await new InfoQuestQuestions({
         Question: req.body.Question,
         QuestionCorrect: req.body.QuestionCorrect,
@@ -78,12 +81,15 @@ const createInfoQuestQuest = async (req, res) => {
           // txData : createdQuestion._id,
           // txDescription : "Incentive for creating a quest"
         })
-        const getAmount = await getTreasury();
+        // Increment the Treasury
         await updateTreasury({ amount: QUEST_CREATED_AMOUNT, inc: true })
+        // Decrement the UserBalance
+        await updateUserBalance({ uuid: req.body.uuid, amount: QUEST_CREATED_AMOUNT, dec: true })
 
       res.status(201).json({ message: "Quest has been Created", questID: createdQuestion._id });
-    } catch (err) {
-      res.status(500).send("Not Created 2" + err.message);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while createInfoQuestQuest: ${error.message}` });
     }
   }
 const constraintForUniqueQuestion = async (req, res) => {

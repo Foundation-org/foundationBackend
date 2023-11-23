@@ -36,6 +36,10 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    balance: {
+      type: Number,
+      default: 0.00,
+    },
     walletAddr: {
       type: String,
     },
