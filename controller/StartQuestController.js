@@ -5,6 +5,7 @@ const { createLedger } = require("../utils/createLedger");
 const crypto = require("crypto");
 const { getTreasury, updateTreasury } = require("../utils/treasuryService");
 const { QUEST_COMPLETED_AMOUNT, QUEST_COMPLETED_CHANGE_AMOUNT, QUEST_OPTION_ADDED_AMOUNT, QUEST_OPTION_CONTENTION_GIVEN_AMOUNT } = require("../constants");
+const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 
 const updateViolationCounter = async (req, res) => {
   try {
@@ -52,6 +53,8 @@ const createStartQuest = async (req, res) => {
       const contentionsGivenIncrement = contendedArray.length;
       // if user gives contention
       if(contendedArray.length) {
+        const userBalance = await getUserBalance(req.body.uuid);
+        if(userBalance < QUEST_OPTION_CONTENTION_GIVEN_AMOUNT) throw new Error("The balance is insufficient to give the contention!")  
         // Create Ledger
         await createLedger(
           {
@@ -339,6 +342,8 @@ const updateChangeAnsStartQuest = async (req, res) => {
       const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
       const contentionsGivenIncrement = contendedArray.length;
       if(contendedArray.length) {
+        const userBalance = await getUserBalance(req.body.uuid);
+        if(userBalance < QUEST_OPTION_CONTENTION_GIVEN_AMOUNT) throw new Error("The balance is insufficient to give the contention!")  
         // Create Ledger
         await createLedger(
           {
@@ -367,8 +372,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
             // txDescription : "DisInsentive for giving contention"
           }
         )
-        const getAmount = await getTreasury();
+        // increment the Treasury
         await updateTreasury({ amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT, inc: true })
+        // Decrement the User Balance
+        await updateUserBalance({ amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT, dec: true })
       }
   
       await User.findOneAndUpdate(
