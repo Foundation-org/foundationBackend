@@ -5,6 +5,8 @@ const colors = require("colors");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
+import passport from "passport"
+import '../service/passport'
 
 dotenv.config();
 
@@ -13,6 +15,10 @@ dotenv.config();
 // middlewares
 app.use(cors());
 app.options("*", cors());
+
+// passport
+app.use(passport.initialize())
+app.use(passport.session()) //important because deserializeUser has to decode the information from the session id
 
 app.use(express.json());
 app.use(helmet());
