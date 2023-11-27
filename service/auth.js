@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config/env");
+const { JWT_SECRET, CLIENT_ID } = require("../config/env");
+const { OAuth2Client } = require('google-auth-library');
+
 module.exports.hashedPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
   const hashed = await bcrypt.hash(password, salt);
@@ -13,4 +15,20 @@ module.exports.createToken = (user) => {
   return jwt.sign(user, JWT_SECRET, {
     expiresIn: "7d",
   });
+};
+
+module.exports.googleVerify = async(token) => {
+  const client = new OAuth2Client(CLIENT_ID);
+  try {
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+    });
+    const payload = ticket.getPayload();
+    // const userid = payload['sub'];
+    console.log(payload)
+    return payload
+  } catch (error) {
+      console.log(error)
+  }
 };

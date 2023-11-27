@@ -12,7 +12,7 @@ dotenv.config()
 const GitHub = gitHubStrategy.Strategy
 const Google = googleStrategy.Strategy
 const Twitter = twitterStrategy.Strategy
-const Local = localStrategy.Strategy
+// const Local = localStrategy.Strategy
 
 passport.serializeUser(function (user, done) {
   done(null, user._id)

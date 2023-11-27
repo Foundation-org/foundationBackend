@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 // const nodemailer = require("nodemailer");
 const AWS = require("aws-sdk")
 const crypto = require("crypto");
-const { createToken } = require("../service/auth");
+const { createToken, googleVerify } = require("../service/auth");
 const { createLedger } = require("../utils/createLedger");
 const { isGoogleEmail } = require("../utils/checkGoogleAccount");
 const { createTreasury, getTreasury, updateTreasury } = require("../utils/treasuryService");
@@ -56,11 +56,15 @@ const changePassword = async (req, res) => {
 
 const signUpUser = async (req, res) => {
   try {
+    if(req.query.GoogleAccount){
+      signUpUserBySocialLogin(req, res)
+    }
     const alreadyUser = await User.findOne({ email: req.body.userEmail });
     if(alreadyUser) throw new Error("Email Already Exists");
 
     const checkGoogleEmail = await isGoogleEmail(req.body.userEmail)
     if(checkGoogleEmail) throw new Error("Please Signup with Google Account")
+
 
     const uuid = crypto.randomBytes(11).toString("hex");
     console.log(uuid);
@@ -98,6 +102,62 @@ const signUpUser = async (req, res) => {
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: `An error occurred while signUpUser Auth: ${error.message}` });
+  }
+}
+
+const signUpUserBySocialLogin = async (req, res) => {
+  try {
+    // Check Google Account Token
+    const payload = await googleVerify(req.query.token)
+    const uuid = crypto.randomBytes(11).toString("hex");
+    const user = await new User({
+      email: payload.email,
+      // password: hashPassword,
+      uuid: uuid,
+    });
+    // Create a Badge
+    user.badges.unshift({ accountName: "Gmail", isVerified: payload.email_verified  })
+    // Step 3 - Update user verification status to true
+    user.gmailVerified = payload.email_verified;
+    await user.save();
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : uuid,
+        txUserAction : "accountBadgeAdded",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : user.badges[0]._id,
+        // txDescription : "User adds a verification badge"
+      })
+    await createLedger(
+      {
+        uuid : uuid,
+        txUserAction : "accountBadgeAdded",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "DAO",
+        txFrom : "DAO Treasury",
+        txTo : uuid,
+        txAmount : ACCOUNT_BADGE_ADDED_AMOUNT,
+        // txData : user.badges[0]._id,
+        // txDescription : "Incentive for adding badges"
+      })
+      // 
+      // Decrement the Treasury
+      await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true })
+      await updateTreasury({ amount: ACCOUNT_SIGNUP_AMOUNT, dec: true })
+      
+      // Increment the UserBalance
+      await updateUserBalance({ uuid: user.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT+ACCOUNT_SIGNUP_AMOUNT, inc: true })
+    return res.status(200).send({
+      message: "Google Account Signup Successfully!",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message })
   }
 }
 
