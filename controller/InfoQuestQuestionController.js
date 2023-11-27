@@ -71,7 +71,7 @@ const createInfoQuestQuest = async (req, res) => {
 const constraintForUniqueQuestion = async (req, res) => {
     try {
       // Get the question from the query parameters and convert it to lowercase
-      const queryQuestion = req.query.question.toLowerCase();
+      const queryQuestion = req.query.question?.toLowerCase();
   
       // Check for a matching question in a case-insensitive manner
       const matchingQuestion = await InfoQuestQuestions.findOne({
@@ -891,5 +891,6 @@ module.exports = {
     getAllQuestsWithCorrectStatus,
     getAllQuestsWithIncorrectStatus,
     getAllQuestsWithChangeAnsStatus,
+    getQuestionsWithStatus,
     testBookmarks,
 }
