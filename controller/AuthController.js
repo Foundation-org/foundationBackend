@@ -10,6 +10,7 @@ const { isGoogleEmail } = require("../utils/checkGoogleAccount");
 const { createTreasury, getTreasury, updateTreasury } = require("../utils/treasuryService");
 const { ACCOUNT_BADGE_ADDED_AMOUNT, ACCOUNT_SIGNUP_AMOUNT } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
+const { eduEmailCheck } = require("../utils/eduEmailCheck");
 
 
 const changePassword = async (req, res) => {
@@ -109,17 +110,29 @@ const signUpUserBySocialLogin = async (req, res) => {
   try {
     // Check Google Account Token
     const payload = await googleVerify(req.query.token)
+
+    // Check if email already exist
+    const alreadyUser = await User.findOne({ email: payload.email });
+    if(alreadyUser) throw new Error("Email Already Exists");
+
     const uuid = crypto.randomBytes(11).toString("hex");
     const user = await new User({
       email: payload.email,
-      // password: hashPassword,
       uuid: uuid,
     });
-    // Create a Badge
-    user.badges.unshift({ accountName: "Gmail", isVerified: payload.email_verified  })
-    // Step 3 - Update user verification status to true
+
+    // Check Email Category
+    const emailStatus = await eduEmailCheck(req, res, payload.email)
+    let type = '';
+    if(emailStatus.status === 'OK') type = 'Education'
+
+    // Create a Badge at starting index
+    user.badges.unshift({ accountName: "Gmail", isVerified: payload.email_verified, type: type })
+
+    // Update user verification status to true
     user.gmailVerified = payload.email_verified;
     await user.save();
+
     // Create Ledger
     await createLedger(
       {
@@ -152,6 +165,13 @@ const signUpUserBySocialLogin = async (req, res) => {
       
       // Increment the UserBalance
       await updateUserBalance({ uuid: user.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT+ACCOUNT_SIGNUP_AMOUNT, inc: true })
+
+      if(user.badges[0].type !== "Education") {
+        return res.status(200).send({
+          message: "Please Choose the Type!",
+          user
+        });
+      }
     return res.status(200).send({
       message: "Google Account Signup Successfully!",
     });

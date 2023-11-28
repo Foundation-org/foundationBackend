@@ -1,11 +1,11 @@
-import gitHubStrategy from "passport-github2"
-import googleStrategy from "passport-google-oauth20"
-import twitterStrategy from "passport-twitter"
-import localStrategy from "passport-local"
-import passport from "passport"
-import dotenv from "dotenv"
-import UserModel from "../models/UserModel"
-import bcrypt from "bcrypt"
+const gitHubStrategy = require("passport-github2")
+const googleStrategy = require("passport-google-oauth20")
+const twitterStrategy = require("passport-twitter")
+const localStrategy = require("passport-local")
+const passport = require("passport")
+const dotenv = require("dotenv")
+const UserModel = require("../models/UserModel")
+const bcrypt = require("bcrypt")
 
 dotenv.config()
 
