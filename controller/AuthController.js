@@ -169,7 +169,8 @@ const signUpUserBySocialLogin = async (req, res) => {
       if(user.badges[0].type !== "Education") {
         return res.status(200).send({
           message: "Please Choose the Type!",
-          user
+          userId: user._id,
+          badgeId: user.badges[0]._id
         });
       }
     return res.status(200).send({
