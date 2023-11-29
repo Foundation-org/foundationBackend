@@ -14,6 +14,9 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    QuestTopic: {
+      type: String,
+    },
     QuestAnswers: {
       type: Array,
     },

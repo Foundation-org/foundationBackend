@@ -1,7 +1,8 @@
 const axios = require("axios");
 const { STATEMENT, SYSTEM_MESSAGES } = require('../constants/index')
 const { OPEN_AI_KEY, OPEN_AI_URL } = require("../config/env");
-const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks, incrementCounter, removeQuotes, isAllNumbers } = require("../service/AiValidation");
+const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks, incrementCounter, removeQuotes, isAllNumbers, createQuestTopic } = require("../service/AiValidation");
+const QuestTopics = require("../models/QuestTopics");
 
 
 const minApiCallDelay = 500;
@@ -14,7 +15,7 @@ let apiCallCount = 0;
 
 const validation = async (req, res) => {
     const callType = req.params.callType;
-    if (callType >= 1 && callType <= 4) {
+    if (callType >= 1 && callType <= 3) {
       const now = Date.now();
       const timeSinceLastCall = now - lastApiCallTimestamp;
   
@@ -161,14 +162,8 @@ async function handleRequest(
       filtered = removeTrailingQuestionMarks(filtered);
     }
   
-    // if (callType == 3) {
-    //   if (filtered == "No.") status = "FAIL";
-    //   filtered = userMessage;
-    // }
-    // new
-    if (callType == 4) {
-      if (filtered == 'Non-sensical' || filtered == 'Fragment' || filtered == 'Non-sensical.' || filtered == 'Fragment.' ) status = 'FAIL';
-      filtered = userMessage;
+    if (callType == 3) {
+      createQuestTopic(filtered)
     }
   
     return { message: filtered, status: status };

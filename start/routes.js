@@ -9,6 +9,7 @@ const StartQuestRoute = require("../routes/StartQuestRoute");
 
 module.exports = function (app) {
     app.use("/", LedgerRoute)
+    app.use("/", AiValidationRoutes)
     app.use("/user", AuthRoute)
     app.use("/bookmarkQuest", BookmarkQuestRoute)
     app.use("/infoquestions", InfoQuestQuestionRoute)

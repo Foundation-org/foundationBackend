@@ -2,6 +2,7 @@ const { STATEMENT } = require("../constants");
 const User = require("../models/UserModel");
 const crypto = require("crypto");
 const { createLedger } = require("../utils/createLedger");
+const QuestTopics = require("../models/QuestTopics");
 
 
 module.exports.checkViolationInSentence = (sentence) => {
@@ -107,4 +108,15 @@ module.exports.removeQuotes = (sentence) => {
 
 module.exports.isAllNumbers = (input) => {
   return /^\d+$/.test(input);
+}
+
+module.exports.createQuestTopic = async(topic) => {
+  try {
+    const checkQuestTopic = await QuestTopics.findOne({ name: topic })
+    if(checkQuestTopic) return
+    const questTopic = await new QuestTopics({ name: topic })
+    await questTopic.save()
+  } catch (error) {
+    console.log(error);
+  }
 }
