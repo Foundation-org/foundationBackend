@@ -13,6 +13,7 @@ const createInfoQuestQuest = async (req, res) => {
         whichTypeQuestion: req.body.whichTypeQuestion,
         usersAddTheirAns: req.body.usersAddTheirAns || false,
         usersChangeTheirAns: req.body.usersChangeTheirAns,
+        userCanSelectMutiple: req.body.userCanSelectMutiple,
         QuestAnswers:
           req.body.QuestAnswers === undefined ? [] : req.body.QuestAnswers,
         QuestAnswersSelected:
