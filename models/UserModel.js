@@ -74,6 +74,14 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    correctedAnswers: {
+      type: Number,
+      default: 0,
+    },
+    wrongedAnswers: {
+      type: Number,
+      default: 0,
+    },
     createdQuests: [
       {
         type: mongoose.Schema.Types.ObjectId,

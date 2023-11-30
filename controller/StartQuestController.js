@@ -183,7 +183,41 @@ const createStartQuest = async (req, res) => {
           const getAmount = await getTreasury();
           await updateTreasury({ amount: QUEST_OPTION_ADDED_AMOUNT, inc: true })
       }
-  
+      // Correct Answer or Wrong Answer
+      const questionCorrectAnswer = data.QuestionCorrect.toLowerCase().trim();
+      if(questionCorrectAnswer !== "no option" && questionCorrectAnswer !== "not selected"){
+        // For only multiple choice question
+        if(questionCorrectAnswer === "selected") {
+          const questionCorrectAnswerArray = data.QuestAnswersSelected.map(item => item?.answers.toLowerCase().trim());
+          const givenAnswersArray = req.body.data?.selected;
+          const answersMatched = givenAnswersArray.every(item => questionCorrectAnswerArray.includes(item?.question.toLowerCase().trim()))
+          if(answersMatched){
+            await User.findOneAndUpdate(
+              { uuid: req.body.uuid },
+              { $inc: { correctedAnswers: 1 } }
+              );
+            } else {
+            await User.findOneAndUpdate(
+              { uuid: req.body.uuid },
+              { $inc: { wrongedAnswers: 1 } }
+            );
+          }
+          
+        } else { // for Yes/No and Agree/Disagree
+          const givenAnswer = req.body.data?.selected?.toLowerCase().trim() ;
+          if(questionCorrectAnswer === givenAnswer){
+              await User.findOneAndUpdate(
+                { uuid: req.body.uuid },
+                { $inc: { correctedAnswers: 1 } }
+                );
+              } else {
+              await User.findOneAndUpdate(
+                { uuid: req.body.uuid },
+                { $inc: { wrongedAnswers: 1 } }
+              );
+            }
+        }
+      }
       // Check if QuestionCorrect is not "Not Selected" and push the ID to completedQuests
       // if (data.QuestionCorrect !== "Not Selected") {
       await User.findOneAndUpdate(

@@ -36,7 +36,7 @@ module.exports.removeCorrected = (inputString) => {
 
 
 module.exports.replaceWithPeriod = (inputString) => {
-  console.log("🚀 ~ file: AiValidation.js:43 ~ inputString:", inputString)
+  console.log(": AiValidation.js:43 ~ inputString:", inputString)
   // Use a regular expression to check the last character
   const regex = /[^\s.]$/;
   

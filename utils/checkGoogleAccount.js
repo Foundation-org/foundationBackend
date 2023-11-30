@@ -11,7 +11,6 @@ module.exports.isGoogleEmail = async(email) => {
         reject(err);
       } else {
         // Check if any MX record points to Google
-        // console.log("🚀 ~ file: checkGoogleAccount.js:15 ~ dns.resolveMx ~ addresses:", addresses)
         const isGoogle = addresses.some(mx => mx.exchange.includes('google'));
         resolve(isGoogle);
       }

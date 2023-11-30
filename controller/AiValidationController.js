@@ -57,7 +57,6 @@ async function handleRequest(
     try {
       const { queryType } = req.query;
       let userMessage = req.query.userMessage;
-      console.log("🚀 ~ file: AiValidationController.js:59 ~ userMessage:", userMessage)
       // Check if userMessage is empty
       if (!userMessage) {
         res.status(400).json({ message: "Empty Message", status: "ERROR" });
