@@ -24,10 +24,13 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
       type: String,
     },
     usersAddTheirAns: {
-      type: Boolean
+      type: Boolean,
     },
     usersChangeTheirAns: {
-      type: String
+      type: String,
+    },
+    userCanSelectMutiple:{
+      type: Boolean,
     },
     startStatus: {
       type: String,
