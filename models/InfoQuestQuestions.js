@@ -29,7 +29,7 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     usersChangeTheirAns: {
       type: String,
     },
-    userCanSelectMutiple:{
+    userCanSelectMultiple:{
       type: Boolean,
     },
     startStatus: {
