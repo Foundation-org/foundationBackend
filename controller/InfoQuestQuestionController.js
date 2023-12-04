@@ -822,7 +822,7 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
         let Result = [];
         await allQuestions.map(async function (rcrd) {
           await startedQuestions.map(function (rec) {
-            if (rec.questForeignKey === rcrd._id.toString()) {
+            if (rec.questForeignKey === rcrd?._id.toString()) {
               if (
                 rcrd.QuestionCorrect === "Not Selected" ||
                 rcrd.whichTypeQuestion === "ranked choise"
