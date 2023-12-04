@@ -104,20 +104,23 @@ try {
     !user && res.status(404).json("User not Found");
 
     const compPass = await bcrypt.compare(req.body.password, user.password);
-    // Create Ledger
-    await createLedger(
-      {
-          uuid : user.uuid,
-          txUserAction : "accountLoginFail",
-          txID : crypto.randomBytes(11).toString("hex"),
-          txAuth : "User",
-          txFrom : user.uuid,
-          txTo : "dao",
-          txAmount : "0",
-          txData : user.uuid,
-          // txDescription : "User logs in failed"
-      })
-    !compPass && res.status(400).json("Wrong Password");
+    
+    if(!compPass) {
+      // Create Ledger
+      await createLedger(
+        {
+            uuid : user.uuid,
+            txUserAction : "accountLoginFail",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "User",
+            txFrom : user.uuid,
+            txTo : "dao",
+            txAmount : "0",
+            txData : user.uuid,
+            // txDescription : "User logs in failed"
+        })
+      return res.status(400).json("Wrong Password")
+    };
 
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
