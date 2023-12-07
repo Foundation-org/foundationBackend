@@ -12,10 +12,8 @@ router.post("/getAllQuests", InfoQuestQuestionController.getAllQuests)
 router.post("/getAllQuestsWithOpenInfoQuestStatus", InfoQuestQuestionController.getAllQuestsWithOpenInfoQuestStatus)
 router.post("/getAllQuestsWithAnsweredStatus", InfoQuestQuestionController.getAllQuestsWithAnsweredStatus)
 router.post("/getAllQuestsWithDefaultStatus", InfoQuestQuestionController.getAllQuestsWithDefaultStatus)
-router.post("/getAllQuestsWithCorrectStatus", InfoQuestQuestionController.getAllQuestsWithCorrectStatus)
-router.post("/getAllQuestsWithIncorrectStatus", InfoQuestQuestionController.getAllQuestsWithIncorrectStatus)
+router.post("/getAllQuestsWithCompletedStatus", InfoQuestQuestionController.getAllQuestsWithCompletedStatus)
 router.post("/getAllQuestsWithChangeAnsStatus", InfoQuestQuestionController.getAllQuestsWithChangeAnsStatus)
-router.post("/testBookmarks",InfoQuestQuestionController.testBookmarks)
 
 module.exports = router;
 

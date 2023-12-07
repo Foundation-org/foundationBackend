@@ -245,50 +245,12 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
           await startedQuestions.map(function (rec) {
             if (rec.questForeignKey === rcrd._id.toString()) {
               if (
-                rcrd.QuestionCorrect === "Not Selected" ||
+                rcrd.usersChangeTheirAns?.trim() !== "" ||
                 rcrd.whichTypeQuestion === "ranked choise"
               ) {
                 rcrd.startStatus = "change answer";
               } else {
-                if (
-                  rcrd.whichTypeQuestion === "yes/no" ||
-                  rcrd.whichTypeQuestion === "agree/disagree"
-                ) {
-                  const selectedAnswers1 = rec.data[rec.data.length - 1].selected
-                    .toLowerCase()
-                    .trim();
-                  const selectedAnswers2 =
-                    rcrd.QuestionCorrect.toLowerCase().trim();
-  
-                  const isCorrect =
-                    JSON.stringify(selectedAnswers1) ===
-                    JSON.stringify(selectedAnswers2);
-  
-                  if (!isCorrect) {
-                    rcrd.startStatus = "incorrect";
-                  } else {
-                    rcrd.startStatus = "correct";
-                  }
-                } else {
-                  const selectedAnswers1 = rec.data[
-                    rec.data.length - 1
-                  ].selected.map((item) => item.question.toLowerCase().trim());
-                  const selectedAnswers2 = rcrd.QuestAnswersSelected.map((item) =>
-                    item.answers.toLowerCase().trim()
-                  );
-                  selectedAnswers1.sort();
-                  selectedAnswers2.sort();
-  
-                  const isCorrect =
-                    JSON.stringify(selectedAnswers1) ===
-                    JSON.stringify(selectedAnswers2);
-  
-                  if (!isCorrect) {
-                    rcrd.startStatus = "incorrect";
-                  } else {
-                    rcrd.startStatus = "correct";
-                  }
-                }
+                rcrd.startStatus="completed"
               }
             }
           });
@@ -376,129 +338,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     });
   };
   
-const getAllQuestsWithCorrectStatus = async (req, res) => {
-  try {
-    let allQuestions;
-
-    let filterObj = {};
-    if (req.body.filter === true) {
-      if (req.body.Page === "Bookmark") {
-        filterObj.createdBy = req.body.uuid;
-      } else {
-        filterObj.uuid = req.body.uuid;
-      }
-    }
-
-    if (req.body.type) {
-      filterObj.whichTypeQuestion = req.body.type;
-    }
-
-    if (req.body.Page === "Bookmark") {
-      console.log("running");
-      filterObj.uuid = req.body.uuid;
-      const Questions = await BookmarkQuests.find(filterObj).sort(
-        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
-
-      const mapPromises = Questions.map(async function (record) {
-        return await InfoQuestQuestions.findOne({
-          _id: record.questForeignKey,
-        });
-      });
-
-      allQuestions = await Promise.all(mapPromises);
-    } else {
-      allQuestions = await InfoQuestQuestions.find(filterObj).sort(
-        req.body.sort === "Newest First"
-          ? { createdAt: -1 }
-          : req.body.sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : req.body.sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
-      );
-    }
-  
-      if (req.body.uuid === "" || req.body.uuid === undefined) {
-        res.status(200).json(allQuestions);
-      } else {
-        const startedQuestions = await StartQuests.find({
-          uuid: req.body.uuid,
-          // uuid: "0x81597438fdd366b90971a73f39d56eea4702c43a",
-        });
-  
-        let Result = [];
-        await allQuestions.map(async function (rcrd) {
-          let startedOrNot = false;
-          await startedQuestions.map(function (rec) {
-            if (rec.questForeignKey === rcrd._id.toString()) {
-              if (
-                rcrd.QuestionCorrect === "Not Selected" ||
-                rcrd.whichTypeQuestion === "ranked choise"
-              ) {
-              } else {
-                // rcrd.startStatus = "completed";
-                if (
-                  rcrd.whichTypeQuestion === "yes/no" ||
-                  rcrd.whichTypeQuestion === "agree/disagree"
-                ) {
-                  const selectedAnswers1 = rec.data[rec.data.length - 1].selected
-                    .toLowerCase()
-                    .trim();
-                  const selectedAnswers2 =
-                    rcrd.QuestionCorrect.toLowerCase().trim();
-  
-                  const isCorrect =
-                    JSON.stringify(selectedAnswers1) ===
-                    JSON.stringify(selectedAnswers2);
-  
-                  // Update the startStatus based on whether answers are correct or not
-  
-                  if (isCorrect) {
-                    rcrd.startStatus = "correct";
-                    Result.push(rcrd);
-                  }
-                } else {
-                  const selectedAnswers1 = rec.data[
-                    rec.data.length - 1
-                  ].selected.map((item) => item.question.toLowerCase().trim());
-                  const selectedAnswers2 = rcrd.QuestAnswersSelected.map((item) =>
-                    item.answers.toLowerCase().trim()
-                  );
-                  selectedAnswers1.sort();
-                  selectedAnswers2.sort();
-  
-                  // Compare the selected answers
-                  const isCorrect =
-                    JSON.stringify(selectedAnswers1) ===
-                    JSON.stringify(selectedAnswers2);
-  
-                  // Update the startStatus based on whether answers are correct or not
-  
-                  if (isCorrect) {
-                    rcrd.startStatus = "correct";
-                    Result.push(rcrd);
-                  }
-                }
-              }
-            }
-          });
-        });
-        const start = req.body.start;
-        const end = req.body.end;
-        console.log("Start" + start + "end" + end);
-  
-        res.status(200).json({
-          data: Result.slice(start, end),
-          hasNextPage: end<Result.length,
-         
-        });
-      }
-    } catch (err) {
-      res.status(500).send(err);
-    }
-  }
-const getAllQuestsWithIncorrectStatus = async (req, res) => {
+const getAllQuestsWithCompletedStatus = async (req, res) => {
   try {
     let allQuestions;
 
@@ -553,53 +393,12 @@ const getAllQuestsWithIncorrectStatus = async (req, res) => {
           await startedQuestions.map(function (rec) {
             if (rec.questForeignKey === rcrd._id.toString()) {
               if (
-                rcrd.QuestionCorrect === "Not Selected" ||
+                rcrd.usersChangeTheirAns?.trim() !== "" ||
                 rcrd.whichTypeQuestion === "ranked choise"
               ) {
               } else {
-                // rcrd.startStatus = "completed";
-                if (
-                  rcrd.whichTypeQuestion === "yes/no" ||
-                  rcrd.whichTypeQuestion === "agree/disagree"
-                ) {
-                  const selectedAnswers1 = rec.data[rec.data.length - 1].selected
-                    .toLowerCase()
-                    .trim();
-                  const selectedAnswers2 =
-                    rcrd.QuestionCorrect.toLowerCase().trim();
-  
-                  const isCorrect =
-                    JSON.stringify(selectedAnswers1) ===
-                    JSON.stringify(selectedAnswers2);
-  
-                  // Update the startStatus based on whether answers are correct or not
-  
-                  if (!isCorrect) {
-                    rcrd.startStatus = "incorrect";
-                    Result.push(rcrd);
-                  }
-                } else {
-                  const selectedAnswers1 = rec.data[
-                    rec.data.length - 1
-                  ].selected.map((item) => item.question.toLowerCase().trim());
-                  const selectedAnswers2 = rcrd.QuestAnswersSelected.map((item) =>
-                    item.answers.toLowerCase().trim()
-                  );
-                  selectedAnswers1.sort();
-                  selectedAnswers2.sort();
-  
-                  // Compare the selected answers
-                  const isCorrect =
-                    JSON.stringify(selectedAnswers1) ===
-                    JSON.stringify(selectedAnswers2);
-  
-                  // Update the startStatus based on whether answers are correct or not
-  
-                  if (!isCorrect) {
-                    rcrd.startStatus = "incorrect";
-                    Result.push(rcrd);
-                  }
-                }
+                rcrd.startStatus = "completed";
+                Result.push(rcrd);
               }
             }
           });
@@ -680,7 +479,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
           if (startedOrNot === true) {
             // if (rcrd.QuestionCorrect === "Not Selected") {
             if (
-              rcrd.QuestionCorrect === "Not Selected" ||
+              rcrd.usersChangeTheirAns?.trim() !== "" ||
               rcrd.whichTypeQuestion === "ranked choise"
             ) {
               rcrd.startStatus = "change answer";
@@ -700,115 +499,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
     } catch (err) {
       res.status(500).send(err);
     }
-  }
-
-  const testBookmarks = async (req, res) => {
-    try {
-      let allQuestions;
-  
-      let filterObj = {};
-      if (req.body.filter === true) {
-        if (req.body.Page === "Bookmark") {
-          filterObj.createdBy = req.body.uuid;
-        } else {
-          filterObj.uuid = req.body.uuid;
-        }
-      }
-  
-      if (req.body.type) {
-        filterObj.whichTypeQuestion = req.body.type;
-      }
-  
-      if (req.body.Page === "Bookmark") {
-        console.log("running");
-        filterObj.uuid = req.body.uuid;
-        const Questions = await BookmarkQuests.find(filterObj).sort(
-          req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-        );
-  
-        const mapPromises = Questions.map(async function (record) {
-          return await InfoQuestQuestions.findOne({
-            _id: record.questForeignKey,
-          });
-        });
-  
-        allQuestions = await Promise.all(mapPromises);
-      } else {
-        allQuestions = await InfoQuestQuestions.find(filterObj).sort(
-          req.body.sort === "Newest First"
-            ? { createdAt: -1 }
-            : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
-        );
-      }
-  
-      const startedQuestions = await StartQuests.find({
-        uuid: req.body.uuid,
-      });
-  
-      let Result = [];
-      allQuestions.forEach((rcrd) => {
-        startedQuestions.forEach((rec) => {
-          if (rec.questForeignKey === rcrd._id.toString()) {
-            if (
-              rcrd.QuestionCorrect !== "Not Selected" &&
-              rcrd.whichTypeQuestion !== "ranked choise"
-            ) {
-              if (
-                rcrd.whichTypeQuestion === "yes/no" ||
-                rcrd.whichTypeQuestion === "agree/disagree"
-              ) {
-                const selectedAnswers1 = rec.data[rec.data.length - 1].selected
-                  .toLowerCase()
-                  .trim();
-                const selectedAnswers2 = rcrd.QuestionCorrect.toLowerCase().trim();
-  
-                const isCorrect =
-                  JSON.stringify(selectedAnswers1) ===
-                  JSON.stringify(selectedAnswers2);
-  
-                if (isCorrect) {
-                  rcrd.startStatus = "correct";
-                  Result.push(rcrd);
-                }
-              } else {
-                const selectedAnswers1 = rec.data[rec.data.length - 1].selected
-                  .map((item) => item.question.toLowerCase().trim())
-                  .sort();
-                const selectedAnswers2 = rcrd.QuestAnswersSelected.map((item) =>
-                  item.answers.toLowerCase().trim()
-                ).sort();
-  
-                const isCorrect =
-                  JSON.stringify(selectedAnswers1) ===
-                  JSON.stringify(selectedAnswers2);
-  
-                if (isCorrect) {
-                  rcrd.startStatus = "correct";
-                  Result.push(rcrd);
-                }
-              }
-            }
-          }
-        });
-      });
-  
-      const start = req.body.start;
-      const end = req.body.end;
-  
-      res.status(200).json({
-        data: Result.slice(start, end),
-        hasNextPage: end < Result.length,
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).send(err.message || "Internal Server Error");
-    }
-  };
-  
+  } 
 
 async function getQuestionsWithStatus(allQuestions, uuid) {
     try {
@@ -824,50 +515,12 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
           await startedQuestions.map(function (rec) {
             if (rec.questForeignKey === rcrd?._id.toString()) {
               if (
-                rcrd.QuestionCorrect === "Not Selected" ||
+                rcrd.usersChangeTheirAns?.trim() !== "" ||
                 rcrd.whichTypeQuestion === "ranked choise"
               ) {
                 rcrd.startStatus = "change answer";
               } else {
-                if (
-                  rcrd.whichTypeQuestion === "yes/no" ||
-                  rcrd.whichTypeQuestion === "agree/disagree"
-                ) {
-                  const selectedAnswers1 = rec.data[rec.data.length - 1].selected
-                    .toLowerCase()
-                    .trim();
-                  const selectedAnswers2 =
-                    rcrd.QuestionCorrect.toLowerCase().trim();
-  
-                  const isCorrect =
-                    JSON.stringify(selectedAnswers1) ===
-                    JSON.stringify(selectedAnswers2);
-  
-                  if (!isCorrect) {
-                    rcrd.startStatus = "incorrect";
-                  } else {
-                    rcrd.startStatus = "correct";
-                  }
-                } else {
-                  const selectedAnswers1 = rec.data[
-                    rec.data.length - 1
-                  ].selected.map((item) => item.question.toLowerCase().trim());
-                  const selectedAnswers2 = rcrd.QuestAnswersSelected.map((item) =>
-                    item.answers.toLowerCase().trim()
-                  );
-                  selectedAnswers1.sort();
-                  selectedAnswers2.sort();
-  
-                  const isCorrect =
-                    JSON.stringify(selectedAnswers1) ===
-                    JSON.stringify(selectedAnswers2);
-  
-                  if (!isCorrect) {
-                    rcrd.startStatus = "incorrect";
-                  } else {
-                    rcrd.startStatus = "correct";
-                  }
-                }
+                rcrd.startStatus="completed"
               }
             }
           });
@@ -889,9 +542,7 @@ module.exports = {
     getAllQuestsWithOpenInfoQuestStatus,
     getAllQuestsWithAnsweredStatus,
     getAllQuestsWithDefaultStatus,
-    getAllQuestsWithCorrectStatus,
-    getAllQuestsWithIncorrectStatus,
+    getAllQuestsWithCompletedStatus,
     getAllQuestsWithChangeAnsStatus,
     getQuestionsWithStatus,
-    testBookmarks,
 }

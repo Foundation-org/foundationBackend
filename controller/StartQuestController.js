@@ -416,7 +416,7 @@ const getRankedQuestPercent = async (req, res) => {
       const mapExecution = StartQuestsData.map(async (res) => {
         let i = 1;
   
-        res.data[res.data.length - 1].selected.map((option) => {
+        res.data[res.data.length - 1].selected?.map((option) => {
           const question = option.question.trim();
           if (optionsCount[question]) {
             optionsCount[question] +=
@@ -511,7 +511,7 @@ const getStartQuestPercent = async (req, res) => {
           }
         } else {
           if (res.data[res.data.length - 1].selected) {
-            res.data[res.data.length - 1].selected.map((option) => {
+            res.data[res.data.length - 1].selected?.map((option) => {
               const question = option.question.trim();
               if (selectedOptionsCount[question]) {
                 selectedOptionsCount[question]++;
