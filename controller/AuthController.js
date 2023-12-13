@@ -57,9 +57,6 @@ const changePassword = async (req, res) => {
 
 const signUpUser = async (req, res) => {
   try {
-    if(req.query.GoogleAccount){
-      signUpUserBySocialLogin(req, res)
-    }
     const alreadyUser = await User.findOne({ email: req.body.userEmail });
     if(alreadyUser) throw new Error("Email Already Exists");
 
@@ -108,9 +105,11 @@ const signUpUser = async (req, res) => {
 
 const signUpUserBySocialLogin = async (req, res) => {
   try {
-    // Check Google Account Token
-    const payload = await googleVerify(req.query.token)
-
+    // if(req.query.GoogleAccount){
+    //   signUpUserBySocialLogin(req, res)
+    // }
+    // Check Google Account
+    const payload = req.body.data;
     // Check if email already exist
     const alreadyUser = await User.findOne({ email: payload.email });
     if(alreadyUser) throw new Error("Email Already Exists");
@@ -167,18 +166,20 @@ const signUpUserBySocialLogin = async (req, res) => {
       await updateUserBalance({ uuid: user.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT+ACCOUNT_SIGNUP_AMOUNT, inc: true })
 
       if(user.badges[0].type !== "Education") {
-        return res.status(200).send({
+        return res.status(200).json({
           message: "Please Choose the Type!",
           userId: user._id,
-          badgeId: user.badges[0]._id
+          badgeId: user.badges[0]._id,
+          required_action: true,
         });
       }
-    return res.status(200).send({
+    res.status(201).json({
       message: "Google Account Signup Successfully!",
+      required_action: false
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message })
+    console.error(error.message);
+    res.status(500).json({ message: `An error occurred while signUpUser Auth: ${error.message}` });
   }
 }
 
@@ -551,6 +552,7 @@ const logout = async(req, res) => {
 module.exports = {
     changePassword,
     signUpUser,
+    signUpUserBySocialLogin,
     signInUser,
     userInfo,
     setUserWallet,

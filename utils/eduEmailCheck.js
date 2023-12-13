@@ -1,4 +1,5 @@
 const emailValidator = require('email-validator');
+const axios = require('axios');
 
 const stripDelay = 1000;
 const minApiCallDelay = 3000;
@@ -31,7 +32,7 @@ module.exports.eduEmailCheck = async (req, res, eMail) => {
         }
 
         if (validateEmail(eMail)) {
-            const domain=extractDomain(eMail)
+            let domain=extractDomain(eMail)
 
             lastApiCallTimestamp = Date.now();
             apiCallCount++;

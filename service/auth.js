@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET, CLIENT_ID } = require("../config/env");
 const { OAuth2Client } = require('google-auth-library');
+const axios = require('axios');
 
 module.exports.hashedPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);

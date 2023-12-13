@@ -19,7 +19,7 @@ const userSchema = mongoose.Schema(
     password: {
       type: String,
       min: 6,
-      required: true,
+      // required: true,
     },
     gmailVerified: {
       type: Boolean,
@@ -98,6 +98,7 @@ const userSchema = mongoose.Schema(
       {
         accountName: { type: String },
         isVerified: { type: Boolean },
+        type: { type: String },
       }
     ]
   },

@@ -5,4 +5,5 @@ module.exports = {
     OPEN_AI_KEY: process.env.OPEN_AI_KEY,
     JWT_SECRET: process.env.JWT_SECRET,
     CLIENT_ID: process.env.CLIENT_ID,
+    BASE_PORT: process.env.BASE_PORT,
   };

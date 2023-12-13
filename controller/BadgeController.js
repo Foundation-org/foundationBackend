@@ -16,14 +16,15 @@ const UserModel = require("../models/UserModel");
 
 const update = async (req, res) => {
     try {
-        const { userId: id, badgeId } = req.params;
-        const User = await UserModel.findByPk(id);
+        const { userId, badgeId } = req.params;
+        const User = await UserModel.findOne({ _id: userId });
         if(!User) throw new Error("No such User!");
         // Find the Badge
         const userBadges = User.badges;
         const updatedUserBadges = userBadges.map(item => {
-            if(item._id === parseInt(badgeId)){
-                return item.type = req.body.type;
+            if(item._id.toHexString()  == badgeId){
+                return { ...item, type: req.body.type }
+                // return item.type = req.body.type;
             };
         })
         // Update the user badges

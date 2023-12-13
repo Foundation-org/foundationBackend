@@ -5,6 +5,7 @@ const colors = require("colors");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
+const { BASE_PORT } = require("../config/env");
 // const passport = require("passport");
 // import passport from "passport"
 // import '../service/passport'
@@ -30,9 +31,9 @@ app.use(morgan("common"));
 require("../start/routes")(app)
 
 app.get("/", (req, res) => {
-  // res.json(`Server is listening on port: ${port}`);
+  res.json(`Server is listening on port: ${BASE_PORT}`);
 //   res.send(`Foundation Server`);
-  res.json();
+  // res.json();
 });
 
 module.exports = app;
