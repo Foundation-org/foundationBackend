@@ -12,6 +12,8 @@ router.post("/signUpUser", AuthController.signUpUser);
 
 router.post("/signUpUser/social", AuthController.signUpUserBySocialLogin);
 
+router.post("/signInUser/social", AuthController.signInUserBySocialLogin);
+
 router.post("/signInUser", AuthController.signInUser);
 
 router.post("/userInfo", AuthController.userInfo);

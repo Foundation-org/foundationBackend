@@ -188,6 +188,11 @@ try {
     const user = await User.findOne({ email: req.body.email });
     if(!user) throw new Error("User not Found");
 
+    // To check the google account
+    if(user.badges[0].accountName === "Gmail") throw new Error("Please Login with Google Account")
+    // To check the facebook account
+    if(user.badges[0].accountName === "Fmail") throw new Error("Please Login with Facebook Account")
+
     const compPass = await bcrypt.compare(req.body.password, user.password);
     
     if(!compPass) {
@@ -231,6 +236,45 @@ try {
     console.error(error.message);
       res.status(500).json({ message: `An error occurred while signInUser Auth: ${error.message}` });
 }
+}
+
+const signInUserBySocialLogin = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.data.email });
+    if(!user) throw new Error("User not Found");
+
+    // Check Google Account
+    const payload = req.body.data;
+    // Check if email already exist
+    const alreadyUser = await User.findOne({ email: payload.email });
+    if(!alreadyUser) throw new Error("Please Signup!");
+    
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
+    // Create Ledger
+    await createLedger(
+    {
+        uuid : user.uuid,
+        txUserAction : "accountLogin",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : user.uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : user.uuid,
+        // txDescription : "user logs in"
+    })
+
+    // res.status(200).json(user);
+    res.status(200).json({ ...user._doc, token });
+    // res.status(201).send("Signed in Successfully");
+    // if(req.query.GoogleAccount){
+    //   signUpUserBySocialLogin(req, res)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: `An error occurred while signUpUser Auth: ${error.message}` });
+  }
 }
 
 const userInfo = async (req, res) => {
@@ -495,8 +539,9 @@ const deleteByUUID = async(req, res) => {
 const logout = async(req, res) => {
     try {
       const { uuid } = req.params;
+    // return
       const user = await User.findOne({uuid});
-      !user && res.status(404).json("User not Found");
+      if(!user) throw new Error("User not Found");
       // Create Ledger
       await createLedger(
         {
@@ -512,7 +557,7 @@ const logout = async(req, res) => {
         }
       )
   
-      res.status(201).send("User has been deleted");
+      res.status(200).json({ message: "User has been logout successfully!" });
     } catch (error) {
       console.error(error.message);
       res.status(500).json({ message: `An error occurred while logout Auth: ${error.message}` });
@@ -554,6 +599,7 @@ module.exports = {
     signUpUser,
     signUpUserBySocialLogin,
     signInUser,
+    signInUserBySocialLogin,
     userInfo,
     setUserWallet,
     signedUuid,
