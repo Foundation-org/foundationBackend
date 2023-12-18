@@ -73,7 +73,7 @@ const get = async (req, res) => {
   try {
     const getTreasury = await Treasury.findOne();
     res.status(200).json({
-      data: getTreasury.amount.toString(),
+      data: getTreasury?.amount?.toString(),
     });
   } catch (error) {
     console.error(error);

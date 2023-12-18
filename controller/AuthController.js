@@ -189,9 +189,9 @@ try {
     if(!user) throw new Error("User not Found");
 
     // To check the google account
-    if(user.badges[0].accountName === "Gmail") throw new Error("Please Login with Google Account")
+    if(user?.badges[0]?.accountName === "Gmail") throw new Error("Please Login with Google Account")
     // To check the facebook account
-    if(user.badges[0].accountName === "Fmail") throw new Error("Please Login with Facebook Account")
+    if(user?.badges[0]?.accountName === "Fmail") throw new Error("Please Login with Facebook Account")
 
     const compPass = await bcrypt.compare(req.body.password, user.password);
     
