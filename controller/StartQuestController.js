@@ -180,8 +180,10 @@ const createStartQuest = async (req, res) => {
             // txData : question._id,
             // txDescription : "Incentive for adding answer to quest"
           })
-          const getAmount = await getTreasury();
-          await updateTreasury({ amount: QUEST_OPTION_ADDED_AMOUNT, inc: true })
+          // Decrement the Treasury
+          await updateTreasury({ amount: QUEST_OPTION_ADDED_AMOUNT, dec: true })
+          // Increment the UserBalance
+          await updateUserBalance({ uuid: req.body.uuid, amount: QUEST_OPTION_ADDED_AMOUNT, inc: true })
       }
       // Correct Answer or Wrong Answer
       const questionCorrectAnswer = data.QuestionCorrect.toLowerCase().trim();
@@ -250,8 +252,10 @@ const createStartQuest = async (req, res) => {
           // txData : question._id,
           // txDescription : "Incentive for completing quests"
         })
-        const getAmount = await getTreasury();
+        // Decrement the Treasury
         await updateTreasury({ amount: QUEST_COMPLETED_AMOUNT, dec: true })
+        // Increment the UserBalance
+        await updateUserBalance({ uuid: req.body.uuid, amount: QUEST_COMPLETED_AMOUNT, inc: true })
   
       res.status(200).json({ message: "Start Quest Created Successfully", startQuestID: question._id  });
     } catch (err) {
@@ -493,9 +497,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
             // txData : startQuestQuestion._id,
             // txDescription : "Incentive for changing a quest answer"
           })
-          const getAmount = await getTreasury();
+          // Decrement the Treasury
           await updateTreasury({ amount: QUEST_COMPLETED_CHANGE_AMOUNT, dec: true })
-  
+          // Increment the UserBalance
+          await updateUserBalance({ uuid: req.body.uuid, amount: QUEST_COMPLETED_CHANGE_AMOUNT, inc: true })
         } else {
           responseMsg = "Answer has not changed";
         }
