@@ -72,13 +72,13 @@ module.exports.removeTrailingQuestionMarks = (sentence) => {
 
 module.exports.incrementCounter = async(req, res, data) => {
   try {
-    const result = await User.updateOne(
-      { uuid: req.user.uuid },
-      { $inc: { violationCounter: 1 } }
-      );
-    if (result?.nModified === 0) {
-      return res.status(404).send("User not found");
-    }
+    // const result = await User.updateOne(
+    //   { uuid: req.user.uuid },
+    //   { $inc: { violationCounter: 1 } }
+    //   );
+    // if (result?.nModified === 0) {
+    //   return res.status(404).send("User not found");
+    // }
     // Create Ledger
     await createLedger(
     {
