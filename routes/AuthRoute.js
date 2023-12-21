@@ -16,6 +16,8 @@ router.post("/signInUser/social", AuthController.signInUserBySocialLogin);
 
 router.post("/signInUser", AuthController.signInUser);
 
+router.post("/send/email", AuthController.sendEmail);
+
 router.post("/create/guestMode", AuthController.createGuestMode);
 
 router.post("/signIn/guestMode", AuthController.signInGuestMode);

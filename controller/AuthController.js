@@ -12,6 +12,7 @@ const { ACCOUNT_BADGE_ADDED_AMOUNT, ACCOUNT_SIGNUP_AMOUNT } = require("../consta
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
 const { getRandomDigits } = require("../utils/getRandomDigits");
+const { sendEmailMessage } = require("../utils/sendEmailMessage");
 
 
 const changePassword = async (req, res) => {
@@ -545,6 +546,20 @@ const sendVerifyEmail = async (req, res) => {
     res.status(500).json({ message: `An error occurred while sendVerifyEmail Auth: ${error.message}` });
   }
 }
+
+const sendEmail = async(req, res) => {
+  try {
+    const { email, subject, message } = req.body;
+    const response = await sendEmailMessage(email, subject, message)
+    if(response) {
+      res.status(200).json({message: `Email Sent Successfully!`})
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: `An error occurred while sendVerifyEmail Auth: ${error.message}` });
+  }
+}
+
 const verify = async (req, res) => {
     const verificationCode = req.body.verificationCode;
     const token = req._parsedUrl.query;
@@ -728,6 +743,7 @@ module.exports = {
     setUserWallet,
     signedUuid,
     sendVerifyEmail,
+    sendEmail,
     verify,
     deleteByUUID,
     logout,
