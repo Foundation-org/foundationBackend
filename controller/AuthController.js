@@ -11,6 +11,7 @@ const { createTreasury, getTreasury, updateTreasury } = require("../utils/treasu
 const { ACCOUNT_BADGE_ADDED_AMOUNT, ACCOUNT_SIGNUP_AMOUNT } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
+const { getRandomDigits } = require("../utils/getRandomDigits");
 
 
 const changePassword = async (req, res) => {
@@ -241,7 +242,9 @@ try {
 const createGuestMode = async (req, res) => {
   try {
     const uuid = crypto.randomBytes(11).toString("hex");
+    const randomDigits = getRandomDigits(6)
     const user = await new User({
+      email: `user-${randomDigits}@guest.com`,
       uuid: uuid,
       isGuestMode: true,
     });
