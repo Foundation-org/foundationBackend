@@ -361,6 +361,22 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     });
   };
   
+  const getQuestById = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const infoQuest = await InfoQuestQuestions.findOne({
+        _id: id,
+      });
+      if(!infoQuest) throw new Error("No Quest Exist!");
+      res.status(200).json({
+        data: infoQuest,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: `An error occurred while getQuestById InfoQuest: ${error.message}` });
+    }
+  };
+
 const getAllQuestsWithCompletedStatus = async (req, res) => {
   try {
     let allQuestions;
@@ -565,6 +581,7 @@ module.exports = {
     getAllQuestsWithOpenInfoQuestStatus,
     getAllQuestsWithAnsweredStatus,
     getAllQuestsWithDefaultStatus,
+    getQuestById,
     getAllQuestsWithCompletedStatus,
     getAllQuestsWithChangeAnsStatus,
     getQuestionsWithStatus,
