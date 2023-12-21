@@ -238,6 +238,124 @@ try {
 }
 }
 
+const createGuestMode = async (req, res) => {
+  try {
+    const uuid = crypto.randomBytes(11).toString("hex");
+    const user = await new User({
+      uuid: uuid,
+      isGuestMode: true,
+    });
+    const users = await user.save();
+    if(!users) throw new Error("User not Created");
+
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : uuid,
+        txUserAction : "guestAccountCreated",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : uuid,
+        // txDescription : "User creates a new account"
+      }
+    )
+
+    res.status(200).json({ ...user._doc, token });
+  } catch (error) {
+      console.error(error.message);
+        res.status(500).json({ message: `An error occurred while createGuestMode Auth: ${error.message}` });
+  }
+  }
+
+const signInGuestMode = async (req, res) => {
+  try {
+    const alreadyUser = await User.findOne({ email: req.body.userEmail });
+    if(alreadyUser) throw new Error("Email Already Exists");
+
+    const checkGoogleEmail = await isGoogleEmail(req.body.userEmail)
+    if(checkGoogleEmail) throw new Error("Please Signup with Google Account")
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(req.body.userPassword, salt);
+    const user = await new User({
+      email: req.body.userEmail,
+      password: hashPassword,
+      uuid: req.body.uuid,
+    });
+    const users = await user.save();
+    if(!users) throw new Error("User not Created");
+
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
+    // Create Ledger
+    await createLedger(
+      {
+        uuid : uuid,
+        txUserAction : "accountCreated",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : uuid,
+        // txDescription : "User creates a new account"
+      }
+    )
+
+    res.status(200).json({ ...user._doc, token });
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: `An error occurred while signInGuestMode Auth: ${error.message}` });
+  }
+}
+
+const signInSocialGuestMode = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.data.email });
+    if(!user) throw new Error("User not Found");
+
+    // Check Google Account
+    const payload = req.body.data;
+    // Check if email already exist
+    const alreadyUser = await User.findOne({ email: payload.email });
+    if(!alreadyUser) throw new Error("Please Signup!");
+    
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
+    // Create Ledger
+    await createLedger(
+    {
+        uuid : user.uuid,
+        txUserAction : "accountLogin",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : user.uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : user.uuid,
+        // txDescription : "user logs in"
+    })
+
+    // res.status(200).json(user);
+    res.status(200).json({ ...user._doc, token });
+    // res.status(201).send("Signed in Successfully");
+    // if(req.query.GoogleAccount){
+    //   signUpUserBySocialLogin(req, res)
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: `An error occurred while signInSocialGuestMode Auth: ${error.message}` });
+  }
+}
+
 const signInUserBySocialLogin = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.data.email });
@@ -599,6 +717,9 @@ module.exports = {
     signUpUser,
     signUpUserBySocialLogin,
     signInUser,
+    createGuestMode,
+    signInGuestMode,
+    signInSocialGuestMode,
     signInUserBySocialLogin,
     userInfo,
     setUserWallet,

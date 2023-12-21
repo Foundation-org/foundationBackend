@@ -14,12 +14,16 @@ const userSchema = mongoose.Schema(
       type: String,
       unique: true,
       max: 50,
-      required: true,
+      // required: true,
     },
     password: {
       type: String,
       min: 6,
       // required: true,
+    },
+    isGuestMode: {
+      type: Boolean,
+      // default: false
     },
     gmailVerified: {
       type: Boolean,

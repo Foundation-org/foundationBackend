@@ -16,6 +16,12 @@ router.post("/signInUser/social", AuthController.signInUserBySocialLogin);
 
 router.post("/signInUser", AuthController.signInUser);
 
+router.post("/create/guestMode", AuthController.createGuestMode);
+
+router.post("/signIn/guestMode", AuthController.signInGuestMode);
+
+router.post("/signInSocial/guestMode", AuthController.signInSocialGuestMode);
+
 router.post("/userInfo", AuthController.userInfo);
 
 router.put("/setUserWallet", AuthController.setUserWallet);
