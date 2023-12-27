@@ -18,6 +18,7 @@ const createInfoQuestQuest = async (req, res) => {
         whichTypeQuestion: req.body.whichTypeQuestion,
         usersAddTheirAns: req.body.usersAddTheirAns || false,
         usersChangeTheirAns: req.body.usersChangeTheirAns,
+        QuestTopic:req.body.QuestTopic,
         userCanSelectMultiple: req.body.userCanSelectMultiple,
         QuestAnswers:
           req.body.QuestAnswers === undefined ? [] : req.body.QuestAnswers,
@@ -44,7 +45,7 @@ const createInfoQuestQuest = async (req, res) => {
       user.questsCreated += 1;
   
       // Push the ID of the created question into the createdQuests array
-      user.createdQuests.push(createdQuestion._id);
+      user.createdQuests?.push(createdQuestion._id);
       // await User.findOneAndUpdate(
       //   { uuid: req.body.uuid },
       //   {
