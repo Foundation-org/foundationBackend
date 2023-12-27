@@ -470,13 +470,14 @@ const updateChangeAnsStartQuest = async (req, res) => {
             { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
             { upsert: true }
           ).exec();
-  
+            
+          const commonTxId = crypto.randomBytes(11).toString("hex")
           // Create Ledger
           await createLedger(
           {
             uuid: req.body.uuid,
             txUserAction: "questCompletedChange",
-            txID: crypto.randomBytes(11).toString("hex"),
+            txID: commonTxId,
             txAuth: "User",
             txFrom: req.body.uuid,
             txTo: "dao",
@@ -489,7 +490,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
           {
             uuid : req.body.uuid,
             txUserAction : "questCompletedChange",
-            txID : crypto.randomBytes(11).toString("hex"),
+            txID : commonTxId,
             txAuth : "DAO",
             txFrom : "DAO Treasury",
             txTo : req.body.uuid,
