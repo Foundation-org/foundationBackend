@@ -1,5 +1,4 @@
-const QuestTopics = require("../models/QuestTopics");
-
+const QuestTopics = require('../models/QuestTopics');
 
 // const create = async (req, res) => {
 //   try {
@@ -13,20 +12,21 @@ const QuestTopics = require("../models/QuestTopics");
 //   }
 // };
 
-
 const update = async (req, res) => {
-    try {
-        const { topicId: id, isAllow } = req.params;
-        const Topic = await QuestTopics.findByPk(id);
-        if(!Topic) throw new Error("No such Topic!");
-        Topic.isAllow = isAllow;
-        await Topic.save();
-        res.status(200).json({ data: Topic });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: `An error occurred while update QuestTopic: ${error.message}` });
-    }
-  };
+  try {
+    const { topicId: id, isAllow } = req.params;
+    const Topic = await QuestTopics.findByPk(id);
+    if (!Topic) throw new Error('No such Topic!');
+    Topic.isAllow = isAllow;
+    await Topic.save();
+    res.status(200).json({ data: Topic });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while update QuestTopic: ${error.message}`,
+    });
+  }
+};
 
 const getAllTopic = async (req, res) => {
   try {
@@ -38,24 +38,26 @@ const getAllTopic = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
+    const namesArray = questTopics.map((topic) => topic.name);
+
     const totalCount = await QuestTopics.countDocuments({ uuid });
     const pageCount = Math.ceil(totalCount / limit);
 
+    console.log(questTopics);
+
     res.status(200).json({
-      data: questTopics,
+      // data: questTopics,
+      data: namesArray,
       pageCount,
       totalCount,
     });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while getAll QuestTopic: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while getAll QuestTopic: ${error.message}`,
+    });
   }
 };
-
 
 const getAllQuestByTopic = async (req, res) => {
   try {
@@ -75,7 +77,9 @@ const getAllQuestByTopic = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: `An error occurred while getAllQuestByTopic QuestTopic: ${error.message}` });
+    res.status(500).json({
+      message: `An error occurred while getAllQuestByTopic QuestTopic: ${error.message}`,
+    });
   }
 };
 
@@ -86,14 +90,15 @@ const getAllQuestByTrendingTopic = async (req, res) => {
     res.json(trendingTopics);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: `An error occurred while getAllQuestByTrendingTopic QuestTopic: ${error.message}` });
+    res.status(500).json({
+      message: `An error occurred while getAllQuestByTrendingTopic QuestTopic: ${error.message}`,
+    });
   }
 };
-
 
 module.exports = {
   update,
   getAllTopic,
   getAllQuestByTopic,
-  getAllQuestByTrendingTopic
-}
+  getAllQuestByTrendingTopic,
+};
