@@ -2,29 +2,6 @@ const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const BookmarkQuests = require("../models/BookmarkQuests");
 const { getQuestionsWithStatus } = require("./InfoQuestQuestionController");
 
-const searchQuestionsWithPreferences = async (req, res) => {
-  const searchTerm = req.query.term || "";
-  const uuid = req.query.uuid;
-
-  try {
-    const results = await InfoQuestQuestions.find({
-      $or: [
-        { QuestTopic: { $regex: searchTerm, $options: "i" } },
-
-      ],
-    });
-
-    const questionsWithStatus = await getQuestionsWithStatus(results, uuid);
-
-    res.status(200).json({
-      data: questionsWithStatus,
-      hasNextPage: false,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Internal Server Error");
-  }
-};
 
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
@@ -83,5 +60,4 @@ const searchBookmarks = async (req, res) => {
 module.exports = {
   easySearch,
   searchBookmarks,
-  searchQuestionsWithPreferences
 };
