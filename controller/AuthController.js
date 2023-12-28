@@ -259,7 +259,7 @@ const createGuestMode = async (req, res) => {
     await createLedger(
       {
         uuid : uuid,
-        txUserAction : "guestAccountCreated",
+        txUserAction : "accountCreatedGuest",
         txID : crypto.randomBytes(11).toString("hex"),
         txAuth : "User",
         txFrom : uuid,
