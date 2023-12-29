@@ -674,8 +674,8 @@ const logout = async(req, res) => {
     try {
       const { uuid } = req.params;
     // return
-      const user = await User.findOne({uuid});
-      if(!user) throw new Error("User not Found");
+      // const user = await User.findOne({uuid});
+      // if(!user) throw new Error("User not Found");
       // Create Ledger
       await createLedger(
         {
