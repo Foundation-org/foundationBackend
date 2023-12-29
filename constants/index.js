@@ -16,7 +16,7 @@ module.exports = {
     "Correct provided text to standard English. Shortest responses only.",
     "Suggest a topic category for this statement. One word answer only."
   ],
-  ACCOUNT_SIGNUP_AMOUNT: 4,
+  // ACCOUNT_SIGNUP_AMOUNT: 4,
   ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,
   QUEST_COMPLETED_AMOUNT: 0.96,
   QUEST_COMPLETED_CHANGE_AMOUNT: 0.06,

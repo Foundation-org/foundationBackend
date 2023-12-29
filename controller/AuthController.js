@@ -8,7 +8,7 @@ const { createToken, googleVerify } = require("../service/auth");
 const { createLedger } = require("../utils/createLedger");
 const { isGoogleEmail } = require("../utils/checkGoogleAccount");
 const { createTreasury, getTreasury, updateTreasury } = require("../utils/treasuryService");
-const { ACCOUNT_BADGE_ADDED_AMOUNT, ACCOUNT_SIGNUP_AMOUNT } = require("../constants");
+const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
 const { getRandomDigits } = require("../utils/getRandomDigits");
@@ -162,10 +162,9 @@ const signUpUserBySocialLogin = async (req, res) => {
       // 
       // Decrement the Treasury
       await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true })
-      await updateTreasury({ amount: ACCOUNT_SIGNUP_AMOUNT, dec: true })
       
       // Increment the UserBalance
-      await updateUserBalance({ uuid: user.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT+ACCOUNT_SIGNUP_AMOUNT, inc: true })
+      await updateUserBalance({ uuid: user.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT, inc: true })
 
       if(user.badges[0].type !== "Education") {
         return res.status(200).json({
@@ -628,10 +627,9 @@ const verify = async (req, res) => {
         // 
         // Decrement the Treasury
         await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true })
-        await updateTreasury({ amount: ACCOUNT_SIGNUP_AMOUNT, dec: true })
         
         // Increment the UserBalance
-        await updateUserBalance({ uuid: user.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT+ACCOUNT_SIGNUP_AMOUNT, inc: true })
+        await updateUserBalance({ uuid: user.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT, inc: true })
       return res.status(200).send({
         message: "Gmail Account verified",
       });
