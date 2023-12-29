@@ -1,4 +1,5 @@
 const UserModel = require("../models/UserModel");
+const { createToken } = require("../service/auth");
 
 
 // const create = async (req, res) => {
@@ -30,7 +31,11 @@ const update = async (req, res) => {
         // Update the user badges
         User.badges = updatedUserBadges;
         await User.save();
-        res.status(200).json({ data: User });
+
+        // Generate a JWT token
+        const token = createToken({ uuid: User.uuid });
+
+        res.status(200).json({ ...User._doc, token });
 
     } catch (error) {
       console.error(error);
