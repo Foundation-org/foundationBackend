@@ -12,8 +12,8 @@ module.exports = {
     "please provide"
   ],
   SYSTEM_MESSAGES: [
-    "Correct provided statement to standard English. Shortest responses only.",
-    "Correct provided text to standard English. Shortest responses only.",
+    "Correct provided statement to standard English without contractions. Shortest responses only.",
+    "Correct provided words and numbers to standard English without contractions. Shortest responses only.",
     "Suggest a topic category for this statement. One word answer only."
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
