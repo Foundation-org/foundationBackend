@@ -149,6 +149,7 @@ const createStartQuest = async (req, res) => {
               QuestAnswers: {
                 question: req.body.addedAnswer,
                 selected: true,
+                uuid:req.body.addedAnswerUuid,
               },
             },
           }
