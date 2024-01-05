@@ -44,6 +44,21 @@ const update = async (req, res) => {
   };
 
 
+  const getBadges = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const User = await UserModel.findOne({ uuid: userId });
+        if(!User) throw new Error("No such User!");
+        // Find the Badge
+        const userBadges = User.badges;
+
+        res.status(200).json({ userBadges });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: `An error occurred while update Ledger: ${error.message}` });
+    }
+  };
 
 
 
@@ -98,6 +113,7 @@ const remove = async (req, res) => {
 module.exports = {
 //   create,
   update,
+  getBadges,
 //   getById,
 //   getAll,
 //   search,
