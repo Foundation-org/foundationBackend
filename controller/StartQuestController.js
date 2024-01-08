@@ -605,33 +605,39 @@ const getStartQuestPercent = async (req, res) => {
         questype = 1;
         if (
           res.data[res.data.length - 1].selected === "Yes" ||
-          res.data[res.data.length - 1].selected === "Agree"
+          res.data[res.data.length - 1].selected === "Agree" ||
+          res.data[res.data.length - 1].selected === "Like"
         ) {
           startQuestWithPositiveAns += 1;
           if (
             res.data[res.data.length - 1].contended === "Yes" ||
-            res.data[res.data.length - 1].contended === "Agree"
+            res.data[res.data.length - 1].contended === "Agree" ||
+            res.data[res.data.length - 1].contended === "Like"
           ) {
             startQuestWithPositiveConAns += 1;
           } else if (
             res.data[res.data.length - 1].contended === "No" ||
-            res.data[res.data.length - 1].contended === "Disagree"
+            res.data[res.data.length - 1].contended === "Disagree" ||
+            res.data[res.data.length - 1].contended === "Unlike"
           ) {
             startQuestWithNagativeConAns += 1;
           }
         } else if (
           res.data[res.data.length - 1].selected === "No" ||
-          res.data[res.data.length - 1].selected === "Disagree"
+          res.data[res.data.length - 1].selected === "Disagree" ||
+          res.data[res.data.length - 1].selected === "Unlike"
         ) {
           startQuestWithNagativeAns += 1;
           if (
             res.data[res.data.length - 1].contended === "No" ||
-            res.data[res.data.length - 1].contended === "Disagree"
+            res.data[res.data.length - 1].contended === "Disagree" ||
+            res.data[res.data.length - 1].contended === "Unlike"
           ) {
             startQuestWithNagativeConAns += 1;
           } else if (
             res.data[res.data.length - 1].contended === "Yes" ||
-            res.data[res.data.length - 1].contended === "Agree"
+            res.data[res.data.length - 1].contended === "Agree" ||
+            res.data[res.data.length - 1].contended === "Unlike"
           ) {
             startQuestWithPositiveConAns += 1;
           }
