@@ -97,7 +97,8 @@ const signUpUser = async (req, res) => {
       }
     )
 
-    res.status(200).json({ ...user._doc, token });
+    await sendVerifyEmail(req, res);
+    // res.status(200).json({ ...user._doc, token });
 
   } catch (error) {
     console.error(error.message);
@@ -442,7 +443,7 @@ const signedUuid = async (req, res) => {
   }
 const sendVerifyEmail = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.userEmail });
     // console.log("user", user);
     !user && res.status(404).json("User not Found");
 
@@ -505,7 +506,7 @@ const sendVerifyEmail = async (req, res) => {
       Source: process.env.AWS_SES_SENDER,
       Destination: {
         ToAddresses: [
-          req.body.email
+          req.body.userEmail
         ]
       },
       ReplyToAddresses: [],
@@ -537,8 +538,8 @@ const sendVerifyEmail = async (req, res) => {
       console.log(error);
     }
 
-    return res.status(201).send({
-      message: `Sent a verification email to ${req.body.email}`,
+    return res.status(200).send({
+      message: `Sent a verification email to ${req.body.userEmail}`,
     });
   } catch (error) {
     console.error(error.message);

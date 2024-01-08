@@ -1,6 +1,16 @@
 const passport = require("passport")
+const User = require("../models/UserModel");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
-const { OAuth2Client } = require('google-auth-library')
+const { OAuth2Client } = require('google-auth-library');
+const { eduEmailCheck } = require("../utils/eduEmailCheck");
+const { createLedger } = require("../utils/createLedger");
+const { updateTreasury } = require("../utils/treasuryService");
+const { updateUserBalance } = require("../utils/userServices");
+const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
+const { createToken } = require("../service/auth");
 
 // Github
 const githubSuccess = async (req, res) => {
@@ -39,39 +49,108 @@ const googleCallback = async (req, res) => {
 };
 
 
-const clientId = "233419149658-kvv0vd3go48fp56v22vr0qfoimvkp5tl.apps.googleusercontent.com";
+const googleHandler = async (req, res) => {
+    try {
+      // if(req.query.GoogleAccount){
+      //   signUpUserBySocialLogin(req, res)
+      // }
+      // Check Google Account
+      const payload = req.user;
+      // Check if email already exist
+      const user = await User.findOne({ email: payload.emails[0].value });
 
-const authClient = new OAuth2Client(clientId)
+    //   Signup User
+      if(!user) {
+        const uuid = crypto.randomBytes(11).toString("hex");
+        const newUser = await new User({
+            email: payload.emails[0].value,
+            uuid: uuid,
+        });
 
-const googleAuthentication = async(req, res) => {
-    const { idToken } = req.body;
-    if (idToken) {
-        authClient.verifyIdToken({ idToken, audience: clientId })
-            .then(response => {
-                // console.log(response)
-                const { email_verified, email, name, picture } = response.payload
-                console.log("🚀 ~ file: PassportController.js:53 ~ googleAuthentication ~ response.payload:", response.payload)
-                // if (email_verified) {
-                //     User.findOne({ email }).exec((err, user) => {
-                //         if(user){
-                //             return res.json(user)
-                //         }
-                //         else{
-                //             let password = email + clientId
-                //             let newUser = new User({email,name,picture,password});
-                //             newUser.save((err,data)=>{
-                //                 if(err){
-                //                     return res.status.json({error:"mongodb error"})
-                //                 }
-                //                 res.json(data)
-                //             })
-                //         }
-                //     })
-                // }
+        // Check Email Category
+        const emailStatus = await eduEmailCheck(req, res, payload.email)
+        let type = '';
+        if(emailStatus.status === 'OK') type = 'Education'
+
+        // Create a Badge at starting index
+        newUser.badges.unshift({ accountName: "Gmail", isVerified: payload.email_verified, type: type })
+
+        // Update newUser verification status to true
+        newUser.gmailVerified = payload.emails[0].verified;
+        
+        // Create Ledger
+        await createLedger(
+        {
+            uuid : uuid,
+            txUserAction : "accountBadgeAdded",
+            txID : crypto.randomBytes(11).toString("hex"),
+            txAuth : "User",
+            txFrom : uuid,
+            txTo : "dao",
+            txAmount : "0",
+            txData : newUser.badges[0]._id,
+            // txDescription : "User adds a verification badge"
+        })
+        await createLedger(
+            {
+                uuid : uuid,
+                txUserAction : "accountBadgeAdded",
+                txID : crypto.randomBytes(11).toString("hex"),
+                txAuth : "DAO",
+                txFrom : "DAO Treasury",
+                txTo : uuid,
+                txAmount : ACCOUNT_BADGE_ADDED_AMOUNT,
+                // txData : newUser.badges[0]._id,
+                // txDescription : "Incentive for adding badges"
             })
-            .catch(err => { console.log(err) })
+            // 
+            
+            if(newUser.badges[0].type !== "Education") {
+                newUser.requiredAction = true
+            }
+            await newUser.save();
+
+            // Decrement the Treasury
+            await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true })
+            
+            // Increment the UserBalance
+            await updateUserBalance({ uuid: newUser.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT, inc: true })
+
+            // Generate a JWT token
+            const token = createToken({ uuid: newUser.uuid });
+
+            res.cookie("jwt", token);
+            res.cookie("uId", newUser.uuid);
+            res.redirect(`https://localhost:5173/dashboard`);
+            return
+      }
+    //   Sign in User
+    
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
+    // Create Ledger
+    await createLedger(
+    {
+        uuid : user.uuid,
+        txUserAction : "accountLogin",
+        txID : crypto.randomBytes(11).toString("hex"),
+        txAuth : "User",
+        txFrom : user.uuid,
+        txTo : "dao",
+        txAmount : "0",
+        txData : user.uuid,
+        // txDescription : "user logs in"
+    })
+
+        res.cookie("jwt", token);
+        res.cookie("uId", user.uuid);
+        res.redirect(`https://localhost:5173/dashboard`);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ message: `An error occurred while signUpUser Auth: ${error.message}` });
     }
-}
+  }
 
 module.exports = {
     githubSuccess,
@@ -83,5 +162,5 @@ module.exports = {
     googleSuccess,
     googleFailure,
     googleCallback,
-    googleAuthentication
+    googleHandler
 }

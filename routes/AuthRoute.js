@@ -5,6 +5,7 @@ const AuthController = require("../controller/AuthController");
 // middleware
 const protect = require("../middleware/protect");
 const cache = require("../middleware/cache");
+const passport = require("passport");
 
 router.put("/changePassword", AuthController.changePassword);
 
@@ -15,6 +16,8 @@ router.post("/signUpUser/social", AuthController.signUpUserBySocialLogin);
 router.post("/signInUser/social", AuthController.signInUserBySocialLogin);
 
 router.post("/signInUser", AuthController.signInUser);
+
+router.post("/signInUser/test", passport.authenticate('jwt', { session: false }), (req, res) => { res.json({message: "OK"}) });
 
 router.post("/send/email", AuthController.sendEmail);
 

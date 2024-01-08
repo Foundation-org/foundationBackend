@@ -5,7 +5,10 @@ const twitterStrategy = require("passport-twitter")
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 // var LinkedInStrategy = require('passport-linkedin').Strategy;
 var InstagramStrategy = require('passport-instagram').Strategy;
-const localStrategy = require("passport-local")
+const localStrategy = require("passport-local");
+const JwtStrategy = require("passport-jwt").Strategy;
+  ExtractJwt = require('passport-jwt').ExtractJwt;
+var opts = {}
 const dotenv = require("dotenv")
 // const UserModel = require("../models/UserModel")
 const bcrypt = require("bcrypt")
@@ -30,6 +33,26 @@ passport.deserializeUser(async function (user, done) {
   //   return done(null, user)
   // })
 })
+
+
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = 'secret';
+// opts.issuer = 'accounts.examplesoft.com';
+// opts.audience = 'yoursite.net';
+passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+    done(null, jwt_payload)
+    // User.findOne({id: jwt_payload.sub}, function(err, user) {
+    //     if (err) {
+    //         return done(err, false);
+    //     }
+    //     if (user) {
+    //         return done(null, user);
+    //     } else {
+    //         return done(null, false);
+    //         // or you could create a new account
+    //     }
+    // });
+}));
  
 passport.use(
   new GitHub(
@@ -39,7 +62,6 @@ passport.use(
       callbackURL: "http://localhost:7354/auth/github/callback",
     },
     function (accessToken, refreshToken, profile, done) {
-      console.log("🚀 ~ file: passport.js:39 ~ profile:", profile)
       done(null, profile)
       // UserModel.findOne({ githubId: profile.id }, async (err, user) => {
       //   if (err) return done(err, null)
@@ -121,7 +143,6 @@ passport.use(new Google({
 },
 function(accessToken, refreshToken, profile, cb) {
   cb(null, profile)
-  console.log("🚀 ~ file: passport.js:111 ~ profile:", profile)
   // User.findOrCreate({ googleId: profile.id }, function (err, user) {
   //   return cb(err, user);
   // });

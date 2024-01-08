@@ -53,8 +53,6 @@ router.get(
 );
 
 //   Google
-router.get("/test/google", PassportController.googleAuthentication)
-
 router.get("/login/success", (req, res) => {
   if (req.user) {
     res.status(200).json({
@@ -73,11 +71,7 @@ router.get("/google/callback",
     // successRedirect: CLIENT_URL,
     failureRedirect: "/login/failed",
   }),
-  (req, res) => {
-    console.log("🚀 ~ file: PassportRoutes.js:64 ~ req:", req);
-    // res.json({ user: req.user });
-    res.redirect(`https://localhost:5173/?user=${encodeURIComponent(JSON.stringify(req.user))}`);
-  }
+  PassportController.googleHandler
 );
 
 // router.get('/google/callback',

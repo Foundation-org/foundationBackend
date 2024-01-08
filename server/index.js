@@ -1,6 +1,7 @@
 const express = require("express");
 const sessionExpress = require('express-session');
 const cookieSession = require("cookie-session");
+const cookieParser = require('cookie-parser');
 const app = express();
 const dotenv = require("dotenv");
 const colors = require("colors");
@@ -25,20 +26,21 @@ app.use(sessionExpress({
 // app.use(
 //   cookieSession({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
 // );
-// passport
-app.use(passport.initialize())
-app.use(passport.session()) //important because deserializeUser has to decode the information from the session id
 
 
 // middlewares
-app.use(cors());
-// app.use(cors({
-//   origin: "https://localhost:5173",
-//   methods: "GET,POST,PUT,DELETE",
-//   credentials: true,
-// }));
-// app.options("*", cors());
-
+// app.use(cors());
+app.use(cors({
+    origin: "https://localhost:5173",
+    // methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+  }));
+  // app.options("*", cors());
+app.use(cookieParser());
+  
+  // passport
+  app.use(passport.initialize())
+  // app.use(passport.session()) //important because deserializeUser has to decode the information from the session id
 
 app.use(express.json());
 app.use(helmet());

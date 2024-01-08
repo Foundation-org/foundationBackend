@@ -30,6 +30,8 @@ const update = async (req, res) => {
         })
         // Update the user badges
         User.badges = updatedUserBadges;
+        // Update the action
+        User.requiredAction = false;
         await User.save();
 
         // Generate a JWT token
