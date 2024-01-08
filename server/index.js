@@ -8,7 +8,7 @@ const colors = require("colors");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
-const { BASE_PORT, FRONTEND_URL } = require("../config/env");
+const { BASE_PORT, FRONTEND_URL, FRONTEND_URL_1 } = require("../config/env");
 const passport = require("passport");
 // import passport from "passport"
 // import '../service/passport'
@@ -17,7 +17,12 @@ require("../service/passport")
 
 dotenv.config();
 
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin: [FRONTEND_URL, FRONTEND_URL_1],
+    // methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+  }));
 
 app.use(sessionExpress({
   secret: 'somethingsecretgoeshere',
