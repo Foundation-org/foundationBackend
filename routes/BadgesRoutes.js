@@ -10,6 +10,8 @@ const protect = require("../middleware/protect");
 
 router.patch("/updateBadge/:userId/:badgeId", BadgeController.update);
 
+router.get("/getBadges/:userId", BadgeController.getBadges);
+
 // router.get("/getAllBadge", BadgeController.getAll);
 
 // router.post("/searchBadge",BadgeController.search);

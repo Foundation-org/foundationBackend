@@ -50,6 +50,10 @@ const userSchema = mongoose.Schema(
     signedUuid: {
       type: String,
     },
+    requiredAction: {
+      type: Boolean,
+      default: false
+    },
     contentionsOnAddedAns: {
       type: Number,
       default: 0,

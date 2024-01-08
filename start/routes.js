@@ -8,6 +8,7 @@ const SearchRoute = require("../routes/SearchRoute");
 const QuestTopicRoute=require("../routes/QuestTopicRoute")
 const StartQuestRoute = require("../routes/StartQuestRoute");
 const BadgesRoutes = require("../routes/BadgesRoutes");
+const PassportRoutes = require("../routes/PassportRoutes");
 
 module.exports = function (app) {
     app.use("/", LedgerRoute)
@@ -21,5 +22,6 @@ module.exports = function (app) {
     app.use("/startQuest", StartQuestRoute)
     app.use("/ledger",LedgerRoute)
     app.use("/treasury",TreasuryRoutes)
+    app.use("/auth",PassportRoutes)
     // app.use(error);
   };
