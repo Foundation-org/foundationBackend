@@ -17,6 +17,8 @@ require("../service/passport")
 
 dotenv.config();
 
+app.use(cors());
+
 app.use(sessionExpress({
   secret: 'somethingsecretgoeshere',
   resave: false,
@@ -30,12 +32,11 @@ app.use(sessionExpress({
 
 // middlewares
 // app.use(cors());
-app.use(cors({
-    origin: FRONTEND_URL,
-    // methods: "GET,POST,PUT,DELETE",
-    credentials: true,
-  }));
-  // app.options("*", cors());
+// app.use(cors({
+//     origin: FRONTEND_URL,
+//     methods: "GET,POST,PUT,DELETE",
+//     credentials: true,
+//   }));
 app.use(cookieParser());
   
   // passport
