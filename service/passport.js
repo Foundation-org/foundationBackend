@@ -12,7 +12,7 @@ var opts = {}
 const dotenv = require("dotenv")
 // const UserModel = require("../models/UserModel")
 const bcrypt = require("bcrypt")
-const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, LINKEDIN_KEY, LINKEDIN_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = require("../config/env")
+const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, LINKEDIN_KEY, LINKEDIN_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BACKEND_URL } = require("../config/env")
 
 dotenv.config()
 
@@ -59,7 +59,8 @@ passport.use(
     {
       clientID: GITHUB_CLIENT_ID,
       clientSecret: GITHUB_CLIENT_SECRET,
-      callbackURL: "http://localhost:7354/auth/github/callback",
+      callbackURL: `${BACKEND_URL}/auth/github/callback`,
+
     },
     function (accessToken, refreshToken, profile, done) {
       done(null, profile)
@@ -83,7 +84,7 @@ passport.use(
 passport.use(new LinkedInStrategy({
   clientID: LINKEDIN_KEY,
   clientSecret: LINKEDIN_SECRET,
-  callbackURL: "http://localhost:7354/auth/linkedin/callback",
+  callbackURL: `${BACKEND_URL}/auth/linkedin/callback`,
   scope: ['r_emailaddress', 'r_liteprofile'],
 }, function(accessToken, refreshToken, profile, done) {
   // asynchronous verification, for effect...
@@ -112,7 +113,7 @@ passport.use(new LinkedInStrategy({
 passport.use(new Twitter({
   consumerKey: TWITTER_CONSUMER_KEY,
   consumerSecret: TWITTER_CONSUMER_SECRET,
-  callbackURL: "http://localhost:7354/auth/twitter/callback"
+  callbackURL: `${BACKEND_URL}/auth/twitter/callback`,
 },
 function(token, tokenSecret, profile, cb) {
   return cb(null, profile);
@@ -139,7 +140,7 @@ function(token, tokenSecret, profile, cb) {
 passport.use(new Google({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: "http://localhost:7354/auth/google/callback"
+  callbackURL: `${BACKEND_URL}/auth/google/callback`,
 },
 function(accessToken, refreshToken, profile, cb) {
   cb(null, profile)

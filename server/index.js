@@ -8,7 +8,7 @@ const colors = require("colors");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
-const { BASE_PORT } = require("../config/env");
+const { BASE_PORT, FRONTEND_URL } = require("../config/env");
 const passport = require("passport");
 // import passport from "passport"
 // import '../service/passport'
@@ -31,7 +31,7 @@ app.use(sessionExpress({
 // middlewares
 // app.use(cors());
 app.use(cors({
-    origin: "https://localhost:5173",
+    origin: FRONTEND_URL,
     // methods: "GET,POST,PUT,DELETE",
     credentials: true,
   }));

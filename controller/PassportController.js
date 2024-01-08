@@ -11,6 +11,7 @@ const { updateTreasury } = require("../utils/treasuryService");
 const { updateUserBalance } = require("../utils/userServices");
 const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
 const { createToken } = require("../service/auth");
+const { FRONTEND_URL } = require("../config/env");
 
 // Github
 const githubSuccess = async (req, res) => {
@@ -121,7 +122,7 @@ const googleHandler = async (req, res) => {
 
             res.cookie("jwt", token);
             res.cookie("uId", newUser.uuid);
-            res.redirect(`https://localhost:5173/dashboard`);
+            res.redirect(`${FRONTEND_URL}/dashboard`);
             return
       }
     //   Sign in User
@@ -145,7 +146,7 @@ const googleHandler = async (req, res) => {
 
         res.cookie("jwt", token);
         res.cookie("uId", user.uuid);
-        res.redirect(`https://localhost:5173/dashboard`);
+        res.redirect(`${FRONTEND_URL}/dashboard`);
     } catch (error) {
       console.error(error.message);
       res.status(500).json({ message: `An error occurred while signUpUser Auth: ${error.message}` });

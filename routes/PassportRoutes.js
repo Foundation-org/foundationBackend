@@ -6,9 +6,10 @@ const PassportController = require("../controller/PassportController");
 // middleware
 const protect = require("../middleware/protect");
 const cache = require("../middleware/cache");
+const { FRONTEND_URL } = require("../config/env");
 
 
-const CLIENT_URL = "https://localhost:5173/profile";
+const CLIENT_URL = `${FRONTEND_URL}/profile`;
 
 router.get("/login/failed", (req, res) => {
     res.status(401).json({
