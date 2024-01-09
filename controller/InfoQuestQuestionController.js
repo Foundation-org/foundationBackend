@@ -390,19 +390,24 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
 
 const getQuestById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const infoQuest = await InfoQuestQuestions.findOne({
+    const { uuid, id } = req.params; // Use req.params instead of req.body
+    const infoQuest = await InfoQuestQuestions.find({
       _id: id,
     });
     if (!infoQuest) throw new Error("No Quest Exist!");
+
+    const result = await getQuestionsWithStatus(infoQuest, uuid);
+
     res.status(200).json({
-      data: infoQuest,
+      data: result,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: `An error occurred while getQuestById InfoQuest: ${error.message}` });
   }
 };
+
+
 
 const getAllQuestsWithCompletedStatus = async (req, res) => {
   try {
