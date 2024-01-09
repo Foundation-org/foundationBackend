@@ -12,7 +12,7 @@ router.post("/getAllQuests", InfoQuestQuestionController.getAllQuests)
 router.post("/getAllQuestsWithOpenInfoQuestStatus", InfoQuestQuestionController.getAllQuestsWithOpenInfoQuestStatus)
 router.post("/getAllQuestsWithAnsweredStatus", InfoQuestQuestionController.getAllQuestsWithAnsweredStatus)
 router.post("/getAllQuestsWithDefaultStatus", InfoQuestQuestionController.getAllQuestsWithDefaultStatus)
-router.post("/getQuest/:uuid/:id", InfoQuestQuestionController.getQuestById)
+router.get("/getQuest/:uuid/:id", InfoQuestQuestionController.getQuestById)
 router.post("/getAllQuestsWithCompletedStatus", InfoQuestQuestionController.getAllQuestsWithCompletedStatus)
 router.post("/getAllQuestsWithChangeAnsStatus", InfoQuestQuestionController.getAllQuestsWithChangeAnsStatus)
 
