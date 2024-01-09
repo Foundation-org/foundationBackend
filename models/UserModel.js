@@ -107,6 +107,7 @@ const userSchema = mongoose.Schema(
         accountName: { type: String },
         isVerified: { type: Boolean },
         type: { type: String },
+        createdAt: { type: Date, default: new Date() }
       }
     ]
   },

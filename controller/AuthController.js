@@ -13,6 +13,7 @@ const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
 const { getRandomDigits } = require("../utils/getRandomDigits");
 const { sendEmailMessage } = require("../utils/sendEmailMessage");
+const { FRONTEND_URL } = require("../config/env");
 
 
 const changePassword = async (req, res) => {
@@ -231,9 +232,9 @@ try {
         // txDescription : "user logs in"
     })
 
-    // res.status(200).json(user);
-    res.status(200).json({ ...user._doc, token });
-    // res.status(201).send("Signed in Successfully");
+    res.cookie("uId", user.uuid, { httpOnly: true });
+    res.cookie("jwt", token, { httpOnly: true });
+    res.json({ message: "Successful" })
 } catch (error) {
     console.error(error.message);
       res.status(500).json({ message: `An error occurred while signInUser Auth: ${error.message}` });
@@ -402,7 +403,6 @@ const signInUserBySocialLogin = async (req, res) => {
 const userInfo = async (req, res) => {
     try {
       const user = await User.findOne({ uuid: req.body.uuid });
-  
       res.status(200).json(user);
     } catch (error) {
       console.error(error.message);

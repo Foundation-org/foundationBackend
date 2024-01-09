@@ -9,7 +9,7 @@ const cache = require("../middleware/cache");
 const { FRONTEND_URL } = require("../config/env");
 
 
-const CLIENT_URL = `${FRONTEND_URL}/profile`;
+const CLIENT_URL = `${FRONTEND_URL}/profile/verification-badges`;
 
 router.get("/login/failed", (req, res) => {
     res.status(401).json({
@@ -20,7 +20,7 @@ router.get("/login/failed", (req, res) => {
 
 
 //   Github
-router.get("/github", passport.authenticate("github", { scope: ["profile"] }));
+router.get("/github", passport.authenticate("github", { scope: [ 'user:email' ] }));
 
 router.get(
   "/github/callback",

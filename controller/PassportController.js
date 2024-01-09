@@ -153,6 +153,36 @@ const googleHandler = async (req, res) => {
     }
   }
 
+  const addBadge = async (req, res) => {
+    try {
+        // const { userId, badgeId } = req.params;
+        const User = await UserModel.findOne({ _id: userId });
+        if(!User) throw new Error("No such User!");
+        // Find the Badge
+        const userBadges = User.badges;
+        const updatedUserBadges = userBadges.map(item => {
+            if(item._id.toHexString()  == badgeId){
+                return { ...item, type: req.body.type }
+                // return item.type = req.body.type;
+            };
+        })
+        // Update the user badges
+        User.badges = updatedUserBadges;
+        // Update the action
+        User.requiredAction = false;
+        await User.save();
+
+        // Generate a JWT token
+        const token = createToken({ uuid: User.uuid });
+
+        res.status(200).json({ ...User._doc, token });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: `An error occurred while update Ledger: ${error.message}` });
+    }
+  };
+
 module.exports = {
     githubSuccess,
     githubFailure,
@@ -163,5 +193,6 @@ module.exports = {
     googleSuccess,
     googleFailure,
     googleCallback,
-    googleHandler
+    googleHandler,
+    addBadge
 }
