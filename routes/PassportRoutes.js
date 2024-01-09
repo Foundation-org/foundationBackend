@@ -27,6 +27,7 @@ router.get(
   passport.authenticate("github", {
     successRedirect: CLIENT_URL,
     failureRedirect: "/login/failed",
+    session: false,
   })
 );
 
@@ -39,6 +40,7 @@ router.get(
   passport.authenticate("linkedin", {
     successRedirect: CLIENT_URL,
     failureRedirect: "/login/failed",
+    session: false,
   })
 );
 
@@ -50,6 +52,7 @@ router.get(
   passport.authenticate("twitter", {
     successRedirect: CLIENT_URL,
     failureRedirect: "/login/failed",
+    session: false,
   })
 );
 
@@ -71,6 +74,7 @@ router.get("/google/callback",
   passport.authenticate("google", {
     // successRedirect: CLIENT_URL,
     failureRedirect: "/login/failed",
+    session: false,
   }),
   PassportController.googleHandler
 );
