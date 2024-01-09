@@ -18,7 +18,7 @@ const createBookmarkQuest = async (req, res) => {
       const question = await new BookmarkQuests({
         Question: req.body.Question,
         questForeignKey: req.body.questForeignKey,
-        uuid: req.body.uuid,
+        uuid: req.cookies.uuid,
         whichTypeQuestion:req.body.whichTypeQuestion,
         createdBy:owner.uuid
       });
@@ -28,11 +28,11 @@ const createBookmarkQuest = async (req, res) => {
       // Create Ledger
       await createLedger(
         {
-          uuid : req.body.uuid,
+          uuid : req.cookies.uuid,
           txUserAction : "bookmarkAdded",
           txID : crypto.randomBytes(11).toString("hex"),
           txAuth : "User",
-          txFrom : req.body.uuid,
+          txFrom : req.cookies.uuid,
           txTo : "dao",
           txAmount : "0",
           txData : questions._id,
@@ -48,20 +48,20 @@ const deleteBookmarkQuest = async (req, res) => {
     try {
       const questions = await BookmarkQuests.findOne({
         questForeignKey: req.body.questForeignKey,
-        uuid: req.body.uuid,
+        uuid: req.cookies.uuid,
       });
       await BookmarkQuests.deleteOne({
         questForeignKey: req.body.questForeignKey,
-        uuid: req.body.uuid,
+        uuid: req.cookies.uuid,
       });
       // Create Ledger
       await createLedger(
         {
-          uuid : req.body.uuid,
+          uuid : req.cookies.uuid,
           txUserAction : "bookmarkRemoved",
           txID : crypto.randomBytes(11).toString("hex"),
           txAuth : "User",
-          txFrom : req.body.uuid,
+          txFrom : req.cookies.uuid,
           txTo : "dao",
           txAmount : "0",
           txData : questions._id,
@@ -75,7 +75,7 @@ const deleteBookmarkQuest = async (req, res) => {
 const getAllBookmarkQuests = async (req, res) => {
     try {
       const Questions = await BookmarkQuests.find({
-        uuid: req.body.uuid,
+        uuid: req.cookies.uuid,
       });
       // console.log(Questions);
       res.status(200).json(Questions);
@@ -97,7 +97,7 @@ const getAllBookmarkQuestions = async (req, res) => {
         filterObj.whichTypeQuestion = req.body.type;
       }
       if(req.body.filter===true){
-        filterObj.createdBy=req.body.uuid;
+        filterObj.createdBy=req.cookies.uuid;
       }
   
       const Questions = await BookmarkQuests.find(filterObj)

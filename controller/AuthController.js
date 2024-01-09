@@ -232,7 +232,7 @@ try {
         // txDescription : "user logs in"
     })
 
-    res.cookie("uId", user.uuid, { httpOnly: true });
+    res.cookie("uuid", user.uuid, { httpOnly: true });
     res.cookie("jwt", token, { httpOnly: true });
     res.json({ message: "Successful" })
 } catch (error) {
@@ -402,7 +402,7 @@ const signInUserBySocialLogin = async (req, res) => {
 
 const userInfo = async (req, res) => {
     try {
-      const user = await User.findOne({ uuid: req.body.uuid });
+      const user = await User.findOne({ uuid: req.cookies.uuid });
       res.status(200).json(user);
     } catch (error) {
       console.error(error.message);
@@ -673,7 +673,7 @@ const deleteByUUID = async(req, res) => {
   }
 const logout = async(req, res) => {
     try {
-      const { uuid } = req.params;
+      const uuid = req.cookies.uuid;
     // return
       // const user = await User.findOne({uuid});
       // if(!user) throw new Error("User not Found");
@@ -691,7 +691,9 @@ const logout = async(req, res) => {
           // txDescription : "User logs out"
         }
       )
-  
+        
+      res.clearCookie("uuid");
+      res.clearCookie("jwt");
       res.status(200).json({ message: "User has been logout successfully!" });
     } catch (error) {
       console.error(error.message);

@@ -31,7 +31,8 @@ const create = async (req, res) => {
 
 const getById = async (req, res) => {
   try {
-    const { page, limit, uuid } = req.query;
+    const { page, limit } = req.query;
+    const uuid = req.cookies.uuid;
     const skip = (page - 1) * limit;
 
     const ledger = await Ledgers.find({ uuid })

@@ -5,7 +5,7 @@ const { getQuestionsWithStatus } = require("./InfoQuestQuestionController");
 
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
-  const uuid = req.query.uuid;
+  const uuid = req.cookies.uuid;
 
   try {
     const results = await InfoQuestQuestions.find({
@@ -30,7 +30,7 @@ const easySearch = async (req, res) => {
 
 const searchBookmarks = async (req, res) => {
   const searchTerm = req.query.term;
-  const uuid = req.query.uuid;
+  const uuid = req.cookies.uuid;
   try {
     const results = await BookmarkQuests.find({
       $or: [{ Question: { $regex: searchTerm, $options: "i" } }],

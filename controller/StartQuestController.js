@@ -10,7 +10,7 @@ const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const updateViolationCounter = async (req, res) => {
   try {
     const result = await User.updateOne(
-      { uuid: req.body.uuid },
+      { uuid: req.cookies.uuid },
       { $inc: { violationCounter: 1 } }
     );
     if (result.nModified === 0) {

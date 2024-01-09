@@ -121,7 +121,7 @@ const googleHandler = async (req, res) => {
             const token = createToken({ uuid: newUser.uuid });
 
             res.cookie("jwt", token);
-            res.cookie("uId", newUser.uuid);
+            res.cookie("uuid", newUser.uuid);
             res.redirect(`${FRONTEND_URL}/dashboard`);
             return
       }
@@ -145,7 +145,7 @@ const googleHandler = async (req, res) => {
     })
 
         res.cookie("jwt", token);
-        res.cookie("uId", user.uuid);
+        res.cookie("uuid", user.uuid);
         res.redirect(`${FRONTEND_URL}/dashboard`);
     } catch (error) {
       console.error(error.message);
