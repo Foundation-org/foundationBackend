@@ -162,6 +162,7 @@ async function handleRequest(
     }
   
     if (callType == 3) {
+      filtered = removeTrailingPeriods(filtered);
       createQuestTopic(filtered)
     }
   
