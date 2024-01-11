@@ -35,7 +35,7 @@ module.exports.googleVerify = async(token) => {
 };
 
 module.exports.cookieConfiguration = () => {
-  if(DEVELOPMENT){
+  if(DEVELOPMENT === true){
     return { httpOnly: true }
   } else {
     return { httpOnly: true, sameSite: 'none', secure: true}
