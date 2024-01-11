@@ -24,12 +24,12 @@ app.use(cors({
     credentials: true,
   }));
 
-// app.use(sessionExpress({
-//   secret: 'somethingsecretgoeshere',
-//   resave: false,
-//   saveUninitialized: true,
-//   // cookie: { secure: true }
-// }))
+app.use(sessionExpress({
+  secret: 'somethingsecretgoeshere',
+  resave: false,
+  saveUninitialized: true,
+  // cookie: { secure: true }
+}))
 // app.use(
 //   cookieSession({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
 // );

@@ -49,7 +49,6 @@ passport.use(
       clientID: GITHUB_CLIENT_ID,
       clientSecret: GITHUB_CLIENT_SECRET,
       callbackURL: `${BACKEND_URL}/auth/github/callback`,
-
     },
     function (accessToken, refreshToken, profile, done) {
       done(null, profile)
@@ -103,6 +102,7 @@ passport.use(new Twitter({
   consumerKey: TWITTER_CONSUMER_KEY,
   consumerSecret: TWITTER_CONSUMER_SECRET,
   callbackURL: `${BACKEND_URL}/auth/twitter/callback`,
+  includeEmail: true,
 },
 function(token, tokenSecret, profile, cb) {
   return cb(null, profile);

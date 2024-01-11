@@ -12,6 +12,7 @@ const { updateUserBalance } = require("../utils/userServices");
 const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
 const { createToken } = require("../service/auth");
 const { FRONTEND_URL } = require("../config/env");
+const UserModel = require("../models/UserModel");
 
 // Github
 const githubSuccess = async (req, res) => {
@@ -159,36 +160,63 @@ const googleHandler = async (req, res) => {
   }
 };
 
-const addBadge = async (req, res) => {
-  try {
-    // const { userId, badgeId } = req.params;
-    const User = await UserModel.findOne({ _id: userId });
-    if (!User) throw new Error("No such User!");
-    // Find the Badge
-    const userBadges = User.badges;
-    const updatedUserBadges = userBadges.map((item) => {
-      if (item._id.toHexString() == badgeId) {
-        return { ...item, type: req.body.type };
-        // return item.type = req.body.type;
-      }
-    });
-    // Update the user badges
-    User.badges = updatedUserBadges;
-    // Update the action
-    User.requiredAction = false;
-    await User.save();
+  const addBadge = async (req, res) => {
+    try {
+        console.log(req.user);
+        // console.log("🚀 ~ addBadge ~ req.user:", req.user)
+        // return
+        // const { userId, badgeId } = req.params;
+        if(!req.user._json.email) throw new Error("No Email Exist!")
+        const User = await UserModel.findOne({ email: req.user._json.email });
+        if(!User) throw new Error("No such User!");
+        // Find the Badge
+        const userBadges = User.badges;
+        const updatedUserBadges = [...userBadges, { accountName: req.user.provider, isVerified: true, type: "default" }]
+        // console.log("🚀 ~ addBadge ~ updatedUserBadges:", updatedUserBadges)
+        // Update the user badges
+        User.badges = updatedUserBadges;
+        // Update the action
+        await User.save();
 
-    // Generate a JWT token
-    const token = createToken({ uuid: User.uuid });
+        // Create Ledger
+        await createLedger(
+            {
+                uuid : User.uuid,
+                txUserAction : "accountBadgeAdded",
+                txID : crypto.randomBytes(11).toString("hex"),
+                txAuth : "User",
+                txFrom : User.uuid,
+                txTo : "dao",
+                txAmount : "0",
+                txData : User.badges[0]._id,
+                // txDescription : "User adds a verification badge"
+            })
+            await createLedger(
+                {
+                    uuid : User.uuid,
+                    txUserAction : "accountBadgeAdded",
+                    txID : crypto.randomBytes(11).toString("hex"),
+                    txAuth : "DAO",
+                    txFrom : "DAO Treasury",
+                    txTo : User.uuid,
+                    txAmount : ACCOUNT_BADGE_ADDED_AMOUNT,
+                    // txData : newUser.badges[0]._id,
+                    // txDescription : "Incentive for adding badges"
+                })
+        // Decrement the Treasury
+        await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true })
+            
+        // Increment the UserBalance
+        await updateUserBalance({ uuid: User.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT, inc: true })
 
-    res.status(200).json({ ...User._doc, token });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: `An error occurred while update Ledger: ${error.message}`,
-    });
-  }
-};
+        res.redirect(`${FRONTEND_URL}/profile/verification-badges`);
+
+    } catch (error) {
+    //   res.redirect(500).json({ message: `An error occurred while update Ledger: ${error.message}` });
+        console.log("🚀 ~ addBadge ~ error.message:", error.message)
+        res.redirect(`${FRONTEND_URL}/profile/verification-badges`);
+    }
+  };
 
 module.exports = {
   githubSuccess,
