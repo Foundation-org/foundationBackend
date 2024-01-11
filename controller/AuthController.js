@@ -749,8 +749,8 @@ const logout = async (req, res) => {
       // txDescription : "User logs out"
     });
 
-    res.clearCookie("uuid");
-    res.clearCookie("jwt");
+    res.clearCookie("uuid", cookieConfiguration());
+    res.clearCookie("jwt", cookieConfiguration());
     res.status(200).json({ message: "User has been logout successfully!" });
   } catch (error) {
     console.error(error.message);
