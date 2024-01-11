@@ -10,7 +10,7 @@ const { createLedger } = require("../utils/createLedger");
 const { updateTreasury } = require("../utils/treasuryService");
 const { updateUserBalance } = require("../utils/userServices");
 const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
-const { createToken } = require("../service/auth");
+const { createToken, cookieConfiguration, getClientURL } = require("../service/auth");
 const { FRONTEND_URL } = require("../config/env");
 const UserModel = require("../models/UserModel");
 
@@ -55,6 +55,7 @@ const googleHandler = async (req, res) => {
     // if(req.query.GoogleAccount){
     //   signUpUserBySocialLogin(req, res)
     // }
+
     // Check Google Account
     const payload = req.user;
     // Check if email already exist
@@ -125,9 +126,9 @@ const googleHandler = async (req, res) => {
 
       // Generate a JWT token
       const token = createToken({ uuid: newUser.uuid });
-
-      res.cookie("jwt", token, { httpOnly: true });
-      res.cookie("uuid", newUser.uuid, { httpOnly: true });
+      // console.log(req.get('host'));
+      res.cookie("jwt", token, cookieConfiguration());
+      res.cookie("uuid", newUser.uuid, cookieConfiguration());
       res.redirect(`${FRONTEND_URL}/auth0`);
       return;
     }
@@ -149,8 +150,8 @@ const googleHandler = async (req, res) => {
       // txDescription : "user logs in"
     });
 
-    res.cookie("jwt", token, { httpOnly: true });
-    res.cookie("uuid", user.uuid), { httpOnly: true };
+    res.cookie("jwt", token, cookieConfiguration());
+    res.cookie("uuid", user.uuid), cookieConfiguration();
     res.redirect(`${FRONTEND_URL}/auth0`);
   } catch (error) {
     console.error(error.message);

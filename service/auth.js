@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET, CLIENT_ID } = require("../config/env");
+const { JWT_SECRET, CLIENT_ID, DEVELOPMENT, FRONTEND_URL, FRONTEND_URL_1 } = require("../config/env");
 const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
 
@@ -33,3 +33,11 @@ module.exports.googleVerify = async(token) => {
       console.log(error)
   }
 };
+
+module.exports.cookieConfiguration = () => {
+  if(DEVELOPMENT){
+    return { httpOnly: true }
+  } else {
+    return { httpOnly: true, sameSite: 'none', secure: true}
+  }
+}

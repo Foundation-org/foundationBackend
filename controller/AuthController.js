@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 // const nodemailer = require("nodemailer");
 const AWS = require("aws-sdk");
 const crypto = require("crypto");
-const { createToken, googleVerify } = require("../service/auth");
+const { createToken, googleVerify, cookieConfiguration } = require("../service/auth");
 const { createLedger } = require("../utils/createLedger");
 const { isGoogleEmail } = require("../utils/checkGoogleAccount");
 const {
@@ -246,8 +246,8 @@ const signInUser = async (req, res) => {
       // txDescription : "user logs in"
     });
 
-    res.cookie("uuid", user.uuid, { httpOnly: true });
-    res.cookie("jwt", token, { httpOnly: true });
+    res.cookie("uuid", user.uuid, cookieConfiguration());
+    res.cookie("jwt", token, cookieConfiguration());
     res.json({ message: "Successful" });
   } catch (error) {
     console.error(error.message);
