@@ -220,7 +220,7 @@ const googleHandler = async (req, res) => {
 
   const socialBadgeToken = async(req, res) => {
     // 
-    const token = createToken(req.user);
+    const token = createToken({ _json: req.user._json, provider: req.user.provider });
     res.cookie("social", token, { httpOnly: true, maxAge: 1000 * 60 });
     res.redirect(`${FRONTEND_URL}/profile/verification-badges?social=true`);
   }
