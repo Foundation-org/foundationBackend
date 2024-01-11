@@ -126,8 +126,8 @@ const googleHandler = async (req, res) => {
       // Generate a JWT token
       const token = createToken({ uuid: newUser.uuid });
 
-      res.cookie("jwt", token);
-      res.cookie("uuid", newUser.uuid);
+      res.cookie("jwt", token, { httpOnly: true });
+      res.cookie("uuid", newUser.uuid, { httpOnly: true });
       res.redirect(`${FRONTEND_URL}/auth0`);
       return;
     }
@@ -149,8 +149,8 @@ const googleHandler = async (req, res) => {
       // txDescription : "user logs in"
     });
 
-    res.cookie("jwt", token);
-    res.cookie("uuid", user.uuid);
+    res.cookie("jwt", token, { httpOnly: true });
+    res.cookie("uuid", user.uuid), { httpOnly: true };
     res.redirect(`${FRONTEND_URL}/auth0`);
   } catch (error) {
     console.error(error.message);
@@ -218,6 +218,13 @@ const googleHandler = async (req, res) => {
     }
   };
 
+  const socialBadgeToken = async(req, res) => {
+    // 
+    const token = createToken(req.user);
+    res.cookie("social", token, { httpOnly: true, maxAge: 1000 * 60 });
+    res.redirect(`${FRONTEND_URL}/profile/verification-badges?social=true`);
+  }
+
 module.exports = {
   githubSuccess,
   githubFailure,
@@ -230,4 +237,5 @@ module.exports = {
   googleCallback,
   googleHandler,
   addBadge,
+  socialBadgeToken
 };

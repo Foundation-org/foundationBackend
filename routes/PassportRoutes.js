@@ -26,10 +26,10 @@ router.get(
   "/github/callback",
   passport.authenticate("github", {
     // successRedirect: CLIENT_URL,
-    failureRedirect: "/login/failed",
+    failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.addBadge
+  PassportController.socialBadgeToken
 );
 
 
@@ -39,10 +39,11 @@ router.get("/linkedin", passport.authenticate("linkedin", { scope: ["profile"] }
 router.get(
   "/linkedin/callback",
   passport.authenticate("linkedin", {
-    successRedirect: CLIENT_URL,
-    failureRedirect: "/login/failed",
+    // successRedirect: CLIENT_URL,
+    failureRedirect: CLIENT_URL,
     session: false,
-  })
+  }),
+  PassportController.socialBadgeToken
 );
 
 //   LinkedIn
@@ -52,10 +53,10 @@ router.get(
   "/twitter/callback",
   passport.authenticate("twitter", {
     // successRedirect: CLIENT_URL,
-    failureRedirect: "/login/failed",
+    failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.addBadge
+  PassportController.socialBadgeToken
 );
 
 //   Google
@@ -75,7 +76,7 @@ router.get("/google", passport.authenticate("google", { scope: ['profile', 'emai
 router.get("/google/callback",
   passport.authenticate("google", {
     // successRedirect: CLIENT_URL,
-    failureRedirect: "/login/failed",
+    failureRedirect: CLIENT_URL,
     session: false,
   }),
   PassportController.googleHandler

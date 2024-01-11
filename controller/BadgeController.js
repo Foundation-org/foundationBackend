@@ -1,5 +1,10 @@
+const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
 const UserModel = require("../models/UserModel");
 const { createToken } = require("../service/auth");
+const { createLedger } = require("../utils/createLedger");
+const crypto = require("crypto");
+const { updateTreasury } = require("../utils/treasuryService");
+const { updateUserBalance } = require("../utils/userServices");
 
 
 // const create = async (req, res) => {
@@ -111,11 +116,65 @@ const remove = async (req, res) => {
   }
 };
 
+const addBadgeSocial = async (req, res) => {
+  try {
+      if(!req.user._json.email) throw new Error("No Email Exist!")
+      const User = await UserModel.findOne({ uuid: req.cookies.uuid });
+      if(!User) throw new Error("No such User!");
+      // Find the Badge
+      const badge = User.badges.some(item => item.accountName === req.user.provider)
+      if(badge) throw new Error("Badge already exist");
+      const userBadges = User.badges;
+      const updatedUserBadges = [...userBadges, { accountName: req.user.provider, isVerified: true, type: "default" }]
+      // Update the user badges
+      User.badges = updatedUserBadges;
+      // Update the action
+      await User.save();
+
+      // Create Ledger
+      await createLedger(
+          {
+              uuid : User.uuid,
+              txUserAction : "accountBadgeAdded",
+              txID : crypto.randomBytes(11).toString("hex"),
+              txAuth : "User",
+              txFrom : User.uuid,
+              txTo : "dao",
+              txAmount : "0",
+              txData : User.badges[0]._id,
+              // txDescription : "User adds a verification badge"
+          })
+          await createLedger(
+              {
+                  uuid : User.uuid,
+                  txUserAction : "accountBadgeAdded",
+                  txID : crypto.randomBytes(11).toString("hex"),
+                  txAuth : "DAO",
+                  txFrom : "DAO Treasury",
+                  txTo : User.uuid,
+                  txAmount : ACCOUNT_BADGE_ADDED_AMOUNT,
+                  // txData : newUser.badges[0]._id,
+                  // txDescription : "Incentive for adding badges"
+              })
+      // Decrement the Treasury
+      await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true })
+          
+      // Increment the UserBalance
+      await updateUserBalance({ uuid: User.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT, inc: true })
+
+      res.clearCookie("social");
+      res.status(200).json({ message: "Successful" });
+
+  } catch (error) {
+    res.status(500).json({ message: `An error occurred while addSocialBadge: ${error.message}` });
+  }
+};
 
 module.exports = {
 //   create,
   update,
   getBadges,
+  addBadgeSocial
 //   getById,
 //   getAll,
 //   search,
