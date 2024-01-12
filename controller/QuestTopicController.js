@@ -59,6 +59,40 @@ const getAllTopic = async (req, res) => {
   }
 };
 
+const searchTopics = async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    if (!search) {
+      return res.status(400).json({ message: 'Search term is required' });
+    }
+
+    const query = {
+      name: { $regex: new RegExp(search, 'i') }, // Case-insensitive search
+    };
+
+    const questTopics = await QuestTopics.find(query).sort({ _id: 1 }); // Adjust sorting based on your needs
+
+    const namesArray = questTopics.map((topic) => topic.name);
+
+    const totalCount = questTopics.length;
+
+    res.status(200).json({
+      data: namesArray,
+      totalCount,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while searching topics: ${error.message}`,
+    });
+  }
+};
+
+
+
+
+
 const getAllQuestByTopic = async (req, res) => {
   try {
     const { title } = req.body;
@@ -101,4 +135,5 @@ module.exports = {
   getAllTopic,
   getAllQuestByTopic,
   getAllQuestByTrendingTopic,
+  searchTopics
 };
