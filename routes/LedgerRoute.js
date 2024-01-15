@@ -5,17 +5,12 @@ const LedgerController = require("../controller/LedgerController");
 // middleware
 const protect = require("../middleware/protect");
 
-
 router.post("/createLedger", LedgerController.create);
-
-// router.patch("/updateLedger/:id", LedgerController.update);
 
 router.get("/getAllLedger", LedgerController.getAll);
 
 router.get("/ledgerById", LedgerController.getById);
 
-router.post("/searchLedger",LedgerController.search);
-
-// router.delete("/deleteLedger/:id", LedgerController.remove);
+router.post("/searchLedger", LedgerController.search);
 
 module.exports = router;
