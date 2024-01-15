@@ -120,3 +120,12 @@ module.exports.createQuestTopic = async(topic) => {
     console.log(error);
   }
 }
+
+module.exports.checkNonsenseInTopics = (sentence) => {
+  const statements = [
+      "Topic category: Unclear"
+	];
+
+  const lowerCaseSentence = sentence.toLowerCase();
+  return statements.some(statement => lowerCaseSentence.includes(statement.toLowerCase()));
+}

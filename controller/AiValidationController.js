@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { STATEMENT, SYSTEM_MESSAGES } = require('../constants/index')
 const { OPEN_AI_KEY, OPEN_AI_URL } = require("../config/env");
-const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks, incrementCounter, removeQuotes, isAllNumbers, createQuestTopic } = require("../service/AiValidation");
+const { checkViolationInSentence, removeCorrected, capitalizeFirstLetter, removePeriod, replaceWithPeriod, extractAlphabetic, removeQuestionMark, removeTrailingPeriods, removeTrailingQuestionMarks, incrementCounter, removeQuotes, isAllNumbers, createQuestTopic, checkNonsenseInTopics } = require("../service/AiValidation");
 const QuestTopics = require("../models/QuestTopics");
 
 
@@ -163,7 +163,13 @@ async function handleRequest(
   
     if (callType == 3) {
       filtered = removeTrailingPeriods(filtered);
-      createQuestTopic(filtered)
+      const found = checkNonsenseInTopics(filtered)
+      if(found) {
+        filtered = userMessage;
+        status = "FAIL";
+      } else {
+        createQuestTopic(filtered)
+      }
     }
   
     return { message: filtered, status: status };
