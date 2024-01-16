@@ -17,8 +17,6 @@ router.post("/signInUser/social", AuthController.signInUserBySocialLogin);
 
 router.post("/signInUser", AuthController.signInUser);
 
-router.post("/signInUser/test", passport.authenticate('jwt', { session: false }), (req, res) => { res.json({message: "OK"}) });
-
 router.post("/send/email", AuthController.sendEmail);
 
 router.post("/create/guestMode", AuthController.createGuestMode);

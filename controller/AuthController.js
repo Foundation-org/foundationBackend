@@ -4,7 +4,11 @@ const jwt = require("jsonwebtoken");
 // const nodemailer = require("nodemailer");
 const AWS = require("aws-sdk");
 const crypto = require("crypto");
-const { createToken, googleVerify, cookieConfiguration } = require("../service/auth");
+const {
+  createToken,
+  googleVerify,
+  cookieConfiguration,
+} = require("../service/auth");
 const { createLedger } = require("../utils/createLedger");
 const { isGoogleEmail } = require("../utils/checkGoogleAccount");
 const {
@@ -54,11 +58,9 @@ const changePassword = async (req, res) => {
     res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while changePassword Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while changePassword Auth: ${error.message}`,
+    });
   }
 };
 
@@ -103,11 +105,9 @@ const signUpUser = async (req, res) => {
     // res.status(200).json({ ...user._doc, token });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while signUpUser Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while signUpUser Auth: ${error.message}`,
+    });
   }
 };
 
@@ -192,11 +192,9 @@ const signUpUserBySocialLogin = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while signUpUser Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while signUpUser Auth: ${error.message}`,
+    });
   }
 };
 
@@ -251,11 +249,9 @@ const signInUser = async (req, res) => {
     res.json({ message: "Successful" });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while signInUser Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while signInUser Auth: ${error.message}`,
+    });
   }
 };
 
@@ -290,11 +286,9 @@ const createGuestMode = async (req, res) => {
     res.status(200).json({ ...user._doc, token });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while createGuestMode Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while createGuestMode Auth: ${error.message}`,
+    });
   }
 };
 
@@ -335,11 +329,9 @@ const signInGuestMode = async (req, res) => {
     res.status(200).json({ ...user._doc, token });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while signInGuestMode Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while signInGuestMode Auth: ${error.message}`,
+    });
   }
 };
 
@@ -377,11 +369,9 @@ const signInSocialGuestMode = async (req, res) => {
     //   signUpUserBySocialLogin(req, res)
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while signInSocialGuestMode Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while signInSocialGuestMode Auth: ${error.message}`,
+    });
   }
 };
 
@@ -419,11 +409,9 @@ const signInUserBySocialLogin = async (req, res) => {
     //   signUpUserBySocialLogin(req, res)
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while signUpUser Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while signUpUser Auth: ${error.message}`,
+    });
   }
 };
 
@@ -433,11 +421,9 @@ const userInfo = async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while userInfo Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while userInfo Auth: ${error.message}`,
+    });
   }
 };
 const setUserWallet = async (req, res) => {
@@ -453,11 +439,9 @@ const setUserWallet = async (req, res) => {
     res.status(201).send("Wallet Updated");
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while setUserWallet Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while setUserWallet Auth: ${error.message}`,
+    });
   }
 };
 const signedUuid = async (req, res) => {
@@ -473,11 +457,9 @@ const signedUuid = async (req, res) => {
     res.status(201).send("Updated");
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while signedUuid Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while signedUuid Auth: ${error.message}`,
+    });
   }
 };
 const sendVerifyEmail = async (req, res) => {
@@ -579,11 +561,9 @@ const sendVerifyEmail = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while sendVerifyEmail Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while sendVerifyEmail Auth: ${error.message}`,
+    });
   }
 };
 
@@ -596,11 +576,9 @@ const sendEmail = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while sendVerifyEmail Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while sendVerifyEmail Auth: ${error.message}`,
+    });
   }
 };
 
@@ -627,11 +605,9 @@ const verify = async (req, res) => {
     payload = jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET);
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while verify Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while verify Auth: ${error.message}`,
+    });
   }
 
   try {
@@ -686,11 +662,9 @@ const verify = async (req, res) => {
     });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while signUpUser Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while signUpUser Auth: ${error.message}`,
+    });
   }
 };
 const deleteByUUID = async (req, res) => {
@@ -723,19 +697,14 @@ const deleteByUUID = async (req, res) => {
     res.status(201).send("User has been deleted");
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while deleteByUUID Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while deleteByUUID Auth: ${error.message}`,
+    });
   }
 };
 const logout = async (req, res) => {
   try {
     const uuid = req.cookies.uuid;
-    // return
-    // const user = await User.findOne({uuid});
-    // if(!user) throw new Error("User not Found");
     // Create Ledger
     await createLedger({
       uuid: uuid,
@@ -754,11 +723,9 @@ const logout = async (req, res) => {
     res.status(200).json({ message: "User has been logout successfully!" });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while logout Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while logout Auth: ${error.message}`,
+    });
   }
 };
 const deleteBadgeById = async (req, res) => {
@@ -785,11 +752,9 @@ const deleteBadgeById = async (req, res) => {
     res.status(201).send("User has been deleted");
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while deleteBadgeById Auth: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while deleteBadgeById Auth: ${error.message}`,
+    });
   }
 };
 module.exports = {
