@@ -1,22 +1,10 @@
-const QuestTopics = require('../models/QuestTopics');
-
-// const create = async (req, res) => {
-//   try {
-//     const ledger = await new UserModel({ ...req.body });
-//     const savedLedger = await ledger.save();
-//     if (!savedLedger) throw new Error("Ledger Not Created Successfully!");
-//     res.status(201).json({ data: savedLedger });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: `An error occurred while create Ledger: ${error.message}` });
-//   }
-// };
+const QuestTopics = require("../models/QuestTopics");
 
 const update = async (req, res) => {
   try {
     const { topicId: id, isAllow } = req.params;
     const Topic = await QuestTopics.findByPk(id);
-    if (!Topic) throw new Error('No such Topic!');
+    if (!Topic) throw new Error("No such Topic!");
     Topic.isAllow = isAllow;
     await Topic.save();
     res.status(200).json({ data: Topic });
@@ -64,11 +52,11 @@ const searchTopics = async (req, res) => {
     const { search } = req.query;
 
     if (!search) {
-      return res.status(400).json({ message: 'Search term is required' });
+      return res.status(400).json({ message: "Search term is required" });
     }
 
     const query = {
-      name: { $regex: new RegExp(search, 'i') }, // Case-insensitive search
+      name: { $regex: new RegExp(search, "i") }, // Case-insensitive search
     };
 
     const questTopics = await QuestTopics.find(query).sort({ _id: 1 }); // Adjust sorting based on your needs
@@ -88,10 +76,6 @@ const searchTopics = async (req, res) => {
     });
   }
 };
-
-
-
-
 
 const getAllQuestByTopic = async (req, res) => {
   try {
@@ -135,5 +119,5 @@ module.exports = {
   getAllTopic,
   getAllQuestByTopic,
   getAllQuestByTrendingTopic,
-  searchTopics
+  searchTopics,
 };

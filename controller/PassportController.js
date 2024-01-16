@@ -10,52 +10,16 @@ const { createLedger } = require("../utils/createLedger");
 const { updateTreasury } = require("../utils/treasuryService");
 const { updateUserBalance } = require("../utils/userServices");
 const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
-const { createToken, cookieConfiguration, getClientURL } = require("../service/auth");
+const {
+  createToken,
+  cookieConfiguration,
+  getClientURL,
+} = require("../service/auth");
 const { FRONTEND_URL } = require("../config/env");
 const UserModel = require("../models/UserModel");
 
-// Github
-const githubSuccess = async (req, res) => {
-  passport.authenticate("github", { scope: ["user"] });
-};
-
-const githubFailure = async (req, res) => {
-  passport.authenticate("github", { failureRedirect: "/auth/login/failed" });
-};
-const githubCallback = async (req, res) => {
-  res.redirect(process.env.FRONTEND_ORIGIN);
-};
-
-// Twitter
-const twitterSuccess = async (req, res) => {
-  passport.authenticate("twitter", { scope: ["user"] });
-};
-
-const twitterFailure = async (req, res) => {
-  passport.authenticate("twitter", { failureRedirect: "/auth/login/failed" });
-};
-const twitterCallback = async (req, res) => {
-  res.redirect(process.env.FRONTEND_ORIGIN);
-};
-
-// Google
-const googleSuccess = async (req, res) => {
-  passport.authenticate("google", { scope: ["user"] });
-};
-
-const googleFailure = async (req, res) => {
-  passport.authenticate("google", { failureRedirect: "/auth/login/failed" });
-};
-const googleCallback = async (req, res) => {
-  res.redirect(process.env.FRONTEND_ORIGIN);
-};
-
 const googleHandler = async (req, res) => {
   try {
-    // if(req.query.GoogleAccount){
-    //   signUpUserBySocialLogin(req, res)
-    // }
-
     // Check Google Account
     const payload = req.user;
     // Check if email already exist
@@ -161,82 +125,77 @@ const googleHandler = async (req, res) => {
   }
 };
 
-  const addBadge = async (req, res) => {
-    try {
-        console.log(req.user);
-        // console.log("🚀 ~ addBadge ~ req.user:", req.user)
-        // return
-        // const { userId, badgeId } = req.params;
-        if(!req.user._json.email) throw new Error("No Email Exist!")
-        const User = await UserModel.findOne({ email: req.user._json.email });
-        if(!User) throw new Error("No such User!");
-        // Find the Badge
-        const userBadges = User.badges;
-        const updatedUserBadges = [...userBadges, { accountName: req.user.provider, isVerified: true, type: "default" }]
-        // console.log("🚀 ~ addBadge ~ updatedUserBadges:", updatedUserBadges)
-        // Update the user badges
-        User.badges = updatedUserBadges;
-        // Update the action
-        await User.save();
+const addBadge = async (req, res) => {
+  try {
+    console.log(req.user);
+    // return
+    // const { userId, badgeId } = req.params;
+    if (!req.user._json.email) throw new Error("No Email Exist!");
+    const User = await UserModel.findOne({ email: req.user._json.email });
+    if (!User) throw new Error("No such User!");
+    // Find the Badge
+    const userBadges = User.badges;
+    const updatedUserBadges = [
+      ...userBadges,
+      { accountName: req.user.provider, isVerified: true, type: "default" },
+    ];
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
 
-        // Create Ledger
-        await createLedger(
-            {
-                uuid : User.uuid,
-                txUserAction : "accountBadgeAdded",
-                txID : crypto.randomBytes(11).toString("hex"),
-                txAuth : "User",
-                txFrom : User.uuid,
-                txTo : "dao",
-                txAmount : "0",
-                txData : User.badges[0]._id,
-                // txDescription : "User adds a verification badge"
-            })
-            await createLedger(
-                {
-                    uuid : User.uuid,
-                    txUserAction : "accountBadgeAdded",
-                    txID : crypto.randomBytes(11).toString("hex"),
-                    txAuth : "DAO",
-                    txFrom : "DAO Treasury",
-                    txTo : User.uuid,
-                    txAmount : ACCOUNT_BADGE_ADDED_AMOUNT,
-                    // txData : newUser.badges[0]._id,
-                    // txDescription : "Incentive for adding badges"
-                })
-        // Decrement the Treasury
-        await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true })
-            
-        // Increment the UserBalance
-        await updateUserBalance({ uuid: User.uuid, amount: ACCOUNT_BADGE_ADDED_AMOUNT, inc: true })
+    // Create Ledger
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "accountBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: User.badges[0]._id,
+      // txDescription : "User adds a verification badge"
+    });
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "accountBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: "DAO Treasury",
+      txTo: User.uuid,
+      txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      // txData : newUser.badges[0]._id,
+      // txDescription : "Incentive for adding badges"
+    });
+    // Decrement the Treasury
+    await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
 
-        res.redirect(`${FRONTEND_URL}/profile/verification-badges`);
+    // Increment the UserBalance
+    await updateUserBalance({
+      uuid: User.uuid,
+      amount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      inc: true,
+    });
 
-    } catch (error) {
+    res.redirect(`${FRONTEND_URL}/profile/verification-badges`);
+  } catch (error) {
     //   res.redirect(500).json({ message: `An error occurred while update Ledger: ${error.message}` });
-        console.log("🚀 ~ addBadge ~ error.message:", error.message)
-        res.redirect(`${FRONTEND_URL}/profile/verification-badges`);
-    }
-  };
-
-  const socialBadgeToken = async(req, res) => {
-    // 
-    const token = createToken({ _json: req.user._json, provider: req.user.provider });
-    res.cookie("social", token, { httpOnly: true, maxAge: 1000 * 60 });
-    res.redirect(`${FRONTEND_URL}/profile/verification-badges?social=true`);
+    res.redirect(`${FRONTEND_URL}/profile/verification-badges`);
   }
+};
+
+const socialBadgeToken = async (req, res) => {
+  //
+  const token = createToken({
+    _json: req.user._json,
+    provider: req.user.provider,
+  });
+  res.cookie("social", token, { httpOnly: true, maxAge: 1000 * 60 });
+  res.redirect(`${FRONTEND_URL}/profile/verification-badges?social=true`);
+};
 
 module.exports = {
-  githubSuccess,
-  githubFailure,
-  githubCallback,
-  twitterSuccess,
-  twitterFailure,
-  twitterCallback,
-  googleSuccess,
-  googleFailure,
-  googleCallback,
   googleHandler,
   addBadge,
-  socialBadgeToken
+  socialBadgeToken,
 };

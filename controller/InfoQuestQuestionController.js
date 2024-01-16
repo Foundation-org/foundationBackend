@@ -11,7 +11,8 @@ const BookmarkQuests = require("../models/BookmarkQuests");
 const createInfoQuestQuest = async (req, res) => {
   try {
     const userBalance = await getUserBalance(req.body.uuid);
-    if (userBalance < QUEST_CREATED_AMOUNT) throw new Error("The balance is insufficient to create a Quest!")
+    if (userBalance < QUEST_CREATED_AMOUNT)
+      throw new Error("The balance is insufficient to create a Quest!");
     const question = await new InfoQuestQuestions({
       Question: req.body.Question,
       QuestionCorrect: req.body.QuestionCorrect,
@@ -57,42 +58,53 @@ const createInfoQuestQuest = async (req, res) => {
     await user.save();
 
     // Create Ledger
-    await createLedger(
-      {
-        uuid: user.uuid,
-        txUserAction: "questCreated",
-        txID: crypto.randomBytes(11).toString("hex"),
-        txAuth: "User",
-        txFrom: user.uuid,
-        txTo: "dao",
-        txAmount: "0",
-        txData: createdQuestion._id,
-        // txDescription : "User creates a new quest"
-      })
+    await createLedger({
+      uuid: user.uuid,
+      txUserAction: "questCreated",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: user.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: createdQuestion._id,
+      // txDescription : "User creates a new quest"
+    });
     // Create Ledger
-    await createLedger(
-      {
-        uuid: user.uuid,
-        txUserAction: "questCreated",
-        txID: crypto.randomBytes(11).toString("hex"),
-        txAuth: "DAO",
-        txFrom: user.uuid,
-        txTo: "DAO Treasury",
-        txAmount: QUEST_CREATED_AMOUNT,
-        // txData : createdQuestion._id,
-        // txDescription : "Incentive for creating a quest"
-      })
+    await createLedger({
+      uuid: user.uuid,
+      txUserAction: "questCreated",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: user.uuid,
+      txTo: "DAO Treasury",
+      txAmount: QUEST_CREATED_AMOUNT,
+      // txData : createdQuestion._id,
+      // txDescription : "Incentive for creating a quest"
+    });
     // Increment the Treasury
-    await updateTreasury({ amount: QUEST_CREATED_AMOUNT, inc: true })
+    await updateTreasury({ amount: QUEST_CREATED_AMOUNT, inc: true });
     // Decrement the UserBalance
-    await updateUserBalance({ uuid: req.body.uuid, amount: QUEST_CREATED_AMOUNT, dec: true })
+    await updateUserBalance({
+      uuid: req.body.uuid,
+      amount: QUEST_CREATED_AMOUNT,
+      dec: true,
+    });
 
-    res.status(201).json({ message: "Quest has been Created", questID: createdQuestion._id });
+    res
+      .status(201)
+      .json({
+        message: "Quest has been Created",
+        questID: createdQuestion._id,
+      });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ message: `An error occurred while createInfoQuestQuest: ${error.message}` });
+    res
+      .status(500)
+      .json({
+        message: `An error occurred while createInfoQuestQuest: ${error.message}`,
+      });
   }
-}
+};
 const constraintForUniqueQuestion = async (req, res) => {
   try {
     // Get the question from the query parameters and convert it to lowercase
@@ -114,7 +126,7 @@ const constraintForUniqueQuestion = async (req, res) => {
     console.error(error);
     return res.status(500).send("Internal Server Error");
   }
-}
+};
 const getAllQuests = async (req, res) => {
   try {
     const Questions = await InfoQuestQuestions.find();
@@ -122,7 +134,7 @@ const getAllQuests = async (req, res) => {
   } catch (err) {
     res.status(500).send(err);
   }
-}
+};
 const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
   try {
     let allQuestions;
@@ -140,11 +152,12 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       filterObj.whichTypeQuestion = req.body.type;
     }
     if (req.body.terms && req.body.terms.length > 0) {
-      const regexTerm = req.body.terms.map(term => new RegExp(term, 'i'));
+      const regexTerm = req.body.terms.map((term) => new RegExp(term, "i"));
       filterObj.QuestTopic = { $in: regexTerm };
-    }
-    else if (req.body.blockedTerms && req.body.blockedTerms.length > 0) {
-      const regexBlockterms = req.body.blockedTerms.map(term => new RegExp(term, 'i'));
+    } else if (req.body.blockedTerms && req.body.blockedTerms.length > 0) {
+      const regexBlockterms = req.body.blockedTerms.map(
+        (term) => new RegExp(term, "i")
+      );
       filterObj.QuestTopic = { $nin: regexBlockterms };
     }
 
@@ -167,10 +180,10 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
         req.body.sort === "Newest First"
           ? { createdAt: -1 }
           : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-              ? { interactingCounter: -1 }
-              : "createdAt"
+          ? { lastInteractedAt: -1 }
+          : req.body.sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
       );
     }
 
@@ -201,13 +214,12 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       res.status(200).json({
         data: Result.slice(start, end),
         hasNextPage: end < Result.length,
-
       });
     }
   } catch (err) {
     res.status(500).send(err);
   }
-}
+};
 const getAllQuestsWithAnsweredStatus = async (req, res) => {
   try {
     let allQuestions;
@@ -225,14 +237,14 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       filterObj.whichTypeQuestion = req.body.type;
     }
     if (req.body.terms && req.body.terms.length > 0) {
-      const regexTerm = req.body.terms.map(term => new RegExp(term, 'i'));
+      const regexTerm = req.body.terms.map((term) => new RegExp(term, "i"));
       filterObj.QuestTopic = { $in: regexTerm };
-    }
-    else if (req.body.blockedTerms && req.body.blockedTerms.length > 0) {
-      const regexBlockterms = req.body.blockedTerms.map(term => new RegExp(term, 'i'));
+    } else if (req.body.blockedTerms && req.body.blockedTerms.length > 0) {
+      const regexBlockterms = req.body.blockedTerms.map(
+        (term) => new RegExp(term, "i")
+      );
       filterObj.QuestTopic = { $nin: regexBlockterms };
     }
-
 
     if (req.body.Page === "Bookmark") {
       console.log("running");
@@ -253,10 +265,10 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
         req.body.sort === "Newest First"
           ? { createdAt: -1 }
           : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-              ? { interactingCounter: -1 }
-              : "createdAt"
+          ? { lastInteractedAt: -1 }
+          : req.body.sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
       );
     }
 
@@ -291,7 +303,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
             ) {
               rcrd.startStatus = "change answer";
             } else {
-              rcrd.startStatus = "completed"
+              rcrd.startStatus = "completed";
             }
           }
         });
@@ -306,16 +318,16 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       res.status(200).json({
         data: Result.slice(start, end),
         hasNextPage: end < Result.length,
-
       });
     }
   } catch (err) {
     res.status(500).send(err);
   }
-}
+};
 
 const getAllQuestsWithDefaultStatus = async (req, res) => {
-  const { uuid, _page, _limit, filter, sort, type, Page, terms, blockedTerms } = req.body;
+  const { uuid, _page, _limit, filter, sort, type, Page, terms, blockedTerms } =
+    req.body;
   const page = parseInt(_page);
   const pageSize = parseInt(_limit);
 
@@ -337,14 +349,12 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     filterObj.whichTypeQuestion = type;
   }
   if (terms && terms.length > 0) {
-    const regexTerm = terms.map(term => new RegExp(term, 'i'));
+    const regexTerm = terms.map((term) => new RegExp(term, "i"));
     filterObj.QuestTopic = { $in: regexTerm };
-  }
-  else if (blockedTerms && blockedTerms.length > 0) {
-    const regexBlockterms = blockedTerms.map(term => new RegExp(term, 'i'));
+  } else if (blockedTerms && blockedTerms.length > 0) {
+    const regexBlockterms = blockedTerms.map((term) => new RegExp(term, "i"));
     filterObj.QuestTopic = { $nin: regexBlockterms };
   }
-
 
   if (Page === "Bookmark") {
     console.log("running");
@@ -367,18 +377,16 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : sort === "Most Popular"
-              ? { interactingCounter: -1 }
-              : "createdAt"
+          ? { lastInteractedAt: -1 }
+          : sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
       .limit(pageSize);
     totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
   }
   // Query the database with skip and limit options to get questions for the requested page
-
-
 
   const result = await getQuestionsWithStatus(allQuestions, uuid);
 
@@ -403,11 +411,13 @@ const getQuestById = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: `An error occurred while getQuestById InfoQuest: ${error.message}` });
+    res
+      .status(500)
+      .json({
+        message: `An error occurred while getQuestById InfoQuest: ${error.message}`,
+      });
   }
 };
-
-
 
 const getAllQuestsWithCompletedStatus = async (req, res) => {
   try {
@@ -426,11 +436,12 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       filterObj.whichTypeQuestion = req.body.type;
     }
     if (req.body.terms && req.body.terms.length > 0) {
-      const regexTerm = req.body.terms.map(term => new RegExp(term, 'i'));
+      const regexTerm = req.body.terms.map((term) => new RegExp(term, "i"));
       filterObj.QuestTopic = { $in: regexTerm };
-    }
-    else if(req.body.blockedTerms && req.body.blockedTerms.length > 0) {
-      const regexBlockterms = req.body.blockedTerms.map(term => new RegExp(term, 'i'));
+    } else if (req.body.blockedTerms && req.body.blockedTerms.length > 0) {
+      const regexBlockterms = req.body.blockedTerms.map(
+        (term) => new RegExp(term, "i")
+      );
       filterObj.QuestTopic = { $nin: regexBlockterms };
     }
 
@@ -453,10 +464,10 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
         req.body.sort === "Newest First"
           ? { createdAt: -1 }
           : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-              ? { interactingCounter: -1 }
-              : "createdAt"
+          ? { lastInteractedAt: -1 }
+          : req.body.sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
       );
     }
 
@@ -489,13 +500,12 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       res.status(200).json({
         data: Result.slice(start, end),
         hasNextPage: end < Result.length,
-
       });
     }
   } catch (err) {
     res.status(500).send(err);
   }
-}
+};
 const getAllQuestsWithChangeAnsStatus = async (req, res) => {
   try {
     let allQuestions;
@@ -513,14 +523,14 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       filterObj.whichTypeQuestion = req.body.type;
     }
     if (req.body.terms && req.body.terms.length > 0) {
-      const regexTerm = req.body.terms.map(term => new RegExp(term, 'i'));
+      const regexTerm = req.body.terms.map((term) => new RegExp(term, "i"));
       filterObj.QuestTopic = { $in: regexTerm };
-    }
-    else if(req.body.blockedTerms && req.body.blockedTerms.length > 0) {
-      const regexBlockterms = req.body.blockedTerms.map(term => new RegExp(term, 'i'));
+    } else if (req.body.blockedTerms && req.body.blockedTerms.length > 0) {
+      const regexBlockterms = req.body.blockedTerms.map(
+        (term) => new RegExp(term, "i")
+      );
       filterObj.QuestTopic = { $nin: regexBlockterms };
     }
-
 
     if (req.body.Page === "Bookmark") {
       console.log("running");
@@ -541,10 +551,10 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
         req.body.sort === "Newest First"
           ? { createdAt: -1 }
           : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-              ? { interactingCounter: -1 }
-              : "createdAt"
+          ? { lastInteractedAt: -1 }
+          : req.body.sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
       );
     }
 
@@ -581,13 +591,12 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       res.status(200).json({
         data: Result.slice(start, end),
         hasNextPage: end < Result.length,
-
       });
     }
   } catch (err) {
     res.status(500).send(err);
   }
-}
+};
 
 async function getQuestionsWithStatus(allQuestions, uuid) {
   try {
@@ -608,7 +617,7 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
             ) {
               rcrd.startStatus = "change answer";
             } else {
-              rcrd.startStatus = "completed"
+              rcrd.startStatus = "completed";
             }
           }
         });
@@ -634,4 +643,4 @@ module.exports = {
   getAllQuestsWithCompletedStatus,
   getAllQuestsWithChangeAnsStatus,
   getQuestionsWithStatus,
-}
+};

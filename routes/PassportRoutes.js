@@ -1,4 +1,4 @@
-const passport = require("passport")
+const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 // controller
@@ -8,19 +8,20 @@ const protect = require("../middleware/protect");
 const cache = require("../middleware/cache");
 const { FRONTEND_URL } = require("../config/env");
 
-
 const CLIENT_URL = `${FRONTEND_URL}/profile/verification-badges`;
 
 router.get("/login/failed", (req, res) => {
-    res.status(401).json({
-      success: false,
-      message: "failure",
-    });
+  res.status(401).json({
+    success: false,
+    message: "failure",
   });
-
+});
 
 //   Github
-router.get("/github", passport.authenticate("github", { scope: [ 'user:email' ] }));
+router.get(
+  "/github",
+  passport.authenticate("github", { scope: ["user:email"] })
+);
 
 router.get(
   "/github/callback",
@@ -32,9 +33,11 @@ router.get(
   PassportController.socialBadgeToken
 );
 
-
 //   LinkedIn
-router.get("/linkedin", passport.authenticate("linkedin", { scope: ["profile"] }));
+router.get(
+  "/linkedin",
+  passport.authenticate("linkedin", { scope: ["profile"] })
+);
 
 router.get(
   "/linkedin/callback",
@@ -71,9 +74,13 @@ router.get("/login/success", (req, res) => {
   }
 });
 
-router.get("/google", passport.authenticate("google", { scope: ['profile', 'email']}));
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
 
-router.get("/google/callback",
+router.get(
+  "/google/callback",
   passport.authenticate("google", {
     // successRedirect: CLIENT_URL,
     failureRedirect: CLIENT_URL,
@@ -81,30 +88,4 @@ router.get("/google/callback",
   }),
   PassportController.googleHandler
 );
-
-// router.get('/google/callback',
-//   passport.authenticate('google', { failureRedirect: '/' }),
-//   (req, res) => {
-//     console.log("🚀 ~ file: PassportRoutes.js:69 ~ req:", req)
-//     // Instead of redirecting, you can send data in the response
-//     res.json({ user: req.user });
-//   }
-// );
-// github auth
-// router.get("/github", passport.authenticate("github", { scope: ["user"] }));
-// router.get("/auth/github/fail", (req, res, next) => {
-//     res.send('login failed');
-// })
-// router.get("/auth/github/callback", passport.authenticate('github',
-// {failureRedirect: '/github/fail'}))
-// router.get("/github/callback", PassportController.githubFailure, PassportController.githubCallback);
-
-// twitter auth
-// router.get("/twitter", PassportController.twitterSuccess);
-// router.get("/twitter/callback", PassportController.twitterFailure, PassportController.twitterCallback);
-
-// // Google auth
-// router.get("/google", PassportController.googleSuccess);
-// router.get("/google/callback", PassportController.googleFailure, PassportController.googleCallback);
-
-module.exports = router; 
+module.exports = router;

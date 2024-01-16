@@ -2,7 +2,6 @@ const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const BookmarkQuests = require("../models/BookmarkQuests");
 const { getQuestionsWithStatus } = require("./InfoQuestQuestionController");
 
-
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
   const uuid = req.cookies.uuid;
@@ -45,7 +44,10 @@ const searchBookmarks = async (req, res) => {
     const allQuestions = await Promise.all(mapPromises);
 
     // Call getQuestionsWithStatus and await its result
-    const questionsWithStatus = await getQuestionsWithStatus(allQuestions, uuid);
+    const questionsWithStatus = await getQuestionsWithStatus(
+      allQuestions,
+      uuid
+    );
 
     res.status(200).json({
       data: questionsWithStatus,
