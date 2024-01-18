@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const { getTreasury, updateTreasury } = require("../utils/treasuryService");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const BookmarkQuests = require("../models/BookmarkQuests");
+const { getPercentage } = require("../utils/getPercentage");
 
 const createInfoQuestQuest = async (req, res) => {
   try {
@@ -90,19 +91,15 @@ const createInfoQuestQuest = async (req, res) => {
       dec: true,
     });
 
-    res
-      .status(201)
-      .json({
-        message: "Quest has been Created",
-        questID: createdQuestion._id,
-      });
+    res.status(201).json({
+      message: "Quest has been Created",
+      questID: createdQuestion._id,
+    });
   } catch (error) {
     console.error(error.message);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while createInfoQuestQuest: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while createInfoQuestQuest: ${error.message}`,
+    });
   }
 };
 const constraintForUniqueQuestion = async (req, res) => {
@@ -395,6 +392,79 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     hasNextPage: skip + pageSize < totalQuestionsCount,
   });
 };
+const getAllQuestsWithResult = async (req, res) => {
+  const { uuid, _page, _limit, filter, sort, type, Page, terms, blockedTerms } =
+    req.body;
+  const page = parseInt(_page);
+  const pageSize = parseInt(_limit);
+
+  // Calculate the number of documents to skip to get to the desired page
+  const skip = (page - 1) * pageSize;
+  let allQuestions = [];
+  let filterObj = {};
+  let totalQuestionsCount;
+
+  if (filter === true) {
+    if (Page === "Bookmark") {
+      filterObj.createdBy = uuid;
+    } else {
+      filterObj.uuid = uuid;
+    }
+  }
+
+  if (type) {
+    filterObj.whichTypeQuestion = type;
+  }
+  if (terms && terms.length > 0) {
+    const regexTerm = terms.map((term) => new RegExp(term, "i"));
+    filterObj.QuestTopic = { $in: regexTerm };
+  } else if (blockedTerms && blockedTerms.length > 0) {
+    const regexBlockterms = blockedTerms.map((term) => new RegExp(term, "i"));
+    filterObj.QuestTopic = { $nin: regexBlockterms };
+  }
+
+  if (Page === "Bookmark") {
+    console.log("running");
+    filterObj.uuid = uuid;
+    const Questions = await BookmarkQuests.find(filterObj).sort(
+      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    );
+
+    const mapPromises = Questions.map(async function (record) {
+      return await InfoQuestQuestions.findOne({
+        _id: record.questForeignKey,
+      });
+    });
+
+    allQuestions = await Promise.all(mapPromises);
+    totalQuestionsCount = await BookmarkQuests.countDocuments(filterObj);
+  } else {
+    allQuestions = await InfoQuestQuestions.find(filterObj)
+      .sort(
+        sort === "Newest First"
+          ? { createdAt: -1 }
+          : sort === "Last Updated"
+          ? { lastInteractedAt: -1 }
+          : sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
+      ) // Sort by createdAt field in descending order
+      .skip(skip)
+      .limit(pageSize);
+    totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
+  }
+
+  const resultArray = allQuestions.map(getPercentage);
+
+  // Query the database with skip and limit options to get questions for the requested page
+
+  const result = await getQuestionsWithStatus(resultArray, uuid);
+
+  res.status(200).json({
+    data: result,
+    hasNextPage: skip + pageSize < totalQuestionsCount,
+  });
+};
 
 const getQuestById = async (req, res) => {
   try {
@@ -411,11 +481,9 @@ const getQuestById = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while getQuestById InfoQuest: ${error.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while getQuestById InfoQuest: ${error.message}`,
+    });
   }
 };
 
@@ -639,6 +707,7 @@ module.exports = {
   getAllQuestsWithOpenInfoQuestStatus,
   getAllQuestsWithAnsweredStatus,
   getAllQuestsWithDefaultStatus,
+  getAllQuestsWithResult,
   getQuestById,
   getAllQuestsWithCompletedStatus,
   getAllQuestsWithChangeAnsStatus,

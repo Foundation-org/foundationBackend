@@ -32,7 +32,7 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     usersChangeTheirAns: {
       type: String,
     },
-    userCanSelectMultiple:{
+    userCanSelectMultiple: {
       type: Boolean,
     },
     startStatus: {
@@ -46,6 +46,15 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     interactingCounter: {
       type: Number,
       default: 0,
+    },
+    totalStartQuest: {
+      type: Number,
+      default: 0,
+    },
+    result: {
+      type: Array,
+      // default: [{ answer: {}, contended: {} }],
+      default: undefined,
     },
   },
   { timestamps: true }

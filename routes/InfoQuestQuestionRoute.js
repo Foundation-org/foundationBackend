@@ -26,6 +26,10 @@ router.post(
   "/getAllQuestsWithDefaultStatus",
   InfoQuestQuestionController.getAllQuestsWithDefaultStatus
 );
+router.post(
+  "/getAllQuestsWithResult",
+  InfoQuestQuestionController.getAllQuestsWithResult
+);
 router.get("/getQuest/:uuid/:id", InfoQuestQuestionController.getQuestById);
 router.post(
   "/getAllQuestsWithCompletedStatus",

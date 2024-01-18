@@ -31,7 +31,7 @@ const createStartQuest = async (req, res) => {
     const currentDate = new Date();
 
     // Update InfoQuestQuestions and get the data
-    const data = await InfoQuestQuestions.findByIdAndUpdate(
+    const getInfoQuestQuestion = await InfoQuestQuestions.findByIdAndUpdate(
       { _id: req.body.questForeignKey },
       {
         $set: { lastInteractedAt: currentDate.toISOString() },
@@ -40,12 +40,12 @@ const createStartQuest = async (req, res) => {
       { new: true } // To get the updated document
     );
 
-    if (!data) {
+    if (!getInfoQuestQuestion) {
       return res.status(404).send("InfoQuestQuestions not found");
     }
 
     // Get the UUID of the matching record in InfoQuestQuestions
-    const matchingUuid = data.uuid;
+    const matchingUuid = getInfoQuestQuestion.uuid;
 
     // Update the User table with the matching UUID and increment 'userAnswered'
     await User.findOneAndUpdate(
@@ -143,6 +143,40 @@ const createStartQuest = async (req, res) => {
 
     await question.save();
 
+    // increment the totalStartQuest, selected and contended count
+    const selectedCounter = {};
+    const contendedCounter = {};
+    if (
+      getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+      getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
+    ) {
+      req.body.data?.selected?.forEach((item) => {
+        selectedCounter[`result.selected.${item.question}`] = 1;
+      });
+      if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
+        req.body.data?.contended?.forEach((item) => {
+          contendedCounter[`result.contended.${item.question}`] = 1;
+        });
+      }
+    } else {
+      selectedCounter[`result.selected.${req.body.data.selected}`] = 1;
+    }
+    await getInfoQuestQuestion.updateOne({
+      $inc: {
+        totalStartQuest: 1,
+        ...selectedCounter,
+        ...contendedCounter,
+      },
+    });
+
+    // increment the result answers count
+    // await getInfoQuestQuestion.updateOne({
+    //   $inc: {
+    //     totalStartQuest: 1,
+    //     [`result.answer.${req.body.data.selected}`]: 1,
+    //   },
+    // });
+
     if (req.body.addedAnswer !== "") {
       // Increment 'addedAnswers' for the user
       await User.findOneAndUpdate(
@@ -198,16 +232,18 @@ const createStartQuest = async (req, res) => {
       });
     }
     // Correct Answer or Wrong Answer
-    const questionCorrectAnswer = data.QuestionCorrect.toLowerCase().trim();
+    const questionCorrectAnswer =
+      getInfoQuestQuestion.QuestionCorrect.toLowerCase().trim();
     if (
       questionCorrectAnswer !== "no option" &&
       questionCorrectAnswer !== "not selected"
     ) {
       // For only multiple choice question
       if (questionCorrectAnswer === "selected") {
-        const questionCorrectAnswerArray = data.QuestAnswersSelected.map(
-          (item) => item?.answers.toLowerCase().trim()
-        );
+        const questionCorrectAnswerArray =
+          getInfoQuestQuestion.QuestAnswersSelected.map((item) =>
+            item?.answers.toLowerCase().trim()
+          );
         const givenAnswersArray = req.body.data?.selected;
         const answersMatched = givenAnswersArray.every((item) =>
           questionCorrectAnswerArray.includes(
@@ -245,7 +281,7 @@ const createStartQuest = async (req, res) => {
     // if (data.QuestionCorrect !== "Not Selected") {
     await User.findOneAndUpdate(
       { uuid: req.body.uuid },
-      { $addToSet: { completedQuests: data._id } }
+      { $addToSet: { completedQuests: getInfoQuestQuestion._id } }
     );
     // Create Ledger
     await createLedger({
@@ -280,19 +316,15 @@ const createStartQuest = async (req, res) => {
       inc: true,
     });
 
-    res
-      .status(200)
-      .json({
-        message: "Start Quest Created Successfully",
-        startQuestID: question._id,
-      });
+    res.status(200).json({
+      message: "Start Quest Created Successfully",
+      startQuestID: question._id,
+    });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while createStartQuest: ${err.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while createStartQuest: ${err.message}`,
+    });
   }
 };
 const updateChangeAnsStartQuest = async (req, res) => {
@@ -553,11 +585,9 @@ const updateChangeAnsStartQuest = async (req, res) => {
       .json({ message: responseMsg, startQuestID: startQuestQuestion._id });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({
-        message: `An error occurred while updateChangeAnsStartQuest: ${err.message}`,
-      });
+    res.status(500).json({
+      message: `An error occurred while updateChangeAnsStartQuest: ${err.message}`,
+    });
   }
 
   function Compare(obj1, obj2) {

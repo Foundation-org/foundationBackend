@@ -12,7 +12,7 @@ const Ledgers = mongoose.Schema(
     txData: { type: mongoose.Schema.Types.Mixed }, // Assuming data can be of any type
     txDate: { type: Date, default: Date.now },
     // type: { type: String, default: "User" },
-    txDescription: { type: String }
+    txDescription: { type: String },
   },
   { timestamps: true }
 );
