@@ -150,12 +150,18 @@ const createStartQuest = async (req, res) => {
       getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
       getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
     ) {
-      req.body.data?.selected?.forEach((item) => {
-        selectedCounter[`result.selected.${item.question}`] = 1;
-      });
       if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
+        req.body.data?.selected?.forEach((item) => {
+          selectedCounter[`result.selected.${item.question}`] = 1;
+        });
         req.body.data?.contended?.forEach((item) => {
           contendedCounter[`result.contended.${item.question}`] = 1;
+        });
+      }
+      if (getInfoQuestQuestion.whichTypeQuestion === "ranked choise") {
+        req.body.data?.selected?.forEach((item, index) => {
+          const count = req.body.data?.selected.length - index - 1;
+          selectedCounter[`result.selected.${item.question}`] = count;
         });
       }
     } else {
@@ -535,22 +541,28 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // decrement the selected and contended count
         let selectedCounter = {};
         let contendedCounter = {};
-        if (
-          getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
-          getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
-        ) {
+        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
           initialStartQuestData[
             initialStartQuestData.length - 1
           ]?.selected?.forEach((item) => {
             selectedCounter[`result.selected.${item.question}`] = -1;
           });
-          if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
-            initialStartQuestData[
-              initialStartQuestData.length - 1
-            ]?.contended?.forEach((item) => {
-              contendedCounter[`result.contended.${item.question}`] = -1;
-            });
-          }
+          initialStartQuestData[
+            initialStartQuestData.length - 1
+          ]?.contended?.forEach((item) => {
+            contendedCounter[`result.contended.${item.question}`] = -1;
+          });
+        } else if (getInfoQuestQuestion.whichTypeQuestion === "ranked choise") {
+          initialStartQuestData[
+            initialStartQuestData.length - 1
+          ]?.selected?.forEach((item, index) => {
+            const count =
+              initialStartQuestData[initialStartQuestData.length - 1]?.selected
+                .length -
+              index -
+              1;
+            selectedCounter[`result.selected.${item.question}`] = -count;
+          });
         } else {
           selectedCounter[
             `result.selected.${
@@ -558,6 +570,14 @@ const updateChangeAnsStartQuest = async (req, res) => {
             }`
           ] = -1;
         }
+        console.log(
+          "🚀 ~ updateChangeAnsStartQuest ~ initialStartQuestData:",
+          initialStartQuestData[0].selected
+        );
+        console.log(
+          "🚀 ~ updateChangeAnsStartQuest ~ selectedCounter:",
+          selectedCounter
+        );
         await InfoQuestQuestions.findByIdAndUpdate(
           { _id: req.body.questId },
           {
@@ -578,22 +598,28 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // increment the selected and contended count
         selectedCounter = {};
         contendedCounter = {};
-        if (
-          getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
-          getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
-        ) {
+        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
           startQuestQuestion.data[
             startQuestQuestion.data.length - 1
           ]?.selected?.forEach((item) => {
             selectedCounter[`result.selected.${item.question}`] = 1;
           });
-          if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
-            startQuestQuestion.data[
-              startQuestQuestion.data.length - 1
-            ]?.contended?.forEach((item) => {
-              contendedCounter[`result.contended.${item.question}`] = 1;
-            });
-          }
+          startQuestQuestion.data[
+            startQuestQuestion.data.length - 1
+          ]?.contended?.forEach((item) => {
+            contendedCounter[`result.contended.${item.question}`] = 1;
+          });
+        } else if (getInfoQuestQuestion.whichTypeQuestion === "ranked choise") {
+          startQuestQuestion.data[
+            startQuestQuestion.data.length - 1
+          ]?.selected?.forEach((item, index) => {
+            const count =
+              startQuestQuestion.data[startQuestQuestion.data.length - 1]
+                ?.selected.length -
+              index -
+              1;
+            selectedCounter[`result.selected.${item.question}`] = count;
+          });
         } else {
           selectedCounter[
             `result.selected.${
@@ -723,6 +749,8 @@ const getRankedQuestPercent = async (req, res) => {
           : Number(Math.round(percentage));
       }
 
+      console.log("🚀 ~ returnPromise.all ~ optionsCount:", optionsCount);
+      console.log("🚀 ~ returnPromise.all ~ totalCount:", totalCount);
       const responseObj = {
         rankedPercentage: percentageOfOptions,
       };
