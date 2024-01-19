@@ -38,6 +38,7 @@ module.exports.getPercentage = (document) => {
     let contendedPercentage;
     if (document.whichTypeQuestion === "multiple choise") {
       contendedPercentage = document?.result?.map((item) => {
+        if (!item?.contended) return;
         const contendedKeys = Object.keys(item?.contended);
         const totalSelected = contendedKeys.reduce(
           (sum, key) => sum + item.contended[key],
