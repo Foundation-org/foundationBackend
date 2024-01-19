@@ -333,11 +333,12 @@ const updateChangeAnsStartQuest = async (req, res) => {
       questForeignKey: req.body.questId,
       uuid: req.body.uuid,
     });
+    const initialStartQuestData = [...startQuestQuestion.data];
 
     // Get the current date and time
     const currentDate = new Date();
 
-    InfoQuestQuestions.findByIdAndUpdate(
+    const getInfoQuestQuestion = await InfoQuestQuestions.findByIdAndUpdate(
       { _id: req.body.questId },
       {
         $set: { lastInteractedAt: currentDate.toISOString() },
@@ -531,11 +532,86 @@ const updateChangeAnsStartQuest = async (req, res) => {
         responseMsg = "Start Quest Updated Successfully";
         startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
 
+        // decrement the selected and contended count
+        let selectedCounter = {};
+        let contendedCounter = {};
+        if (
+          getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+          getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
+        ) {
+          initialStartQuestData[
+            initialStartQuestData.length - 1
+          ]?.selected?.forEach((item) => {
+            selectedCounter[`result.selected.${item.question}`] = -1;
+          });
+          if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
+            initialStartQuestData[
+              initialStartQuestData.length - 1
+            ]?.contended?.forEach((item) => {
+              contendedCounter[`result.contended.${item.question}`] = -1;
+            });
+          }
+        } else {
+          selectedCounter[
+            `result.selected.${
+              initialStartQuestData[initialStartQuestData.length - 1]?.selected
+            }`
+          ] = -1;
+        }
+        await InfoQuestQuestions.findByIdAndUpdate(
+          { _id: req.body.questId },
+          {
+            $inc: {
+              // totalStartQuest: 1,
+              ...selectedCounter,
+              ...contendedCounter,
+            },
+          }
+        );
+
         await StartQuests.findByIdAndUpdate(
           { _id: startQuestQuestion._id },
           { data: startQuestAnswersSelected, addedAnswer: AnswerAddedOrNot },
           { upsert: true }
         ).exec();
+
+        // increment the selected and contended count
+        selectedCounter = {};
+        contendedCounter = {};
+        if (
+          getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+          getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
+        ) {
+          startQuestQuestion.data[
+            startQuestQuestion.data.length - 1
+          ]?.selected?.forEach((item) => {
+            selectedCounter[`result.selected.${item.question}`] = 1;
+          });
+          if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
+            startQuestQuestion.data[
+              startQuestQuestion.data.length - 1
+            ]?.contended?.forEach((item) => {
+              contendedCounter[`result.contended.${item.question}`] = 1;
+            });
+          }
+        } else {
+          selectedCounter[
+            `result.selected.${
+              startQuestQuestion.data[startQuestQuestion.data.length - 1]
+                ?.selected
+            }`
+          ] = 1;
+        }
+        await InfoQuestQuestions.findByIdAndUpdate(
+          { _id: req.body.questId },
+          {
+            $inc: {
+              // totalStartQuest: 1,
+              ...selectedCounter,
+              ...contendedCounter,
+            },
+          }
+        );
 
         const commonTxId = crypto.randomBytes(11).toString("hex");
         // Create Ledger
