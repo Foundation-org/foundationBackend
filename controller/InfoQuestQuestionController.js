@@ -127,7 +127,8 @@ const constraintForUniqueQuestion = async (req, res) => {
 const getAllQuests = async (req, res) => {
   try {
     const Questions = await InfoQuestQuestions.find();
-    res.status(200).json(Questions);
+    const resultArray = Questions.map(getPercentage);
+    res.status(200).json(resultArray);
   } catch (err) {
     res.status(500).send(err);
   }
@@ -185,7 +186,8 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
-      res.status(200).json(allQuestions);
+      const resultArray = allQuestions.map(getPercentage);
+      res.status(200).json(resultArray);
     } else {
       let Result = [];
       const startedQuestions = await StartQuests.find({
@@ -208,8 +210,14 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       const end = req.body.end;
       console.log("Start" + start + "end" + end);
 
+      const resultArray = Result.slice(start, end).map(getPercentage);
+      const desiredArray = resultArray.map((item) => ({
+        ...item._doc,
+        selectedPercentage: item.selectedPercentage,
+        contendedPercentage: item.contendedPercentage,
+      }));
       res.status(200).json({
-        data: Result.slice(start, end),
+        data: desiredArray,
         hasNextPage: end < Result.length,
       });
     }
@@ -270,7 +278,8 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
-      res.status(200).json(allQuestions);
+      const resultArray = allQuestions.map(getPercentage);
+      res.status(200).json(resultArray);
     } else {
       let Records = [];
       const startedQuestions = await StartQuests.find({
@@ -312,8 +321,15 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       const end = req.body.end;
       console.log("Start" + start + "end" + end);
 
+      const resultArray = Result.slice(start, end).map(getPercentage);
+      const desiredArray = resultArray.map((item) => ({
+        ...item._doc,
+        selectedPercentage: item.selectedPercentage,
+        contendedPercentage: item.contendedPercentage,
+      }));
+
       res.status(200).json({
-        data: Result.slice(start, end),
+        data: desiredArray,
         hasNextPage: end < Result.length,
       });
     }
@@ -383,9 +399,16 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       .limit(pageSize);
     totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
   }
-  // Query the database with skip and limit options to get questions for the requested page
 
-  const result = await getQuestionsWithStatus(allQuestions, uuid);
+  const resultArray = allQuestions.map(getPercentage);
+  const desiredArray = resultArray.map((item) => ({
+    ...item._doc,
+    selectedPercentage: item.selectedPercentage,
+    contendedPercentage: item.contendedPercentage,
+  }));
+
+  // Query the database with skip and limit options to get questions for the requested page
+  const result = await getQuestionsWithStatus(desiredArray, uuid);
 
   res.status(200).json({
     data: result,
@@ -540,7 +563,8 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
-      res.status(200).json(allQuestions);
+      const resultArray = allQuestions.map(getPercentage);
+      res.status(200).json(resultArray);
     } else {
       const startedQuestions = await StartQuests.find({
         uuid: req.body.uuid,
@@ -565,8 +589,15 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       const start = req.body.start;
       const end = req.body.end;
       console.log("Start" + start + "end" + end);
+
+      const resultArray = Result.slice(start, end).map(getPercentage);
+      const desiredArray = resultArray.map((item) => ({
+        ...item._doc,
+        selectedPercentage: item.selectedPercentage,
+        contendedPercentage: item.contendedPercentage,
+      }));
       res.status(200).json({
-        data: Result.slice(start, end),
+        data: desiredArray,
         hasNextPage: end < Result.length,
       });
     }
@@ -627,7 +658,8 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
-      res.status(200).json(allQuestions);
+      const resultArray = allQuestions.map(getPercentage);
+      res.status(200).json(resultArray);
     } else {
       const startedQuestions = await StartQuests.find({
         uuid: req.body.uuid,
@@ -656,8 +688,15 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       const start = req.body.start;
       const end = req.body.end;
 
+      const resultArray = Result.slice(start, end).map(getPercentage);
+      const desiredArray = resultArray.map((item) => ({
+        ...item._doc,
+        selectedPercentage: item.selectedPercentage,
+        contendedPercentage: item.contendedPercentage,
+      }));
+
       res.status(200).json({
-        data: Result.slice(start, end),
+        data: desiredArray,
         hasNextPage: end < Result.length,
       });
     }
@@ -678,7 +717,7 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
       let Result = [];
       await allQuestions.map(async function (rcrd) {
         await startedQuestions.map(function (rec) {
-          if (rec.questForeignKey === rcrd?._id.toString()) {
+          if (rec.questForeignKey === rcrd?._id?.toString()) {
             if (
               rcrd.usersChangeTheirAns?.trim() !== "" ||
               rcrd.whichTypeQuestion === "ranked choise"
