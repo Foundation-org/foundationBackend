@@ -56,6 +56,10 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
       // default: [{ answer: {}, contended: {} }],
       default: undefined,
     },
+    startQuestData: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "StartQuests",
+    },
   },
   { timestamps: true }
 );

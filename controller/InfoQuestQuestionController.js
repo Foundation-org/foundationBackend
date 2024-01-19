@@ -174,15 +174,17 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
 
       allQuestions = await Promise.all(mapPromises);
     } else {
-      allQuestions = await InfoQuestQuestions.find(filterObj).sort(
-        req.body.sort === "Newest First"
-          ? { createdAt: -1 }
-          : req.body.sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : req.body.sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
-      );
+      allQuestions = await InfoQuestQuestions.find(filterObj)
+        .sort(
+          req.body.sort === "Newest First"
+            ? { createdAt: -1 }
+            : req.body.sort === "Last Updated"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
+        )
+        .populate("startQuestData");
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -266,15 +268,17 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
 
       allQuestions = await Promise.all(mapPromises);
     } else {
-      allQuestions = await InfoQuestQuestions.find(filterObj).sort(
-        req.body.sort === "Newest First"
-          ? { createdAt: -1 }
-          : req.body.sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : req.body.sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
-      );
+      allQuestions = await InfoQuestQuestions.find(filterObj)
+        .sort(
+          req.body.sort === "Newest First"
+            ? { createdAt: -1 }
+            : req.body.sort === "Last Updated"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
+        )
+        .populate("startQuestData");
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -396,7 +400,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
           : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
-      .limit(pageSize);
+      .limit(pageSize)
+      .populate("startQuestData");
     totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
   }
 
@@ -473,7 +478,8 @@ const getAllQuestsWithResult = async (req, res) => {
           : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
-      .limit(pageSize);
+      .limit(pageSize)
+      .populate("startQuestData");
     totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
   }
 
@@ -551,15 +557,17 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
 
       allQuestions = await Promise.all(mapPromises);
     } else {
-      allQuestions = await InfoQuestQuestions.find(filterObj).sort(
-        req.body.sort === "Newest First"
-          ? { createdAt: -1 }
-          : req.body.sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : req.body.sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
-      );
+      allQuestions = await InfoQuestQuestions.find(filterObj)
+        .sort(
+          req.body.sort === "Newest First"
+            ? { createdAt: -1 }
+            : req.body.sort === "Last Updated"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
+        )
+        .populate("startQuestData");
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -646,15 +654,17 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
 
       allQuestions = await Promise.all(mapPromises);
     } else {
-      allQuestions = await InfoQuestQuestions.find(filterObj).sort(
-        req.body.sort === "Newest First"
-          ? { createdAt: -1 }
-          : req.body.sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : req.body.sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
-      );
+      allQuestions = await InfoQuestQuestions.find(filterObj)
+        .sort(
+          req.body.sort === "Newest First"
+            ? { createdAt: -1 }
+            : req.body.sort === "Last Updated"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
+        )
+        .populate("startQuestData");
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
