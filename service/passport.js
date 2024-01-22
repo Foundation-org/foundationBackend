@@ -3,6 +3,7 @@ const gitHubStrategy = require("passport-github2")
 const googleStrategy = require("passport-google-oauth20")
 const twitterStrategy = require("passport-twitter")
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
 // var LinkedInStrategy = require('passport-linkedin').Strategy;
 var InstagramStrategy = require('passport-instagram').Strategy;
 const localStrategy = require("passport-local");
@@ -12,7 +13,7 @@ var opts = {}
 const dotenv = require("dotenv")
 // const UserModel = require("../models/UserModel")
 const bcrypt = require("bcrypt")
-const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, LINKEDIN_KEY, LINKEDIN_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BACKEND_URL } = require("../config/env")
+const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, LINKEDIN_KEY, LINKEDIN_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BACKEND_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET } = require("../config/env")
 
 dotenv.config()
 
@@ -96,6 +97,19 @@ passport.use(new LinkedInStrategy({
 //   // });
 // }
 // ));
+passport.use(new FacebookStrategy({
+  clientID: FACEBOOK_APP_ID,
+  clientSecret: FACEBOOK_APP_SECRET,
+  // callbackURL: "http://localhost:3000/auth/facebook/callback"
+  callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
+},
+function(accessToken, refreshToken, profile, cb) {
+  return cb(null, profile)
+  // User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+  //   return cb(err, user);
+  // });
+}
+));
 
 
 passport.use(new Twitter({

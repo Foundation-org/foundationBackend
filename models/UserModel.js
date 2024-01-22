@@ -104,6 +104,7 @@ const userSchema = mongoose.Schema(
     ],
     badges: [
       {
+        accountId: { type: String },
         accountName: { type: String },
         isVerified: { type: Boolean },
         type: { type: String },

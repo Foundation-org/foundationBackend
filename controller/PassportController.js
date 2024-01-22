@@ -23,30 +23,30 @@ const googleHandler = async (req, res) => {
     // Check Google Account
     const payload = req.user;
     // Check if email already exist
-    const user = await User.findOne({ email: payload.emails[0].value });
+    const user = await User.findOne({ email: payload._json.email });
 
     //   Signup User
     if (!user) {
       const uuid = crypto.randomBytes(11).toString("hex");
       const newUser = await new User({
-        email: payload.emails[0].value,
+        email: payload._json.email,
         uuid: uuid,
       });
 
       // Check Email Category
-      const emailStatus = await eduEmailCheck(req, res, payload.email);
+      const emailStatus = await eduEmailCheck(req, res, payload._json.email);
       let type = "";
       if (emailStatus.status === "OK") type = "Education";
 
       // Create a Badge at starting index
       newUser.badges.unshift({
         accountName: "Gmail",
-        isVerified: payload.email_verified,
+        isVerified: payload._json.email_verified,
         type: type,
       });
 
       // Update newUser verification status to true
-      newUser.gmailVerified = payload.emails[0].verified;
+      newUser.gmailVerified = payload._json.email_verified;
 
       // Create Ledger
       await createLedger({
@@ -190,6 +190,7 @@ const socialBadgeToken = async (req, res) => {
     _json: req.user._json,
     provider: req.user.provider,
   });
+    console.log("🚀 ~ socialBadgeToken ~ req.user:", req.user)
   res.cookie("social", token, { httpOnly: true, maxAge: 1000 * 60 });
   res.redirect(`${FRONTEND_URL}/profile/verification-badges?social=true`);
 };

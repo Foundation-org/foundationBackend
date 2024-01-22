@@ -88,4 +88,19 @@ router.get(
   }),
   PassportController.googleHandler
 );
+
+router.get(
+  "/facebook",
+  passport.authenticate("facebook", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/facebook/callback",
+  passport.authenticate("facebook", {
+    // successRedirect: CLIENT_URL,
+    failureRedirect: CLIENT_URL,
+    session: false,
+  }),
+  PassportController.googleHandler
+);
 module.exports = router;
