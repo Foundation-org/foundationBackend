@@ -190,7 +190,6 @@ const socialBadgeToken = async (req, res) => {
     _json: req.user._json,
     provider: req.user.provider,
   });
-    console.log("🚀 ~ socialBadgeToken ~ req.user:", req.user)
   res.cookie("social", token, { httpOnly: true, maxAge: 1000 * 60 });
   res.redirect(`${FRONTEND_URL}/profile/verification-badges?social=true`);
 };

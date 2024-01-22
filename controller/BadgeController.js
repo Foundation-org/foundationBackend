@@ -60,14 +60,13 @@ const addBadgeSocial = async (req, res) => {
     const User = await UserModel.findOne({ uuid: req.cookies.uuid });
     if (!User) throw new Error("No such User!");
     // Find the Badge
-    const badge = User.badges.some(
-      (item) => item.accountName === req.user.provider
-    );
-    if (badge) throw new Error("Badge already exist");
+    const usersWithBadge = await UserModel.find({ 'badges': { $elemMatch: { accountId: req.user._json.id } } });
+    if (usersWithBadge.length !== 0) throw new Error("Badge already exist");
+
     const userBadges = User.badges;
     const updatedUserBadges = [
       ...userBadges,
-      { accountName: req.user.provider, isVerified: true, type: "default" },
+      { accountId: req.user._json.id, accountName: req.user.provider, isVerified: true, type: "default" },
     ];
     // Update the user badges
     User.badges = updatedUserBadges;
