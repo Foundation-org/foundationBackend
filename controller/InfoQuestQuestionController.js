@@ -305,10 +305,11 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       await Records.map(async function (rcrd) {
         await startedQuestions.map(function (rec) {
           if (rec.questForeignKey === rcrd._id.toString()) {
+            rcrd.startQuestData = rec;
             if (
               rcrd.usersChangeTheirAns?.trim() !== "" ||
               rcrd.whichTypeQuestion === "ranked choise"
-            ) {
+              ) {
               rcrd.startStatus = "change answer";
             } else {
               rcrd.startStatus = "completed";
@@ -318,11 +319,11 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
 
         Result.push(rcrd);
       });
-
+      
       const start = req.body.start;
       const end = req.body.end;
       console.log("Start" + start + "end" + end);
-
+      
       const resultArray = Result.slice(start, end).map(getPercentage);
       const desiredArray = resultArray.map((item) => ({
         ...item._doc,
@@ -676,6 +677,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
         await startedQuestions.map(function (rec) {
           if (rec.questForeignKey === rcrd._id.toString()) {
             startedOrNot = true;
+            rcrd.startQuestData = rec
           }
         });
         if (startedOrNot === true) {
