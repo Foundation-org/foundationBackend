@@ -183,8 +183,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
             : req.body.sort === "Most Popular"
             ? { interactingCounter: -1 }
             : "createdAt"
-        )
-        .populate("startQuestData");
+        );
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -277,8 +276,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
             : req.body.sort === "Most Popular"
             ? { interactingCounter: -1 }
             : "createdAt"
-        )
-        .populate("startQuestData");
+        );
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -400,9 +398,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
           : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
-      .limit(pageSize)
-      .populate("startQuestData");
-    totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
+      .limit(pageSize);
+      totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
   }
 
   const resultArray = allQuestions.map(getPercentage);
@@ -478,8 +475,7 @@ const getAllQuestsWithResult = async (req, res) => {
           : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
-      .limit(pageSize)
-      .populate("startQuestData");
+      .limit(pageSize);
     totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
   }
 
@@ -566,8 +562,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
             : req.body.sort === "Most Popular"
             ? { interactingCounter: -1 }
             : "createdAt"
-        )
-        .populate("startQuestData");
+        );
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -663,8 +658,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
             : req.body.sort === "Most Popular"
             ? { interactingCounter: -1 }
             : "createdAt"
-        )
-        .populate("startQuestData");
+        );
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -723,6 +717,7 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
       const startedQuestions = await StartQuests.find({
         uuid: uuid,
       });
+      console.log("🚀 ~ getQuestionsWithStatus ~ startedQuestions:", startedQuestions)
 
       let Result = [];
       await allQuestions.map(async function (rcrd) {
@@ -733,8 +728,10 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
               rcrd.whichTypeQuestion === "ranked choise"
             ) {
               rcrd.startStatus = "change answer";
+              rcrd.startQuestData = rec
             } else {
               rcrd.startStatus = "completed";
+              rcrd.startQuestData = rec
             }
           }
         });
@@ -742,6 +739,7 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
         Result.push(rcrd);
       });
 
+      console.log("🚀 ~ getQuestionsWithStatus ~ Result:", Result)
       return Result;
     }
   } catch (err) {

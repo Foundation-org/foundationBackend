@@ -173,9 +173,9 @@ const createStartQuest = async (req, res) => {
         ...selectedCounter,
         ...contendedCounter,
       },
-      $set: {
-        startQuestData: question._id,
-      },
+      // $set: {
+      //   startQuestData: question._id,
+      // },
     });
 
     // increment the result answers count
