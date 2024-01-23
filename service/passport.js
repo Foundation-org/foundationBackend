@@ -102,6 +102,7 @@ passport.use(new FacebookStrategy({
   clientSecret: FACEBOOK_APP_SECRET,
   // callbackURL: "http://localhost:3000/auth/facebook/callback"
   callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
+  profileFields: ['id', 'displayName', 'photos', 'email']
 },
 function(accessToken, refreshToken, profile, cb) {
   return cb(null, profile)

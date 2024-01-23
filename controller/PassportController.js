@@ -22,6 +22,7 @@ const googleHandler = async (req, res) => {
   try {
     // Check Google Account
     const payload = req.user;
+    console.log("🚀 ~ googleHandler ~ payload:", payload)
     // Check if email already exist
     const user = await User.findOne({ email: payload._json.email });
 
@@ -33,15 +34,19 @@ const googleHandler = async (req, res) => {
         uuid: uuid,
       });
 
-      // Check Email Category
-      const emailStatus = await eduEmailCheck(req, res, payload._json.email);
       let type = "";
-      if (emailStatus.status === "OK") type = "Education";
+      // Check Email Category
+      if(payload._json.email === "google") {
+        const emailStatus = await eduEmailCheck(req, res, payload._json.email);
+        if (emailStatus.status === "OK") type = "Education";
+      } else {
+        type = 'default'
+      }
 
       // Create a Badge at starting index
       newUser.badges.unshift({
-        accountName: "Gmail",
-        isVerified: payload._json.email_verified,
+        accountName: req.user.provider,
+        isVerified: true,
         type: type,
       });
 
@@ -73,7 +78,7 @@ const googleHandler = async (req, res) => {
       });
       //
 
-      if (newUser.badges[0].type !== "Education") {
+      if (newUser.badges[0].type !== "Education" && payload._json.provider === "google") {
         newUser.requiredAction = true;
       }
       await newUser.save();
