@@ -499,11 +499,18 @@ const getQuestById = async (req, res) => {
       _id: id,
     });
     if (!infoQuest) throw new Error("No Quest Exist!");
-
+    
     const result = await getQuestionsWithStatus(infoQuest, uuid);
+    
+    const resultArray = result.map(getPercentage);
+    const desiredArray = resultArray.map((item) => ({
+      ...item._doc,
+      selectedPercentage: item.selectedPercentage,
+      contendedPercentage: item.contendedPercentage,
+    }));
 
     res.status(200).json({
-      data: result,
+      data: desiredArray,
     });
   } catch (error) {
     console.log(error);
@@ -719,7 +726,6 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
       const startedQuestions = await StartQuests.find({
         uuid: uuid,
       });
-      console.log("🚀 ~ getQuestionsWithStatus ~ startedQuestions:", startedQuestions)
 
       let Result = [];
       await allQuestions.map(async function (rcrd) {
@@ -741,7 +747,6 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
         Result.push(rcrd);
       });
 
-      console.log("🚀 ~ getQuestionsWithStatus ~ Result:", Result)
       return Result;
     }
   } catch (err) {
