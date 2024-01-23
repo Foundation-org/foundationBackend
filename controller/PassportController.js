@@ -78,7 +78,7 @@ const googleHandler = async (req, res) => {
       });
       //
 
-      if (newUser.badges[0].type !== "Education" && payload._json.provider === "google") {
+      if (newUser.badges[0].type !== "Education" && req.user.provider === "google") {
         newUser.requiredAction = true;
       }
       await newUser.save();
