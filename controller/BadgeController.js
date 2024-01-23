@@ -56,7 +56,6 @@ const getBadges = async (req, res) => {
 
 const addBadgeSocial = async (req, res) => {
   try {
-    if (!req.user._json.email) throw new Error("No Email Exist!");
     const User = await UserModel.findOne({ uuid: req.cookies.uuid });
     if (!User) throw new Error("No such User!");
     // Find the Badge
