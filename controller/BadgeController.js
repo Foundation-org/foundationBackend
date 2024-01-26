@@ -59,13 +59,20 @@ const addBadgeSocial = async (req, res) => {
     const User = await UserModel.findOne({ uuid: req.cookies.uuid });
     if (!User) throw new Error("No such User!");
     // Find the Badge
-    const usersWithBadge = await UserModel.find({ 'badges': { $elemMatch: { accountId: req.user._json.id } } });
+    const usersWithBadge = await UserModel.find({
+      badges: { $elemMatch: { accountId: req.user._json.id } },
+    });
     if (usersWithBadge.length !== 0) throw new Error("Badge already exist");
 
     const userBadges = User.badges;
     const updatedUserBadges = [
       ...userBadges,
-      { accountId: req.user._json.id, accountName: req.user.provider, isVerified: true, type: "default" },
+      {
+        accountId: req.user._json.id,
+        accountName: req.user.provider,
+        isVerified: true,
+        type: "default",
+      },
     ];
     // Update the user badges
     User.badges = updatedUserBadges;
@@ -114,8 +121,138 @@ const addBadgeSocial = async (req, res) => {
   }
 };
 
+const addBadge = async (req, res) => {
+  try {
+    const User = await UserModel.findOne({ uuid: req.body.uuid });
+    if (!User) throw new Error("No such User!");
+    // Find the Badge
+    const usersWithBadge = await UserModel.find({
+      badges: { $elemMatch: { accountId: req.body.badgeAccountId } },
+    });
+    if (usersWithBadge.length !== 0) throw new Error("Badge already exist");
+
+    const userBadges = User.badges;
+    const updatedUserBadges = [
+      ...userBadges,
+      {
+        accountId: req.body.badgeAccountId,
+        accountName: req.body.provider,
+        isVerified: true,
+        type: "default",
+      },
+    ];
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
+
+    // Create Ledger
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "accountBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: User.badges[0]._id,
+      // txDescription : "User adds a verification badge"
+    });
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "accountBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: "DAO Treasury",
+      txTo: User.uuid,
+      txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      // txData : newUser.badges[0]._id,
+      // txDescription : "Incentive for adding badges"
+    });
+    // Decrement the Treasury
+    await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
+
+    // Increment the UserBalance
+    await updateUserBalance({
+      uuid: User.uuid,
+      amount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      inc: true,
+    });
+
+    res.status(200).json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while addSocialBadge: ${error.message}`,
+    });
+  }
+};
+
+const removeBadge = async (req, res) => {
+  try {
+    const User = await UserModel.findOne({ uuid: req.body.uuid });
+    if (!User) throw new Error("No such User!");
+    // Find the Badge
+    const usersWithBadge = await UserModel.find({
+      badges: { $elemMatch: { accountId: req.body.badgeAccountId } },
+    });
+    if (usersWithBadge.length === 0) throw new Error("Badge not exist!");
+
+    const userBadges = User.badges;
+    const updatedUserBadges = userBadges.filter((item) => {
+      if (item.accountId !== req.body.badgeAccountId) {
+        return item;
+      }
+    });
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
+
+    // // Create Ledger
+    // await createLedger({
+    //   uuid: User.uuid,
+    //   txUserAction: "accountBadgeAdded",
+    //   txID: crypto.randomBytes(11).toString("hex"),
+    //   txAuth: "User",
+    //   txFrom: User.uuid,
+    //   txTo: "dao",
+    //   txAmount: "0",
+    //   txData: User.badges[0]._id,
+    //   // txDescription : "User adds a verification badge"
+    // });
+    // await createLedger({
+    //   uuid: User.uuid,
+    //   txUserAction: "accountBadgeAdded",
+    //   txID: crypto.randomBytes(11).toString("hex"),
+    //   txAuth: "DAO",
+    //   txFrom: "DAO Treasury",
+    //   txTo: User.uuid,
+    //   txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+    //   // txData : newUser.badges[0]._id,
+    //   // txDescription : "Incentive for adding badges"
+    // });
+    // // Decrement the Treasury
+    // await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
+
+    // // Increment the UserBalance
+    // await updateUserBalance({
+    //   uuid: User.uuid,
+    //   amount: ACCOUNT_BADGE_ADDED_AMOUNT,
+    //   inc: true,
+    // });
+
+    res.status(200).json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while addSocialBadge: ${error.message}`,
+    });
+  }
+};
+
 module.exports = {
   update,
   getBadges,
   addBadgeSocial,
+  addBadge,
+  removeBadge,
 };

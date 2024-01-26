@@ -12,4 +12,8 @@ router.get("/getBadges/:userId", BadgeController.getBadges);
 
 router.post("/addBadge/social", socialProtect, BadgeController.addBadgeSocial);
 
+router.post("/addBadge", BadgeController.addBadge);
+
+router.post("/removeBadge", BadgeController.removeBadge);
+
 module.exports = router;
