@@ -1,6 +1,7 @@
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const BookmarkQuests = require("../models/BookmarkQuests");
 const { getQuestionsWithStatus } = require("./InfoQuestQuestionController");
+const { getPercentage } = require("../utils/getPercentage");
 
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
@@ -15,10 +16,21 @@ const easySearch = async (req, res) => {
       ],
     });
 
-    const questionsWithStatus = await getQuestionsWithStatus(results, uuid);
+    const resultArray = results.map(getPercentage);
+    const desiredArray = resultArray.map((item) => ({
+      ...item._doc,
+      selectedPercentage: item.selectedPercentage,
+      contendedPercentage: item.contendedPercentage,
+    }));
+  
+    // Query the database with skip and limit options to get questions for the requested page
+    const result = await getQuestionsWithStatus(desiredArray, uuid);
+
+
+    // const questionsWithStatus = await getQuestionsWithStatus(results, uuid);
 
     res.status(200).json({
-      data: questionsWithStatus,
+      data: result,
       hasNextPage: false,
     });
   } catch (err) {
