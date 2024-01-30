@@ -632,6 +632,11 @@ const updateChangeAnsStartQuest = async (req, res) => {
               1;
             selectedCounter[`result.selected.${item.question}`] = count;
           });
+          startQuestQuestion.data[
+            startQuestQuestion.data.length - 1
+          ]?.contended?.forEach((item) => {
+            contendedCounter[`result.contended.${item.question}`] = 1;
+          });
         } else {
           selectedCounter[
             `result.selected.${
