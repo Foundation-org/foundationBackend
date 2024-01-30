@@ -17,7 +17,29 @@ module.exports.getPercentage = (document) => {
       });
       return percentageObject;
     });
-    return { ...document, selectedPercentage };
+
+    let contendedPercentage;
+    if (document.whichTypeQuestion === "ranked choise") {
+      contendedPercentage = document?.result?.map((item) => {
+        if (!item?.contended) return;
+        const contendedKeys = Object.keys(item?.contended);
+        const totalSelected = contendedKeys.reduce(
+          (sum, key) => sum + item.contended[key],
+          0
+        );
+        const percentageObject = {};
+
+        contendedKeys.forEach((key) => {
+          percentageObject[key] =
+            ((item.contended[key] / document.totalStartQuest) * 100).toFixed(
+              0
+            ) + "%";
+        });
+
+        return percentageObject;
+      });
+    }
+    return { ...document, selectedPercentage,contendedPercentage };
   } else {
     const selectedPercentage = document?.result?.map((item) => {
       const selectedKeys = Object.keys(item?.selected);

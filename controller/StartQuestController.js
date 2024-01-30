@@ -163,6 +163,9 @@ const createStartQuest = async (req, res) => {
           const count = req.body.data?.selected.length - index - 1;
           selectedCounter[`result.selected.${item.question}`] = count;
         });
+        req.body.data?.contended?.forEach((item) => {
+          contendedCounter[`result.contended.${item.question}`] = 1;
+        });
       }
     } else {
       selectedCounter[`result.selected.${req.body.data.selected}`] = 1;
@@ -565,6 +568,12 @@ const updateChangeAnsStartQuest = async (req, res) => {
               index -
               1;
             selectedCounter[`result.selected.${item.question}`] = -count;
+          });
+
+          initialStartQuestData[
+            initialStartQuestData.length - 1
+          ]?.contended?.forEach((item) => {
+            contendedCounter[`result.contended.${item.question}`] = -1;
           });
         } else {
           selectedCounter[
