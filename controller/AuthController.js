@@ -582,6 +582,21 @@ const sendEmail = async (req, res) => {
   }
 };
 
+const verifyReferralCode = (req, res) => {
+  const referralCode = "Jan2024";
+  const code = req.body.code;
+
+  if (code === referralCode) {
+    res.status(200).json({
+      message: "Referral Code matched",
+    });
+  } else {
+    res.status(401).json({
+      message: "Invalid Referral Code",
+    });
+  }
+};
+
 const verify = async (req, res) => {
   const verificationCode = req.body.verificationCode;
   const token = req._parsedUrl.query;
@@ -772,6 +787,7 @@ module.exports = {
   sendVerifyEmail,
   sendEmail,
   verify,
+  verifyReferralCode,
   deleteByUUID,
   logout,
   deleteBadgeById,
