@@ -49,12 +49,28 @@ router.get(
   PassportController.socialBadgeToken
 );
 
-//   LinkedIn
+//   Twitter
 router.get("/twitter", passport.authenticate("twitter", { session: false }));
 
 router.get(
   "/twitter/callback",
   passport.authenticate("twitter", {
+    // successRedirect: CLIENT_URL,
+    failureRedirect: CLIENT_URL,
+    session: false,
+  }),
+  PassportController.socialBadgeToken
+);
+
+//   Instagram
+router.get(
+  "/instagram",
+  passport.authenticate("instagram")
+);
+
+router.get(
+  "/instagram/callback",
+  passport.authenticate("instagram", {
     // successRedirect: CLIENT_URL,
     failureRedirect: CLIENT_URL,
     session: false,
