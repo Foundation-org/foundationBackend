@@ -16,6 +16,7 @@ const {
   isAllNumbers,
   createQuestTopic,
   checkNonsenseInTopics,
+  numberToWords,
 } = require("../service/AiValidation");
 const QuestTopics = require("../models/QuestTopics");
 
@@ -165,6 +166,7 @@ function checkResponse(responseData, userMessage, callType, req, res) {
     filtered = capitalizeFirstLetter(filtered);
     filtered = removeTrailingPeriods(filtered);
     filtered = removeTrailingQuestionMarks(filtered);
+    filtered = numberToWords(filtered)
   }
 
   if (callType == 3) {

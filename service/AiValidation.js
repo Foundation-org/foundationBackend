@@ -3,6 +3,9 @@ const User = require("../models/UserModel");
 const crypto = require("crypto");
 const { createLedger } = require("../utils/createLedger");
 const QuestTopics = require("../models/QuestTopics");
+const { ToWords } = require('to-words');
+
+const numberToWord = new ToWords({localeCode: "en-US"});
 
 
 module.exports.checkViolationInSentence = (sentence) => {
@@ -129,3 +132,25 @@ module.exports.checkNonsenseInTopics = (sentence) => {
   const lowerCaseSentence = sentence.toLowerCase();
   return statements.some(statement => lowerCaseSentence.includes(statement.toLowerCase()));
 }
+
+module.exports.numberToWords = (sentence) => {
+   // Regular expression to match numbers in the sentence
+   const regex = /(\d+,\d+|\d+)(\.\d+)?/g;
+  
+    // Extract numbers from the sentence
+    const numbers = sentence.match(regex);
+  
+    if (numbers) {
+      // Perform calculations on each number
+      const updatedNumbers = numbers.map((num) => {
+        return numberToWord.convert(parseFloat(num.replace(/,/g, '')))
+      });
+  
+      // Replace the original numbers with the updated ones in the sentence
+      const updatedSentence = sentence.replace(regex, () => updatedNumbers.shift());
+  
+      return updatedSentence;
+    }
+  
+    return sentence; // Return the original sentence if no numbers are found
+};
