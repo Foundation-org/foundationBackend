@@ -501,7 +501,7 @@ const getQuestById = async (req, res) => {
     const { uuid, id } = req.params; // Use req.params instead of req.body
     const infoQuest = await InfoQuestQuestions.find({
       _id: id,
-    });
+    }).populate('getUserBadge', 'badges');
     if (!infoQuest) throw new Error("No Quest Exist!");
     
     const result = await getQuestionsWithStatus(infoQuest, uuid);
