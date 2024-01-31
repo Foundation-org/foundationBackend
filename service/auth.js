@@ -36,8 +36,8 @@ module.exports.googleVerify = async(token) => {
 
 module.exports.cookieConfiguration = () => {
   if(DEVELOPMENT === true){
-    return { httpOnly: true }
+    return { httpOnly: true, expiry, expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) }
   } else {
-    return { httpOnly: true, sameSite: 'none', secure: true}
+    return { httpOnly: true, sameSite: 'none', secure: true, expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)}
   }
 }
