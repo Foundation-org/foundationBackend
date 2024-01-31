@@ -14,6 +14,12 @@ const createInfoQuestQuest = async (req, res) => {
     const userBalance = await getUserBalance(req.body.uuid);
     if (userBalance < QUEST_CREATED_AMOUNT)
       throw new Error("The balance is insufficient to create a Quest!");
+    // Find the user by uuid
+    const user = await User.findOne({ uuid: req.body.uuid });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
     const question = await new InfoQuestQuestions({
       Question: req.body.Question,
       QuestionCorrect: req.body.QuestionCorrect,
@@ -29,6 +35,7 @@ const createInfoQuestQuest = async (req, res) => {
           ? []
           : req.body.QuestAnswersSelected,
       uuid: req.body.uuid,
+      getUserBadge: user._id
     });
 
     const createdQuestion = await question.save();
@@ -36,12 +43,6 @@ const createInfoQuestQuest = async (req, res) => {
       return res.status(404).send("Not Created 1");
     }
 
-    // Find the user by uuid
-    const user = await User.findOne({ uuid: req.body.uuid });
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
 
     // Increment the questsCreated field by one
     user.questsCreated += 1;
@@ -169,7 +170,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-        });
+        }).populate('getUserBadge', 'badges');
       });
 
       allQuestions = await Promise.all(mapPromises);
@@ -183,7 +184,8 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
             : req.body.sort === "Most Popular"
             ? { interactingCounter: -1 }
             : "createdAt"
-        );
+        )
+        .populate('getUserBadge', 'badges');
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -262,7 +264,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-        });
+        }).populate('getUserBadge', 'badges');
       });
 
       allQuestions = await Promise.all(mapPromises);
@@ -276,7 +278,8 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
             : req.body.sort === "Most Popular"
             ? { interactingCounter: -1 }
             : "createdAt"
-        );
+        )
+        .populate('getUserBadge', 'badges');
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -382,7 +385,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-      });
+      }).populate('getUserBadge', 'badges');
     });
 
     allQuestions = await Promise.all(mapPromises);
@@ -399,7 +402,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
           : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
-      .limit(pageSize);
+      .limit(pageSize)
+      .populate('getUserBadge', 'badges');
       totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
   }
 
@@ -459,7 +463,7 @@ const getAllQuestsWithResult = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-      });
+      }).populate('getUserBadge', 'badges');
     });
 
     allQuestions = await Promise.all(mapPromises);
@@ -556,7 +560,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-        });
+        }).populate('getUserBadge', 'badges');
       });
 
       allQuestions = await Promise.all(mapPromises);
@@ -570,7 +574,8 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
             : req.body.sort === "Most Popular"
             ? { interactingCounter: -1 }
             : "createdAt"
-        );
+        )
+        .populate('getUserBadge', 'badges');
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -652,7 +657,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-        });
+        }).populate('getUserBadge', 'badges');
       });
 
       allQuestions = await Promise.all(mapPromises);
@@ -666,7 +671,8 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
             : req.body.sort === "Most Popular"
             ? { interactingCounter: -1 }
             : "createdAt"
-        );
+        )
+        .populate('getUserBadge', 'badges');
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {

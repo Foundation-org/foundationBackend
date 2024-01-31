@@ -14,7 +14,7 @@ const easySearch = async (req, res) => {
         { whichTypeQuestion: { $regex: searchTerm, $options: "i" } },
         { "QuestAnswers.question": { $regex: searchTerm, $options: "i" } },
       ],
-    });
+    }).populate('getUserBadge', 'badges');
 
     const resultArray = results.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({

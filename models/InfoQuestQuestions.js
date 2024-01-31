@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Users = require("../models/UserModel");
 
 const InfoQuestQuestionsSchema = mongoose.Schema(
   {
@@ -25,6 +26,10 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     },
     uuid: {
       type: String,
+    },
+    getUserBadge: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user'
     },
     usersAddTheirAns: {
       type: Boolean,
