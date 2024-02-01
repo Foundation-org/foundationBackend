@@ -581,17 +581,26 @@ const sendEmail = async (req, res) => {
   }
 };
 
-const verifyReferralCode = (req, res) => {
-  const referralCode = "Jan2024";
-  const code = req.body.code;
+const verifyReferralCode = async(req, res) => {
+  try {
+    const referralCode = "Jan2024";
+    const { code, uuid } = req.body;
+    
+    // const user = User.
+    const user = await User.findOne({ uuid });
+    if (!user) throw new Error("User Not Exist");
+  
+    if(code !== referralCode) throw new Error("Referral code not exist!")
 
-  if (code === referralCode) {
-    res.status(200).json({
-      message: "Referral Code matched",
-    });
-  } else {
-    res.status(401).json({
-      message: "Invalid Referral Code",
+    // Generate a token
+    const token = createToken({ uuid: user.uuid });
+  
+    res.cookie("uuid", user.uuid, cookieConfiguration());
+    res.cookie("jwt", token, cookieConfiguration());
+    res.json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while verifyReferralCode Auth: ${error.message}`,
     });
   }
 };
