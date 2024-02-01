@@ -468,9 +468,10 @@ const sendVerifyEmail = async (req, res) => {
     // console.log("user", user);
     !user && res.status(404).json("User not Found");
 
-    const verificationTokenFull = jwt.sign({ ID: user._id }, JWT_SECRET, {
-      expiresIn: "10m",
-    });
+    // const verificationTokenFull = jwt.sign({ ID: user._id }, JWT_SECRET, {
+    //   expiresIn: "10m",
+    // });
+    const verificationTokenFull = createToken({ uuid: user.uuid });
 
     const verificationToken = verificationTokenFull.substr(
       verificationTokenFull.length - 6

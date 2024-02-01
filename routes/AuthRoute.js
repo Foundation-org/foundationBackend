@@ -35,7 +35,7 @@ router.post("/sendVerifyEmail", AuthController.sendVerifyEmail);
 
 router.post("/verify", protect, AuthController.verify);
 
-router.post("/ReferralCheck", AuthController.verifyReferralCode);
+router.post("/referral", AuthController.verifyReferralCode);
 
 router.delete("/delete/:uuid", AuthController.deleteByUUID);
 
