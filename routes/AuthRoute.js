@@ -33,9 +33,9 @@ router.put("/signedUuid", AuthController.signedUuid);
 
 router.post("/sendVerifyEmail", AuthController.sendVerifyEmail);
 
-router.post("/verify", AuthController.verify);
+router.post("/verify", protect, AuthController.verify);
 
-router.post("/ReferralCheck",AuthController.verifyReferralCode)
+router.post("/ReferralCheck", AuthController.verifyReferralCode);
 
 router.delete("/delete/:uuid", AuthController.deleteByUUID);
 

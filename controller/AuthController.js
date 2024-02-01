@@ -21,7 +21,7 @@ const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
 const { getRandomDigits } = require("../utils/getRandomDigits");
 const { sendEmailMessage } = require("../utils/sendEmailMessage");
-const { FRONTEND_URL } = require("../config/env");
+const { FRONTEND_URL, JWT_SECRET } = require("../config/env");
 
 const changePassword = async (req, res) => {
   try {
@@ -468,11 +468,9 @@ const sendVerifyEmail = async (req, res) => {
     // console.log("user", user);
     !user && res.status(404).json("User not Found");
 
-    const verificationTokenFull = jwt.sign(
-      { ID: user._id },
-      process.env.USER_VERIFICATION_TOKEN_SECRET,
-      { expiresIn: "1d" }
-    );
+    const verificationTokenFull = jwt.sign({ ID: user._id }, JWT_SECRET, {
+      expiresIn: "10m",
+    });
 
     const verificationToken = verificationTokenFull.substr(
       verificationTokenFull.length - 6
@@ -482,7 +480,7 @@ const sendVerifyEmail = async (req, res) => {
     console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
-    const url = `https://on.foundation/VerifyCode?${verificationTokenFull}`;
+    const url = `${FRONTEND_URL}/VerifyCode?${verificationTokenFull}`;
     // console.log("url", url);
 
     // NODEMAILER
@@ -674,6 +672,7 @@ const verify = async (req, res) => {
     });
     return res.status(200).send({
       message: "Gmail Account verified",
+      uuid: req.user,
     });
   } catch (error) {
     console.error(error.message);
