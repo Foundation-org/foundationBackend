@@ -29,6 +29,14 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    verification:{
+      type: Boolean,
+      default: false,
+    },
+    referral:{
+      type: Boolean,
+      default: false,
+    },
     metamaskVerified: {
       type: Boolean,
       default: false,

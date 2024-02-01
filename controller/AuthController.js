@@ -482,6 +482,7 @@ const sendVerifyEmail = async (req, res) => {
 
     // Step 3 - Email the user a unique verification link
     const url = `${FRONTEND_URL}/VerifyCode?${verificationTokenFull}`;
+    return res.status(200).json({url})
     // console.log("url", url);
 
     // NODEMAILER
@@ -590,13 +591,15 @@ const verifyReferralCode = async(req, res) => {
     const user = await User.findOne({ uuid });
     if (!user) throw new Error("User Not Exist");
   
-    if(code !== referralCode) throw new Error("Referral code not exist!")
+    if(code !== referralCode) throw new Error("Referral code not exist!");
 
     // Generate a token
     const token = createToken({ uuid: user.uuid });
   
     res.cookie("uuid", user.uuid, cookieConfiguration());
     res.cookie("jwt", token, cookieConfiguration());
+    user.referral = true;
+    await user.save();
     res.json({ message: "Successful" });
   } catch (error) {
     res.status(500).json({
@@ -646,6 +649,7 @@ const verify = async (req, res) => {
     user.badges.unshift({ accountName: "Email", isVerified: true });
     // Step 3 - Update user verification status to true
     user.gmailVerified = true;
+    user.verification = true;
     await user.save();
     // Create Ledger
     await createLedger({
