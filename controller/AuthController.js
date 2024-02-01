@@ -614,19 +614,19 @@ const verify = async (req, res) => {
   }
 
   // Step 1 -  Verify the token from the URL
-  let payload = null;
-  try {
-    payload = jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET);
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({
-      message: `An error occurred while verify Auth: ${error.message}`,
-    });
-  }
+  // let payload = null;
+  // try {
+  //   payload = jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET);
+  // } catch (error) {
+  //   console.error(error.message);
+  //   res.status(500).json({
+  //     message: `An error occurred while verify Auth: ${error.message}`,
+  //   });
+  // }
 
   try {
     // Step 2 - Find user with matching ID
-    const user = await User.findOne({ _id: payload.ID }).exec();
+    const user = await User.findOne({ uuid: req.user.uuid }).exec();
     if (!user) {
       return res.status(404).send({
         message: "User does not  exists",
@@ -673,7 +673,7 @@ const verify = async (req, res) => {
     });
     return res.status(200).send({
       message: "Gmail Account verified",
-      uuid: req.user,
+      uuid: req.user.uuid,
     });
   } catch (error) {
     console.error(error.message);
