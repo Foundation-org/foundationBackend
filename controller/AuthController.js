@@ -482,7 +482,7 @@ const sendVerifyEmail = async (req, res) => {
 
     // Step 3 - Email the user a unique verification link
     const url = `${FRONTEND_URL}/VerifyCode?${verificationTokenFull}`;
-    return res.status(200).json({url})
+    // return res.status(200).json({url})
     // console.log("url", url);
 
     // NODEMAILER
