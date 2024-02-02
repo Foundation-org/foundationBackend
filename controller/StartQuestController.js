@@ -9,6 +9,7 @@ const {
   QUEST_COMPLETED_CHANGE_AMOUNT,
   QUEST_OPTION_ADDED_AMOUNT,
   QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
+  QUEST_OWNER_ACCOUNT,
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 
@@ -325,6 +326,27 @@ const createStartQuest = async (req, res) => {
     await updateUserBalance({
       uuid: req.body.uuid,
       amount: QUEST_COMPLETED_AMOUNT,
+      inc: true,
+    });
+
+    // Create Ledger
+    await createLedger({
+      uuid: getInfoQuestQuestion.uuid,
+      txUserAction: "questCompleted",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: "DAO Treasury",
+      txTo: getInfoQuestQuestion.uuid,
+      txAmount: QUEST_OWNER_ACCOUNT,
+      // txData : question._id,
+      // txDescription : "Incentive to Quest owner for completed quest"
+    });
+    // Decrement the Treasury
+    await updateTreasury({ amount: QUEST_OWNER_ACCOUNT, dec: true });
+    // Increment the UserBalance
+    await updateUserBalance({
+      uuid: getInfoQuestQuestion.uuid,
+      amount: QUEST_OWNER_ACCOUNT,
       inc: true,
     });
 
