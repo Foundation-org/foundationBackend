@@ -8,6 +8,7 @@ const { getTreasury, updateTreasury } = require("../utils/treasuryService");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const BookmarkQuests = require("../models/BookmarkQuests");
 const { getPercentage } = require("../utils/getPercentage");
+const shortLink = require('shortlink')
 
 const createInfoQuestQuest = async (req, res) => {
   try {
@@ -35,7 +36,8 @@ const createInfoQuestQuest = async (req, res) => {
           ? []
           : req.body.QuestAnswersSelected,
       uuid: req.body.uuid,
-      getUserBadge: user._id
+      getUserBadge: user._id,
+      uniqueShareLink: shortLink.generate(8)
     });
 
     const createdQuestion = await question.save();
@@ -524,6 +526,40 @@ const getQuestById = async (req, res) => {
   }
 };
 
+const getQuestByUniqueShareLink = async (req, res) => {
+  try {
+    // req.cookie
+    console.log("🚀 ~ getQuestById ~ req.cookie:", req.cookies)
+    // return
+    const uuid = req.cookies.uuid;
+    const { uniqueShareLink } = req.params; // Use req.params instead of req.body
+    console.log("🚀 ~ getQuestById ~ uniqueShareLink:", uniqueShareLink)
+    const infoQuest = await InfoQuestQuestions.find({
+      uniqueShareLink,
+    }).populate('getUserBadge', 'badges');
+    console.log("🚀 ~ getQuestById ~ infoQuest:", infoQuest)
+    if (!infoQuest) throw new Error("No Quest Exist!");
+    
+    const result = await getQuestionsWithStatus(infoQuest, uuid);
+    
+    const resultArray = result.map(getPercentage);
+    const desiredArray = resultArray.map((item) => ({
+      ...item._doc,
+      selectedPercentage: item.selectedPercentage,
+      contendedPercentage: item.contendedPercentage,
+    }));
+
+    res.status(200).json({
+      data: desiredArray,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: `An error occurred while getQuestByUniqueShareLink InfoQuest: ${error.message}`,
+    });
+  }
+};
+
 const getAllQuestsWithCompletedStatus = async (req, res) => {
   try {
     let allQuestions;
@@ -772,4 +808,5 @@ module.exports = {
   getAllQuestsWithCompletedStatus,
   getAllQuestsWithChangeAnsStatus,
   getQuestionsWithStatus,
+  getQuestByUniqueShareLink
 };

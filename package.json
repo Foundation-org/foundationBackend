@@ -45,6 +45,7 @@
     "passport-linkedin-oauth2": "^2.0.0",
     "passport-local": "^1.0.0",
     "passport-twitter": "^1.0.4",
+    "shortlink": "^1.1.0",
     "to-words": "^4.0.0"
   },
   "devDependencies": {

@@ -283,7 +283,10 @@ const createGuestMode = async (req, res) => {
       // txDescription : "User creates a new account"
     });
 
-    res.status(200).json({ ...user._doc, token });
+    // res.status(200).json({ ...user._doc, token });
+    res.cookie("uuid", uuid, cookieConfiguration());
+    res.cookie("jwt", token, cookieConfiguration());
+    res.json({ message: "Successful" });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({

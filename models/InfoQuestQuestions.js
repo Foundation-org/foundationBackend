@@ -31,6 +31,9 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'user'
     },
+    uniqueShareLink: {
+      type: String
+    },
     usersAddTheirAns: {
       type: Boolean,
     },
