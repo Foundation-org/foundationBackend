@@ -27,6 +27,8 @@ router.post("/signInSocial/guestMode", AuthController.signInSocialGuestMode);
 
 router.post("/userInfo", AuthController.userInfo);
 
+router.post("/userInfoById", AuthController.userInfoById);
+
 router.put("/setUserWallet", AuthController.setUserWallet);
 
 router.put("/signedUuid", AuthController.signedUuid);

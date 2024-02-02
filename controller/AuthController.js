@@ -430,6 +430,26 @@ const userInfo = async (req, res) => {
     });
   }
 };
+
+const userInfoById = async (req, res) => {
+  try {
+    const user = await User.findOne({ uuid: req.body.uuid });
+
+    // Generate a JWT token
+    const token = createToken({ uuid: req.body.uuid });
+
+    res.cookie("uuid", req.body.uuid, cookieConfiguration());
+    res.cookie("jwt", token, cookieConfiguration());
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while userInfoById Auth: ${error.message}`,
+    });
+  }
+};
+
+
 const setUserWallet = async (req, res) => {
   try {
     // Load the document
@@ -808,4 +828,5 @@ module.exports = {
   deleteByUUID,
   logout,
   deleteBadgeById,
+  userInfoById
 };
