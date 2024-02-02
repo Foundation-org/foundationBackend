@@ -32,6 +32,7 @@ const googleHandler = async (req, res) => {
       const newUser = await new User({
         email: payload._json.email,
         uuid: uuid,
+        role: 'user' 
       });
 
       let type = "";

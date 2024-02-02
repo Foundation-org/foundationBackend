@@ -81,6 +81,7 @@ const signUpUser = async (req, res) => {
       email: req.body.userEmail,
       password: hashPassword,
       uuid: uuid,
+      role: 'user' 
     });
     const users = await user.save();
     if (!users) throw new Error("User not Created");
