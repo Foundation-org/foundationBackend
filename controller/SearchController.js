@@ -44,8 +44,11 @@ const searchBookmarks = async (req, res) => {
   const uuid = req.cookies.uuid;
   try {
     const results = await BookmarkQuests.find({
-      $or: [{ Question: { $regex: searchTerm, $options: "i" } }],
+      Question: { $regex: searchTerm, $options: "i" },
+      uuid: uuid 
     });
+    
+    
     const reversedResults = results.reverse();
     const mapPromises = reversedResults.map(async function (record) {
       return await InfoQuestQuestions.findOne({
