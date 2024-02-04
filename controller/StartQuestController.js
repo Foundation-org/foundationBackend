@@ -133,7 +133,10 @@ const createStartQuest = async (req, res) => {
 
     // Process the 'selected' array
     await processArray(req.body.data?.selected, "selectionsOnAddedAns");
-
+     
+    if (req.body.isAddedAnsSelected===false) {
+      req.body.data.selected = req.body.data.selected.filter(entry => !entry.addedAnswerByUser);
+    }
     // Create a new StartQuests document
     const question = new StartQuests({
       questForeignKey: req.body.questForeignKey,
@@ -204,7 +207,7 @@ const createStartQuest = async (req, res) => {
           $push: {
             QuestAnswers: {
               question: req.body.addedAnswer,
-              selected: true,
+              selected: req.body.isAddedAnsSelected,
               uuid: req.body.addedAnswerUuid,
             },
           },
@@ -553,7 +556,8 @@ const updateChangeAnsStartQuest = async (req, res) => {
               AnswerAddedOrNot = option.question;
               const addAnswer = {
                 question: option.question,
-                selected: true,
+                selected: req.body.isAddedAnsSelected,
+                uuid: req.body.addedAnswerUuid,
               };
               InfoQuestQuestions.findByIdAndUpdate(
                 { _id: req.body.questId },
@@ -564,6 +568,9 @@ const updateChangeAnsStartQuest = async (req, res) => {
         }
 
         responseMsg = "Start Quest Updated Successfully";
+        if (req.body.isAddedAnsSelected===false) {
+          req.body.changeAnswerAddedObj.selected = req.body.changeAnswerAddedObj.selected.filter(entry => !entry.addedAnswerByUser);
+        }
         startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
 
         // decrement the selected and contended count
