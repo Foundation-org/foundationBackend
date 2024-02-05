@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 
+const columnsSchema = {
+  id: String,
+  list: Array,
+};
+
 const userSchema = mongoose.Schema(
   {
     // username: {
@@ -43,6 +48,20 @@ const userSchema = mongoose.Schema(
     },
     uuid: {
       type: String,
+    },
+    States: {
+      expandedView: Boolean,
+      searchData: String,
+      filterByStatus: String,
+      filterByType: String,
+      filterByScope: String,
+      filterBySort: String,
+      columns: {
+        All: columnsSchema,
+        Preferences: columnsSchema,
+        Block: columnsSchema,
+      },
+      clearFilter: Boolean,
     },
     violationCounter: {
       type: Number,

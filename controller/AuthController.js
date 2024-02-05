@@ -757,6 +757,26 @@ const deleteByUUID = async (req, res) => {
 const logout = async (req, res) => {
   try {
     const uuid = req.cookies.uuid;
+    const userStates = req.body.state;
+
+    // Wait for the update to complete
+    const updatedUser = await User.findOneAndUpdate(
+      { uuid: uuid },
+      {
+        $set: {
+          'States.expandedView': userStates.expandedView,
+          'States.searchData': userStates.searchData,
+          'States.filterByStatus': userStates.filterByStatus,
+          'States.filterByType': userStates.filterByType,
+          'States.filterByScope': userStates.filterByScope,
+          'States.filterBySort': userStates.filterBySort,
+          'States.columns': userStates.columns,
+          'States.clearFilter': userStates.clearFilter,
+        },
+      },
+      { new: true }
+    );
+
     // Create Ledger
     await createLedger({
       uuid: uuid,
@@ -770,9 +790,10 @@ const logout = async (req, res) => {
       // txDescription : "User logs out"
     });
 
+    // Clear cookies and respond to the client
     res.clearCookie("uuid", cookieConfiguration());
     res.clearCookie("jwt", cookieConfiguration());
-    res.status(200).json({ message: "User has been logout successfully!" });
+    res.status(200).json({ message: "User has been logout successfully!", updatedUser });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -780,6 +801,7 @@ const logout = async (req, res) => {
     });
   }
 };
+
 const deleteBadgeById = async (req, res) => {
   try {
     const { uuid, id } = req.params;
