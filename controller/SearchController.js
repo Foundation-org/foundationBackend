@@ -58,9 +58,16 @@ const searchBookmarks = async (req, res) => {
 
     const allQuestions = await Promise.all(mapPromises);
 
+    const resultArray = allQuestions.map(getPercentage);
+    const desiredArray = resultArray.map((item) => ({
+      ...item._doc,
+      selectedPercentage: item.selectedPercentage,
+      contendedPercentage: item.contendedPercentage,
+    }));
+
     // Call getQuestionsWithStatus and await its result
     const questionsWithStatus = await getQuestionsWithStatus(
-      allQuestions,
+      desiredArray,
       uuid
     );
 
