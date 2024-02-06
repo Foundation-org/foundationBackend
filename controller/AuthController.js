@@ -679,9 +679,10 @@ const verify = async (req, res) => {
     const user = await User.findOne({ uuid: req.user.uuid }).exec();
     if (!user) {
       return res.status(404).send({
-        message: "User does not  exists",
+        message: "User does not exists",
       });
     }
+ 
 
     // Create a Badge
     user.badges.unshift({ accountName: "Email", isVerified: true });
@@ -722,10 +723,20 @@ const verify = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
-    return res.status(200).send({
-      message: "Gmail Account verified",
-      uuid: req.user.uuid,
-    });
+    // return res.status(200).send({
+    //   message: "Gmail Account verified",
+    //   uuid: req.user.uuid,
+    // });
+    user.referral = true;
+    await user.save();
+    // Generate a token
+    const generateToken = createToken({ uuid: req.user.uuid });
+  
+    res.cookie("uuid", req.user.uuid, cookieConfiguration());
+    res.cookie("jwt", generateToken, cookieConfiguration());
+   
+    res.json({ message: "Successful" });
+
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
