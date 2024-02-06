@@ -70,7 +70,7 @@ const signUpUser = async (req, res) => {
     if (alreadyUser) throw new Error("Email Already Exists");
 
     const checkGoogleEmail = await isGoogleEmail(req.body.userEmail);
-    if (checkGoogleEmail) throw new Error("Please Signup with Google Account");
+    if (checkGoogleEmail) throw new Error("We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'");
 
     const uuid = crypto.randomBytes(11).toString("hex");
     console.log(uuid);
@@ -206,7 +206,7 @@ const signInUser = async (req, res) => {
 
     // To check the google account
     if (user?.badges[0]?.accountName === "Gmail")
-      throw new Error("Please Login with Google Account");
+      throw new Error("We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'");
     // To check the facebook account
     if (user?.badges[0]?.accountName === "Fmail")
       throw new Error("Please Login with Facebook Account");
@@ -302,7 +302,7 @@ const signInGuestMode = async (req, res) => {
     if (alreadyUser) throw new Error("Email Already Exists");
 
     const checkGoogleEmail = await isGoogleEmail(req.body.userEmail);
-    if (checkGoogleEmail) throw new Error("Please Signup with Google Account");
+    if (checkGoogleEmail) throw new Error("We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'");
 
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req.body.userPassword, salt);
