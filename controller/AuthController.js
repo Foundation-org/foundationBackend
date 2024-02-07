@@ -118,7 +118,7 @@ const signUpUserBySocialLogin = async (req, res) => {
     //   signUpUserBySocialLogin(req, res)
     // }
     // Check Google Account
-    const payload = req.body.data;
+    const payload = req.body;
     // Check if email already exist
     const alreadyUser = await User.findOne({ email: payload.email });
     if (alreadyUser) throw new Error("Email Already Exists");
@@ -127,6 +127,7 @@ const signUpUserBySocialLogin = async (req, res) => {
     const user = await new User({
       email: payload.email,
       uuid: uuid,
+      role: 'user'
     });
 
     // Check Email Category
@@ -136,8 +137,8 @@ const signUpUserBySocialLogin = async (req, res) => {
 
     // Create a Badge at starting index
     user.badges.unshift({
-      accountName: "Gmail",
-      isVerified: payload.email_verified,
+      accountName: payload.provider,
+      isVerified: true,
       type: type,
     });
 
@@ -179,18 +180,14 @@ const signUpUserBySocialLogin = async (req, res) => {
       inc: true,
     });
 
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
     if (user.badges[0].type !== "Education") {
-      return res.status(200).json({
-        message: "Please Choose the Type!",
-        userId: user._id,
-        badgeId: user.badges[0]._id,
-        required_action: true,
-      });
+      user.requiredAction = true;
+      await user.save();
     }
-    res.status(201).json({
-      message: "Google Account Signup Successfully!",
-      required_action: false,
-    });
+    res.status(200).json({ ...user._doc, token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -734,9 +731,7 @@ const verify = async (req, res) => {
   
     res.cookie("uuid", req.user.uuid, cookieConfiguration());
     res.cookie("jwt", generateToken, cookieConfiguration());
-   
-    res.json({ message: "Successful" });
-
+    res.status(200).json({ ...user._doc, token: generateToken });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({

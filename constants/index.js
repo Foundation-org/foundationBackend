@@ -9,7 +9,8 @@ module.exports = {
     "unable to assist",
     "i'm sorry, ",
     "sorry, ",
-    "please provide"
+    "please provide",
+    "did you mean"
   ],
   SYSTEM_MESSAGES: [
     "Correct provided statement to standard English without contractions. Shortest responses only.",
