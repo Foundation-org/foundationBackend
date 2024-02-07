@@ -61,7 +61,7 @@ const userSchema = mongoose.Schema(
         Preferences: columnsSchema,
         Block: columnsSchema,
       },
-      clearFilter: Boolean,
+      lightMode: Boolean,
     },
     violationCounter: {
       type: Number,

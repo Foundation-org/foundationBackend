@@ -43,6 +43,8 @@ router.delete("/delete/:uuid", AuthController.deleteByUUID);
 
 router.post("/logout", AuthController.logout);
 
+router.post("/setStates", AuthController.setStates);
+
 router.delete("/badge/:id/:uuid", AuthController.deleteBadgeById);
 
 module.exports = router;

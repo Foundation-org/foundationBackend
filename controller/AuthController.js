@@ -782,25 +782,6 @@ const deleteByUUID = async (req, res) => {
 const logout = async (req, res) => {
   try {
     const uuid = req.cookies.uuid;
-    // const userStates = req.body.state;
-
-    // Wait for the update to complete
-    // const updatedUser = await User.findOneAndUpdate(
-    //   { uuid: uuid },
-    //   {
-    //     $set: {
-    //       'States.expandedView': userStates.expandedView,
-    //       'States.searchData': userStates.searchData,
-    //       'States.filterByStatus': userStates.filterByStatus,
-    //       'States.filterByType': userStates.filterByType,
-    //       'States.filterByScope': userStates.filterByScope,
-    //       'States.filterBySort': userStates.filterBySort,
-    //       'States.columns': userStates.columns,
-    //       'States.clearFilter': userStates.clearFilter,
-    //     },
-    //   },
-    //   { new: true }
-    // );
 
     // Create Ledger
     await createLedger({
@@ -818,7 +799,6 @@ const logout = async (req, res) => {
     // Clear cookies and respond to the client
     res.clearCookie("uuid", cookieConfiguration());
     res.clearCookie("jwt", cookieConfiguration());
-    // res.status(200).json({ message: "User has been logout successfully!", updatedUser });
     res.status(200).json({ message: "User has been logout successfully!"});
   } catch (error) {
     console.error(error.message);
@@ -827,6 +807,40 @@ const logout = async (req, res) => {
     });
   }
 };
+
+const setStates = async (req, res) => {
+  try {
+    const uuid = req.body.uuid;
+    const userStates = req.body.state;
+
+    const updatedUser = await User.findOneAndUpdate(
+      { uuid: uuid },
+      {
+        $set: {
+          'States.expandedView': userStates.expandedView,
+          'States.searchData': userStates.searchData,
+          'States.filterByStatus': userStates.filterByStatus,
+          'States.filterByType': userStates.filterByType,
+          'States.filterByScope': userStates.filterByScope,
+          'States.filterBySort': userStates.filterBySort,
+          'States.columns': userStates.columns,
+          'States.lightMode': userStates.LightMode,
+        },
+      },
+      { new: true }
+    );
+
+
+    res.status(200).json({ message: "Filters Updated", updatedUser});
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while setting filters: ${error.message}`,
+    });
+  }
+};
+
 
 const deleteBadgeById = async (req, res) => {
   try {
@@ -875,6 +889,7 @@ module.exports = {
   verifyReferralCode,
   deleteByUUID,
   logout,
+  setStates,
   deleteBadgeById,
   userInfoById
 };
