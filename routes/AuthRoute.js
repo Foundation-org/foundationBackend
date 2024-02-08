@@ -45,6 +45,8 @@ router.post("/logout", AuthController.logout);
 
 router.post("/setStates", AuthController.setStates);
 
+router.post("/setBookmarkStates", AuthController.setBookmarkStates);
+
 router.delete("/badge/:id/:uuid", AuthController.deleteBadgeById);
 
 module.exports = router;

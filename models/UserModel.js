@@ -63,6 +63,20 @@ const userSchema = mongoose.Schema(
       },
       lightMode: Boolean,
     },
+    bookmarkStates: {
+      expandedView: Boolean,
+      searchData: String,
+      filterByStatus: String,
+      filterByType: String,
+      filterByScope: String,
+      filterBySort: String,
+      columns: {
+        All: columnsSchema,
+        Preferences: columnsSchema,
+        Block: columnsSchema,
+      },
+      lightMode: Boolean,
+    },
     violationCounter: {
       type: Number,
       default: 0,

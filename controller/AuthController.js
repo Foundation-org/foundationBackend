@@ -835,6 +835,38 @@ const setStates = async (req, res) => {
   }
 };
 
+const setBookmarkStates = async (req, res) => {
+  try {
+    const uuid = req.cookies.uuid;
+    const updatedUser = await User.findOneAndUpdate(
+      { uuid: uuid },
+      {
+        $set: {
+          'bookmarkStates.expandedView': req.body.expandedView,
+          'bookmarkStates.searchData': req.body.searchData,
+          'bookmarkStates.filterByStatus': req.body.filterByStatus,
+          'bookmarkStates.filterByType': req.body.filterByType,
+          'bookmarkStates.filterByScope': req.body.filterByScope,
+          'bookmarkStates.filterBySort': req.body.filterBySort,
+          'bookmarkStates.columns': req.body.columns,
+          'bookmarkStates.lightMode': req.body.LightMode,
+        },
+      },
+      { new: true }
+    );
+
+
+    res.status(200).json({ message: "Filters Updated", updatedUser});
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while setting filters: ${error.message}`,
+    });
+  }
+};
+
+
 
 const deleteBadgeById = async (req, res) => {
   try {
@@ -884,6 +916,7 @@ module.exports = {
   deleteByUUID,
   logout,
   setStates,
+  setBookmarkStates,
   deleteBadgeById,
   userInfoById
 };
