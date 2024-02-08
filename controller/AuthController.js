@@ -284,7 +284,8 @@ const createGuestMode = async (req, res) => {
     // res.status(200).json({ ...user._doc, token });
     res.cookie("uuid", uuid, cookieConfiguration());
     res.cookie("jwt", token, cookieConfiguration());
-    res.json({ message: "Successful" });
+    // res.json({ message: "Successful" });
+    res.status(200).json({ ...user._doc, token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -418,7 +419,7 @@ const signInUserBySocialLogin = async (req, res) => {
 
 const userInfo = async (req, res) => {
   try {
-    const user = await User.findOne({ uuid: req.cookies.uuid });
+    const user = await User.findOne({ uuid: req.cookies.uuid || req.body.uuid });
     res.status(200).json(user);
   } catch (error) {
     console.error(error.message);
