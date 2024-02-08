@@ -805,21 +805,19 @@ const logout = async (req, res) => {
 
 const setStates = async (req, res) => {
   try {
-    const uuid = req.body.uuid;
-    const userStates = req.body.state;
-
+    const uuid = req.cookies.uuid;
     const updatedUser = await User.findOneAndUpdate(
       { uuid: uuid },
       {
         $set: {
-          'States.expandedView': userStates.expandedView,
-          'States.searchData': userStates.searchData,
-          'States.filterByStatus': userStates.filterByStatus,
-          'States.filterByType': userStates.filterByType,
-          'States.filterByScope': userStates.filterByScope,
-          'States.filterBySort': userStates.filterBySort,
-          'States.columns': userStates.columns,
-          'States.lightMode': userStates.LightMode,
+          'States.expandedView': req.body.expandedView,
+          'States.searchData': req.body.searchData,
+          'States.filterByStatus': req.body.filterByStatus,
+          'States.filterByType': req.body.filterByType,
+          'States.filterByScope': req.body.filterByScope,
+          'States.filterBySort': req.body.filterBySort,
+          'States.columns': req.body.columns,
+          'States.lightMode': req.body.LightMode,
         },
       },
       { new: true }
