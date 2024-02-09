@@ -698,29 +698,29 @@ const updateChangeAnsStartQuest = async (req, res) => {
           txData: startQuestQuestion._id,
           // txDescription : "User changes their answer on a quest"
         });
-        // Create Ledger
-        await createLedger({
-          uuid: req.body.uuid,
-          txUserAction: "questCompletedChange",
-          txID: commonTxId,
-          txAuth: "DAO",
-          txFrom: "DAO Treasury",
-          txTo: req.body.uuid,
-          txAmount: QUEST_COMPLETED_CHANGE_AMOUNT,
-          // txData : startQuestQuestion._id,
-          // txDescription : "Incentive for changing a quest answer"
-        });
-        // Decrement the Treasury
-        await updateTreasury({
-          amount: QUEST_COMPLETED_CHANGE_AMOUNT,
-          dec: true,
-        });
-        // Increment the UserBalance
-        await updateUserBalance({
-          uuid: req.body.uuid,
-          amount: QUEST_COMPLETED_CHANGE_AMOUNT,
-          inc: true,
-        });
+        // // Create Ledger
+        // await createLedger({
+        //   uuid: req.body.uuid,
+        //   txUserAction: "questCompletedChange",
+        //   txID: commonTxId,
+        //   txAuth: "DAO",
+        //   txFrom: "DAO Treasury",
+        //   txTo: req.body.uuid,
+        //   txAmount: QUEST_COMPLETED_CHANGE_AMOUNT,
+        //   // txData : startQuestQuestion._id,
+        //   // txDescription : "Incentive for changing a quest answer"
+        // });
+        // // Decrement the Treasury
+        // await updateTreasury({
+        //   amount: QUEST_COMPLETED_CHANGE_AMOUNT,
+        //   dec: true,
+        // });
+        // // Increment the UserBalance
+        // await updateUserBalance({
+        //   uuid: req.body.uuid,
+        //   amount: QUEST_COMPLETED_CHANGE_AMOUNT,
+        //   inc: true,
+        // });
       } else {
         responseMsg = "Answer has not changed";
       }

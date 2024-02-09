@@ -101,7 +101,19 @@ const signUpUser = async (req, res) => {
       txData: uuid,
       // txDescription : "User creates a new account"
     });
-
+    // Create Ledger
+    await createLedger({
+      uuid: user.uuid,
+      txUserAction: "accountLogin",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: user.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: user.uuid,
+      // txDescription : "user logs in"
+    });
+    
     await sendVerifyEmail(req, res);
     // res.status(200).json({ ...user._doc, token });
   } catch (error) {
@@ -145,7 +157,30 @@ const signUpUserBySocialLogin = async (req, res) => {
     // Update user verification status to true
     user.gmailVerified = payload.email_verified;
     await user.save();
-
+    // Create Ledger
+    await createLedger({
+      uuid: uuid,
+      txUserAction: "accountCreated",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: uuid,
+      // txDescription : "User creates a new account"
+    });
+    // Create Ledger
+    await createLedger({
+      uuid: user.uuid,
+      txUserAction: "accountLogin",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: user.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: user.uuid,
+      // txDescription : "user logs in"
+    });
     // Create Ledger
     await createLedger({
       uuid: uuid,
@@ -169,7 +204,6 @@ const signUpUserBySocialLogin = async (req, res) => {
       // txData : user.badges[0]._id,
       // txDescription : "Incentive for adding badges"
     });
-    //
     // Decrement the Treasury
     await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
 
