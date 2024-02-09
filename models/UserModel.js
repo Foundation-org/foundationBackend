@@ -50,32 +50,74 @@ const userSchema = mongoose.Schema(
       type: String,
     },
     States: {
-      expandedView: Boolean,
-      searchData: String,
-      filterByStatus: String,
-      filterByType: String,
-      filterByScope: String,
-      filterBySort: String,
+      expandedView: {
+        type: Boolean,
+        default: false, 
+      },
+      searchData: {
+        type: String,
+        default: "", 
+      },
+      filterByStatus: {
+        type: String,
+        default: "", 
+      },
+      filterByType: {
+        type: String,
+        default: "", 
+      },
+      filterByScope: {
+        type: String,
+        default: "", 
+      },
+      filterBySort: {
+        type: String,
+        default: "Newest First", 
+      },
       columns: {
         All: columnsSchema,
         Preferences: columnsSchema,
         Block: columnsSchema,
       },
-      lightMode: Boolean,
+      lightMode: {
+        type: Boolean,
+        default: true, 
+      },
     },
     bookmarkStates: {
-      expandedView: Boolean,
-      searchData: String,
-      filterByStatus: String,
-      filterByType: String,
-      filterByScope: String,
-      filterBySort: String,
+      expandedView: {
+        type: Boolean,
+        default: false, 
+      },
+      searchData: {
+        type: String,
+        default: "", 
+      },
+      filterByStatus: {
+        type: String,
+        default: "", 
+      },
+      filterByType: {
+        type: String,
+        default: "", 
+      },
+      filterByScope: {
+        type: String,
+        default: "", 
+      },
+      filterBySort: {
+        type: String,
+        default: "Newest First", 
+      },
       columns: {
         All: columnsSchema,
         Preferences: columnsSchema,
         Block: columnsSchema,
       },
-      lightMode: Boolean,
+      lightMode: {
+        type: Boolean,
+        default: true, 
+      },
     },
     violationCounter: {
       type: Number,
