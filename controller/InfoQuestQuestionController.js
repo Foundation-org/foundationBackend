@@ -411,10 +411,17 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
   const resultArray = allQuestions.map(getPercentage);
   const desiredArray = resultArray.map((item) => ({
     ...item._doc,
-    selectedPercentage: item.selectedPercentage,
-    contendedPercentage: item.contendedPercentage,
+    selectedPercentage: item?.selectedPercentage?.[0]
+      ? [Object.fromEntries(
+        Object.entries(item.selectedPercentage[0]).sort((a, b) => parseInt(b[1]) - parseInt(a[1]))
+      )]
+      : [],
+    contendedPercentage: item?.contendedPercentage?.[0]
+      ? [Object.fromEntries(
+        Object.entries(item.contendedPercentage[0]).sort((a, b) => parseInt(b[1]) - parseInt(a[1]))
+      )]
+      : [],
   }));
-
   // Query the database with skip and limit options to get questions for the requested page
   const result = await getQuestionsWithStatus(desiredArray, uuid);
 
