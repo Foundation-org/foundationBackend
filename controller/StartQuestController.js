@@ -65,7 +65,7 @@ const createStartQuest = async (req, res) => {
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
-        txUserAction: "questOptionContentionGiven",
+        txUserAction: "postOptionContentionGiven",
         txID: crypto.randomBytes(11).toString("hex"),
         txAuth: "User",
         txFrom: req.body.uuid,
@@ -77,7 +77,7 @@ const createStartQuest = async (req, res) => {
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
-        txUserAction: "questOptionContentionGiven",
+        txUserAction: "postOptionContentionGiven",
         txID: crypto.randomBytes(11).toString("hex"),
         txAuth: "DAO",
         txFrom: req.body.uuid,
@@ -133,9 +133,11 @@ const createStartQuest = async (req, res) => {
 
     // Process the 'selected' array
     await processArray(req.body.data?.selected, "selectionsOnAddedAns");
-     
-    if (req.body.isAddedAnsSelected===false) {
-      req.body.data.selected = req.body.data.selected.filter(entry => !entry.addedAnswerByUser);
+
+    if (req.body.isAddedAnsSelected === false) {
+      req.body.data.selected = req.body.data.selected.filter(
+        (entry) => !entry.addedAnswerByUser
+      );
     }
     // Create a new StartQuests document
     const question = new StartQuests({
@@ -217,7 +219,7 @@ const createStartQuest = async (req, res) => {
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
-        txUserAction: "questOptionAdded",
+        txUserAction: "postOptionAdded",
         txID: crypto.randomBytes(11).toString("hex"),
         txAuth: "User",
         txFrom: req.body.questForeignKey,
@@ -229,7 +231,7 @@ const createStartQuest = async (req, res) => {
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
-        txUserAction: "questOptionAdded",
+        txUserAction: "postOptionAdded",
         txID: crypto.randomBytes(11).toString("hex"),
         txAuth: "DAO",
         txFrom: "DAO Treasury",
@@ -302,7 +304,7 @@ const createStartQuest = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
-      txUserAction: "questCompleted",
+      txUserAction: "postCompleted",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: req.body.uuid,
@@ -314,7 +316,7 @@ const createStartQuest = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
-      txUserAction: "questCompleted",
+      txUserAction: "postCompleted",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: "DAO Treasury",
@@ -335,7 +337,7 @@ const createStartQuest = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: getInfoQuestQuestion.uuid,
-      txUserAction: "questCompleted",
+      txUserAction: "postCompleted",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: "DAO Treasury",
@@ -487,7 +489,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
-        txUserAction: "questOptionContentionGiven",
+        txUserAction: "postOptionContentionGiven",
         txID: crypto.randomBytes(11).toString("hex"),
         txAuth: "User",
         txFrom: req.body.uuid,
@@ -499,7 +501,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
-        txUserAction: "questOptionContentionGiven",
+        txUserAction: "postOptionContentionGiven",
         txID: crypto.randomBytes(11).toString("hex"),
         txAuth: "DAO",
         txFrom: req.body.uuid,
@@ -568,8 +570,11 @@ const updateChangeAnsStartQuest = async (req, res) => {
         }
 
         responseMsg = "Start Quest Updated Successfully";
-        if (req.body.isAddedAnsSelected===false) {
-          req.body.changeAnswerAddedObj.selected = req.body.changeAnswerAddedObj.selected.filter(entry => !entry.addedAnswerByUser);
+        if (req.body.isAddedAnsSelected === false) {
+          req.body.changeAnswerAddedObj.selected =
+            req.body.changeAnswerAddedObj.selected.filter(
+              (entry) => !entry.addedAnswerByUser
+            );
         }
         startQuestAnswersSelected.push(req.body.changeAnswerAddedObj);
 
@@ -689,7 +694,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // Create Ledger
         await createLedger({
           uuid: req.body.uuid,
-          txUserAction: "questCompletedChange",
+          txUserAction: "postCompletedChange",
           txID: commonTxId,
           txAuth: "User",
           txFrom: req.body.uuid,
@@ -701,7 +706,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // // Create Ledger
         // await createLedger({
         //   uuid: req.body.uuid,
-        //   txUserAction: "questCompletedChange",
+        //   txUserAction: "postCompletedChange",
         //   txID: commonTxId,
         //   txAuth: "DAO",
         //   txFrom: "DAO Treasury",

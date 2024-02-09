@@ -8,7 +8,7 @@ const { getTreasury, updateTreasury } = require("../utils/treasuryService");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const BookmarkQuests = require("../models/BookmarkQuests");
 const { getPercentage } = require("../utils/getPercentage");
-const shortLink = require('shortlink')
+const shortLink = require("shortlink");
 
 const createInfoQuestQuest = async (req, res) => {
   try {
@@ -37,14 +37,13 @@ const createInfoQuestQuest = async (req, res) => {
           : req.body.QuestAnswersSelected,
       uuid: req.body.uuid,
       getUserBadge: user._id,
-      uniqueShareLink: shortLink.generate(8)
+      uniqueShareLink: shortLink.generate(8),
     });
 
     const createdQuestion = await question.save();
     if (!createdQuestion) {
       return res.status(404).send("Not Created 1");
     }
-
 
     // Increment the questsCreated field by one
     user.questsCreated += 1;
@@ -64,7 +63,7 @@ const createInfoQuestQuest = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
-      txUserAction: "questCreated",
+      txUserAction: "postCreated",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: user.uuid,
@@ -76,7 +75,7 @@ const createInfoQuestQuest = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
-      txUserAction: "questCreated",
+      txUserAction: "postCreated",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: user.uuid,
@@ -172,7 +171,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-        }).populate('getUserBadge', 'badges');
+        }).populate("getUserBadge", "badges");
       });
 
       allQuestions = await Promise.all(mapPromises);
@@ -187,7 +186,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
             ? { interactingCounter: -1 }
             : "createdAt"
         )
-        .populate('getUserBadge', 'badges');
+        .populate("getUserBadge", "badges");
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -266,7 +265,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-        }).populate('getUserBadge', 'badges');
+        }).populate("getUserBadge", "badges");
       });
 
       allQuestions = await Promise.all(mapPromises);
@@ -281,7 +280,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
             ? { interactingCounter: -1 }
             : "createdAt"
         )
-        .populate('getUserBadge', 'badges');
+        .populate("getUserBadge", "badges");
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -314,7 +313,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
             if (
               rcrd.usersChangeTheirAns?.trim() !== "" ||
               rcrd.whichTypeQuestion === "ranked choise"
-              ) {
+            ) {
               rcrd.startStatus = "change answer";
             } else {
               rcrd.startStatus = "completed";
@@ -324,11 +323,11 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
 
         Result.push(rcrd);
       });
-      
+
       const start = req.body.start;
       const end = req.body.end;
       console.log("Start" + start + "end" + end);
-      
+
       const resultArray = Result.slice(start, end).map(getPercentage);
       const desiredArray = resultArray.map((item) => ({
         ...item._doc,
@@ -387,7 +386,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-      }).populate('getUserBadge', 'badges');
+      }).populate("getUserBadge", "badges");
     });
 
     allQuestions = await Promise.all(mapPromises);
@@ -405,8 +404,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       ) // Sort by createdAt field in descending order
       .skip(skip)
       .limit(pageSize)
-      .populate('getUserBadge', 'badges');
-      totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
+      .populate("getUserBadge", "badges");
+    totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
   }
 
   const resultArray = allQuestions.map(getPercentage);
@@ -465,7 +464,7 @@ const getAllQuestsWithResult = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-      }).populate('getUserBadge', 'badges');
+      }).populate("getUserBadge", "badges");
     });
 
     allQuestions = await Promise.all(mapPromises);
@@ -503,11 +502,11 @@ const getQuestById = async (req, res) => {
     const { uuid, id } = req.params; // Use req.params instead of req.body
     const infoQuest = await InfoQuestQuestions.find({
       _id: id,
-    }).populate('getUserBadge', 'badges');
+    }).populate("getUserBadge", "badges");
     if (!infoQuest) throw new Error("No Quest Exist!");
-    
+
     const result = await getQuestionsWithStatus(infoQuest, uuid);
-    
+
     const resultArray = result.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
@@ -529,19 +528,19 @@ const getQuestById = async (req, res) => {
 const getQuestByUniqueShareLink = async (req, res) => {
   try {
     // req.cookie
-    console.log("🚀 ~ getQuestById ~ req.cookie:", req.cookies)
+    console.log("🚀 ~ getQuestById ~ req.cookie:", req.cookies);
     // return
     const uuid = req.cookies.uuid;
     const { uniqueShareLink } = req.params; // Use req.params instead of req.body
-    console.log("🚀 ~ getQuestById ~ uniqueShareLink:", uniqueShareLink)
+    console.log("🚀 ~ getQuestById ~ uniqueShareLink:", uniqueShareLink);
     const infoQuest = await InfoQuestQuestions.find({
       uniqueShareLink,
-    }).populate('getUserBadge', 'badges');
-    console.log("🚀 ~ getQuestById ~ infoQuest:", infoQuest)
+    }).populate("getUserBadge", "badges");
+    console.log("🚀 ~ getQuestById ~ infoQuest:", infoQuest);
     if (!infoQuest) throw new Error("No Quest Exist!");
-    
+
     const result = await getQuestionsWithStatus(infoQuest, uuid);
-    
+
     const resultArray = result.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
@@ -596,7 +595,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-        }).populate('getUserBadge', 'badges');
+        }).populate("getUserBadge", "badges");
       });
 
       allQuestions = await Promise.all(mapPromises);
@@ -611,7 +610,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
             ? { interactingCounter: -1 }
             : "createdAt"
         )
-        .populate('getUserBadge', 'badges');
+        .populate("getUserBadge", "badges");
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -693,7 +692,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-        }).populate('getUserBadge', 'badges');
+        }).populate("getUserBadge", "badges");
       });
 
       allQuestions = await Promise.all(mapPromises);
@@ -708,7 +707,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
             ? { interactingCounter: -1 }
             : "createdAt"
         )
-        .populate('getUserBadge', 'badges');
+        .populate("getUserBadge", "badges");
     }
 
     if (req.body.uuid === "" || req.body.uuid === undefined) {
@@ -726,7 +725,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
         await startedQuestions.map(function (rec) {
           if (rec.questForeignKey === rcrd._id.toString()) {
             startedOrNot = true;
-            rcrd.startQuestData = rec
+            rcrd.startQuestData = rec;
           }
         });
         if (startedOrNot === true) {
@@ -778,10 +777,10 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
               rcrd.whichTypeQuestion === "ranked choise"
             ) {
               rcrd.startStatus = "change answer";
-              rcrd.startQuestData = rec
+              rcrd.startQuestData = rec;
             } else {
               rcrd.startStatus = "completed";
-              rcrd.startQuestData = rec
+              rcrd.startQuestData = rec;
             }
           }
         });
@@ -808,5 +807,5 @@ module.exports = {
   getAllQuestsWithCompletedStatus,
   getAllQuestsWithChangeAnsStatus,
   getQuestionsWithStatus,
-  getQuestByUniqueShareLink
+  getQuestByUniqueShareLink,
 };
