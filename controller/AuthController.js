@@ -527,8 +527,9 @@ const sendVerifyEmail = async (req, res) => {
     // const verificationTokenFull = jwt.sign({ ID: user._id }, JWT_SECRET, {
     //   expiresIn: "10m",
     // });
-    const verificationTokenFull = createToken({ uuid: user.uuid });
-
+    const verificationTokenFull = jwt.sign({ uuid: user.uuid }, JWT_SECRET, {
+      expiresIn: "2m",
+    });
     const verificationToken = verificationTokenFull.substr(
       verificationTokenFull.length - 6
     );
@@ -678,6 +679,29 @@ const verifyReferralCode = async(req, res) => {
   }
 };
 
+const AuthenticateJWT=async(req,res)=>{
+  try{
+
+    const token = req.headers.authorization;
+    const decodedToken = jwt.verify(token, JWT_SECRET);
+    const user = await User.findOne({ uuid: decodedToken.uuid });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.verification) {
+      return res.status(409).json({ message: 'Already Verified' });
+    } 
+    return res.status(200).json({ message: 'Continue' });
+
+  }
+  catch(error){
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+}
+
 const verify = async (req, res) => {
   const verificationCode = req.body.verificationCode;
   const token = req._parsedUrl.query;
@@ -759,7 +783,7 @@ const verify = async (req, res) => {
     //   message: "Gmail Account verified",
     //   uuid: req.user.uuid,
     // });
-    user.referral = true;
+    user.verification = true;
     await user.save();
     // Generate a token
     const generateToken = createToken({ uuid: req.user.uuid });
@@ -952,5 +976,6 @@ module.exports = {
   setStates,
   setBookmarkStates,
   deleteBadgeById,
-  userInfoById
+  userInfoById,
+  AuthenticateJWT
 };
