@@ -20,32 +20,10 @@ const {
 } = require("../service/AiValidation");
 const QuestTopics = require("../models/QuestTopics");
 
-const minApiCallDelay = 500;
-const maxApiCallsPerDay = 2200; // total calls per oneDayInMillis
-const oneDayInMillis = 24 * 60 * 60 * 1000; // 24hr period
-
-let lastApiCallTimestamp = 0;
-let apiCallCount = 0;
 
 const validation = async (req, res) => {
   const callType = req.params.callType;
   if (callType >= 1 && callType <= 3) {
-    const now = Date.now();
-    const timeSinceLastCall = now - lastApiCallTimestamp;
-
-    if (timeSinceLastCall < minApiCallDelay) {
-      const delay = minApiCallDelay - timeSinceLastCall;
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-
-    if (apiCallCount >= maxApiCallsPerDay) {
-      res.status(429).json({ message: "API Limit", status: "ERROR" });
-      return;
-    }
-
-    lastApiCallTimestamp = Date.now();
-    apiCallCount++;
-
     await handleRequest(
       req,
       res,
@@ -230,11 +208,6 @@ function checkNonsenseInSentence(sentence) {
     lowerCaseSentence.includes(statement.toLowerCase())
   );
 }
-
-// Reset the API call count daily
-setInterval(() => {
-  apiCallCount = 0;
-}, oneDayInMillis);
 
 module.exports = {
   validation,

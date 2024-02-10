@@ -53,6 +53,11 @@ const createStartQuest = async (req, res) => {
       { uuid: matchingUuid },
       { $inc: { usersAnswered: 1 } }
     );
+    // Your Post Engaged
+    await User.findOneAndUpdate(
+      { uuid: req.body.uuid },
+      { $inc: { yourPostEngaged: 1 } }
+    );
 
     // Process the 'contended' array and increment 'contentionsGiven'
     const contendedArray = req.body.data?.contended || [];

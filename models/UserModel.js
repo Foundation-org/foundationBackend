@@ -153,7 +153,11 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    usersAnswered: {
+    usersAnswered: { // Post Engaged
+      type: Number,
+      default: 0,
+    },
+    yourPostEngaged: { // Your Post Engaged
       type: Number,
       default: 0,
     },
