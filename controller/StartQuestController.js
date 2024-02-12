@@ -362,8 +362,11 @@ const createStartQuest = async (req, res) => {
       inc: true,
     });
 
+    const infoQuest = await InfoQuestQuestions.find({
+      _id: getInfoQuestQuestion._id,
+    }).populate("getUserBadge", "badges");
     // getting the quest status
-    const result = await getQuestionsWithStatus([getInfoQuestQuestion], req.body.uuid);
+    const result = await getQuestionsWithStatus(infoQuest, req.body.uuid);
     // getting the quest percentage
     const resultArray = result.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
@@ -750,10 +753,22 @@ const updateChangeAnsStartQuest = async (req, res) => {
     } else {
       responseMsg = "You can change your answer once every 1 hour";
     }
+    const infoQuest = await InfoQuestQuestions.find({
+      _id: req.body.questId,
+    }).populate("getUserBadge", "badges");
+    // getting the quest status
+    const result = await getQuestionsWithStatus(infoQuest, req.body.uuid);
+    // getting the quest percentage
+    const resultArray = result.map(getPercentage);
+    const desiredArray = resultArray.map((item) => ({
+      ...item._doc,
+      selectedPercentage: item.selectedPercentage,
+      contendedPercentage: item.contendedPercentage,
+    }));
 
     res
       .status(200)
-      .json({ message: responseMsg, startQuestID: startQuestQuestion._id });
+      .json({ message: responseMsg, startQuestID: startQuestQuestion._id, data: desiredArray[0] });
   } catch (err) {
     console.error(err);
     res.status(500).json({
