@@ -61,4 +61,10 @@ app.get("/", (req, res) => {
   // res.json();
 });
 
+app.post("/twilio/callback", (req, res, next) => {
+  console.log('Status Callback Data:', req.body);
+  res.status(200).send('OK');
+})
+
+
 module.exports = app;
