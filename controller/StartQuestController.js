@@ -12,6 +12,8 @@ const {
   QUEST_OWNER_ACCOUNT,
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
+const { getQuestionsWithStatus } = require("./InfoQuestQuestionController");
+const { getPercentage } = require("../utils/getPercentage");
 
 const updateViolationCounter = async (req, res) => {
   try {
@@ -360,9 +362,20 @@ const createStartQuest = async (req, res) => {
       inc: true,
     });
 
+    // getting the quest status
+    const result = await getQuestionsWithStatus([getInfoQuestQuestion], req.body.uuid);
+    // getting the quest percentage
+    const resultArray = result.map(getPercentage);
+    const desiredArray = resultArray.map((item) => ({
+      ...item._doc,
+      selectedPercentage: item.selectedPercentage,
+      contendedPercentage: item.contendedPercentage,
+    }));
+
     res.status(200).json({
       message: "Start Quest Created Successfully",
       startQuestID: question._id,
+      data: desiredArray[0]
     });
   } catch (err) {
     console.error(err);
