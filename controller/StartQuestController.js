@@ -344,7 +344,7 @@ const createStartQuest = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: getInfoQuestQuestion.uuid,
-      txUserAction: "postCompleted",
+      txUserAction: "postCompletedUser",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: "DAO Treasury",
