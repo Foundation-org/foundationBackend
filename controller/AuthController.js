@@ -626,8 +626,8 @@ const sendVerifyEmail = async (req, res) => {
 
 const sendEmail = async (req, res) => {
   try {
-    const { email, subject, message } = req.body;
-    const response = await sendEmailMessage(email, subject, message);
+    const { subject, message } = req.body;
+    const response = await sendEmailMessage(req.body.email, subject, message, req.body.sender);
     if (response) {
       res.status(200).json({ message: `Email Sent Successfully!` });
     }
