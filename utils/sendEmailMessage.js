@@ -35,7 +35,7 @@ module.exports.sendEmailMessage = async (email, subject, message, sender) => {
         Html: {
           Charset: 'UTF-8',
           Data: `${message} <br /> <br />
-                This message is from on.foundation.io. <br /> <br />`
+                This message is from on.foundation <br /> <br />`
           // Here is the link <a href='${url}>Quest</a> <br /> <br />
           // Please feel free to engage with the quest`,
         },
