@@ -193,6 +193,7 @@ const userSchema = mongoose.Schema(
       {
         accountId: { type: String },
         accountName: { type: String },
+        email: { type: String },
         isVerified: { type: Boolean },
         type: { type: String },
         createdAt: { type: Date, default: new Date() }

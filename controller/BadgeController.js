@@ -6,6 +6,9 @@ const crypto = require("crypto");
 const { updateTreasury } = require("../utils/treasuryService");
 const { updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
+const jwt = require("jsonwebtoken");
+const AWS = require("aws-sdk");
+const { JWT_SECRET, FRONTEND_URL } = require("../config/env");
 
 const update = async (req, res) => {
   try {
@@ -133,6 +136,26 @@ const addContactBadge = async (req, res) => {
         console.log("🚀 ~ addContactBadge ~ emailStatus:", emailStatus)
         if (emailStatus.status !== "OK") throw new Error(emailStatus.message);
     }
+
+    if(req.body.legacy) {
+      // Find the Badge
+      const usersWithBadge = await UserModel.find({
+        badges: { $elemMatch: { email: req.body.email } },
+      });
+      // Find the User Email
+      const usersWithEmail = await UserModel.find({
+        email: req.body.email,
+      });
+      if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0) throw new Error("Badge already exist");
+
+
+      // Send an email
+      await sendVerifyEmail({ email: req.body.email, uuid: req.body.uuid })
+      res.status(201).json({
+          message: `Sent a verification email to ${req.body.email}`,
+        });
+      return;
+    }
     // Find the Badge
     const usersWithBadge = await UserModel.find({
       badges: { $elemMatch: { accountId: req.body.sub } },
@@ -191,7 +214,7 @@ const addContactBadge = async (req, res) => {
     res.status(200).json({ message: "Successful" });
   } catch (error) {
     res.status(500).json({
-      message: `An error occurred while addSocialBadge: ${error.message}`,
+      message: `An error occurred while addContactBadge: ${error.message}`,
     });
   }
 };
@@ -324,11 +347,170 @@ const removeBadge = async (req, res) => {
   }
 };
 
+const sendVerifyEmail = async({email, uuid, }) => {
+  try {
+    const verificationTokenFull = jwt.sign({ uuid, email }, JWT_SECRET, {
+      expiresIn: "2m",
+    });
+    const verificationToken = verificationTokenFull.substr(
+      verificationTokenFull.length - 6
+    );
+
+    // const verificationToken = user.generateVerificationToken();
+    console.log("verificationToken", verificationToken);
+
+    // Step 3 - Email the user a unique verification link
+    const url = `${FRONTEND_URL}/VerifyCode?token=${verificationTokenFull}&badge=true`;
+
+    const SES_CONFIG = {
+      region: process.env.AWS_SES_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+    };
+    // Create SES service object
+    console.log("before sesClient", SES_CONFIG);
+
+    const sesClient = new AWS.SES(SES_CONFIG);
+
+    let params = {
+      Source: process.env.AWS_SES_SENDER,
+      Destination: {
+        ToAddresses: [email],
+      },
+      ReplyToAddresses: [],
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `Click <a href = '${url}'>here</a> to confirm your email <br /> <br /> <br />
+                   And confirm this code <b>${verificationToken}</b> from the App`,
+          },
+          Text: {
+            Charset: "UTF-8",
+            Data: "Verify Accountt",
+          },
+        },
+
+        Subject: {
+          Charset: "UTF-8",
+          Data: "Verify Account",
+        },
+      },
+    };
+
+    try {
+      const emailRes = await sesClient.sendEmail(params).promise();
+      return emailRes;
+    } catch (error) {
+      console.log(error);
+    }
+
+    // return res.status(200).send({
+    //   message: `Sent a verification email to ${email}`,
+    // });
+  } catch (error) {
+    console.error(error.message);
+    // res.status(500).json({
+    //   message: `An error occurred while sendVerifyEmail Auth: ${error.message}`,
+    // });
+  }
+}
+
+const addContactBadgeVerify = async(req, res) => {
+  try{
+
+    const token = req.headers.authorization;
+    const decodedToken = jwt.verify(token, JWT_SECRET);
+
+    const User = await UserModel.findOne({ uuid: decodedToken.uuid });
+    if (!User) throw new Error("No such User!");
+
+    // Find the Badge
+    const usersWithBadge = await UserModel.find({
+      badges: { $elemMatch: { email: decodedToken.email } },
+    });
+    // Find the User Email
+    const usersWithEmail = await UserModel.find({
+      email: decodedToken.email,
+    });
+    if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0) throw new Error("Badge already exist");
+    
+     
+      // const userBadges = User.badges;
+      // const updatedUserBadges = [
+      //   ...userBadges,
+      //   {
+      //     email: decodedToken.email,
+      //     isVerified: false,
+      //     type: decodedToken.type,
+      //   },
+      // ];
+      // // Update the user badges
+      // User.badges = updatedUserBadges;
+      // // Update the action
+      // await User.save();
+
+    return res.status(200).json({ message: 'Continue' });
+
+  }
+  catch(error){
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+}
+
+const addContactBadgeAdd = async(req, res) => {
+  try{
+
+    const token = req.headers.authorization;
+    const decodedToken = jwt.verify(token, JWT_SECRET);
+
+    const User = await UserModel.findOne({ uuid: decodedToken.uuid });
+    if (!User) throw new Error("No such User!");
+
+    // Find the Badge
+    const usersWithBadge = await UserModel.find({
+      badges: { $elemMatch: { email: decodedToken.email } },
+    });
+    // Find the User Email
+    const usersWithEmail = await UserModel.find({
+      email: decodedToken.email,
+    });
+    if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0) throw new Error("Badge already exist");
+    
+     
+      const userBadges = User.badges;
+      const updatedUserBadges = [
+        ...userBadges,
+        {
+          email: decodedToken.email,
+          isVerified: false,
+          type: decodedToken.type,
+        },
+      ];
+      // Update the user badges
+      User.badges = updatedUserBadges;
+      // Update the action
+      await User.save();
+      res.status(200).json({ ...User._doc });
+  }
+  catch(error){
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+}
+
 module.exports = {
   update,
   getBadges,
   addBadgeSocial,
   addBadge,
   removeBadge,
-  addContactBadge
+  addContactBadge,
+  addContactBadgeVerify,
+  addContactBadgeAdd
 };

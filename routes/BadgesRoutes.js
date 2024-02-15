@@ -14,6 +14,10 @@ router.post("/addBadge/social", socialProtect, BadgeController.addBadgeSocial);
 
 router.post("/addBadge/contact", BadgeController.addContactBadge);
 
+router.post("/addBadge/contact/verify", BadgeController.addContactBadgeVerify);
+
+router.post("/addBadge/contact/add", BadgeController.addContactBadgeAdd);
+
 router.post("/addBadge", BadgeController.addBadge);
 
 router.post("/removeBadge", BadgeController.removeBadge);
