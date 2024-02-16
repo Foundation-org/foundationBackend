@@ -338,7 +338,7 @@ const signUpGuestMode = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req.body.password, salt);
-    const updatedGuestUserMode = await User.updateOne(
+    await User.updateOne(
       { uuid: req.body.uuid },
       {
         $set: {
@@ -350,34 +350,36 @@ const signUpGuestMode = async (req, res) => {
     );
 
     // Generate a JWT token
-    const token = createToken({ uuid: updatedGuestUserMode.uuid });
+    const token = createToken({ uuid: req.body.uuid });
 
     // Create Ledger
     await createLedger({
-      uuid: updatedGuestUserMode.uuid,
+      uuid: req.body.uuid,
       txUserAction: "accountCreated",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
-      txFrom: updatedGuestUserMode.uuid,
+      txFrom: req.body.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: updatedGuestUserMode.uuid,
+      txData: req.body.uuid,
       // txDescription : "User creates a new account"
     });
     // Create Ledger
     await createLedger({
-      uuid: updatedGuestUserMode.uuid,
+      uuid: req.body.uuid,
       txUserAction: "accountLogin",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
-      txFrom: updatedGuestUserMode.uuid,
+      txFrom: req.body.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: updatedGuestUserMode.uuid,
+      txData: req.body.uuid,
       // txDescription : "user logs in"
     });
 
-    res.status(200).json({ ...updatedGuestUserMode._doc, token });
+    const getUpdatedUser = await User.findOne({ uuid: req.body.uuid });
+
+    res.status(200).json({ ...getUpdatedUser._doc, token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
