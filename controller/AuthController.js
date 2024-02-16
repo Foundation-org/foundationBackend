@@ -337,7 +337,7 @@ const signUpGuestMode = async (req, res) => {
     if (checkGoogleEmail) throw new Error("We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'");
 
     const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(req.body.userPassword, salt);
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
     const updatedGuestUserMode = await User.updateOne(
       { uuid: req.body.uuid },
       {
