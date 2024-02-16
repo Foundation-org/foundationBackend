@@ -335,6 +335,9 @@ const signUpGuestMode = async (req, res) => {
     const guestUserMode = await User.findOne({ uuid: req.body.uuid });
     if (!guestUserMode) throw new Error("Guest Mode not Exist!");
 
+    const alreadyUser = await User.findOne({ email: req.body.email });
+    if (alreadyUser) throw new Error("Email Already Exists");
+
     const checkGoogleEmail = await isGoogleEmail(req.body.email);
     if (checkGoogleEmail) throw new Error("We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'");
 
@@ -365,24 +368,8 @@ const signUpGuestMode = async (req, res) => {
       txTo: "dao",
       txAmount: "0",
       txData: req.body.uuid,
-      // txDescription : "User creates a new account"
     });
-    // Create Ledger
-    // await createLedger({
-    //   uuid: req.body.uuid,
-    //   txUserAction: "accountLogin",
-    //   txID: crypto.randomBytes(11).toString("hex"),
-    //   txAuth: "User",
-    //   txFrom: req.body.uuid,
-    //   txTo: "dao",
-    //   txAmount: "0",
-    //   txData: req.body.uuid,
-    //   // txDescription : "user logs in"
-    // });
 
-    // const getUpdatedUser = await User.findOne({ uuid: req.body.uuid });
-
-    // res.status(200).json({ ...getUpdatedUser._doc, token });
     await sendVerifyEmailGuest(req, res);
   } catch (error) {
     console.error(error.message);
