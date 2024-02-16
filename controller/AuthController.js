@@ -344,7 +344,8 @@ const signUpGuestMode = async (req, res) => {
         $set: {
           email: req.body.email,
           password: hashPassword,
-          role: "user"
+          role: "user",
+          isGuestMode:false
         },
       }
     );
