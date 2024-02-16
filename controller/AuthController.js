@@ -330,6 +330,8 @@ const createGuestMode = async (req, res) => {
 
 const signUpGuestMode = async (req, res) => {
   try {
+
+    console.log(req.body.uuid);
     const guestUserMode = await User.findOne({ uuid: req.body.uuid });
     if (!guestUserMode) throw new Error("Guest Mode not Exist!");
 
@@ -366,21 +368,22 @@ const signUpGuestMode = async (req, res) => {
       // txDescription : "User creates a new account"
     });
     // Create Ledger
-    await createLedger({
-      uuid: req.body.uuid,
-      txUserAction: "accountLogin",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "User",
-      txFrom: req.body.uuid,
-      txTo: "dao",
-      txAmount: "0",
-      txData: req.body.uuid,
-      // txDescription : "user logs in"
-    });
+    // await createLedger({
+    //   uuid: req.body.uuid,
+    //   txUserAction: "accountLogin",
+    //   txID: crypto.randomBytes(11).toString("hex"),
+    //   txAuth: "User",
+    //   txFrom: req.body.uuid,
+    //   txTo: "dao",
+    //   txAmount: "0",
+    //   txData: req.body.uuid,
+    //   // txDescription : "user logs in"
+    // });
 
-    const getUpdatedUser = await User.findOne({ uuid: req.body.uuid });
+    // const getUpdatedUser = await User.findOne({ uuid: req.body.uuid });
 
-    res.status(200).json({ ...getUpdatedUser._doc, token });
+    // res.status(200).json({ ...getUpdatedUser._doc, token });
+    await sendVerifyEmailGuest(req, res);
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -391,18 +394,55 @@ const signUpGuestMode = async (req, res) => {
 
 const signUpSocialGuestMode = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.data.email });
-    if (!user) throw new Error("User not Found");
+    const payload = req.body;
 
-    // Check Google Account
-    const payload = req.body.data;
     // Check if email already exist
-    const alreadyUser = await User.findOne({ email: payload.email });
-    if (!alreadyUser) throw new Error("Please Signup!");
+    const AlreadyUser = await User.findOne({ email: payload.email });
+    if (AlreadyUser) throw new Error("Email Already Exist");
 
-    // Generate a JWT token
-    const token = createToken({ uuid: user.uuid });
+    //if user doesnot exist
+    const user = await User.findOne({ uuid: payload.uuid });
+    if (!user) throw new Error("User doesn't Exist");
 
+    const uuid = payload.uuid;
+    await User.updateOne(
+      { uuid: uuid },
+      {
+        $set: {
+          email: payload.email,
+          role: "user",
+          isGuestMode:false
+        },
+      }
+    );
+
+    // Check Email Category
+    const emailStatus = await eduEmailCheck(req, res, payload.email);
+    let type = "";
+    if (emailStatus.status === "OK") type = "Education";
+
+    // Create a Badge at starting index
+    user.badges.unshift({
+      accountName: payload.provider,
+      isVerified: true,
+      type: type,
+    });
+
+    // Update user verification status to true
+    user.gmailVerified = payload.email_verified;
+    await user.save();
+    // Create Ledger
+    await createLedger({
+      uuid: uuid,
+      txUserAction: "accountCreated",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: uuid,
+      // txDescription : "User creates a new account"
+    });
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
@@ -415,12 +455,47 @@ const signUpSocialGuestMode = async (req, res) => {
       txData: user.uuid,
       // txDescription : "user logs in"
     });
+    // Create Ledger
+    await createLedger({
+      uuid: uuid,
+      txUserAction: "accountBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: user.badges[0]._id,
+      // txDescription : "User adds a verification badge"
+    });
+    await createLedger({
+      uuid: uuid,
+      txUserAction: "accountBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: "DAO Treasury",
+      txTo: uuid,
+      txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      // txData : user.badges[0]._id,
+      // txDescription : "Incentive for adding badges"
+    });
+    // Decrement the Treasury
+    await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
 
-    // res.status(200).json(user);
+    // Increment the UserBalance
+    await updateUserBalance({
+      uuid: user.uuid,
+      amount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      inc: true,
+    });
+
+    // Generate a JWT token
+    const token = createToken({ uuid: user.uuid });
+
+    if (user.badges[0].type !== "Education") {
+      user.requiredAction = true;
+      await user.save();
+    }
     res.status(200).json({ ...user._doc, token });
-    // res.status(201).send("Signed in Successfully");
-    // if(req.query.GoogleAccount){
-    //   signUpUserBySocialLogin(req, res)
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -536,10 +611,83 @@ const signedUuid = async (req, res) => {
     });
   }
 };
+
+const sendVerifyEmailGuest = async (req, res) => {
+  try {
+
+
+    const verificationTokenFull = jwt.sign({ uuid: req.body.uuid }, JWT_SECRET, {
+      expiresIn: "2m",
+    });
+    const verificationToken = verificationTokenFull.substr(
+      verificationTokenFull.length - 6
+    );
+
+
+    // Step 3 - Email the user a unique verification link
+    const url = `${FRONTEND_URL}/VerifyCode/?${verificationTokenFull}`;
+  
+    const SES_CONFIG = {
+      region: process.env.AWS_SES_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+    };
+    // Create SES service object
+    console.log("before sesClient", SES_CONFIG);
+
+    const sesClient = new AWS.SES(SES_CONFIG);
+
+    let params = {
+      Source: process.env.AWS_SES_SENDER,
+      Destination: {
+        ToAddresses: [req.body.email],
+      },
+      ReplyToAddresses: [],
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `Click <a href = '${url}'>here</a> to confirm your email <br /> <br /> <br />
+                   And confirm this code <b>${verificationToken}</b> from the App`,
+          },
+          Text: {
+            Charset: "UTF-8",
+            Data: "Verify Accountt",
+          },
+        },
+
+        Subject: {
+          Charset: "UTF-8",
+          Data: "Verify Account",
+        },
+      },
+    };
+
+    try {
+      const res = await sesClient.sendEmail(params).promise();
+      console.log("Email has been sent!", res);
+    } catch (error) {
+      console.log(error);
+    }
+
+    return res.status(200).send({
+      message: `Sent a verification email to ${req.body.email}`,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while sendVerifyEmail Auth: ${error.message}`,
+    });
+  }
+};
+
 const sendVerifyEmail = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.userEmail });
-    // console.log("user", user);
+
+    console.log("user", user);
     !user && res.status(404).json("User not Found");
 
     // const verificationTokenFull = jwt.sign({ ID: user._id }, JWT_SECRET, {
