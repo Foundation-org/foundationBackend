@@ -102,17 +102,17 @@ const signUpUser = async (req, res) => {
       // txDescription : "User creates a new account"
     });
     // Create Ledger
-    await createLedger({
-      uuid: user.uuid,
-      txUserAction: "accountLogin",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "User",
-      txFrom: user.uuid,
-      txTo: "dao",
-      txAmount: "0",
-      txData: user.uuid,
-      // txDescription : "user logs in"
-    });
+    // await createLedger({
+    //   uuid: user.uuid,
+    //   txUserAction: "accountLogin",
+    //   txID: crypto.randomBytes(11).toString("hex"),
+    //   txAuth: "User",
+    //   txFrom: user.uuid,
+    //   txTo: "dao",
+    //   txAmount: "0",
+    //   txData: user.uuid,
+    //   // txDescription : "user logs in"
+    // });
     
     await sendVerifyEmail(req, res);
     // res.status(200).json({ ...user._doc, token });
@@ -328,50 +328,65 @@ const createGuestMode = async (req, res) => {
   }
 };
 
-const signInGuestMode = async (req, res) => {
+const signUpGuestMode = async (req, res) => {
   try {
-    const alreadyUser = await User.findOne({ email: req.body.userEmail });
-    if (alreadyUser) throw new Error("Email Already Exists");
+    const guestUserMode = await User.findOne({ uuid: req.body.uuid });
+    if (!guestUserMode) throw new Error("Guest Mode not Exist!");
 
-    const checkGoogleEmail = await isGoogleEmail(req.body.userEmail);
+    const checkGoogleEmail = await isGoogleEmail(req.body.email);
     if (checkGoogleEmail) throw new Error("We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'");
 
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req.body.userPassword, salt);
-    const user = await new User({
-      email: req.body.userEmail,
-      password: hashPassword,
-      uuid: req.body.uuid,
-    });
-    const users = await user.save();
-    if (!users) throw new Error("User not Created");
+    const updatedGuestUserMode = await User.updateOne(
+      { uuid: req.body.uuid },
+      {
+        $set: {
+          email: req.body.email,
+          password: hashPassword,
+          role: "user"
+        },
+      }
+    );
 
     // Generate a JWT token
-    const token = createToken({ uuid: user.uuid });
+    const token = createToken({ uuid: updatedGuestUserMode.uuid });
 
     // Create Ledger
     await createLedger({
-      uuid: uuid,
+      uuid: updatedGuestUserMode.uuid,
       txUserAction: "accountCreated",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
-      txFrom: uuid,
+      txFrom: updatedGuestUserMode.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: uuid,
+      txData: updatedGuestUserMode.uuid,
       // txDescription : "User creates a new account"
     });
+    // Create Ledger
+    await createLedger({
+      uuid: updatedGuestUserMode.uuid,
+      txUserAction: "accountLogin",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: updatedGuestUserMode.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: updatedGuestUserMode.uuid,
+      // txDescription : "user logs in"
+    });
 
-    res.status(200).json({ ...user._doc, token });
+    res.status(200).json({ ...updatedGuestUserMode._doc, token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
-      message: `An error occurred while signInGuestMode Auth: ${error.message}`,
+      message: `An error occurred while signUpGuestMode Auth: ${error.message}`,
     });
   }
 };
 
-const signInSocialGuestMode = async (req, res) => {
+const signUpSocialGuestMode = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.data.email });
     if (!user) throw new Error("User not Found");
@@ -406,7 +421,7 @@ const signInSocialGuestMode = async (req, res) => {
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
-      message: `An error occurred while signInSocialGuestMode Auth: ${error.message}`,
+      message: `An error occurred while signUpSocialGuestMode Auth: ${error.message}`,
     });
   }
 };
@@ -961,8 +976,8 @@ module.exports = {
   signUpUserBySocialLogin,
   signInUser,
   createGuestMode,
-  signInGuestMode,
-  signInSocialGuestMode,
+  signUpGuestMode,
+  signUpSocialGuestMode,
   signInUserBySocialLogin,
   userInfo,
   setUserWallet,

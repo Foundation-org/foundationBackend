@@ -21,9 +21,9 @@ router.post("/send/email", AuthController.sendEmail);
 
 router.post("/create/guestMode", AuthController.createGuestMode);
 
-router.post("/signIn/guestMode", AuthController.signInGuestMode);
+router.post("/signUp/guestMode", AuthController.signUpGuestMode);
 
-router.post("/signInSocial/guestMode", AuthController.signInSocialGuestMode);
+router.post("/signUpSocial/guestMode", AuthController.signUpSocialGuestMode);
 
 router.post("/userInfo", AuthController.userInfo);
 
