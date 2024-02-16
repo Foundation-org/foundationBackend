@@ -150,7 +150,7 @@ const addContactBadge = async (req, res) => {
 
 
       // Send an email
-      await sendVerifyEmail({ email: req.body.email, uuid: req.body.uuid })
+      await sendVerifyEmail({ email: req.body.email, uuid: req.body.uuid, type: req.body.type })
       res.status(201).json({
           message: `Sent a verification email to ${req.body.email}`,
         });
@@ -347,10 +347,10 @@ const removeBadge = async (req, res) => {
   }
 };
 
-const sendVerifyEmail = async({email, uuid, }) => {
+const sendVerifyEmail = async({email, uuid, type }) => {
   try {
-    const verificationTokenFull = jwt.sign({ uuid, email }, JWT_SECRET, {
-      expiresIn: "2m",
+    const verificationTokenFull = jwt.sign({ uuid, email, type }, JWT_SECRET, {
+      expiresIn: "10m",
     });
     const verificationToken = verificationTokenFull.substr(
       verificationTokenFull.length - 6
@@ -360,7 +360,8 @@ const sendVerifyEmail = async({email, uuid, }) => {
     console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
-    const url = `${FRONTEND_URL}/VerifyCode?token=${verificationTokenFull}&badge=true`;
+    // const url = `${FRONTEND_URL}/VerifyCode?token=${verificationTokenFull}&badge=true`;
+    const url = `${FRONTEND_URL}/badgeverifycode?token=${verificationTokenFull}&badge=true`;
 
     const SES_CONFIG = {
       region: process.env.AWS_SES_REGION,
@@ -487,7 +488,7 @@ const addContactBadgeAdd = async(req, res) => {
         ...userBadges,
         {
           email: decodedToken.email,
-          isVerified: false,
+          isVerified: true,
           type: decodedToken.type,
         },
       ];
@@ -499,7 +500,8 @@ const addContactBadgeAdd = async(req, res) => {
   }
   catch(error){
     return res.status(500).json({
-      message: error.message,
+      // message: error.message,
+      message: `An error occurred while addContactBadge: ${error.message}`,
     });
   }
 }
