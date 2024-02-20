@@ -52,7 +52,7 @@ const userSchema = mongoose.Schema(
     States: {
       expandedView: {
         type: Boolean,
-        default: false, 
+        default: true, 
       },
       searchData: {
         type: String,
@@ -87,7 +87,7 @@ const userSchema = mongoose.Schema(
     bookmarkStates: {
       expandedView: {
         type: Boolean,
-        default: false, 
+        default: true, 
       },
       searchData: {
         type: String,
