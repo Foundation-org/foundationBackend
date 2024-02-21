@@ -161,9 +161,10 @@ const createStartQuest = async (req, res) => {
     const contendedCounter = {};
     if (
       getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+      getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
       getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
     ) {
-      if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
+      if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
         req.body.data?.selected?.forEach((item) => {
           selectedCounter[`result.selected.${item.question}`] = 1;
         });
@@ -602,7 +603,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // decrement the selected and contended count
         let selectedCounter = {};
         let contendedCounter = {};
-        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
+        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
           initialStartQuestData[
             initialStartQuestData.length - 1
           ]?.selected?.forEach((item) => {
@@ -665,7 +666,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // increment the selected and contended count
         selectedCounter = {};
         contendedCounter = {};
-        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise") {
+        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
           startQuestQuestion.data[
             startQuestQuestion.data.length - 1
           ]?.selected?.forEach((item) => {

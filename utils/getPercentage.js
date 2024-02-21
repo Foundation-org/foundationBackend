@@ -58,7 +58,7 @@ module.exports.getPercentage = (document) => {
       return percentageObject;
     });
     let contendedPercentage;
-    if (document.whichTypeQuestion === "multiple choise") {
+    if (document.whichTypeQuestion === "multiple choise" || document.whichTypeQuestion === "open choice") {
       contendedPercentage = document?.result?.map((item) => {
         if (!item?.contended) return;
         const contendedKeys = Object.keys(item?.contended);
