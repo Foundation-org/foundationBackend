@@ -8,12 +8,14 @@ const SearchRoute = require("../routes/SearchRoute");
 const QuestTopicRoute=require("../routes/QuestTopicRoute")
 const StartQuestRoute = require("../routes/StartQuestRoute");
 const BadgesRoutes = require("../routes/BadgesRoutes");
+const UserQuestSettingRoute = require("../routes/UserQuestSettingRoute");
 const PassportRoutes = require("../routes/PassportRoutes");
 
 module.exports = function (app) {
     app.use("/", LedgerRoute)
     app.use("/", AiValidationRoutes)
     app.use("/", BadgesRoutes)
+    app.use("/", UserQuestSettingRoute)
     app.use("/user", AuthRoute)
     app.use("/bookmarkQuest", BookmarkQuestRoute)
     app.use("/infoquestions", InfoQuestQuestionRoute)
