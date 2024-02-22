@@ -76,7 +76,7 @@ const userSchema = mongoose.Schema(
       },
       columns: {
         All: columnsSchema,
-        Preferences: columnsSchema,
+        // Preferences: columnsSchema,
         Block: columnsSchema,
       },
       lightMode: {
@@ -111,7 +111,7 @@ const userSchema = mongoose.Schema(
       },
       columns: {
         All: columnsSchema,
-        Preferences: columnsSchema,
+        // Preferences: columnsSchema,
         Block: columnsSchema,
       },
       lightMode: {
