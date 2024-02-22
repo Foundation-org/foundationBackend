@@ -2,6 +2,7 @@ const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const BookmarkQuests = require("../models/BookmarkQuests");
 const { getQuestionsWithStatus, getQuestionsWithUserSettings } = require("./InfoQuestQuestionController");
 const { getPercentage } = require("../utils/getPercentage");
+const UserQuestSetting = require("../models/UserQuestSetting");
 
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
@@ -83,7 +84,52 @@ const searchBookmarks = async (req, res) => {
   }
 };
 
+const searchHiddenQuest = async (req, res) => {
+  const searchTerm = req.query.term;
+  const uuid = req.cookies.uuid;
+  try {
+    const results = await UserQuestSetting.find({
+      Question: { $regex: searchTerm, $options: "i" },
+      uuid: uuid 
+    });
+    
+    
+    const reversedResults = results.reverse();
+    const mapPromises = reversedResults.map(async function (record) {
+      return await InfoQuestQuestions.findOne({
+        _id: record.questForeignKey,
+      });
+    });
+
+    const allQuestions = await Promise.all(mapPromises);
+
+    const resultArray = allQuestions.map(getPercentage);
+    const desiredArray = resultArray.map((item) => ({
+      ...item._doc,
+      selectedPercentage: item.selectedPercentage,
+      contendedPercentage: item.contendedPercentage,
+    }));
+
+    // Call getQuestionsWithStatus and await its result
+    const questionsWithStatus = await getQuestionsWithStatus(
+      desiredArray,
+      uuid
+    );
+    // getQuestionsWithUserSettings
+    const result = await getQuestionsWithUserSettings(questionsWithStatus, uuid);
+
+    res.status(200).json({
+      data: result,
+      hasNextPage: false,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
 module.exports = {
   easySearch,
   searchBookmarks,
+  searchHiddenQuest
 };
