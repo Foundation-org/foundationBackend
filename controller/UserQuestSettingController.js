@@ -112,6 +112,53 @@ const update = async (req, res) => {
   }
 };
 
+const getAllHiddenQuestions = async (req, res) => {
+  try {
+    const { uuid, _page, _limit } = req.body;
+    const page = parseInt(_page);
+    const pageSize = parseInt(_limit);
+
+    // Calculate the number of documents to skip to get to the desired page
+    const skip = (page - 1) * pageSize;
+    let filterObj = { uuid: uuid };
+
+    if (req.body.type) {
+      filterObj.whichTypeQuestion = req.body.type;
+    }
+    if (req.body.filter === true) {
+      filterObj.createdBy = req.cookies.uuid;
+    }
+
+    const Questions = await BookmarkQuests.find(filterObj)
+      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt")
+      .skip(skip)
+      .limit(pageSize);
+
+    const mapPromises = Questions.map(async function (record) {
+      return InfoQuestQuestions.findOne({
+        _id: record.questForeignKey,
+      });
+    });
+
+    const response = await Promise.all(mapPromises);
+    res.status(200).json(response);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+const getAllHiddenQuests = async (req, res) => {
+  try {
+    const Questions = await BookmarkQuests.find({
+      uuid: req.cookies.uuid,
+    });
+    // console.log(Questions);
+    res.status(200).json(Questions);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
 // const get = async (req, res) => {
 //   try {
 //     const getTreasury = await Treasury.findOne();

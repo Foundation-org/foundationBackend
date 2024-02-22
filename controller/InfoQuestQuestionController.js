@@ -176,6 +176,21 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       });
 
       allQuestions = await Promise.all(mapPromises);
+    } else if(Page === "Hidden"){
+      console.log("running");
+      filterObj.uuid = uuid;
+      const Questions = await UserQuestSetting.find(filterObj).sort(
+        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+  
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        }).populate("getUserBadge", "badges");
+      });
+  
+      allQuestions = await Promise.all(mapPromises);
+      totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
       allQuestions = await InfoQuestQuestions.find(filterObj)
         .sort(
@@ -270,6 +285,21 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       });
 
       allQuestions = await Promise.all(mapPromises);
+    } else if(Page === "Hidden"){
+      console.log("running");
+      filterObj.uuid = uuid;
+      const Questions = await UserQuestSetting.find(filterObj).sort(
+        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+  
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        }).populate("getUserBadge", "badges");
+      });
+  
+      allQuestions = await Promise.all(mapPromises);
+      totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
       allQuestions = await InfoQuestQuestions.find(filterObj)
         .sort(
@@ -392,7 +422,23 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
 
     allQuestions = await Promise.all(mapPromises);
     totalQuestionsCount = await BookmarkQuests.countDocuments(filterObj);
-  } else {
+  } else if(Page === "Hidden"){
+    console.log("running");
+    filterObj.uuid = uuid;
+    const Questions = await UserQuestSetting.find(filterObj).sort(
+      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    );
+
+    const mapPromises = Questions.map(async function (record) {
+      return await InfoQuestQuestions.findOne({
+        _id: record.questForeignKey,
+      }).populate("getUserBadge", "badges");
+    });
+
+    allQuestions = await Promise.all(mapPromises);
+    totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
+  }
+  else {
     allQuestions = await InfoQuestQuestions.find(filterObj)
       .sort(
         sort === "Newest First"
@@ -480,6 +526,21 @@ const getAllQuestsWithResult = async (req, res) => {
 
     allQuestions = await Promise.all(mapPromises);
     totalQuestionsCount = await BookmarkQuests.countDocuments(filterObj);
+  } else if(Page === "Hidden"){
+    console.log("running");
+    filterObj.uuid = uuid;
+    const Questions = await UserQuestSetting.find(filterObj).sort(
+      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    );
+
+    const mapPromises = Questions.map(async function (record) {
+      return await InfoQuestQuestions.findOne({
+        _id: record.questForeignKey,
+      }).populate("getUserBadge", "badges");
+    });
+
+    allQuestions = await Promise.all(mapPromises);
+    totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
   } else {
     allQuestions = await InfoQuestQuestions.find(filterObj)
       .sort(
@@ -617,6 +678,21 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       });
 
       allQuestions = await Promise.all(mapPromises);
+    } else if(Page === "Hidden"){
+      console.log("running");
+      filterObj.uuid = uuid;
+      const Questions = await UserQuestSetting.find(filterObj).sort(
+        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+  
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        }).populate("getUserBadge", "badges");
+      });
+  
+      allQuestions = await Promise.all(mapPromises);
+      totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
       allQuestions = await InfoQuestQuestions.find(filterObj)
         .sort(
@@ -714,6 +790,21 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       });
 
       allQuestions = await Promise.all(mapPromises);
+    } else if(Page === "Hidden"){
+      console.log("running");
+      filterObj.uuid = uuid;
+      const Questions = await UserQuestSetting.find(filterObj).sort(
+        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+  
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        }).populate("getUserBadge", "badges");
+      });
+  
+      allQuestions = await Promise.all(mapPromises);
+      totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
       allQuestions = await InfoQuestQuestions.find(filterObj)
         .sort(
