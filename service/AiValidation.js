@@ -117,7 +117,7 @@ module.exports.createQuestTopic = async(topic) => {
   try {
     const checkQuestTopic = await QuestTopics.findOne({ name: topic })
     if(checkQuestTopic) return
-    const questTopic = await new QuestTopics({ name: topic })
+    const questTopic = await new QuestTopics({ name: topic.charAt(0).toUpperCase() + topic.slice(1).toLowerCase() })
     await questTopic.save()
   } catch (error) {
     console.log(error);
