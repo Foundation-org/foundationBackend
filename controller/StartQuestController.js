@@ -12,7 +12,7 @@ const {
   QUEST_OWNER_ACCOUNT,
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
-const { getQuestionsWithStatus } = require("./InfoQuestQuestionController");
+const { getQuestionsWithStatus, getQuestionsWithUserSettings } = require("./InfoQuestQuestionController");
 const { getPercentage } = require("../utils/getPercentage");
 
 const updateViolationCounter = async (req, res) => {
@@ -368,8 +368,10 @@ const createStartQuest = async (req, res) => {
     }).populate("getUserBadge", "badges");
     // getting the quest status
     const result = await getQuestionsWithStatus(infoQuest, req.body.uuid);
+    // getQuestionsWithUserSettings
+    const result1 = await getQuestionsWithUserSettings(result, uuid);
     // getting the quest percentage
-    const resultArray = result.map(getPercentage);
+    const resultArray = result1.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
@@ -759,8 +761,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
     }).populate("getUserBadge", "badges");
     // getting the quest status
     const result = await getQuestionsWithStatus(infoQuest, req.body.uuid);
+    // getQuestionsWithUserSettings
+    const result1 = await getQuestionsWithUserSettings(result, uuid);
     // getting the quest percentage
-    const resultArray = result.map(getPercentage);
+    const resultArray = result1.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage,

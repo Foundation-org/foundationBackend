@@ -1,6 +1,6 @@
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const BookmarkQuests = require("../models/BookmarkQuests");
-const { getQuestionsWithStatus } = require("./InfoQuestQuestionController");
+const { getQuestionsWithStatus, getQuestionsWithUserSettings } = require("./InfoQuestQuestionController");
 const { getPercentage } = require("../utils/getPercentage");
 
 const easySearch = async (req, res) => {
@@ -26,11 +26,11 @@ const easySearch = async (req, res) => {
     // Query the database with skip and limit options to get questions for the requested page
     const result = await getQuestionsWithStatus(desiredArray, uuid);
 
-
-    // const questionsWithStatus = await getQuestionsWithStatus(results, uuid);
+    // getQuestionsWithUserSettings
+    const result1 = await getQuestionsWithUserSettings(result, uuid);
 
     res.status(200).json({
-      data: result,
+      data: result1,
       hasNextPage: false,
     });
   } catch (err) {
@@ -70,9 +70,11 @@ const searchBookmarks = async (req, res) => {
       desiredArray,
       uuid
     );
+    // getQuestionsWithUserSettings
+    const result = await getQuestionsWithUserSettings(questionsWithStatus, uuid);
 
     res.status(200).json({
-      data: questionsWithStatus,
+      data: result,
       hasNextPage: false,
     });
   } catch (err) {

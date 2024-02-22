@@ -4,14 +4,15 @@ const shortLink = require("shortlink");
 
 const UserQuestSetting = mongoose.Schema(
   {
-    userId: {
+    uuid: {
       // type: Schema.Types.ObjectId,
       // ref: "user",
       type: String
     },
-    questId: {
-      type: Schema.Types.ObjectId,
-      ref: "InfoQuestQuestions",
+    questForeignKey: {
+      // type: Schema.Types.ObjectId,
+      // ref: "InfoQuestQuestions",
+      type: String,
     },
     link: {
       type: String,
@@ -21,6 +22,10 @@ const UserQuestSetting = mongoose.Schema(
     hidden: {
         type: Boolean,
         default: false
+    },
+    hiddenMessage: {
+      type: String,
+      default: ""
     }
   },
   { timestamps: true }

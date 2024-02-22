@@ -51,8 +51,8 @@ const create = async(req, res) => {
     const payload = req.body;
 
     const userQuestSettingExist = await UserQuestSetting.findOne({
-      userId: payload.userId,
-      questId: payload.questId,
+      uuid: payload.uuid,
+      questForeignKey: payload.questForeignKey,
     });
     // To check the record exist
     if (userQuestSettingExist) throw new Error("userQuestSetting already exist");
@@ -78,8 +78,8 @@ const update = async (req, res) => {
     const payload = req.body;
 
     const userQuestSettingExist = await UserQuestSetting.findOne({
-      userId: payload.userId,
-      questId: payload.questId,
+      uuid: payload.uuid,
+      questForeignKey: payload.questForeignKey,
     });
     // To check the record exist
     if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
@@ -87,8 +87,8 @@ const update = async (req, res) => {
     // If the record exists, update it
     const updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
       {
-        userId: payload.userId,
-        questId: payload.questId,
+        uuid: payload.uuid,
+        questForeignKey: payload.questForeignKey,
       },
       {
         // Update fields and values here

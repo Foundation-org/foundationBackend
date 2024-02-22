@@ -9,6 +9,7 @@ const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const BookmarkQuests = require("../models/BookmarkQuests");
 const { getPercentage } = require("../utils/getPercentage");
 const shortLink = require("shortlink");
+const UserQuestSetting = require("../models/UserQuestSetting");
 
 const createInfoQuestQuest = async (req, res) => {
   try {
@@ -425,8 +426,11 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
   // Query the database with skip and limit options to get questions for the requested page
   const result = await getQuestionsWithStatus(desiredArray, uuid);
 
+  // getQuestionsWithUserSettings
+  const result1 = await getQuestionsWithUserSettings(result, uuid);
+
   res.status(200).json({
-    data: result,
+    data: result1,
     hasNextPage: skip + pageSize < totalQuestionsCount,
   });
 };
@@ -497,9 +501,11 @@ const getAllQuestsWithResult = async (req, res) => {
   // Query the database with skip and limit options to get questions for the requested page
 
   const result = await getQuestionsWithStatus(resultArray, uuid);
+  // getQuestionsWithUserSettings
+  const result1 = await getQuestionsWithUserSettings(result, uuid);
 
   res.status(200).json({
-    data: result,
+    data: result1,
     hasNextPage: skip + pageSize < totalQuestionsCount,
   });
 };
@@ -513,8 +519,10 @@ const getQuestById = async (req, res) => {
     if (!infoQuest) throw new Error("No Quest Exist!");
 
     const result = await getQuestionsWithStatus(infoQuest, uuid);
+    // getQuestionsWithUserSettings
+    const result1 = await getQuestionsWithUserSettings(result, uuid);
 
-    const resultArray = result.map(getPercentage);
+    const resultArray = result1.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
@@ -548,7 +556,10 @@ const getQuestByUniqueShareLink = async (req, res) => {
 
     const result = await getQuestionsWithStatus(infoQuest, uuid);
 
-    const resultArray = result.map(getPercentage);
+    // getQuestionsWithUserSettings
+    const result1 = await getQuestionsWithUserSettings(result, uuid);
+
+    const resultArray = result1.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
@@ -802,6 +813,45 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
   }
 }
 
+
+async function getQuestionsWithUserSettings(allQuestions, uuid) {
+  try {
+    if (uuid === "" || uuid === undefined) {
+      return allQuestions;
+    } else {
+      const userQuestSettings = await UserQuestSetting.find({
+        uuid: uuid,
+      });
+      console.log("🚀 ~ getQuestionsWithUserSettings ~ userQuestSettings:", userQuestSettings)
+
+      let Result = [];
+      await allQuestions.map(async function (rcrd) {
+        await userQuestSettings.map(function (rec) {
+          if (rec.questForeignKey === rcrd?._id?.toString()) {
+            rcrd.userQuestSetting = rec;
+            // if (
+            //   rcrd.usersChangeTheirAns?.trim() !== "" ||
+            //   rcrd.whichTypeQuestion === "ranked choise"
+            // ) {
+            //   rcrd.startStatus = "change answer";
+            //   rcrd.startQuestData = rec;
+            // } else {
+            //   rcrd.startStatus = "completed";
+            //   rcrd.startQuestData = rec;
+            // }
+          }
+        });
+
+        Result.push(rcrd);
+      });
+
+      return Result;
+    }
+  } catch (err) {
+    throw err;
+  }
+}
+
 module.exports = {
   createInfoQuestQuest,
   constraintForUniqueQuestion,
@@ -815,4 +865,5 @@ module.exports = {
   getAllQuestsWithChangeAnsStatus,
   getQuestionsWithStatus,
   getQuestByUniqueShareLink,
+  getQuestionsWithUserSettings
 };
