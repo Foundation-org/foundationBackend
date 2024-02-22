@@ -369,7 +369,7 @@ const createStartQuest = async (req, res) => {
     // getting the quest status
     const result = await getQuestionsWithStatus(infoQuest, req.body.uuid);
     // getQuestionsWithUserSettings
-    const result1 = await getQuestionsWithUserSettings(result, uuid);
+    const result1 = await getQuestionsWithUserSettings(result, req.body.uuid);
     // getting the quest percentage
     const resultArray = result1.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
@@ -762,7 +762,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
     // getting the quest status
     const result = await getQuestionsWithStatus(infoQuest, req.body.uuid);
     // getQuestionsWithUserSettings
-    const result1 = await getQuestionsWithUserSettings(result, uuid);
+    const result1 = await getQuestionsWithUserSettings(result, req.body.uuid);
     // getting the quest percentage
     const resultArray = result1.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
