@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const shortLink = require("shortlink");
+// const shortLink = require("shortlink");
 
 const UserQuestSetting = mongoose.Schema(
   {
@@ -17,7 +17,7 @@ const UserQuestSetting = mongoose.Schema(
     link: {
       type: String,
       unique: true,
-      default: shortLink.generate(8)
+      // default: shortLink.generate(8)
     },
     hidden: {
         type: Boolean,

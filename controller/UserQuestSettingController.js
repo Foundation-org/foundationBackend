@@ -57,8 +57,10 @@ const create = async(req, res) => {
     // To check the record exist
     if (userQuestSettingExist) throw new Error("userQuestSetting already exist");
 
+    // Create a short link
     const userQuestSetting = new UserQuestSetting({
-      ...payload
+      ...payload,
+      link: shortLink.generate(8)
     });
     const savedUserQuestSetting = await userQuestSetting.save();
     return res
