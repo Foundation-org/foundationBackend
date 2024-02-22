@@ -176,7 +176,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       });
 
       allQuestions = await Promise.all(mapPromises);
-    } else if(Page === "Hidden"){
+    } else if(req.body.Page === "Hidden"){
       console.log("running");
       filterObj.uuid = uuid;
       const Questions = await UserQuestSetting.find(filterObj).sort(
@@ -242,6 +242,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       });
     }
   } catch (err) {
+    console.log(err);
     res.status(500).send(err);
   }
 };
@@ -285,7 +286,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       });
 
       allQuestions = await Promise.all(mapPromises);
-    } else if(Page === "Hidden"){
+    } else if(req.body.Page === "Hidden"){
       console.log("running");
       filterObj.uuid = uuid;
       const Questions = await UserQuestSetting.find(filterObj).sort(
@@ -678,7 +679,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       });
 
       allQuestions = await Promise.all(mapPromises);
-    } else if(Page === "Hidden"){
+    } else if(req.body.Page === "Hidden"){
       console.log("running");
       filterObj.uuid = uuid;
       const Questions = await UserQuestSetting.find(filterObj).sort(
@@ -790,7 +791,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       });
 
       allQuestions = await Promise.all(mapPromises);
-    } else if(Page === "Hidden"){
+    } else if(req.body.Page === "Hidden"){
       console.log("running");
       filterObj.uuid = uuid;
       const Questions = await UserQuestSetting.find(filterObj).sort(
