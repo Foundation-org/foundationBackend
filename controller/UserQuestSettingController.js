@@ -1,5 +1,9 @@
 const UserQuestSetting = require("../models/UserQuestSetting");
 const shortLink = require("shortlink");
+const { createLedger } = require("../utils/createLedger");
+const crypto = require("crypto");
+const UserModel = require("../models/UserModel");
+
 
 const createOrUpdate = async (req, res) => {
   try {
@@ -63,6 +67,14 @@ const create = async(req, res) => {
       link: shortLink.generate(8)
     });
     const savedUserQuestSetting = await userQuestSetting.save();
+    // if hidden
+    if (payload.hidden) {
+      await hiddenPostCount(payload.uuid, true);
+      await ledgerEntryAdded(payload.uuid, payload.questOwnerUuid);
+    } else {
+      await hiddenPostCount(payload.uuid, false);
+      await ledgerEntryRemoved(payload.uuid, payload.questOwnerUuid);
+    }
     return res
       .status(201)
       .json({ message: "UserQuestSetting Created Successfully!", data: savedUserQuestSetting });
@@ -100,6 +112,14 @@ const update = async (req, res) => {
         new: true, // Return the modified document rather than the original
       }
     );
+    // if hidden
+    if (payload.hidden) {
+      await hiddenPostCount(payload.uuid, true);
+      await ledgerEntryAdded(payload.uuid, payload.questOwnerUuid);
+    } else {
+      await hiddenPostCount(payload.uuid, false);
+      await ledgerEntryRemoved(payload.uuid, payload.questOwnerUuid);
+    }
     return res
       .status(201)
       .json({ message: "UserQuestSetting Updated Successfully!", data: updatedUserQuestSetting });
@@ -158,6 +178,80 @@ const getAllHiddenQuests = async (req, res) => {
     res.status(500).send(err);
   }
 };
+
+const hiddenPostCount = async(uuid, hidden) => {
+  try {
+    // increment
+    await UserModel.updateOne(
+      { uuid },
+      { $inc: { yourHiddenPostCounter: hidden ? 1 : -1 } }
+    );
+    
+  } catch(error) {
+    console.error(error);
+  }
+}
+
+const ledgerEntryAdded = async(uuid, questOwnerUuid) => {
+  try {
+    // User
+    await createLedger({
+     uuid: uuid,
+     txUserAction: "postHiddenAdded",
+     txID: crypto.randomBytes(11).toString("hex"),
+     txAuth: "User",
+     txFrom: uuid,
+     txTo: "dao",
+     txAmount: "0",
+     txData: uuid,
+     // txDescription : "User creates a new account"
+   });
+   await createLedger({
+    uuid: questOwnerUuid,
+    txUserAction: "postHiddenAdded",
+    txID: crypto.randomBytes(11).toString("hex"),
+    txAuth: "User",
+    txFrom: questOwnerUuid,
+    txTo: "dao",
+    txAmount: "0",
+    txData: questOwnerUuid,
+    // txDescription : "User creates a new account"
+  });
+  } catch(error) {
+    console.error(error);
+  }
+}
+
+const ledgerEntryRemoved = async(uuid, questOwnerUuid) => {
+  try {
+    // User
+    await createLedger({
+     uuid: uuid,
+     txUserAction: "postHiddenRemoved",
+     txID: crypto.randomBytes(11).toString("hex"),
+     txAuth: "User",
+     txFrom: uuid,
+     txTo: "dao",
+     txAmount: "0",
+     txData: uuid,
+     // txDescription : "User creates a new account"
+   });
+   await createLedger({
+    uuid: questOwnerUuid,
+    txUserAction: "postHiddenRemoved",
+    txID: crypto.randomBytes(11).toString("hex"),
+    txAuth: "User",
+    txFrom: questOwnerUuid,
+    txTo: "dao",
+    txAmount: "0",
+    txData: questOwnerUuid,
+    // txDescription : "User creates a new account"
+  });
+  } catch(error) {
+    console.error(error);
+  }
+}
+
 
 // const get = async (req, res) => {
 //   try {
