@@ -492,7 +492,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       (userSetting) => userSetting.questForeignKey
     );
   
-    console.log(filterObj);
     allQuestions = await InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj
