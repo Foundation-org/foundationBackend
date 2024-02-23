@@ -3,6 +3,7 @@ const shortLink = require("shortlink");
 const { createLedger } = require("../utils/createLedger");
 const crypto = require("crypto");
 const UserModel = require("../models/UserModel");
+const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 
 
 const createOrUpdate = async (req, res) => {
@@ -67,13 +68,17 @@ const create = async(req, res) => {
       link: shortLink.generate(8)
     });
     const savedUserQuestSetting = await userQuestSetting.save();
+    // Get quest owner uuid
+    const infoQuestQuestion = await InfoQuestQuestions.findOne({
+      _id: payload.questForeignKey,
+    });
     // if hidden
     if (payload.hidden) {
       await hiddenPostCount(payload.uuid, true);
-      await ledgerEntryAdded(payload.uuid, payload.questOwnerUuid);
+      await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
     } else {
       await hiddenPostCount(payload.uuid, false);
-      await ledgerEntryRemoved(payload.uuid, payload.questOwnerUuid);
+      await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
     return res
       .status(201)
@@ -112,13 +117,17 @@ const update = async (req, res) => {
         new: true, // Return the modified document rather than the original
       }
     );
+    // Get quest owner uuid
+    const infoQuestQuestion = await InfoQuestQuestions.findOne({
+      _id: payload.questForeignKey,
+    });
     // if hidden
     if (payload.hidden) {
       await hiddenPostCount(payload.uuid, true);
-      await ledgerEntryAdded(payload.uuid, payload.questOwnerUuid);
+      await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
     } else {
       await hiddenPostCount(payload.uuid, false);
-      await ledgerEntryRemoved(payload.uuid, payload.questOwnerUuid);
+      await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
     return res
       .status(201)
