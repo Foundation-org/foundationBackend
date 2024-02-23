@@ -74,10 +74,10 @@ const create = async(req, res) => {
     });
     // if hidden
     if (payload.hidden) {
-      await hiddenPostCount(payload.uuid, true);
+      await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
     } else {
-      await hiddenPostCount(payload.uuid, false);
+      await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
     return res
@@ -123,10 +123,10 @@ const update = async (req, res) => {
     });
     // if hidden
     if (payload.hidden) {
-      await hiddenPostCount(payload.uuid, true);
+      await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
     } else {
-      await hiddenPostCount(payload.uuid, false);
+      await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
     return res
@@ -217,7 +217,7 @@ const ledgerEntryAdded = async(uuid, questOwnerUuid) => {
    });
    await createLedger({
     uuid: questOwnerUuid,
-    txUserAction: "postHiddenAdded",
+    txUserAction: "postHiddenAddedUser",
     txID: crypto.randomBytes(11).toString("hex"),
     txAuth: "User",
     txFrom: questOwnerUuid,
@@ -247,7 +247,7 @@ const ledgerEntryRemoved = async(uuid, questOwnerUuid) => {
    });
    await createLedger({
     uuid: questOwnerUuid,
-    txUserAction: "postHiddenRemoved",
+    txUserAction: "postHiddenRemovedUser",
     txID: crypto.randomBytes(11).toString("hex"),
     txAuth: "User",
     txFrom: questOwnerUuid,
