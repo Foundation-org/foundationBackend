@@ -206,6 +206,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
 
       allQuestions = await InfoQuestQuestions.find({
         _id: { $nin: hiddenUserSettingIds },
+        ...filterObj
       })
         .sort(
           req.body.sort === "Newest First"
@@ -330,6 +331,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
 
       allQuestions = await InfoQuestQuestions.find({
         _id: { $nin: hiddenUserSettingIds },
+        ...filterObj
       })
         .sort(
           req.body.sort === "Newest First"
@@ -479,9 +481,11 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const hiddenUserSettingIds = hiddenUserSettings.map(
       (userSetting) => userSetting.questForeignKey
     );
-
+  
+    console.log(filterObj);
     allQuestions = await InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
+      ...filterObj
     })
       .sort(
         sort === "Newest First"
@@ -607,6 +611,7 @@ const getAllQuestsWithResult = async (req, res) => {
 
     allQuestions = await InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
+      ...filterObj
     })
       .sort(
         sort === "Newest First"
@@ -773,6 +778,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
 
       allQuestions = await InfoQuestQuestions.find({
         _id: { $nin: hiddenUserSettingIds },
+        ...filterObj
       })
         .sort(
           req.body.sort === "Newest First"
@@ -899,6 +905,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
 
       allQuestions = await InfoQuestQuestions.find({
         _id: { $nin: hiddenUserSettingIds },
+        ...filterObj
       })
         .sort(
           req.body.sort === "Newest First"
