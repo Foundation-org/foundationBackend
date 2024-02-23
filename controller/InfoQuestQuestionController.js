@@ -196,7 +196,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       // First, find UserQuestSettings with hidden: false
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
-        uuid,
+        uuid:req.body.uuid,
       });
 
       // Extract userSettingIds from hiddenUserSettings
@@ -320,7 +320,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       // First, find UserQuestSettings with hidden: false
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
-        uuid,
+        uuid:req.body.uuid,
       });
 
       // Extract userSettingIds from hiddenUserSettings
@@ -402,6 +402,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     }
   } catch (err) {
     res.status(500).send(err);
+    console.log(err);
   }
 };
 
