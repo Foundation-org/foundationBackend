@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const UserQuestSetting = mongoose.Schema(
   {
+    Question: { type: String},
     uuid: {
       // type: Schema.Types.ObjectId,
       // ref: "user",

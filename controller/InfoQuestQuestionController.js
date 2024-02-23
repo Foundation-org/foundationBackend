@@ -179,6 +179,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
     } else if(req.body.Page === "Hidden"){
       console.log("running");
       filterObj.uuid = uuid;
+      filterObj.hidden = true;
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -192,7 +193,15 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       allQuestions = await Promise.all(mapPromises);
       totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
-      allQuestions = await InfoQuestQuestions.find(filterObj)
+      // First, find UserQuestSettings with hidden: false
+    const hiddenUserSettings = await UserQuestSetting.find({ hidden: true });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(userSetting => userSetting.questForeignKey);
+
+      allQuestions = await InfoQuestQuestions.find({
+        _id: { $nin: hiddenUserSettingIds }
+      })
         .sort(
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
@@ -289,6 +298,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     } else if(req.body.Page === "Hidden"){
       console.log("running");
       filterObj.uuid = uuid;
+      filterObj.hidden = true;
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -302,7 +312,15 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       allQuestions = await Promise.all(mapPromises);
       totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
-      allQuestions = await InfoQuestQuestions.find(filterObj)
+      // First, find UserQuestSettings with hidden: false
+    const hiddenUserSettings = await UserQuestSetting.find({ hidden: true });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(userSetting => userSetting.questForeignKey);
+
+      allQuestions = await InfoQuestQuestions.find({
+        _id: { $nin: hiddenUserSettingIds }
+      })
         .sort(
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
@@ -426,6 +444,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
   } else if(Page === "Hidden"){
     console.log("running");
     filterObj.uuid = uuid;
+    filterObj.hidden = true;
     const Questions = await UserQuestSetting.find(filterObj).sort(
       sort === "Newest First" ? { createdAt: -1 } : "createdAt"
     );
@@ -440,7 +459,15 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
   }
   else {
-    allQuestions = await InfoQuestQuestions.find(filterObj)
+    // First, find UserQuestSettings with hidden: false
+    const hiddenUserSettings = await UserQuestSetting.find({ hidden: true });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(userSetting => userSetting.questForeignKey);
+
+    allQuestions = await InfoQuestQuestions.find({
+      _id: { $nin: hiddenUserSettingIds }
+    })
       .sort(
         sort === "Newest First"
           ? { createdAt: -1 }
@@ -530,6 +557,7 @@ const getAllQuestsWithResult = async (req, res) => {
   } else if(Page === "Hidden"){
     console.log("running");
     filterObj.uuid = uuid;
+    filterObj.hidden = true;
     const Questions = await UserQuestSetting.find(filterObj).sort(
       sort === "Newest First" ? { createdAt: -1 } : "createdAt"
     );
@@ -543,7 +571,15 @@ const getAllQuestsWithResult = async (req, res) => {
     allQuestions = await Promise.all(mapPromises);
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
   } else {
-    allQuestions = await InfoQuestQuestions.find(filterObj)
+    // First, find UserQuestSettings with hidden: false
+    const hiddenUserSettings = await UserQuestSetting.find({ hidden: true });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(userSetting => userSetting.questForeignKey);
+
+    allQuestions = await InfoQuestQuestions.find({
+      _id: { $nin: hiddenUserSettingIds }
+    })
       .sort(
         sort === "Newest First"
           ? { createdAt: -1 }
@@ -682,6 +718,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
     } else if(req.body.Page === "Hidden"){
       console.log("running");
       filterObj.uuid = uuid;
+      filterObj.hidden = true;
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -695,7 +732,15 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       allQuestions = await Promise.all(mapPromises);
       totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
-      allQuestions = await InfoQuestQuestions.find(filterObj)
+      // First, find UserQuestSettings with hidden: false
+    const hiddenUserSettings = await UserQuestSetting.find({ hidden: true });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(userSetting => userSetting.questForeignKey);
+
+      allQuestions = await InfoQuestQuestions.find({
+        _id: { $nin: hiddenUserSettingIds }
+      })
         .sort(
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
@@ -794,6 +839,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
     } else if(req.body.Page === "Hidden"){
       console.log("running");
       filterObj.uuid = uuid;
+      filterObj.hidden = true;
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -807,7 +853,15 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       allQuestions = await Promise.all(mapPromises);
       totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
-      allQuestions = await InfoQuestQuestions.find(filterObj)
+       // First, find UserQuestSettings with hidden: false
+    const hiddenUserSettings = await UserQuestSetting.find({ hidden: true });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(userSetting => userSetting.questForeignKey);
+
+      allQuestions = await InfoQuestQuestions.find({
+        _id: { $nin: hiddenUserSettingIds }
+      })
         .sort(
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
