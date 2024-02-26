@@ -306,6 +306,18 @@ const removeBadge = async (req, res) => {
     // Update the action
     await User.save();
 
+     // Create Ledger
+     await createLedger({
+      uuid: User.uuid,
+      txUserAction: "accountBadgeRemoved",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: User.badges[0]._id,
+      // txDescription : "User adds a verification badge"
+    });
     // // Create Ledger
     // await createLedger({
     //   uuid: User.uuid,
