@@ -163,22 +163,33 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
     }
 
     if (req.body.Page === "Bookmark") {
-      console.log("running");
+       filterObj.uuid=req.body.uuid;
+        const hiddenUserSettings = await UserQuestSetting.find({
+        hidden: true,
+        uuid:req.body.uuid,
+      });
+
+      // Extract userSettingIds from hiddenUserSettings
+      const hiddenUserSettingIds = hiddenUserSettings.map(
+        (userSetting) => userSetting.questForeignKey
+      );
       filterObj.uuid = req.body.uuid;
-      const Questions = await BookmarkQuests.find(filterObj).sort(
+      const Questions = await BookmarkQuests.find({
+        questForeignKey: { $nin: hiddenUserSettingIds },
+        ...filterObj,
+      }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-          ...filterObj
+          ...filterObj,
         }).populate("getUserBadge", "badges");
       });
 
       allQuestions = await Promise.all(mapPromises);
-      allQuestions = allQuestions.filter(question => question !== null);
-
+      allQuestions = allQuestions.filter((question) => question !== null);
     } else if (req.body.Page === "Hidden") {
       console.log("running");
       filterObj.uuid = uuid;
@@ -199,7 +210,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       // First, find UserQuestSettings with hidden: false
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
       });
 
       // Extract userSettingIds from hiddenUserSettings
@@ -209,7 +220,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
 
       allQuestions = await InfoQuestQuestions.find({
         _id: { $nin: hiddenUserSettingIds },
-        ...filterObj
+        ...filterObj,
       })
         .sort(
           req.body.sort === "Newest First"
@@ -291,22 +302,33 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     }
 
     if (req.body.Page === "Bookmark") {
-      console.log("running");
-      filterObj.uuid = req.body.uuid;
-      const Questions = await BookmarkQuests.find(filterObj).sort(
-        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      filterObj.uuid=req.body.uuid;
+      const hiddenUserSettings = await UserQuestSetting.find({
+      hidden: true,
+      uuid:req.body.uuid,
+    });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(
+      (userSetting) => userSetting.questForeignKey
+    );
+    filterObj.uuid = req.body.uuid;
+    const Questions = await BookmarkQuests.find({
+      questForeignKey: { $nin: hiddenUserSettingIds },
+      ...filterObj,
+    }).sort(
+      req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-          ...filterObj
+          ...filterObj,
         }).populate("getUserBadge", "badges");
       });
 
       allQuestions = await Promise.all(mapPromises);
-      allQuestions = allQuestions.filter(question => question !== null);
-
+      allQuestions = allQuestions.filter((question) => question !== null);
     } else if (req.body.Page === "Hidden") {
       console.log("running");
       filterObj.uuid = uuid;
@@ -327,7 +349,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       // First, find UserQuestSettings with hidden: false
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
       });
 
       // Extract userSettingIds from hiddenUserSettings
@@ -337,7 +359,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
 
       allQuestions = await InfoQuestQuestions.find({
         _id: { $nin: hiddenUserSettingIds },
-        ...filterObj
+        ...filterObj,
       })
         .sort(
           req.body.sort === "Newest First"
@@ -446,22 +468,32 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
   }
 
   if (Page === "Bookmark") {
-    console.log("running");
-    filterObj.uuid = uuid;
-    const Questions = await BookmarkQuests.find(filterObj).sort(
-      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    const hiddenUserSettings = await UserQuestSetting.find({
+      hidden: true,
+      uuid,
+    });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(
+      (userSetting) => userSetting.questForeignKey
     );
+
+    filterObj.uuid = uuid;
+    const Questions = await BookmarkQuests.find({
+      questForeignKey: { $nin: hiddenUserSettingIds },
+      uuid: uuid,
+    }).sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt");
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        ...filterObj
-      })
+        ...filterObj,
+      });
     });
     console.log(mapPromises);
-    
+
     allQuestions = await Promise.all(mapPromises);
-    allQuestions = allQuestions.filter(question => question !== null);
+    allQuestions = allQuestions.filter((question) => question !== null);
     totalQuestionsCount = await BookmarkQuests.countDocuments(filterObj);
   } else if (Page === "Hidden") {
     console.log("running");
@@ -474,7 +506,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        
       }).populate("getUserBadge", "badges");
     });
 
@@ -491,10 +522,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const hiddenUserSettingIds = hiddenUserSettings.map(
       (userSetting) => userSetting.questForeignKey
     );
-  
+
     allQuestions = await InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
-      ...filterObj
+      ...filterObj,
     })
       .sort(
         sort === "Newest First"
@@ -576,21 +607,31 @@ const getAllQuestsWithResult = async (req, res) => {
   }
 
   if (Page === "Bookmark") {
-    console.log("running");
-    filterObj.uuid = uuid;
-    const Questions = await BookmarkQuests.find(filterObj).sort(
-      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    const hiddenUserSettings = await UserQuestSetting.find({
+      hidden: true,
+      uuid,
+    });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(
+      (userSetting) => userSetting.questForeignKey
     );
 
+    filterObj.uuid = uuid;
+    const Questions = await BookmarkQuests.find({
+      questForeignKey: { $nin: hiddenUserSettingIds },
+      uuid: uuid,
+    }).sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt");
+    
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        ...filterObj
+        ...filterObj,
       }).populate("getUserBadge", "badges");
     });
 
     allQuestions = await Promise.all(mapPromises);
-    allQuestions = allQuestions.filter(question => question !== null);
+    allQuestions = allQuestions.filter((question) => question !== null);
     totalQuestionsCount = await BookmarkQuests.countDocuments(filterObj);
   } else if (Page === "Hidden") {
     console.log("running");
@@ -622,7 +663,7 @@ const getAllQuestsWithResult = async (req, res) => {
 
     allQuestions = await InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
-      ...filterObj
+      ...filterObj,
     })
       .sort(
         sort === "Newest First"
@@ -746,22 +787,33 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
     }
 
     if (req.body.Page === "Bookmark") {
-      console.log("running");
-      filterObj.uuid = req.body.uuid;
-      const Questions = await BookmarkQuests.find(filterObj).sort(
-        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      filterObj.uuid=req.body.uuid;
+      const hiddenUserSettings = await UserQuestSetting.find({
+      hidden: true,
+      uuid:req.body.uuid,
+    });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(
+      (userSetting) => userSetting.questForeignKey
+    );
+    filterObj.uuid = req.body.uuid;
+    const Questions = await BookmarkQuests.find({
+      questForeignKey: { $nin: hiddenUserSettingIds },
+      ...filterObj,
+    }).sort(
+      req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-          ...filterObj
+          ...filterObj,
         }).populate("getUserBadge", "badges");
       });
 
       allQuestions = await Promise.all(mapPromises);
-      allQuestions = allQuestions.filter(question => question !== null);
-
+      allQuestions = allQuestions.filter((question) => question !== null);
     } else if (req.body.Page === "Hidden") {
       console.log("running");
       filterObj.uuid = uuid;
@@ -792,7 +844,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
 
       allQuestions = await InfoQuestQuestions.find({
         _id: { $nin: hiddenUserSettingIds },
-        ...filterObj
+        ...filterObj,
       })
         .sort(
           req.body.sort === "Newest First"
@@ -876,22 +928,33 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
     }
 
     if (req.body.Page === "Bookmark") {
-      console.log("running");
+      filterObj.uuid=req.body.uuid;
+        const hiddenUserSettings = await UserQuestSetting.find({
+        hidden: true,
+        uuid:req.body.uuid,
+      });
+
+      // Extract userSettingIds from hiddenUserSettings
+      const hiddenUserSettingIds = hiddenUserSettings.map(
+        (userSetting) => userSetting.questForeignKey
+      );
       filterObj.uuid = req.body.uuid;
-      const Questions = await BookmarkQuests.find(filterObj).sort(
+      const Questions = await BookmarkQuests.find({
+        questForeignKey: { $nin: hiddenUserSettingIds },
+        ...filterObj,
+      }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
-          ...filterObj
+          ...filterObj,
         }).populate("getUserBadge", "badges");
       });
 
       allQuestions = await Promise.all(mapPromises);
-      allQuestions = allQuestions.filter(question => question !== null);
-
+      allQuestions = allQuestions.filter((question) => question !== null);
     } else if (req.body.Page === "Hidden") {
       console.log("running");
       filterObj.uuid = uuid;
@@ -922,7 +985,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
 
       allQuestions = await InfoQuestQuestions.find({
         _id: { $nin: hiddenUserSettingIds },
-        ...filterObj
+        ...filterObj,
       })
         .sort(
           req.body.sort === "Newest First"
