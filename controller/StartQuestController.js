@@ -482,7 +482,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         }
       }
     };
-
+  
     // DECREMENT
     if (startQuestQuestion?.data.length > 1) {
       let lstTimeSelectionsAndContentions =
@@ -505,7 +505,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
 
     // Increment 'contentionsGiven' based on the length of 'contended' array
     const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
-    const contentionsGivenIncrement = contendedArray.length;
+    const contentionsGivenIncrement = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'] && contendedArray.length === 0 ? -1 : contendedArray.length;
     if (contendedArray.length) {
       const userBalance = await getUserBalance(req.body.uuid);
       if (userBalance < QUEST_OPTION_CONTENTION_GIVEN_AMOUNT)
