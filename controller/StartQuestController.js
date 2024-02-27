@@ -10,6 +10,7 @@ const {
   QUEST_OPTION_ADDED_AMOUNT,
   QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
   QUEST_OWNER_ACCOUNT,
+  QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { getQuestionsWithStatus, getQuestionsWithUserSettings } = require("./InfoQuestQuestionController");
@@ -543,6 +544,43 @@ const updateChangeAnsStartQuest = async (req, res) => {
       await updateUserBalance({
         amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
         dec: true,
+        uuid: req.body.uuid,
+      });
+    } else if(startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'] && contendedArray.length === 0) {
+      // Create Ledger
+      await createLedger({
+        uuid: req.body.uuid,
+        txUserAction: "postOptionContentionRemoved",
+        txID: crypto.randomBytes(11).toString("hex"),
+        txAuth: "User",
+        txFrom: req.body.uuid,
+        txTo: "dao",
+        txAmount: "0",
+        txData: req.body.uuid,
+        // txDescription : "User gives contention to a quest answer"
+      });
+      // Create Ledger
+      await createLedger({
+        uuid: req.body.uuid,
+        txUserAction: "postOptionContentionRemoved",
+        txID: crypto.randomBytes(11).toString("hex"),
+        txAuth: "DAO",
+        txFrom: req.body.uuid,
+        txTo: "DAO Treasury",
+        txAmount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
+        // txData : req.body.uuid,
+        // txDescription : "DisInsentive for giving contention"
+      });
+      // increment the Treasury
+      await updateTreasury({
+        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
+        dec: true,
+      });
+      // Decrement the User Balance
+      await updateUserBalance({
+        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
+        inc: true,
+        uuid: req.body.uuid,
       });
     }
 
