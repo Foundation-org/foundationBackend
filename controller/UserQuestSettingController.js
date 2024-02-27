@@ -208,9 +208,9 @@ const ledgerEntryAdded = async(uuid, questOwnerUuid) => {
      uuid: uuid,
      txUserAction: "postHiddenAdded",
      txID: crypto.randomBytes(11).toString("hex"),
-     txAuth: "User",
-     txFrom: uuid,
-     txTo: "dao",
+     txAuth: "DAO",
+     txFrom: "dao",
+     txTo: uuid,
      txAmount: "0",
      txData: uuid,
      // txDescription : "User creates a new account"
