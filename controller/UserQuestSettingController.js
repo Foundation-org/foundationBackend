@@ -107,10 +107,10 @@ const create = async(req, res) => {
     const payload = req.body;
 
     // if uniqueLink
-    if(payload.linkStatus === "Enable"){
-      await ledgerEntryPostLinkCreated(payload.uuid);
-      payload.link = shortLink.generate(8);
-    }
+    // if(payload.linkStatus === "Enable"){
+    //   await ledgerEntryPostLinkCreated(payload.uuid);
+    //   payload.link = shortLink.generate(8);
+    // }
 
     const userQuestSettingExist = await UserQuestSetting.findOne({
       uuid: payload.uuid,
@@ -158,10 +158,10 @@ const update = async (req, res) => {
     if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
 
     // if uniqueLink
-    if(payload.uniqueLink){
-      await ledgerEntryPostLinkCreated(payload.uuid);
-      payload.link = shortLink.generate(8);
-    }
+    // if(payload.uniqueLink){
+    //   await ledgerEntryPostLinkCreated(payload.uuid);
+    //   payload.link = shortLink.generate(8);
+    // }
     // If the record exists, update it
     const updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
       {
