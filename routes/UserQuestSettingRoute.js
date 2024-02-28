@@ -12,6 +12,7 @@ router.post("/userQuestSetting/create", UserQuestSettingController.create);
 
 router.post("/userQuestSetting/update", UserQuestSettingController.update);
 
+router.post("/userQuestSetting/create", UserQuestSettingController.link);
 
 
 module.exports = router;

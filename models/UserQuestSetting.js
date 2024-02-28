@@ -20,6 +20,11 @@ const UserQuestSetting = mongoose.Schema(
       unique: true,
       // default: shortLink.generate(8)
     },
+    linkStatus: {
+      type: String,
+      enum: ["Enable", "Disable", "Remove"],
+      // default: ""
+    },
     hidden: {
         type: Boolean,
         default: false

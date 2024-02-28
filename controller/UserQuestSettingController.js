@@ -51,9 +51,66 @@ const createOrUpdate = async (req, res) => {
   }
 };
 
+const link = async(req, res) => {
+  try {
+    const payload = req.body;
+
+    // if uniqueLink
+    if(payload.isGenerateLink){
+      await ledgerEntryPostLinkCreated(payload.uuid);
+      payload.link = shortLink.generate(8);
+    }
+
+    const userQuestSettingExist = await UserQuestSetting.findOne({
+      uuid: payload.uuid,
+      questForeignKey: payload.questForeignKey,
+    });
+
+    let savedOrUpdatedUserQuestSetting;
+    // To check the record exist
+    if (userQuestSettingExist) {
+      savedOrUpdatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
+        {
+          uuid: payload.uuid,
+          questForeignKey: payload.questForeignKey,
+        },
+        {
+          // Update fields and values here
+          $set: payload
+        },
+        {
+          new: true, // Return the modified document rather than the original
+        }
+      );
+    } else {
+      // Create a short link
+      const userQuestSetting = new UserQuestSetting({
+        ...payload,
+      });
+      savedOrUpdatedUserQuestSetting = await userQuestSetting.save();
+    };
+    
+    return res
+      .status(201)
+      .json({ message: "UserQuestSetting link Created Successfully!", data: savedOrUpdatedUserQuestSetting });
+
+  } catch(error){
+    console.error(error);
+    res.status(500).json({
+      message: ` An error occurred while create UserQuestSetting link: ${error.message}`,
+    });
+  }
+}
+
 const create = async(req, res) => {
   try {
     const payload = req.body;
+
+    // if uniqueLink
+    if(payload.linkStatus === "Enable"){
+      await ledgerEntryPostLinkCreated(payload.uuid);
+      payload.link = shortLink.generate(8);
+    }
 
     const userQuestSettingExist = await UserQuestSetting.findOne({
       uuid: payload.uuid,
@@ -65,7 +122,6 @@ const create = async(req, res) => {
     // Create a short link
     const userQuestSetting = new UserQuestSetting({
       ...payload,
-      link: shortLink.generate(8)
     });
     const savedUserQuestSetting = await userQuestSetting.save();
     // Get quest owner uuid
@@ -76,10 +132,8 @@ const create = async(req, res) => {
     if (payload.hidden) {
       await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
-    } else {
-      await hiddenPostCount(infoQuestQuestion.uuid, false);
-      await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
+    
     return res
       .status(201)
       .json({ message: "UserQuestSetting Created Successfully!", data: savedUserQuestSetting });
@@ -103,6 +157,11 @@ const update = async (req, res) => {
     // To check the record exist
     if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
 
+    // if uniqueLink
+    if(payload.uniqueLink){
+      await ledgerEntryPostLinkCreated(payload.uuid);
+      payload.link = shortLink.generate(8);
+    }
     // If the record exists, update it
     const updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
       {
@@ -125,7 +184,7 @@ const update = async (req, res) => {
     if (payload.hidden) {
       await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
-    } else {
+    } else if(payload.hidden === false) {
       await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
@@ -196,6 +255,25 @@ const hiddenPostCount = async(uuid, hidden) => {
       { $inc: { yourHiddenPostCounter: hidden ? 1 : -1 } }
     );
     
+  } catch(error) {
+    console.error(error);
+  }
+}
+
+const ledgerEntryPostLinkCreated = async(uuid) => {
+  try {
+    // User
+    await createLedger({
+     uuid: uuid,
+     txUserAction: "postLinkCreated",
+     txID: crypto.randomBytes(11).toString("hex"),
+     txAuth: "User",
+     txFrom: uuid,
+     txTo: "dao",
+     txAmount: "0",
+     txData: uuid,
+     // txDescription : "User creates a new account"
+   });
   } catch(error) {
     console.error(error);
   }
@@ -280,5 +358,6 @@ module.exports = {
   create,
   createOrUpdate,
   update,
+  link,
   // get,
 };
