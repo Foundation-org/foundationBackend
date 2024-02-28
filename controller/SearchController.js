@@ -26,6 +26,7 @@ const easySearch = async (req, res) => {
         { Question: { $regex: searchTerm, $options: "i" } },
         { whichTypeQuestion: { $regex: searchTerm, $options: "i" } },
         { "QuestAnswers.question": { $regex: searchTerm, $options: "i" } },
+        { QuestTopic: { $regex: searchTerm, $options: "i" } },
       ],
       _id: { $nin: hiddenUserSettingIds },
     }).populate("getUserBadge", "badges");
