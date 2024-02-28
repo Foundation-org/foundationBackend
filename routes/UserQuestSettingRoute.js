@@ -6,13 +6,15 @@ const UserQuestSettingController = require("../controller/UserQuestSettingContro
 const protect = require("../middleware/protect");
 const socialProtect = require("../middleware/socialProtect");
 
-router.post("/userQuestSetting/createOrUpdate", UserQuestSettingController.createOrUpdate);
+router.post(
+  "/userQuestSetting/createOrUpdate",
+  UserQuestSettingController.createOrUpdate
+);
 
 router.post("/userQuestSetting/create", UserQuestSettingController.create);
 
 router.post("/userQuestSetting/update", UserQuestSettingController.update);
 
-router.post("/userQuestSetting/create", UserQuestSettingController.link);
-
+router.post("/userQuestSetting/link", UserQuestSettingController.link);
 
 module.exports = router;
