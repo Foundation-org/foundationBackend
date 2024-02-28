@@ -498,34 +498,34 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     // const regexBlockterms = blockedTerms.map((term) => new RegExp(term, "i"));
     filterObj.QuestTopic = { $nin: blockedTerms };
 
-    const hiddenQuestList = await InfoQuestQuestions.find({
-      QuestTopic: { $in: blockedTerms },
-    });
+    // const hiddenQuestList = await InfoQuestQuestions.find({
+    //   QuestTopic: { $in: blockedTerms },
+    // });
     
-    const mapPromises = hiddenQuestList.map(async (item) => {
-      const userQuestSettingExist = await UserQuestSetting.findOne({
-        uuid: uuid,
-        questForeignKey: item._id,
-      });
+    // const mapPromises = hiddenQuestList.map(async (item) => {
+    //   const userQuestSettingExist = await UserQuestSetting.findOne({
+    //     uuid: uuid,
+    //     questForeignKey: item._id,
+    //   });
     
-      if (userQuestSettingExist) {
-        // If userQuestSetting exists, update it
-        await UserQuestSetting.findOneAndUpdate(
-          { uuid: uuid, questForeignKey: item._id },
-          { hidden: true }
-        );
-      } else {
-        // If userQuestSetting does not exist, create it
-        await UserQuestSetting.create({
-          uuid: uuid,
-          questForeignKey: item._id,
-          hidden: true,
-        });
-      }
-    });
+    //   if (userQuestSettingExist) {
+    //     // If userQuestSetting exists, update it
+    //     await UserQuestSetting.findOneAndUpdate(
+    //       { uuid: uuid, questForeignKey: item._id },
+    //       { hidden: true }
+    //     );
+    //   } else {
+    //     // If userQuestSetting does not exist, create it
+    //     await UserQuestSetting.create({
+    //       uuid: uuid,
+    //       questForeignKey: item._id,
+    //       hidden: true,
+    //     });
+    //   }
+    // });
     
-    // Use Promise.allSettled to handle errors without stopping execution
-    await Promise.allSettled(mapPromises);
+    // // Use Promise.allSettled to handle errors without stopping execution
+    // await Promise.allSettled(mapPromises);
 
   }
 
