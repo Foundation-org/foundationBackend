@@ -206,6 +206,22 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
 
       allQuestions = await Promise.all(mapPromises);
       totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
+    } else if (req.body.Page === "SharedLink") {
+      console.log("running");
+      filterObj.uuid = uuid;
+      filterObj.linkStatus === "Enable";
+      const Questions = await UserQuestSetting.find(filterObj).sort(
+        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        }).populate("getUserBadge", "badges");
+      });
+
+      allQuestions = await Promise.all(mapPromises);
+      totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
       // First, find UserQuestSettings with hidden: false
       const hiddenUserSettings = await UserQuestSetting.find({
@@ -333,6 +349,22 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       console.log("running");
       filterObj.uuid = uuid;
       filterObj.hidden = true;
+      const Questions = await UserQuestSetting.find(filterObj).sort(
+        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        }).populate("getUserBadge", "badges");
+      });
+
+      allQuestions = await Promise.all(mapPromises);
+      totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
+    } else if (req.body.Page === "SharedLink") {
+      console.log("running");
+      filterObj.uuid = uuid;
+      filterObj.linkStatus === "Enable";
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -541,6 +573,22 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
 
     allQuestions = await Promise.all(mapPromises);
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
+  } else if (req.body.Page === "SharedLink") {
+    console.log("running");
+    filterObj.uuid = uuid;
+    filterObj.linkStatus === "Enable";
+    const Questions = await UserQuestSetting.find(filterObj).sort(
+      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    );
+
+    const mapPromises = Questions.map(async function (record) {
+      return await InfoQuestQuestions.findOne({
+        _id: record.questForeignKey,
+      }).populate("getUserBadge", "badges");
+    });
+
+    allQuestions = await Promise.all(mapPromises);
+    totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
   } else {
     // First, find UserQuestSettings with hidden: false
     const hiddenUserSettings = await UserQuestSetting.find({
@@ -667,6 +715,22 @@ const getAllQuestsWithResult = async (req, res) => {
     console.log("running");
     filterObj.uuid = uuid;
     filterObj.hidden = true;
+    const Questions = await UserQuestSetting.find(filterObj).sort(
+      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    );
+
+    const mapPromises = Questions.map(async function (record) {
+      return await InfoQuestQuestions.findOne({
+        _id: record.questForeignKey,
+      }).populate("getUserBadge", "badges");
+    });
+
+    allQuestions = await Promise.all(mapPromises);
+    totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
+  } else if (req.body.Page === "SharedLink") {
+    console.log("running");
+    filterObj.uuid = uuid;
+    filterObj.linkStatus === "Enable";
     const Questions = await UserQuestSetting.find(filterObj).sort(
       sort === "Newest First" ? { createdAt: -1 } : "createdAt"
     );
@@ -860,6 +924,22 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
 
       allQuestions = await Promise.all(mapPromises);
       totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
+    } else if (req.body.Page === "SharedLink") {
+      console.log("running");
+      filterObj.uuid = uuid;
+      filterObj.linkStatus === "Enable";
+      const Questions = await UserQuestSetting.find(filterObj).sort(
+        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        }).populate("getUserBadge", "badges");
+      });
+
+      allQuestions = await Promise.all(mapPromises);
+      totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
       // First, find UserQuestSettings with hidden: false
       const hiddenUserSettings = await UserQuestSetting.find({
@@ -989,6 +1069,22 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       console.log("running");
       filterObj.uuid = uuid;
       filterObj.hidden = true;
+      const Questions = await UserQuestSetting.find(filterObj).sort(
+        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
+
+      const mapPromises = Questions.map(async function (record) {
+        return await InfoQuestQuestions.findOne({
+          _id: record.questForeignKey,
+        }).populate("getUserBadge", "badges");
+      });
+
+      allQuestions = await Promise.all(mapPromises);
+      totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
+    } else if (req.body.Page === "SharedLink") {
+      console.log("running");
+      filterObj.uuid = uuid;
+      filterObj.linkStatus === "Enable";
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
