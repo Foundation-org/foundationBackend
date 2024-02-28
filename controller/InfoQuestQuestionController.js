@@ -163,7 +163,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
     }
 
     if (req.body.Page === "Bookmark") {
-       filterObj.uuid=req.body.uuid;
+      //  filterObj.uuid=req.body.uuid;
         const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
         uuid:req.body.uuid,
@@ -173,9 +173,10 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       const hiddenUserSettingIds = hiddenUserSettings.map(
         (userSetting) => userSetting.questForeignKey
       );
-      filterObj.uuid = req.body.uuid;
+      // filterObj.uuid = req.body.uuid;
       const Questions = await BookmarkQuests.find({
         questForeignKey: { $nin: hiddenUserSettingIds },
+        uuid:req.body.uuid,
         ...filterObj,
       }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
@@ -318,7 +319,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     }
 
     if (req.body.Page === "Bookmark") {
-      filterObj.uuid=req.body.uuid;
+      // filterObj.uuid=req.body.uuid;
       const hiddenUserSettings = await UserQuestSetting.find({
       hidden: true,
       uuid:req.body.uuid,
@@ -328,7 +329,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     const hiddenUserSettingIds = hiddenUserSettings.map(
       (userSetting) => userSetting.questForeignKey
     );
-    filterObj.uuid = req.body.uuid;
+    // filterObj.uuid = req.body.uuid;
     const Questions = await BookmarkQuests.find({
       questForeignKey: { $nin: hiddenUserSettingIds },
       ...filterObj,
@@ -540,7 +541,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       (userSetting) => userSetting.questForeignKey
     );
 
-    filterObj.uuid = uuid;
+    // filterObj.uuid = uuid;
     const Questions = await BookmarkQuests.find({
       questForeignKey: { $nin: hiddenUserSettingIds },
       uuid: uuid,
@@ -696,7 +697,7 @@ const getAllQuestsWithResult = async (req, res) => {
       (userSetting) => userSetting.questForeignKey
     );
 
-    filterObj.uuid = uuid;
+    // filterObj.uuid = uuid;
     const Questions = await BookmarkQuests.find({
       questForeignKey: { $nin: hiddenUserSettingIds },
       uuid: uuid,
@@ -882,7 +883,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
     }
 
     if (req.body.Page === "Bookmark") {
-      filterObj.uuid=req.body.uuid;
+      // filterObj.uuid=req.body.uuid;
       const hiddenUserSettings = await UserQuestSetting.find({
       hidden: true,
       uuid:req.body.uuid,
@@ -892,9 +893,10 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
     const hiddenUserSettingIds = hiddenUserSettings.map(
       (userSetting) => userSetting.questForeignKey
     );
-    filterObj.uuid = req.body.uuid;
+    // filterObj.uuid = req.body.uuid;
     const Questions = await BookmarkQuests.find({
       questForeignKey: { $nin: hiddenUserSettingIds },
+      uuid:req.body.uuid,
       ...filterObj,
     }).sort(
       req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
@@ -1039,7 +1041,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
     }
 
     if (req.body.Page === "Bookmark") {
-      filterObj.uuid=req.body.uuid;
+      // filterObj.uuid=req.body.uuid;
         const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
         uuid:req.body.uuid,
@@ -1049,9 +1051,10 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       const hiddenUserSettingIds = hiddenUserSettings.map(
         (userSetting) => userSetting.questForeignKey
       );
-      filterObj.uuid = req.body.uuid;
+      // filterObj.uuid = req.body.uuid;
       const Questions = await BookmarkQuests.find({
         questForeignKey: { $nin: hiddenUserSettingIds },
+        uuid:req.body.uuid,
         ...filterObj,
       }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
