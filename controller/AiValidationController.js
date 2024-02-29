@@ -23,7 +23,7 @@ const QuestTopics = require("../models/QuestTopics");
 
 const validation = async (req, res) => {
   const callType = req.params.callType;
-  if (callType >= 1 && callType <= 3) {
+  if (callType >= 1 && callType <= 6) {
     await handleRequest(
       req,
       res,
@@ -119,6 +119,7 @@ async function handleRequest(
 
 function checkResponse(responseData, userMessage, callType, req, res) {
   let filtered = responseData.choices[0].message.content;
+  console.log("🚀 ~ checkResponse ~ filtered:", filtered)
   let status = "OK";
 
   let found;
