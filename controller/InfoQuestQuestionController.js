@@ -582,9 +582,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     console.log("running");
     filterObj.uuid = uuid;
     filterObj.linkStatus === "Enable";
-    const Questions = await UserQuestSetting.find(filterObj).sort(
-      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-    );
+    const Questions = await UserQuestSetting.find(filterObj)
+    .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
+    .limit(pageSize)
+    .skip(skip);
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -830,7 +831,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
     // return
     const uuid = req.cookies.uuid;
     const { uniqueShareLink } = req.params; // Use req.params instead of req.body
-    
+
     const userQuestSetting = await UserQuestSetting.findOne({
       // uuid,
       link: uniqueShareLink
