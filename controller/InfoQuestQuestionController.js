@@ -164,7 +164,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
 
     if (req.body.Page === "Bookmark") {
       //  filterObj.uuid=req.body.uuid;
-        const hiddenUserSettings = await UserQuestSetting.find({
+      const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
         uuid:req.body.uuid,
       });
@@ -321,21 +321,21 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     if (req.body.Page === "Bookmark") {
       // filterObj.uuid=req.body.uuid;
       const hiddenUserSettings = await UserQuestSetting.find({
-      hidden: true,
-      uuid:req.body.uuid,
-    });
+        hidden: true,
+        uuid:req.body.uuid,
+      });
 
-    // Extract userSettingIds from hiddenUserSettings
-    const hiddenUserSettingIds = hiddenUserSettings.map(
-      (userSetting) => userSetting.questForeignKey
-    );
-    // filterObj.uuid = req.body.uuid;
-    const Questions = await BookmarkQuests.find({
-      questForeignKey: { $nin: hiddenUserSettingIds },
-      ...filterObj,
-    }).sort(
-      req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-    );
+      // Extract userSettingIds from hiddenUserSettings
+      const hiddenUserSettingIds = hiddenUserSettings.map(
+        (userSetting) => userSetting.questForeignKey
+      );
+      // filterObj.uuid = req.body.uuid;
+      const Questions = await BookmarkQuests.find({
+        questForeignKey: { $nin: hiddenUserSettingIds },
+        ...filterObj,
+      }).sort(
+        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -502,13 +502,13 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     // const hiddenQuestList = await InfoQuestQuestions.find({
     //   QuestTopic: { $in: blockedTerms },
     // });
-    
+
     // const mapPromises = hiddenQuestList.map(async (item) => {
     //   const userQuestSettingExist = await UserQuestSetting.findOne({
     //     uuid: uuid,
     //     questForeignKey: item._id,
     //   });
-    
+
     //   if (userQuestSettingExist) {
     //     // If userQuestSetting exists, update it
     //     await UserQuestSetting.findOneAndUpdate(
@@ -524,7 +524,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     //     });
     //   }
     // });
-    
+
     // // Use Promise.allSettled to handle errors without stopping execution
     // await Promise.allSettled(mapPromises);
 
@@ -545,7 +545,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const Questions = await BookmarkQuests.find({
       questForeignKey: { $nin: hiddenUserSettingIds },
       uuid: uuid,
-    }).sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt");
+    })
+      .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
+      .skip(skip)
+      .limit(pageSize);
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -562,9 +565,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     console.log("running");
     filterObj.uuid = uuid;
     filterObj.hidden = true;
-    const Questions = await UserQuestSetting.find(filterObj).sort(
-      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-    );
+    const Questions = await UserQuestSetting.find(filterObj)
+      .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
+      .skip(skip)
+      .limit(pageSize);
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -702,7 +706,7 @@ const getAllQuestsWithResult = async (req, res) => {
       questForeignKey: { $nin: hiddenUserSettingIds },
       uuid: uuid,
     }).sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt");
-    
+
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
@@ -826,7 +830,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
     // return
     const uuid = req.cookies.uuid;
     const { uniqueShareLink } = req.params; // Use req.params instead of req.body
-
+    
     const userQuestSetting = await UserQuestSetting.findOne({
       // uuid,
       link: uniqueShareLink
@@ -889,22 +893,22 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
     if (req.body.Page === "Bookmark") {
       // filterObj.uuid=req.body.uuid;
       const hiddenUserSettings = await UserQuestSetting.find({
-      hidden: true,
-      uuid:req.body.uuid,
-    });
+        hidden: true,
+        uuid:req.body.uuid,
+      });
 
-    // Extract userSettingIds from hiddenUserSettings
-    const hiddenUserSettingIds = hiddenUserSettings.map(
-      (userSetting) => userSetting.questForeignKey
-    );
-    // filterObj.uuid = req.body.uuid;
-    const Questions = await BookmarkQuests.find({
-      questForeignKey: { $nin: hiddenUserSettingIds },
-      uuid:req.body.uuid,
-      ...filterObj,
-    }).sort(
-      req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-    );
+      // Extract userSettingIds from hiddenUserSettings
+      const hiddenUserSettingIds = hiddenUserSettings.map(
+        (userSetting) => userSetting.questForeignKey
+      );
+      // filterObj.uuid = req.body.uuid;
+      const Questions = await BookmarkQuests.find({
+        questForeignKey: { $nin: hiddenUserSettingIds },
+        uuid:req.body.uuid,
+        ...filterObj,
+      }).sort(
+        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -1046,7 +1050,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
 
     if (req.body.Page === "Bookmark") {
       // filterObj.uuid=req.body.uuid;
-        const hiddenUserSettings = await UserQuestSetting.find({
+      const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
         uuid:req.body.uuid,
       });
