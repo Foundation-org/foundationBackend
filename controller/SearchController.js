@@ -68,11 +68,25 @@ const searchBookmarks = async (req, res) => {
     const hiddenUserSettingIds = hiddenUserSettings.map(
       (userSetting) => userSetting.questForeignKey
     );
-    console.log("wamiq2", hiddenUserSettingIds);
+    
+    const infoQuestQuestions = await InfoQuestQuestions.find({
+      $or: [
+        { Question: { $regex: searchTerm, $options: "i" } },
+        { whichTypeQuestion: { $regex: searchTerm, $options: "i" } },
+        { "QuestAnswers.question": { $regex: searchTerm, $options: "i" } },
+        { QuestTopic: { $regex: searchTerm, $options: "i" } },
+      ],
+      _id: { $nin: hiddenUserSettingIds },
+    }).populate("getUserBadge", "badges");
+
+    // Extract QuestId from infoQuestQuestions
+    const questIds = infoQuestQuestions.map(
+      (ob) => ob._id
+    );
 
     const results = await BookmarkQuests.find({
-      questForeignKey: { $nin: hiddenUserSettingIds },
-      Question: { $regex: searchTerm, $options: "i" },
+      questForeignKey: { $in: questIds },
+      // Question: { $regex: searchTerm, $options: "i" },
       uuid: uuid,
     });
 
