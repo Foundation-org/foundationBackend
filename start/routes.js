@@ -10,20 +10,21 @@ const StartQuestRoute = require("../routes/StartQuestRoute");
 const BadgesRoutes = require("../routes/BadgesRoutes");
 const UserQuestSettingRoute = require("../routes/UserQuestSettingRoute");
 const PassportRoutes = require("../routes/PassportRoutes");
+const isUnderMaintenance = require("../middleware/maintenance");
 
 module.exports = function (app) {
-    app.use("/", LedgerRoute)
-    app.use("/", AiValidationRoutes)
-    app.use("/", BadgesRoutes)
-    app.use("/", UserQuestSettingRoute)
-    app.use("/user", AuthRoute)
-    app.use("/bookmarkQuest", BookmarkQuestRoute)
-    app.use("/infoquestions", InfoQuestQuestionRoute)
-    app.use("/search", SearchRoute)
-    app.use("/preferences", QuestTopicRoute)
-    app.use("/startQuest", StartQuestRoute)
-    app.use("/ledger",LedgerRoute)
-    app.use("/treasury",TreasuryRoutes)
-    app.use("/auth",PassportRoutes)
+    app.use("/",isUnderMaintenance, LedgerRoute)
+    app.use("/",isUnderMaintenance, AiValidationRoutes)
+    app.use("/",isUnderMaintenance, BadgesRoutes)
+    app.use("/",isUnderMaintenance, UserQuestSettingRoute)
+    app.use("/user",isUnderMaintenance, AuthRoute)
+    app.use("/bookmarkQuest",isUnderMaintenance, BookmarkQuestRoute)
+    app.use("/infoquestions",isUnderMaintenance, InfoQuestQuestionRoute)
+    app.use("/search",isUnderMaintenance, SearchRoute)
+    app.use("/preferences",isUnderMaintenance, QuestTopicRoute)
+    app.use("/startQuest",isUnderMaintenance, StartQuestRoute)
+    app.use("/ledger",isUnderMaintenance,LedgerRoute)
+    app.use("/treasury",isUnderMaintenance,TreasuryRoutes)
+    app.use("/auth",isUnderMaintenance,PassportRoutes)
     // app.use(error);
   };

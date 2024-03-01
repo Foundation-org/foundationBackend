@@ -22,4 +22,5 @@ module.exports = {
     FRONTEND_URL: process.env.FRONTEND_URL,
     FRONTEND_URL_1: process.env.FRONTEND_URL_1,
     DEVELOPMENT: process.env.DEVELOPMENT,
+    MAINTENANCE:process.env.MAINTENANCE
   };
