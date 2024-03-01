@@ -210,7 +210,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
     } else if (req.body.Page === "SharedLink") {
       console.log("running");
       filterObj.uuid = uuid;
-      filterObj.linkStatus === "Enable";
+      filterObj.linkStatus = "Enable";
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -365,7 +365,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
     } else if (req.body.Page === "SharedLink") {
       console.log("running");
       filterObj.uuid = uuid;
-      filterObj.linkStatus === "Enable";
+      filterObj.linkStatus = "Enable";
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -581,7 +581,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
   } else if (req.body.Page === "SharedLink") {
     console.log("running");
     filterObj.uuid = uuid;
-    filterObj.linkStatus === "Enable";
+    filterObj.linkStatus = "Enable";
     const Questions = await UserQuestSetting.find(filterObj)
     .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
     .limit(pageSize)
@@ -737,7 +737,7 @@ const getAllQuestsWithResult = async (req, res) => {
   } else if (req.body.Page === "SharedLink") {
     console.log("running");
     filterObj.uuid = uuid;
-    filterObj.linkStatus === "Enable";
+    filterObj.linkStatus = "Enable";
     const Questions = await UserQuestSetting.find(filterObj).sort(
       sort === "Newest First" ? { createdAt: -1 } : "createdAt"
     );
@@ -939,7 +939,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
     } else if (req.body.Page === "SharedLink") {
       console.log("running");
       filterObj.uuid = uuid;
-      filterObj.linkStatus === "Enable";
+      filterObj.linkStatus = "Enable";
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -1097,7 +1097,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
     } else if (req.body.Page === "SharedLink") {
       console.log("running");
       filterObj.uuid = uuid;
-      filterObj.linkStatus === "Enable";
+      filterObj.linkStatus = "Enable";
       const Questions = await UserQuestSetting.find(filterObj).sort(
         sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
