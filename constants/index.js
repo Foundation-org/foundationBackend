@@ -10,7 +10,8 @@ module.exports = {
     "i'm sorry, ",
     "sorry, ",
     "please provide",
-    "did you mean"
+    "did you mean",
+    "I cannot understand this message"
   ],
   SYSTEM_MESSAGES: [
     // Q/S
