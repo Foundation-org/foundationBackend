@@ -20,6 +20,8 @@ router.post("/addBadge/contact/add", BadgeController.addContactBadgeAdd);
 
 router.post("/addBadge", BadgeController.addBadge);
 
+router.post("/addBadge/personal/add", BadgeController.addPersonalBadge);
+
 router.post("/removeBadge", BadgeController.removeBadge);
 
 module.exports = router;

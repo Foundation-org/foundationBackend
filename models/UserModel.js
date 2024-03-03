@@ -34,11 +34,11 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    verification:{
+    verification: {
       type: Boolean,
       default: false,
     },
-    referral:{
+    referral: {
       type: Boolean,
       default: false,
     },
@@ -52,27 +52,27 @@ const userSchema = mongoose.Schema(
     States: {
       expandedView: {
         type: Boolean,
-        default: true, 
+        default: true,
       },
       searchData: {
         type: String,
-        default: "", 
+        default: "",
       },
       filterByStatus: {
         type: String,
-        default: "", 
+        default: "",
       },
       filterByType: {
         type: String,
-        default: "", 
+        default: "",
       },
       filterByScope: {
         type: String,
-        default: "", 
+        default: "",
       },
       filterBySort: {
         type: String,
-        default: "Newest First", 
+        default: "Newest First",
       },
       columns: {
         All: columnsSchema,
@@ -81,33 +81,33 @@ const userSchema = mongoose.Schema(
       },
       lightMode: {
         type: Boolean,
-        default: true, 
+        default: true,
       },
     },
     bookmarkStates: {
       expandedView: {
         type: Boolean,
-        default: true, 
+        default: true,
       },
       searchData: {
         type: String,
-        default: "", 
+        default: "",
       },
       filterByStatus: {
         type: String,
-        default: "", 
+        default: "",
       },
       filterByType: {
         type: String,
-        default: "", 
+        default: "",
       },
       filterByScope: {
         type: String,
-        default: "", 
+        default: "",
       },
       filterBySort: {
         type: String,
-        default: "Newest First", 
+        default: "Newest First",
       },
       columns: {
         All: columnsSchema,
@@ -116,7 +116,7 @@ const userSchema = mongoose.Schema(
       },
       lightMode: {
         type: Boolean,
-        default: true, 
+        default: true,
       },
     },
     violationCounter: {
@@ -129,7 +129,7 @@ const userSchema = mongoose.Schema(
     },
     balance: {
       type: Number,
-      default: 0.00,
+      default: 0.0,
     },
     walletAddr: {
       type: String,
@@ -139,7 +139,7 @@ const userSchema = mongoose.Schema(
     },
     requiredAction: {
       type: Boolean,
-      default: false
+      default: false,
     },
     contentionsOnAddedAns: {
       type: Number,
@@ -157,11 +157,13 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    usersAnswered: { // Post Engaged
+    usersAnswered: {
+      // Post Engaged
       type: Number,
       default: 0,
     },
-    yourPostEngaged: { // Your Post Engaged
+    yourPostEngaged: {
+      // Your Post Engaged
       type: Number,
       default: 0,
     },
@@ -200,13 +202,14 @@ const userSchema = mongoose.Schema(
         email: { type: String },
         isVerified: { type: Boolean },
         type: { type: String },
-        createdAt: { type: Date, default: new Date() }
-      }
+        createdAt: { type: Date, default: new Date() },
+        personal: { type: Object },
+      },
     ],
     role: {
       type: String,
-      enum: ['guest', 'user'],
-      default: 'guest',
+      enum: ["guest", "user"],
+      default: "guest",
     },
   },
   { timestamps: true }

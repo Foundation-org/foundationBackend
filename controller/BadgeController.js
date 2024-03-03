@@ -285,6 +285,64 @@ const addBadge = async (req, res) => {
   }
 };
 
+const addPersonalBadge = async (req, res) => {
+  try {
+    const User = await UserModel.findOne({ uuid: req.body.uuid });
+    if (!User) throw new Error("No such User!");
+
+    const userBadges = User.badges;
+    const updatedUserBadges = [
+      ...userBadges,
+      {
+        personal:req.body.personal,
+      },
+    ];
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
+
+    // Create Ledger
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "personalBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: User.badges[0]._id,
+      // txDescription : "User adds a verification badge"
+    });
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "personalBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: "DAO Treasury",
+      txTo: User.uuid,
+      txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      // txData : newUser.badges[0]._id,
+      // txDescription : "Incentive for adding badges"
+    });
+    // Decrement the Treasury
+    await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
+
+    // Increment the UserBalance
+    await updateUserBalance({
+      uuid: User.uuid,
+      amount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      inc: true,
+    });
+
+    res.status(200).json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while addSocialBadge: ${error.message}`,
+    });
+  }
+};
+
 const removeBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -526,5 +584,6 @@ module.exports = {
   removeBadge,
   addContactBadge,
   addContactBadgeVerify,
-  addContactBadgeAdd
+  addContactBadgeAdd,
+  addPersonalBadge
 };
