@@ -507,7 +507,13 @@ const updateChangeAnsStartQuest = async (req, res) => {
     // Increment 'contentionsGiven' based on the length of 'contended' array
     const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
     const contentionsGivenIncrement = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'] && contendedArray.length === 0 ? -1 : contendedArray.length;
-    if (contendedArray.length) {
+    // requested contention - saved contention
+    const requestedContention = contendedArray.length;
+    const savedContention = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'].length;
+    let contentionGivenCounter = requestedContention - savedContention;
+
+    // Increment Counter
+    if (contentionGivenCounter > 0) {
       const userBalance = await getUserBalance(req.body.uuid);
       if (userBalance < QUEST_OPTION_CONTENTION_GIVEN_AMOUNT)
         throw new Error("The balance is insufficient to give the contention!");
@@ -531,22 +537,23 @@ const updateChangeAnsStartQuest = async (req, res) => {
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
-        txAmount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
+        txAmount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter,
         // txData : req.body.uuid,
         // txDescription : "DisInsentive for giving contention"
       });
       // increment the Treasury
       await updateTreasury({
-        amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
+        amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter,
         inc: true,
       });
       // Decrement the User Balance
       await updateUserBalance({
-        amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
+        amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter,
         dec: true,
         uuid: req.body.uuid,
       });
-    } else if(startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'] && contendedArray.length === 0) {
+
+    } else if(contentionGivenCounter < 0) {
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
@@ -567,18 +574,18 @@ const updateChangeAnsStartQuest = async (req, res) => {
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
-        txAmount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
+        txAmount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter),
         // txData : req.body.uuid,
         // txDescription : "DisInsentive for giving contention"
       });
       // increment the Treasury
       await updateTreasury({
-        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
+        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter),
         dec: true,
       });
       // Decrement the User Balance
       await updateUserBalance({
-        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
+        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter),
         inc: true,
         uuid: req.body.uuid,
       });
@@ -586,7 +593,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
 
     await User.findOneAndUpdate(
       { uuid: req.body.uuid },
-      { $inc: { contentionsGiven: contentionsGivenIncrement } }
+      { $inc: { contentionsGiven: contentionGivenCounter } }
     );
 
     let startQuestAnswersSelected = startQuestQuestion?.data;
@@ -678,14 +685,14 @@ const updateChangeAnsStartQuest = async (req, res) => {
             }`
           ] = -1;
         }
-        console.log(
-          "🚀 ~ updateChangeAnsStartQuest ~ initialStartQuestData:",
-          initialStartQuestData[0].selected
-        );
-        console.log(
-          "🚀 ~ updateChangeAnsStartQuest ~ selectedCounter:",
-          selectedCounter
-        );
+        // console.log(
+        //   "🚀 ~ updateChangeAnsStartQuest ~ initialStartQuestData:",
+        //   initialStartQuestData[0].selected
+        // );
+        // console.log(
+        //   "🚀 ~ updateChangeAnsStartQuest ~ selectedCounter:",
+        //   selectedCounter
+        // );
         await InfoQuestQuestions.findByIdAndUpdate(
           { _id: req.body.questId },
           {
