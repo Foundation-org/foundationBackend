@@ -560,7 +560,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
 
     allQuestions = await Promise.all(mapPromises);
     allQuestions = allQuestions.filter((question) => question !== null);
-    totalQuestionsCount = await BookmarkQuests.countDocuments(filterObj);
+    totalQuestionsCount = await BookmarkQuests.countDocuments({
+      questForeignKey: { $nin: hiddenUserSettingIds },
+      uuid: uuid,
+    });
   } else if (Page === "Hidden") {
     console.log("running");
     filterObj.uuid = uuid;
@@ -624,7 +627,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       .skip(skip)
       .limit(pageSize)
       .populate("getUserBadge", "badges");
-    totalQuestionsCount = await InfoQuestQuestions.countDocuments(filterObj);
+    totalQuestionsCount = await InfoQuestQuestions.countDocuments({
+      _id: { $nin: hiddenUserSettingIds },
+      ...filterObj,
+    });
   }
 
   const resultArray = allQuestions.map(getPercentage);
