@@ -515,7 +515,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
     // Increment Counter
     if (contentionGivenCounter > 0) {
       const userBalance = await getUserBalance(req.body.uuid);
-      if (userBalance < QUEST_OPTION_CONTENTION_GIVEN_AMOUNT)
+      if (userBalance < QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter)
         throw new Error("The balance is insufficient to give the contention!");
       // Create Ledger
       await createLedger({
