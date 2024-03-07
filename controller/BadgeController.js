@@ -480,9 +480,7 @@ const removeBadge = async (req, res) => {
       }
     });
     // Update the user badges
-    User.badges = updatedUserBadges;
-    // Update the action
-    await User.save();
+   
 
     // Create Ledger
     await createLedger({
@@ -496,6 +494,10 @@ const removeBadge = async (req, res) => {
       txData: User.badges[0]._id,
       // txDescription : "User adds a verification badge"
     });
+
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
     // // Create Ledger
     // await createLedger({
     //   uuid: User.uuid,
@@ -531,6 +533,7 @@ const removeBadge = async (req, res) => {
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: `An error occurred while addSocialBadge: ${error.message}`,
     });
