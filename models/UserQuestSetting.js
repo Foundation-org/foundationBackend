@@ -17,7 +17,7 @@ const UserQuestSetting = mongoose.Schema(
     },
     link: {
       type: String,
-      default: ""
+      // default: undefined,
       // default: shortLink.generate(8)
     },
     linkStatus: {
