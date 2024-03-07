@@ -154,3 +154,11 @@ module.exports.numberToWords = (sentence) => {
   
     return sentence; // Return the original sentence if no numbers are found
 };
+
+module.exports.extractAndSanitizeDollar = (sentence) => {
+ // Use a regular expression to match symbols
+ const symbolRegex = /[$]/g;
+ const sanitizedSentence = sentence.replace(symbolRegex, '');
+
+ return sanitizedSentence;
+};
