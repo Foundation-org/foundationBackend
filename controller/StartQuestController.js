@@ -13,8 +13,12 @@ const {
   QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
-const { getQuestionsWithStatus, getQuestionsWithUserSettings } = require("./InfoQuestQuestionController");
+const {
+  getQuestionsWithStatus,
+  getQuestionsWithUserSettings,
+} = require("./InfoQuestQuestionController");
 const { getPercentage } = require("../utils/getPercentage");
+const UserQuestSetting = require("../models/UserQuestSetting");
 
 const updateViolationCounter = async (req, res) => {
   try {
@@ -56,12 +60,20 @@ const createStartQuest = async (req, res) => {
       { uuid: matchingUuid },
       { $inc: { usersAnswered: 1 } }
     );
+
     // Your Post Engaged
     await User.findOneAndUpdate(
       { uuid: req.body.uuid },
       { $inc: { yourPostEngaged: 1 } }
     );
 
+    if (req.body.isSharedLinkAns) {
+      // Increament $inc userQuest submtted count if questForeignKey exist in UserQuestSetting Model
+      await UserQuestSetting.findOneAndUpdate(
+        { questForeignKey: req.body.questForeignKey },
+        { $inc: { questsCompleted: 1 } } // Increment questImpression field by 1
+      );
+    }
     // Process the 'contended' array and increment 'contentionsGiven'
     const contendedArray = req.body.data?.contended || [];
     const contentionsGivenIncrement = contendedArray.length;
@@ -165,7 +177,10 @@ const createStartQuest = async (req, res) => {
       getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
       getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
     ) {
-      if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
+      if (
+        getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+        getInfoQuestQuestion.whichTypeQuestion === "open choice"
+      ) {
         req.body.data?.selected?.forEach((item) => {
           selectedCounter[`result.selected.${item.question}`] = 1;
         });
@@ -382,7 +397,7 @@ const createStartQuest = async (req, res) => {
     res.status(200).json({
       message: "Start Quest Created Successfully",
       startQuestID: question._id,
-      data: desiredArray[0]
+      data: desiredArray[0],
     });
   } catch (err) {
     console.error(err);
@@ -483,7 +498,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         }
       }
     };
-  
+
     // DECREMENT
     if (startQuestQuestion?.data.length > 1) {
       let lstTimeSelectionsAndContentions =
@@ -506,16 +521,26 @@ const updateChangeAnsStartQuest = async (req, res) => {
 
     // Increment 'contentionsGiven' based on the length of 'contended' array
     const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
-    const contentionsGivenIncrement = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'] && contendedArray.length === 0 ? -1 : contendedArray.length;
+    const contentionsGivenIncrement =
+      startQuestQuestion?.data[startQuestQuestion?.data.length - 1][
+        "contended"
+      ] && contendedArray.length === 0
+        ? -1
+        : contendedArray.length;
     // requested contention - saved contention
     const requestedContention = contendedArray.length;
-    const savedContention = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'].length;
+    const savedContention =
+      startQuestQuestion?.data[startQuestQuestion?.data.length - 1]["contended"]
+        .length;
     let contentionGivenCounter = requestedContention - savedContention;
 
     // Increment Counter
     if (contentionGivenCounter > 0) {
       const userBalance = await getUserBalance(req.body.uuid);
-      if (userBalance < QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter)
+      if (
+        userBalance <
+        QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter
+      )
         throw new Error("The balance is insufficient to give the contention!");
       // Create Ledger
       await createLedger({
@@ -552,8 +577,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         dec: true,
         uuid: req.body.uuid,
       });
-
-    } else if(contentionGivenCounter < 0) {
+    } else if (contentionGivenCounter < 0) {
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
@@ -574,18 +598,24 @@ const updateChangeAnsStartQuest = async (req, res) => {
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
-        txAmount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter),
+        txAmount:
+          QUEST_OPTION_CONTENTION_REMOVED_AMOUNT *
+          Math.abs(contentionGivenCounter),
         // txData : req.body.uuid,
         // txDescription : "DisInsentive for giving contention"
       });
       // increment the Treasury
       await updateTreasury({
-        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter),
+        amount:
+          QUEST_OPTION_CONTENTION_REMOVED_AMOUNT *
+          Math.abs(contentionGivenCounter),
         dec: true,
       });
       // Decrement the User Balance
       await updateUserBalance({
-        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter),
+        amount:
+          QUEST_OPTION_CONTENTION_REMOVED_AMOUNT *
+          Math.abs(contentionGivenCounter),
         inc: true,
         uuid: req.body.uuid,
       });
@@ -650,7 +680,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // decrement the selected and contended count
         let selectedCounter = {};
         let contendedCounter = {};
-        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
+        if (
+          getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+          getInfoQuestQuestion.whichTypeQuestion === "open choice"
+        ) {
           initialStartQuestData[
             initialStartQuestData.length - 1
           ]?.selected?.forEach((item) => {
@@ -713,7 +746,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // increment the selected and contended count
         selectedCounter = {};
         contendedCounter = {};
-        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
+        if (
+          getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+          getInfoQuestQuestion.whichTypeQuestion === "open choice"
+        ) {
           startQuestQuestion.data[
             startQuestQuestion.data.length - 1
           ]?.selected?.forEach((item) => {
@@ -816,9 +852,11 @@ const updateChangeAnsStartQuest = async (req, res) => {
       contendedPercentage: item.contendedPercentage,
     }));
 
-    res
-      .status(200)
-      .json({ message: responseMsg, startQuestID: startQuestQuestion._id, data: desiredArray[0] });
+    res.status(200).json({
+      message: responseMsg,
+      startQuestID: startQuestQuestion._id,
+      data: desiredArray[0],
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({

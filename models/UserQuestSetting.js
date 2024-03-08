@@ -32,7 +32,15 @@ const UserQuestSetting = mongoose.Schema(
     hiddenMessage: {
       type: String,
       default: ""
-    }
+    },
+    questImpression: {
+      type: Number,
+      default: 0,
+    },
+    questsCompleted: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
