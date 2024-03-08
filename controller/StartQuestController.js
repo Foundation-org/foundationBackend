@@ -509,7 +509,8 @@ const updateChangeAnsStartQuest = async (req, res) => {
     const contentionsGivenIncrement = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'] && contendedArray.length === 0 ? -1 : contendedArray.length;
     // requested contention - saved contention
     const requestedContention = contendedArray.length;
-    const savedContention = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'].length;
+    // const savedContention = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'].length;
+    const savedContention = startQuestQuestion?.data?.[startQuestQuestion?.data.length - 1]?.contended?.length ?? 0;
     let contentionGivenCounter = requestedContention - savedContention;
 
     // Increment Counter
