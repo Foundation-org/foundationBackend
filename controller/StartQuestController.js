@@ -68,9 +68,10 @@ const createStartQuest = async (req, res) => {
     );
 
     if (req.body.isSharedLinkAns) {
+      console.log('req.body.isSharedLinkAns', req.body.isSharedLinkAns)
       // Increament $inc userQuest submtted count if questForeignKey exist in UserQuestSetting Model
       await UserQuestSetting.findOneAndUpdate(
-        { questForeignKey: req.body.questForeignKey },
+        { questForeignKey: req.body.questForeignKey, link: req.body.postLink },
         { $inc: { questsCompleted: 1 } } // Increment questImpression field by 1
       );
     }
