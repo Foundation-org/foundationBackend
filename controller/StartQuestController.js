@@ -471,49 +471,51 @@ const updateChangeAnsStartQuest = async (req, res) => {
       }
     }
 
-    
-    const beforeAnsLength = startQuestQuestion.data[startQuestQuestion.data.length - 1].contended.length;
-    const afterAnsLength = lastDataElement.contended.length;
-    if (beforeAnsLength !== afterAnsLength) {
-      const actualAnsLength = afterAnsLength - beforeAnsLength;
+    if(getInfoQuestQuestion.whichTypeQuestion==="open choice" || getInfoQuestQuestion.whichTypeQuestion==="ranked choise" || getInfoQuestQuestion.whichTypeQuestion==="multiple choise"){
 
-      await User.findOneAndUpdate(
+      const beforeAnsLength = startQuestQuestion.data[startQuestQuestion.data.length - 1].contended.length;
+      const afterAnsLength = lastDataElement.contended.length;
+      if (beforeAnsLength !== afterAnsLength) {
+        const actualAnsLength = afterAnsLength - beforeAnsLength;
+        
+        await User.findOneAndUpdate(
         { uuid: getInfoQuestQuestion.uuid },
         {
           $inc: {
             contentionsOnAddedAns: actualAnsLength,
           },
         }
-      );
+        );
+      }
     }
-
+      
     // INCREMENT
     // Function to process an array
-    const incrementProcessArray = async (array, fieldToUpdate) => {
-      if (array && Array.isArray(array)) {
-        for (const item of array) {
-          // Check if item.question matches addedAnswer in StartQuests
-          const matchingStartQuest = await StartQuests.findOne({
-            addedAnswer: item.question,
-          });
+    // const incrementProcessArray = async (array, fieldToUpdate) => {
+    //   if (array && Array.isArray(array)) {
+    //     for (const item of array) {
+    //       // Check if item.question matches addedAnswer in StartQuests
+    //       const matchingStartQuest = await StartQuests.findOne({
+    //         addedAnswer: item.question,
+    //       });
 
-          if (matchingStartQuest) {
-            // Get the uuid of the matching record
-            const matchingUuid = matchingStartQuest.uuid;
+    //       if (matchingStartQuest) {
+    //         // Get the uuid of the matching record
+    //         const matchingUuid = matchingStartQuest.uuid;
 
-            // Define the field to update based on the provided fieldToUpdate parameter
-            const updateField = {};
-            updateField[fieldToUpdate] = 1;
+    //         // Define the field to update based on the provided fieldToUpdate parameter
+    //         const updateField = {};
+    //         updateField[fieldToUpdate] = 1;
 
-            // Increment the specified field in the User table
-            await User.findOneAndUpdate(
-              { uuid: matchingUuid },
-              { $inc: updateField }
-            );
-          }
-        }
-      }
-    };
+    //         // Increment the specified field in the User table
+    //         await User.findOneAndUpdate(
+    //           { uuid: matchingUuid },
+    //           { $inc: updateField }
+    //         );
+    //       }
+    //     }
+    //   }
+    // };
 
     // Process both 'contended' and 'selected' arrays for increment
     // await Promise.all([
