@@ -17,7 +17,7 @@ const {
   createQuestTopic,
   checkNonsenseInTopics,
   numberToWords,
-  extractAndSanitizeDollars,
+  extractAndSanitizeDollar,
 } = require("../service/AiValidation");
 const QuestTopics = require("../models/QuestTopics");
 
@@ -146,7 +146,7 @@ function checkResponse(responseData, userMessage, callType, req, res) {
     filtered = capitalizeFirstLetter(filtered);
     filtered = removeTrailingPeriods(filtered);
     filtered = removeTrailingQuestionMarks(filtered);
-    filtered = extractAndSanitizeDollars(filtered);
+    filtered = extractAndSanitizeDollar(filtered);
     filtered = numberToWords(filtered)
   }
 

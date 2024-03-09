@@ -17,7 +17,7 @@ const UserQuestSetting = mongoose.Schema(
     },
     link: {
       type: String,
-      // default: undefined,
+      default: ""
       // default: shortLink.generate(8)
     },
     linkStatus: {
@@ -32,15 +32,7 @@ const UserQuestSetting = mongoose.Schema(
     hiddenMessage: {
       type: String,
       default: ""
-    },
-    questImpression: {
-      type: Number,
-      default: 0,
-    },
-    questsCompleted: {
-      type: Number,
-      default: 0,
-    },
+    }
   },
   { timestamps: true }
 );
