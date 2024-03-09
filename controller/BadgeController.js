@@ -231,7 +231,7 @@ const addBadge = async (req, res) => {
     const usersWithBadge = await UserModel.find({
       badges: { $elemMatch: { accountId: req.body.badgeAccountId } },
     });
-    if (usersWithBadge.length !== 0) throw new Error("Badge already exist");
+    if (usersWithBadge.length !== 0) throw new Error("Oops! This account is already linked.");
 
     const userBadges = User.badges;
     const updatedUserBadges = [
