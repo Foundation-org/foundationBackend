@@ -102,35 +102,6 @@ const link = async(req, res) => {
   }
 }
 
-const impression = async (req, res) => {
-  try {
-    const { link } = req.params;
-
-    // Update the document using findOneAndUpdate with $inc operator
-    const updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
-      { link },
-      { $inc: { questImpression: 1 } }, // Increment questImpression field by 1
-      { new: true } // Return the updated document
-    );
-
-    if (!updatedUserQuestSetting) {
-      // If the document doesn't exist, you may want to handle this case
-      return res.status(404).json({ message: "UserQuestSetting not found" });
-    }
-
-    return res.status(201).json({
-      message: "UserQuestSetting link Updated Successfully!",
-      data: updatedUserQuestSetting,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: `An error occurred while updating UserQuestSetting link: ${error.message}`,
-    });
-  }
-};
-
-
 const create = async(req, res) => {
   try {
     const payload = req.body;
@@ -388,6 +359,5 @@ module.exports = {
   createOrUpdate,
   update,
   link,
-  impression
   // get,
 };

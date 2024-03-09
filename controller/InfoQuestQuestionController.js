@@ -332,7 +332,6 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       // filterObj.uuid = req.body.uuid;
       const Questions = await BookmarkQuests.find({
         questForeignKey: { $nin: hiddenUserSettingIds },
-        uuid:req.body.uuid,
         ...filterObj,
       }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"

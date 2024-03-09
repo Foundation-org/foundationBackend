@@ -130,14 +130,14 @@ const addContactBadge = async (req, res) => {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
     // Check education Email
-    if (req.body.type === "education") {
-      // Check Email Category
-      const emailStatus = await eduEmailCheck(req, res, req.body.email);
-      console.log("🚀 ~ addContactBadge ~ emailStatus:", emailStatus);
-      if (emailStatus.status !== "OK") throw new Error(emailStatus.message);
+    if(req.body.type === 'education'){
+        // Check Email Category
+        const emailStatus = await eduEmailCheck(req, res, req.body.email);
+        console.log("🚀 ~ addContactBadge ~ emailStatus:", emailStatus)
+        if (emailStatus.status !== "OK") throw new Error(emailStatus.message);
     }
 
-    if (req.body.legacy) {
+    if(req.body.legacy) {
       // Find the Badge
       const usersWithBadge = await UserModel.find({
         badges: { $elemMatch: { email: req.body.email } },
@@ -146,18 +146,14 @@ const addContactBadge = async (req, res) => {
       const usersWithEmail = await UserModel.find({
         email: req.body.email,
       });
-      if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0)
-        throw new Error("Badge already exist");
+      if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0) throw new Error("Badge already exist");
+
 
       // Send an email
-      await sendVerifyEmail({
-        email: req.body.email,
-        uuid: req.body.uuid,
-        type: req.body.type,
-      });
+      await sendVerifyEmail({ email: req.body.email, uuid: req.body.uuid, type: req.body.type })
       res.status(201).json({
-        message: `Sent a verification email to ${req.body.email}`,
-      });
+          message: `Sent a verification email to ${req.body.email}`,
+        });
       return;
     }
     // Find the Badge
@@ -231,7 +227,7 @@ const addBadge = async (req, res) => {
     const usersWithBadge = await UserModel.find({
       badges: { $elemMatch: { accountId: req.body.badgeAccountId } },
     });
-    if (usersWithBadge.length !== 0) throw new Error("Badge already exist");
+    if (usersWithBadge.length !== 0) throw new Error("Oops! This account is already linked.");
 
     const userBadges = User.badges;
     const updatedUserBadges = [
@@ -298,7 +294,7 @@ const addPersonalBadge = async (req, res) => {
     const updatedUserBadges = [
       ...userBadges,
       {
-        personal: req.body.personal,
+        personal:req.body.personal,
       },
     ];
     // Update the user badges
@@ -347,122 +343,6 @@ const addPersonalBadge = async (req, res) => {
   }
 };
 
-const addWeb3Badge = async (req, res) => {
-
-  console.log(req.body);
-  try {
-    const User = await UserModel.findOne({ uuid: req.body.uuid });
-    if (!User) throw new Error("No such User!");
-
-    const userBadges = User.badges;
-    const updatedUserBadges = [
-      ...userBadges,
-      {
-        web3: req.body.web3,
-      },
-    ];
-    // Update the user badges
-    User.badges = updatedUserBadges;
-    // Update the action
-    await User.save();
-
-    // Create Ledger
-    await createLedger({
-      uuid: User.uuid,
-      txUserAction: "web3BadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "User",
-      txFrom: User.uuid,
-      txTo: "dao",
-      txAmount: "0",
-      txData: User.badges[0]._id,
-    });
-    await createLedger({
-      uuid: User.uuid,
-      txUserAction: "web3BadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "DAO",
-      txFrom: "DAO Treasury",
-      txTo: User.uuid,
-      txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-    });
-    // Decrement the Treasury
-    await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
-
-    // Increment the UserBalance
-    await updateUserBalance({
-      uuid: User.uuid,
-      amount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      inc: true,
-    });
-
-    res.status(200).json({ message: "Successful" });
-  } catch (error) {
-    res.status(500).json({
-      message: `An error occurred while addWeb3Badge: ${error.message}`,
-    });
-  }
-};
-const removePersonalBadge = async (req, res) => {
-  try {
-    const User = await UserModel.findOne({ uuid: req.body.uuid });
-    if (!User) throw new Error("No such User!");
-
-    const userBadges = User.badges;
-    const updatedUserBadges =
-      userBadges?.filter(
-        (badge) => !badge?.personal?.hasOwnProperty(req.body.type)
-      ) || [];
-    // Update the user badges
-    User.badges = updatedUserBadges;
-    // Update the action
-    await User.save();
-
-    // Create Ledger
-    await createLedger({
-      uuid: User.uuid,
-      txUserAction: "personalBadgeRemoved",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "User",
-      txFrom: User.uuid,
-      txTo: "dao",
-      txAmount: "0",
-      txData: User.badges[0]._id,
-      // txDescription : "User adds a verification badge"
-    });
-    res.status(200).json({ message: "Successful" });
-  } catch (error) {
-    res.status(500).json({
-      message: `An error occurred while addPersonalBadge: ${error.message}`,
-    });
-  }
-};
-
-const updatePersonalBadge = async (req, res) => {
-  try {
-    const User = await UserModel.findOne({ uuid: req.body.uuid });
-    if (!User) throw new Error("No such User!");
-
-    const userBadges = User.badges;
-
-    userBadges?.forEach((badge) => {
-      if (badge?.personal?.hasOwnProperty(req.body.type)) {
-        badge.personal[itemType] = req.body.newValue;
-      }
-    });
-    // Update the user badges
-    User.badges = updatedUserBadges;
-    // Update the action
-    await User.save();
-
-    res.status(200).json({ message: "Successful" });
-  } catch (error) {
-    res.status(500).json({
-      message: `An error occurred while updatePersonalBadge: ${error.message}`,
-    });
-  }
-};
-
 const removeBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -480,10 +360,12 @@ const removeBadge = async (req, res) => {
       }
     });
     // Update the user badges
-   
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
 
-    // Create Ledger
-    await createLedger({
+     // Create Ledger
+     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeRemoved",
       txID: crypto.randomBytes(11).toString("hex"),
@@ -494,10 +376,6 @@ const removeBadge = async (req, res) => {
       txData: User.badges[0]._id,
       // txDescription : "User adds a verification badge"
     });
-
-    User.badges = updatedUserBadges;
-    // Update the action
-    await User.save();
     // // Create Ledger
     // await createLedger({
     //   uuid: User.uuid,
@@ -533,14 +411,13 @@ const removeBadge = async (req, res) => {
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       message: `An error occurred while addSocialBadge: ${error.message}`,
     });
   }
 };
 
-const sendVerifyEmail = async ({ email, uuid, type }) => {
+const sendVerifyEmail = async({email, uuid, type }) => {
   try {
     const verificationTokenFull = jwt.sign({ uuid, email, type }, JWT_SECRET, {
       expiresIn: "10m",
@@ -610,10 +487,11 @@ const sendVerifyEmail = async ({ email, uuid, type }) => {
     //   message: `An error occurred while sendVerifyEmail Auth: ${error.message}`,
     // });
   }
-};
+}
 
-const addContactBadgeVerify = async (req, res) => {
-  try {
+const addContactBadgeVerify = async(req, res) => {
+  try{
+
     const token = req.headers.authorization;
     const decodedToken = jwt.verify(token, JWT_SECRET);
 
@@ -628,33 +506,36 @@ const addContactBadgeVerify = async (req, res) => {
     const usersWithEmail = await UserModel.find({
       email: decodedToken.email,
     });
-    if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0)
-      throw new Error("Badge already exist");
+    if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0) throw new Error("Badge already exist");
+    
+     
+      // const userBadges = User.badges;
+      // const updatedUserBadges = [
+      //   ...userBadges,
+      //   {
+      //     email: decodedToken.email,
+      //     isVerified: false,
+      //     type: decodedToken.type,
+      //   },
+      // ];
+      // // Update the user badges
+      // User.badges = updatedUserBadges;
+      // // Update the action
+      // await User.save();
 
-    // const userBadges = User.badges;
-    // const updatedUserBadges = [
-    //   ...userBadges,
-    //   {
-    //     email: decodedToken.email,
-    //     isVerified: false,
-    //     type: decodedToken.type,
-    //   },
-    // ];
-    // // Update the user badges
-    // User.badges = updatedUserBadges;
-    // // Update the action
-    // await User.save();
+    return res.status(200).json({ message: 'Continue' });
 
-    return res.status(200).json({ message: "Continue" });
-  } catch (error) {
+  }
+  catch(error){
     return res.status(500).json({
       message: error.message,
     });
   }
-};
+}
 
-const addContactBadgeAdd = async (req, res) => {
-  try {
+const addContactBadgeAdd = async(req, res) => {
+  try{
+
     const token = req.headers.authorization;
     const decodedToken = jwt.verify(token, JWT_SECRET);
 
@@ -669,30 +550,31 @@ const addContactBadgeAdd = async (req, res) => {
     const usersWithEmail = await UserModel.find({
       email: decodedToken.email,
     });
-    if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0)
-      throw new Error("Badge already exist");
-
-    const userBadges = User.badges;
-    const updatedUserBadges = [
-      ...userBadges,
-      {
-        email: decodedToken.email,
-        isVerified: true,
-        type: decodedToken.type,
-      },
-    ];
-    // Update the user badges
-    User.badges = updatedUserBadges;
-    // Update the action
-    await User.save();
-    res.status(200).json({ ...User._doc });
-  } catch (error) {
+    if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0) throw new Error("Badge already exist");
+    
+     
+      const userBadges = User.badges;
+      const updatedUserBadges = [
+        ...userBadges,
+        {
+          email: decodedToken.email,
+          isVerified: true,
+          type: decodedToken.type,
+        },
+      ];
+      // Update the user badges
+      User.badges = updatedUserBadges;
+      // Update the action
+      await User.save();
+      res.status(200).json({ ...User._doc });
+  }
+  catch(error){
     return res.status(500).json({
       // message: error.message,
       message: `An error occurred while addContactBadge: ${error.message}`,
     });
   }
-};
+}
 
 module.exports = {
   update,
@@ -703,8 +585,5 @@ module.exports = {
   addContactBadge,
   addContactBadgeVerify,
   addContactBadgeAdd,
-  addPersonalBadge,
-  removePersonalBadge,
-  updatePersonalBadge,
-  addWeb3Badge,
+  addPersonalBadge
 };
