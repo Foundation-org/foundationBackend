@@ -24,4 +24,7 @@ router.post("/addBadge/personal/add", BadgeController.addPersonalBadge);
 
 router.post("/removeBadge", BadgeController.removeBadge);
 
+router.post("/addBadge/web3/add", BadgeController.addWeb3Badge);
+
+
 module.exports = router;

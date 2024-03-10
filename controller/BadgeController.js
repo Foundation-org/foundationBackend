@@ -343,6 +343,123 @@ const addPersonalBadge = async (req, res) => {
   }
 };
 
+
+const addWeb3Badge = async (req, res) => {
+
+  console.log(req.body);
+  try {
+    const User = await UserModel.findOne({ uuid: req.body.uuid });
+    if (!User) throw new Error("No such User!");
+
+    const userBadges = User.badges;
+    const updatedUserBadges = [
+      ...userBadges,
+      {
+        web3: req.body.web3,
+      },
+    ];
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
+
+    // Create Ledger
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "web3BadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: User.badges[0]._id,
+    });
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "web3BadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: "DAO Treasury",
+      txTo: User.uuid,
+      txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+    });
+    // Decrement the Treasury
+    await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
+
+    // Increment the UserBalance
+    await updateUserBalance({
+      uuid: User.uuid,
+      amount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      inc: true,
+    });
+
+    res.status(200).json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while addWeb3Badge: ${error.message}`,
+    });
+  }
+};
+const removePersonalBadge = async (req, res) => {
+  try {
+    const User = await UserModel.findOne({ uuid: req.body.uuid });
+    if (!User) throw new Error("No such User!");
+
+    const userBadges = User.badges;
+    const updatedUserBadges =
+      userBadges?.filter(
+        (badge) => !badge?.personal?.hasOwnProperty(req.body.type)
+      ) || [];
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
+
+    // Create Ledger
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "personalBadgeRemoved",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: User.badges[0]._id,
+      // txDescription : "User adds a verification badge"
+    });
+    res.status(200).json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while addPersonalBadge: ${error.message}`,
+    });
+  }
+};
+
+const updatePersonalBadge = async (req, res) => {
+  try {
+    const User = await UserModel.findOne({ uuid: req.body.uuid });
+    if (!User) throw new Error("No such User!");
+
+    const userBadges = User.badges;
+
+    userBadges?.forEach((badge) => {
+      if (badge?.personal?.hasOwnProperty(req.body.type)) {
+        badge.personal[itemType] = req.body.newValue;
+      }
+    });
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
+
+    res.status(200).json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while updatePersonalBadge: ${error.message}`,
+    });
+  }
+};
+
 const removeBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -585,5 +702,8 @@ module.exports = {
   addContactBadge,
   addContactBadgeVerify,
   addContactBadgeAdd,
-  addPersonalBadge
+  addPersonalBadge,
+  removePersonalBadge,
+  updatePersonalBadge,
+  addWeb3Badge,
 };
