@@ -25,7 +25,9 @@ module.exports = {
     // FIRST NAME
     "Is this a valid first name for a person? Answer yes or no or no only.",
     // LAST NAME
-    "Is this a valid last name for a person? Answer yes or no or no only."
+    "Is this a valid last name for a person? Answer yes or no or no only.",
+    // CATEGORY
+    "Give the closest category using only these: Architecture, Arts, Business, Culture, Economics, Education, Environment, Ethics, Geography, Health, History, Law, Music, Philosophy, Personal, Politics, Preferences, Psychology, Religion, Science, Society, Sports, Technology.  Shortest responses only"
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
   ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,
