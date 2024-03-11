@@ -4,7 +4,8 @@ const { createLedger } = require("../utils/createLedger");
 const crypto = require("crypto");
 const UserModel = require("../models/UserModel");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
-
+const AWS = require('aws-sdk');
+const { uploadS3Bucket } = require("../utils/uploadS3Bucket");
 
 const createOrUpdate = async (req, res) => {
   try {
@@ -61,6 +62,11 @@ const link = async(req, res) => {
       payload.link = shortLink.generate(8);
     }
 
+    // To check the Question Description
+    const infoQuestQuestion = await InfoQuestQuestions.findOne({
+      _id: payload.questForeignKey,
+    });
+
     const userQuestSettingExist = await UserQuestSetting.findOne({
       uuid: payload.uuid,
       questForeignKey: payload.questForeignKey,
@@ -82,12 +88,14 @@ const link = async(req, res) => {
           new: true, // Return the modified document rather than the original
         }
       );
+      await uploadS3Bucket({ fileName: savedOrUpdatedUserQuestSetting.link, description: savedOrUpdatedUserQuestSetting.Question })
     } else {
       // Create a short link
       const userQuestSetting = new UserQuestSetting({
         ...payload,
       });
       savedOrUpdatedUserQuestSetting = await userQuestSetting.save();
+      await uploadS3Bucket({ fileName: savedOrUpdatedUserQuestSetting.link, description: savedOrUpdatedUserQuestSetting.Question })
     };
     
     return res
