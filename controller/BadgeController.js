@@ -476,13 +476,8 @@ const removeBadge = async (req, res) => {
         return item;
       }
     });
-    // Update the user badges
-    User.badges = updatedUserBadges;
-    // Update the action
-    await User.save();
 
-     // Create Ledger
-     await createLedger({
+    await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeRemoved",
       txID: crypto.randomBytes(11).toString("hex"),
@@ -493,6 +488,13 @@ const removeBadge = async (req, res) => {
       txData: User.badges[0]._id,
       // txDescription : "User adds a verification badge"
     });
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
+
+     // Create Ledger
+
     // // Create Ledger
     // await createLedger({
     //   uuid: User.uuid,
