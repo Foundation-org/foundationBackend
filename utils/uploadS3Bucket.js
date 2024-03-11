@@ -17,7 +17,7 @@ module.exports.uploadS3Bucket = async ({fileName, description}) => {
         title: "Foundation",
         type: "website",
         url: "https://on.foundation",
-        image: "https://staging.on.foundation/seo.svg",
+        image: "https://foundation-seo.s3.amazonaws.com/foundation-seo-logo.png",
     }
     const { title, type, url, image } = metaTags;
     const params = {
