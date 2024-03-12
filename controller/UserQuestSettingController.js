@@ -43,7 +43,6 @@ const createOrUpdate = async (req, res) => {
         .status(200)
         .json({ message: "UserQuestSetting Updated Successfully!" });
     }
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -52,12 +51,12 @@ const createOrUpdate = async (req, res) => {
   }
 };
 
-const link = async(req, res) => {
+const link = async (req, res) => {
   try {
     const payload = req.body;
 
     // if uniqueLink
-    if(payload.isGenerateLink){
+    if (payload.isGenerateLink) {
       await ledgerEntryPostLinkCreated(payload.uuid);
       payload.link = shortLink.generate(8);
     }
@@ -82,7 +81,7 @@ const link = async(req, res) => {
         },
         {
           // Update fields and values here
-          $set: payload
+          $set: payload,
         },
         {
           new: true, // Return the modified document rather than the original
@@ -108,7 +107,7 @@ const link = async(req, res) => {
       message: ` An error occurred while create UserQuestSetting link: ${error.message}`,
     });
   }
-}
+};
 
 const impression = async (req, res) => {
   try {
@@ -116,7 +115,7 @@ const impression = async (req, res) => {
 
     // Update the document using findOneAndUpdate with $inc operator
     const updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
-      { link },
+      { link, linkStatus:"Enable" },
       { $inc: { questImpression: 1 } }, // Increment questImpression field by 1
       { new: true } // Return the updated document
     );
@@ -138,7 +137,41 @@ const impression = async (req, res) => {
   }
 };
 
-const create = async(req, res) => {
+const status = async (req, res) => {
+  try {
+    const { link } = req.params;
+    const { status } = req.body;
+    let updatedUserQuestSetting;
+
+    if (status === 'Delete') {
+      updatedUserQuestSetting = await UserQuestSetting.findOneAndDelete({ link }).exec();
+      if (!updatedUserQuestSetting) {
+        return res.status(404).json({ message: "Quest Setting not found or already deleted" });
+      }
+      return res.status(200).json({ message: "Quest link Deleted Successfully!" });
+    } else {
+      updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
+        { link },
+        { linkStatus: status },
+        { new: true }
+      );
+      if (!updatedUserQuestSetting) {
+        return res.status(404).json({ message: "Quest Setting not found" });
+      }
+      return res.status(200).json({
+        message: `Quest link ${status === 'Disable' ? 'Disabled' : 'Enabled'} Successfully!`,
+        data: updatedUserQuestSetting,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while changing link status: ${error.message}`,
+    });
+  }
+};
+
+const create = async (req, res) => {
   try {
     const payload = req.body;
 
@@ -153,7 +186,8 @@ const create = async(req, res) => {
       questForeignKey: payload.questForeignKey,
     });
     // To check the record exist
-    if (userQuestSettingExist) throw new Error("userQuestSetting already exist");
+    if (userQuestSettingExist)
+      throw new Error("userQuestSetting already exist");
 
     // Create a short link
     const userQuestSetting = new UserQuestSetting({
@@ -169,18 +203,18 @@ const create = async(req, res) => {
       await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
     }
-    
-    return res
-      .status(201)
-      .json({ message: "UserQuestSetting Created Successfully!", data: savedUserQuestSetting });
 
-  } catch(error){
+    return res.status(201).json({
+      message: "UserQuestSetting Created Successfully!",
+      data: savedUserQuestSetting,
+    });
+  } catch (error) {
     console.error(error);
     res.status(500).json({
       message: ` An error occurred while create UserQuestSetting: ${error.message}`,
     });
   }
-}
+};
 
 const update = async (req, res) => {
   try {
@@ -206,7 +240,7 @@ const update = async (req, res) => {
       },
       {
         // Update fields and values here
-        $set: payload
+        $set: payload,
       },
       {
         new: true, // Return the modified document rather than the original
@@ -220,15 +254,15 @@ const update = async (req, res) => {
     if (payload.hidden) {
       await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
-    } else if(payload.hidden === false) {
+    } else if (payload.hidden === false) {
       await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
-    return res
-      .status(201)
-      .json({ message: "UserQuestSetting Updated Successfully!", data: updatedUserQuestSetting });
-
-  } catch(error){
+    return res.status(201).json({
+      message: "UserQuestSetting Updated Successfully!",
+      data: updatedUserQuestSetting,
+    });
+  } catch (error) {
     console.error(error);
     res.status(500).json({
       message: ` An error occurred while update UserQuestSetting: ${error.message}`,
@@ -283,98 +317,96 @@ const getAllHiddenQuests = async (req, res) => {
   }
 };
 
-const hiddenPostCount = async(uuid, hidden) => {
+const hiddenPostCount = async (uuid, hidden) => {
   try {
     // increment
     await UserModel.updateOne(
       { uuid },
       { $inc: { yourHiddenPostCounter: hidden ? 1 : -1 } }
     );
-    
-  } catch(error) {
+  } catch (error) {
     console.error(error);
   }
-}
+};
 
-const ledgerEntryPostLinkCreated = async(uuid) => {
+const ledgerEntryPostLinkCreated = async (uuid) => {
   try {
     // User
     await createLedger({
-     uuid: uuid,
-     txUserAction: "postLinkCreated",
-     txID: crypto.randomBytes(11).toString("hex"),
-     txAuth: "User",
-     txFrom: uuid,
-     txTo: "dao",
-     txAmount: "0",
-     txData: uuid,
-     // txDescription : "User creates a new account"
-   });
-  } catch(error) {
+      uuid: uuid,
+      txUserAction: "postLinkCreated",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: uuid,
+      // txDescription : "User creates a new account"
+    });
+  } catch (error) {
     console.error(error);
   }
-}
+};
 
-const ledgerEntryAdded = async(uuid, questOwnerUuid) => {
+const ledgerEntryAdded = async (uuid, questOwnerUuid) => {
   try {
     // User
     await createLedger({
-     uuid: uuid,
-     txUserAction: "postHiddenAdded",
-     txID: crypto.randomBytes(11).toString("hex"),
-     txAuth: "DAO",
-     txFrom: "dao",
-     txTo: uuid,
-     txAmount: "0",
-     txData: uuid,
-     // txDescription : "User creates a new account"
-   });
-   await createLedger({
-    uuid: questOwnerUuid,
-    txUserAction: "postHiddenAddedUser",
-    txID: crypto.randomBytes(11).toString("hex"),
-    txAuth: "User",
-    txFrom: questOwnerUuid,
-    txTo: "dao",
-    txAmount: "0",
-    txData: questOwnerUuid,
-    // txDescription : "User creates a new account"
-  });
-  } catch(error) {
+      uuid: uuid,
+      txUserAction: "postHiddenAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: "dao",
+      txTo: uuid,
+      txAmount: "0",
+      txData: uuid,
+      // txDescription : "User creates a new account"
+    });
+    await createLedger({
+      uuid: questOwnerUuid,
+      txUserAction: "postHiddenAddedUser",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: questOwnerUuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: questOwnerUuid,
+      // txDescription : "User creates a new account"
+    });
+  } catch (error) {
     console.error(error);
   }
-}
+};
 
-const ledgerEntryRemoved = async(uuid, questOwnerUuid) => {
+const ledgerEntryRemoved = async (uuid, questOwnerUuid) => {
   try {
     // User
     await createLedger({
-     uuid: uuid,
-     txUserAction: "postHiddenRemoved",
-     txID: crypto.randomBytes(11).toString("hex"),
-     txAuth: "User",
-     txFrom: uuid,
-     txTo: "dao",
-     txAmount: "0",
-     txData: uuid,
-     // txDescription : "User creates a new account"
-   });
-   await createLedger({
-    uuid: questOwnerUuid,
-    txUserAction: "postHiddenRemovedUser",
-    txID: crypto.randomBytes(11).toString("hex"),
-    txAuth: "User",
-    txFrom: questOwnerUuid,
-    txTo: "dao",
-    txAmount: "0",
-    txData: questOwnerUuid,
-    // txDescription : "User creates a new account"
-  });
-  } catch(error) {
+      uuid: uuid,
+      txUserAction: "postHiddenRemoved",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: uuid,
+      // txDescription : "User creates a new account"
+    });
+    await createLedger({
+      uuid: questOwnerUuid,
+      txUserAction: "postHiddenRemovedUser",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: questOwnerUuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: questOwnerUuid,
+      // txDescription : "User creates a new account"
+    });
+  } catch (error) {
     console.error(error);
   }
-}
-
+};
 
 // const get = async (req, res) => {
 //   try {
@@ -395,6 +427,7 @@ module.exports = {
   createOrUpdate,
   update,
   link,
-  impression
+  impression,
+  status,
   // get,
 };

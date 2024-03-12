@@ -843,7 +843,19 @@ const getQuestByUniqueShareLink = async (req, res) => {
       // uuid,
       link: uniqueShareLink
     });
-    if(!userQuestSetting) throw new Error("No Quest Exist!");
+
+    if (!userQuestSetting) {
+      // If the document doesn't exist, you may want to handle this case
+      return res.status(404).json({ status: false, message: "No Quest Exist!" });
+    }
+
+    if (userQuestSetting.linkStatus !== 'Enable') {
+      // If the document doesn't exist, you may want to handle this case
+      return res.status(404).json({ status: true, message: "This Quest is currently disabled" });
+    }
+
+
+
     const infoQuest = await InfoQuestQuestions.find({
       _id: userQuestSetting.questForeignKey,
     }).populate("getUserBadge", "badges");

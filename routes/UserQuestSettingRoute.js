@@ -19,4 +19,8 @@ router.post("/userQuestSetting/link", UserQuestSettingController.link);
 
 router.post("/userQuestImpression/:link", UserQuestSettingController.impression);
 
+router.post("/linkStatus/:link", UserQuestSettingController.status);
+
+//This Link is not Active
+
 module.exports = router;
