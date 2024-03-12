@@ -24,7 +24,7 @@ const QuestTopics = require("../models/QuestTopics");
 
 const validation = async (req, res) => {
   const callType = req.params.callType;
-  if (callType >= 1 && callType <= 6) {
+  if (callType >= 1 && callType <= 7) {
     await handleRequest(
       req,
       res,

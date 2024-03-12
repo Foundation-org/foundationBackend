@@ -19,7 +19,9 @@ module.exports = {
     // OPTION
     "Correct text to standard English without contractions. Never correct brand names or informal words like Coke. Shortest responses only",
     // PREFERENCES
-    "Suggest a topic category for this statement. One word answer only.",
+    // "Suggest a topic category for this statement. One word answer only.",
+    // CATEGORY
+    "Give the closest category using only these: Architecture, Arts, Business, Culture, Economics, Education, Environment, Ethics, Geography, Health, History, Law, Music, Philosophy, Personal, Politics, Preferences, Psychology, Religion, Science, Society, Sports, Technology.  Shortest responses only",
     // COC
     "You are a content moderator for a large social network. I will give you posts to rate. Respond with a rejection score from 0-100 only. Number only.",
     // FIRST NAME
