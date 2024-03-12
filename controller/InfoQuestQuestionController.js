@@ -804,7 +804,7 @@ const getAllQuestsWithResult = async (req, res) => {
 
 const getQuestById = async (req, res) => {
   try {
-    const { uuid, id } = req.params; // Use req.params instead of req.body
+    const { uuid, id,page } = req.params; // Use req.params instead of req.body
     const infoQuest = await InfoQuestQuestions.find({
       _id: id,
     }).populate("getUserBadge", "badges");
@@ -814,7 +814,7 @@ const getQuestById = async (req, res) => {
     // getQuestionsWithUserSettings
     const result1 = await getQuestionsWithUserSettings(result, uuid);
 
-    const resultArray = result1.map((item)=>getPercentage(item, req.body.Page));
+    const resultArray = result1.map((item)=>getPercentage(item,page));
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
