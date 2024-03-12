@@ -585,7 +585,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
   } else if (req.body.Page === "SharedLink") {
     console.log("running");
     filterObj.uuid = uuid;
-    filterObj.linkStatus = "Enable";
+    filterObj.linkStatus = { "$in": ["Enable", "Disable"] };
+    console.log('filterObj', filterObj)
     const Questions = await UserQuestSetting.find(filterObj)
     .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
     .limit(pageSize)
@@ -841,20 +842,14 @@ const getQuestByUniqueShareLink = async (req, res) => {
 
     const userQuestSetting = await UserQuestSetting.findOne({
       // uuid,
-      link: uniqueShareLink
+      link: uniqueShareLink,
+      linkStatus: 'Enable'
     });
 
     if (!userQuestSetting) {
       // If the document doesn't exist, you may want to handle this case
-      return res.status(404).json({ status: false, message: "No Quest Exist!" });
+      return res.status(404).json({ status: false, message: "This link is not active" });
     }
-
-    if (userQuestSetting.linkStatus !== 'Enable') {
-      // If the document doesn't exist, you may want to handle this case
-      return res.status(404).json({ status: true, message: "This Quest is currently disabled" });
-    }
-
-
 
     const infoQuest = await InfoQuestQuestions.find({
       _id: userQuestSetting.questForeignKey,
