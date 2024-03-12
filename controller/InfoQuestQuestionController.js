@@ -585,7 +585,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
   } else if (req.body.Page === "SharedLink") {
     console.log("running");
     filterObj.uuid = uuid;
-    filterObj.linkStatus = "Enable";
+    filterObj.linkStatus = { "$in": ["Enable", "Disable"] };
+    console.log('filterObj', filterObj)
     const Questions = await UserQuestSetting.find(filterObj)
     .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
     .limit(pageSize)
@@ -634,7 +635,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     });
   }
 
-  const resultArray = allQuestions.map(getPercentage);
+  const resultArray = allQuestions.map((item)=>getPercentage(item, req.body.Page));
   const desiredArray = resultArray.map((item) => ({
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
@@ -841,9 +842,15 @@ const getQuestByUniqueShareLink = async (req, res) => {
 
     const userQuestSetting = await UserQuestSetting.findOne({
       // uuid,
-      link: uniqueShareLink
+      link: uniqueShareLink,
+      linkStatus: 'Enable'
     });
-    if(!userQuestSetting) throw new Error("No Quest Exist!");
+
+    if (!userQuestSetting) {
+      // If the document doesn't exist, you may want to handle this case
+      return res.status(404).json({ status: false, message: "This link is not active" });
+    }
+
     const infoQuest = await InfoQuestQuestions.find({
       _id: userQuestSetting.questForeignKey,
     }).populate("getUserBadge", "badges");

@@ -22,5 +22,8 @@ module.exports = {
     FRONTEND_URL: process.env.FRONTEND_URL,
     FRONTEND_URL_1: process.env.FRONTEND_URL_1,
     DEVELOPMENT: process.env.DEVELOPMENT,
-    MAINTENANCE:process.env.MAINTENANCE
+    MAINTENANCE:process.env.MAINTENANCE,
+    AWS_S3_ACCESS_KEY: process.env.AWS_S3_ACCESS_KEY,
+    AWS_S3_SECRET_ACCESS_KEY: process.env.AWS_S3_SECRET_ACCESS_KEY,
+    AWS_S3_REGION: process.env.AWS_S3_REGION,
   };

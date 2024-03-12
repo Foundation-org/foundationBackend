@@ -19,4 +19,6 @@ router.post("/userQuestSetting/link", UserQuestSettingController.link);
 
 router.post("/userQuestImpression/:link", UserQuestSettingController.impression);
 
+router.post("/linkStatus/:link", UserQuestSettingController.status);
+
 module.exports = router;
