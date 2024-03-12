@@ -1,10 +1,19 @@
-module.exports.getPercentage = (document) => {
-  if (document.whichTypeQuestion === "ranked choise" && document?.result) {
-    const totalOptionCount = Object.values(document.result[0].selected).reduce(
+module.exports.getPercentage = (document, page) => {
+  console.log("page", page);
+  let result;
+
+  if (page === "SharedLink") {
+    result = document?.shareLinkResult;
+  } else {
+    result = document?.result;
+  }
+
+  if (document.whichTypeQuestion === "ranked choise" && result) {
+    const totalOptionCount = Object.values(result[0].selected).reduce(
       (acc, value) => acc + value,
       0
     );
-    const selectedPercentage = document?.result?.map((item) => {
+    const selectedPercentage = result?.map((item) => {
       const selectedKeys = Object.keys(item?.selected);
       const totalSelected = selectedKeys.reduce(
         (sum, key) => sum + item.selected[key],
@@ -20,7 +29,7 @@ module.exports.getPercentage = (document) => {
 
     let contendedPercentage;
     if (document.whichTypeQuestion === "ranked choise") {
-      contendedPercentage = document?.result?.map((item) => {
+      contendedPercentage = result?.map((item) => {
         if (!item?.contended) return;
         const contendedKeys = Object.keys(item?.contended);
         const totalSelected = contendedKeys.reduce(
@@ -39,9 +48,9 @@ module.exports.getPercentage = (document) => {
         return percentageObject;
       });
     }
-    return { ...document, selectedPercentage,contendedPercentage };
+    return { ...document, selectedPercentage, contendedPercentage };
   } else {
-    const selectedPercentage = document?.result?.map((item) => {
+    const selectedPercentage = result?.map((item) => {
       const selectedKeys = Object.keys(item?.selected);
       const totalSelected = selectedKeys.reduce(
         (sum, key) => sum + item.selected[key],
@@ -58,8 +67,11 @@ module.exports.getPercentage = (document) => {
       return percentageObject;
     });
     let contendedPercentage;
-    if (document.whichTypeQuestion === "multiple choise" || document.whichTypeQuestion === "open choice") {
-      contendedPercentage = document?.result?.map((item) => {
+    if (
+      document.whichTypeQuestion === "multiple choise" ||
+      document.whichTypeQuestion === "open choice"
+    ) {
+      contendedPercentage = result?.map((item) => {
         if (!item?.contended) return;
         const contendedKeys = Object.keys(item?.contended);
         const totalSelected = contendedKeys.reduce(

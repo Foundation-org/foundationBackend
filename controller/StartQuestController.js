@@ -34,7 +34,7 @@ const updateViolationCounter = async (req, res) => {
 const createStartQuest = async (req, res) => {
   try {
     const currentDate = new Date();
-
+    const { postLink } = req.body
     // Update InfoQuestQuestions and get the data
     const getInfoQuestQuestion = await InfoQuestQuestions.findByIdAndUpdate(
       { _id: req.body.questForeignKey },
@@ -194,6 +194,9 @@ const createStartQuest = async (req, res) => {
     // increment the totalStartQuest, selected and contended count
     const selectedCounter = {};
     const contendedCounter = {};
+    const shareLinkSelectedCounter = {};
+    const shareLinkContendedCounter = {};
+
     if (
       getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
       getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
@@ -206,6 +209,15 @@ const createStartQuest = async (req, res) => {
         req.body.data?.contended?.forEach((item) => {
           contendedCounter[`result.contended.${item.question}`] = 1;
         });
+
+        if(postLink) {
+          req.body.data?.selected?.forEach((item) => {
+            shareLinkSelectedCounter[`shareLinkResult.selected.${item.question}`] = 1;
+          });
+          req.body.data?.contended?.forEach((item) => {
+            shareLinkContendedCounter[`shareLinkResult.contended.${item.question}`] = 1;
+          });
+        }
       }
       if (getInfoQuestQuestion.whichTypeQuestion === "ranked choise") {
         req.body.data?.selected?.forEach((item, index) => {
@@ -215,15 +227,31 @@ const createStartQuest = async (req, res) => {
         req.body.data?.contended?.forEach((item) => {
           contendedCounter[`result.contended.${item.question}`] = 1;
         });
+
+        if(postLink) {
+          req.body.data?.selected?.forEach((item, index) => {
+            const count = req.body.data?.selected.length - index - 1;
+            shareLinkSelectedCounter[`shareLinkResult.selected.${item.question}`] = count;
+          });
+          req.body.data?.contended?.forEach((item) => {
+            shareLinkContendedCounter[`shareLinkResult.contended.${item.question}`] = 1;
+          });
+        }
       }
-    } else {
+    } 
+    else {
       selectedCounter[`result.selected.${req.body.data.selected}`] = 1;
+      if(postLink) {
+        shareLinkContendedCounter[`shareLinkResult.selected.${req.body.data.selected}`] = 1;
+      }
     }
     await getInfoQuestQuestion.updateOne({
       $inc: {
         totalStartQuest: 1,
         ...selectedCounter,
         ...contendedCounter,
+        ...shareLinkSelectedCounter,
+        ...shareLinkContendedCounter
       },
       // $set: {
       //   startQuestData: question._id,

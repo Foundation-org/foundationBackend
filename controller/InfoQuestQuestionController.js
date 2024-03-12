@@ -635,7 +635,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     });
   }
 
-  const resultArray = allQuestions.map(getPercentage);
+  const resultArray = allQuestions.map((item)=>getPercentage(item, req.body.Page));
   const desiredArray = resultArray.map((item) => ({
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
