@@ -814,7 +814,7 @@ const getQuestById = async (req, res) => {
     // getQuestionsWithUserSettings
     const result1 = await getQuestionsWithUserSettings(result, uuid);
 
-    const resultArray = result1.map(getPercentage);
+    const resultArray = result1.map((item)=>getPercentage(item, req.body.Page));
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
