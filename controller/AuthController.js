@@ -1,6 +1,7 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const axios = require('axios');
 // const nodemailer = require("nodemailer");
 const AWS = require("aws-sdk");
 const crypto = require("crypto");
@@ -1077,6 +1078,40 @@ const setBookmarkStates = async (req, res) => {
   }
 };
 
+const getInstaToken = async (req, res) => {
+  try {
+    const clientId = req.body.clientId;
+    const clientSecret = req.body.clientSecret;
+    const redirectUri = req.body.redirectUri;
+    const code = req.body.code;
+
+    console.log('Request Body:', req.body);
+
+    const response = await axios.post(
+      'https://api.instagram.com/oauth/access_token',
+      new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri,
+        code: code,
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+
+    console.log('Instagram API Response:', response.data);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error:', error.message);
+    res.status(error.response ? error.response.status : 500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
 
 
 const deleteBadgeById = async (req, res) => {
@@ -1130,5 +1165,6 @@ module.exports = {
   setBookmarkStates,
   deleteBadgeById,
   userInfoById,
-  AuthenticateJWT
+  AuthenticateJWT,
+  getInstaToken
 };

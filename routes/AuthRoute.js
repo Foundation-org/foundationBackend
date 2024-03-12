@@ -51,4 +51,6 @@ router.post("/setBookmarkStates", AuthController.setBookmarkStates);
 
 router.delete("/badge/:id/:uuid", AuthController.deleteBadgeById);
 
+router.post("/get-insta-token",AuthController.getInstaToken)
+
 module.exports = router;
