@@ -34,7 +34,7 @@ module.exports.uploadS3Bucket = async ({fileName, description}) => {
         
                 <!-- Open Graph / Facebook -->
                 <meta property="og:type" content="${type}" />
-                <meta property="og:url" content="${url}" />
+                <!-- <meta property="og:url" content="${url}" /> -->
                 <meta property="og:title" content="${title}" />
                 <meta property="og:description" content="${description}" />
                 <meta property="og:image" content="${image}" />
