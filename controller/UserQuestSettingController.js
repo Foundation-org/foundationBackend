@@ -146,9 +146,9 @@ const status = async (req, res) => {
     if (status === 'Delete') {
       updatedUserQuestSetting = await UserQuestSetting.findOneAndDelete({ link }).exec();
       if (!updatedUserQuestSetting) {
-        return res.status(404).json({ message: "Quest Setting not found or already deleted" });
+        return res.status(404).json({ message: "Share link not found or already deleted" });
       }
-      return res.status(200).json({ message: "Quest link Deleted Successfully!" });
+      return res.status(200).json({ message: "Share link Deleted Successfully" });
     } else {
       updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
         { link },
@@ -156,10 +156,10 @@ const status = async (req, res) => {
         { new: true }
       );
       if (!updatedUserQuestSetting) {
-        return res.status(404).json({ message: "Quest Setting not found" });
+        return res.status(404).json({ message: "Share link not found" });
       }
       return res.status(200).json({
-        message: `Quest link ${status === 'Disable' ? 'Disabled' : 'Enabled'} Successfully!`,
+        message: `Share link ${status === 'Disable' ? 'Disabled' : 'Enabled'} Successfully`,
         data: updatedUserQuestSetting,
       });
     }

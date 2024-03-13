@@ -1,11 +1,16 @@
 module.exports.getPercentage = (document, page) => {
   console.log("page", page);
   let result;
+  let totalStartQuest;
 
   if (page === "SharedLink") {
+    console.log('Inside SharedLink')
     result = document?.shareLinkResult;
+    totalStartQuest = document?.shareLinkTotalStartQuest;
   } else {
+    console.log('Inside Else SharedLink')
     result = document?.result;
+    totalStartQuest = document?.totalStartQuest;
   }
 
   if (document.whichTypeQuestion === "ranked choise" && result) {
@@ -40,7 +45,7 @@ module.exports.getPercentage = (document, page) => {
 
         contendedKeys.forEach((key) => {
           percentageObject[key] =
-            ((item.contended[key] / document.totalStartQuest) * 100).toFixed(
+            ((item.contended[key] / totalStartQuest) * 100).toFixed(
               0
             ) + "%";
         });
@@ -60,7 +65,7 @@ module.exports.getPercentage = (document, page) => {
 
       selectedKeys.forEach((key) => {
         percentageObject[key] =
-          ((item.selected[key] / document.totalStartQuest) * 100).toFixed(0) +
+          ((item.selected[key] / totalStartQuest) * 100).toFixed(0) +
           "%";
       });
 
@@ -82,7 +87,7 @@ module.exports.getPercentage = (document, page) => {
 
         contendedKeys.forEach((key) => {
           percentageObject[key] =
-            ((item.contended[key] / document.totalStartQuest) * 100).toFixed(
+            ((item.contended[key] / totalStartQuest) * 100).toFixed(
               0
             ) + "%";
         });

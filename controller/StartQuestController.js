@@ -251,7 +251,8 @@ const createStartQuest = async (req, res) => {
         ...selectedCounter,
         ...contendedCounter,
         ...shareLinkSelectedCounter,
-        ...shareLinkContendedCounter
+        ...shareLinkContendedCounter,
+        ...(postLink && { shareLinkTotalStartQuest: 1 }) // Conditional property assignment
       },
       // $set: {
       //   startQuestData: question._id,
