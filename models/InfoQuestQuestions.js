@@ -68,11 +68,6 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
       // default: [{ answer: {}, contended: {} }],
       default: undefined,
     },
-    shareLinkResult: {
-      type: Array,
-      // default: [{ answer: {}, contended: {} }],
-      default: undefined,
-    },
     startQuestData: {
       type: Object,
     },

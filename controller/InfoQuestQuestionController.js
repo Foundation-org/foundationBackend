@@ -166,7 +166,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       //  filterObj.uuid=req.body.uuid;
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
       });
 
       // Extract userSettingIds from hiddenUserSettings
@@ -176,7 +176,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       // filterObj.uuid = req.body.uuid;
       const Questions = await BookmarkQuests.find({
         questForeignKey: { $nin: hiddenUserSettingIds },
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
         ...filterObj,
       }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
@@ -322,7 +322,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       // filterObj.uuid=req.body.uuid;
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
       });
 
       // Extract userSettingIds from hiddenUserSettings
@@ -332,7 +332,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       // filterObj.uuid = req.body.uuid;
       const Questions = await BookmarkQuests.find({
         questForeignKey: { $nin: hiddenUserSettingIds },
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
         ...filterObj,
       }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
@@ -528,7 +528,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
 
     // // Use Promise.allSettled to handle errors without stopping execution
     // await Promise.allSettled(mapPromises);
-
   }
 
   if (Page === "Bookmark") {
@@ -585,12 +584,12 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
   } else if (req.body.Page === "SharedLink") {
     console.log("running");
     filterObj.uuid = uuid;
-    filterObj.linkStatus = { "$in": ["Enable", "Disable"] };
-    console.log('filterObj', filterObj)
+    filterObj.linkStatus = { $in: ["Enable", "Disable"] };
+    console.log("filterObj", filterObj);
     const Questions = await UserQuestSetting.find(filterObj)
-    .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
-    .limit(pageSize)
-    .skip(skip);
+      .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
+      .limit(pageSize)
+      .skip(skip);
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -612,7 +611,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       (userSetting) => userSetting.questForeignKey
     );
 
-    console.log("🚀 ~ getAllQuestsWithDefaultStatus ~ filterObj:", filterObj)
+    console.log("🚀 ~ getAllQuestsWithDefaultStatus ~ filterObj:", filterObj);
     allQuestions = await InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
@@ -635,7 +634,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     });
   }
 
-  const resultArray = allQuestions.map((item)=>getPercentage(item, req.body.Page));
+  const resultArray = allQuestions.map((item) => getPercentage(item));
   const desiredArray = resultArray.map((item) => ({
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
@@ -804,7 +803,8 @@ const getAllQuestsWithResult = async (req, res) => {
 
 const getQuestById = async (req, res) => {
   try {
-    const { uuid, id,page } = req.params; // Use req.params instead of req.body
+    const { uuid, id, page } = req.params; // Use req.params instead of req.body
+    const {postLink} = req.query;
     const infoQuest = await InfoQuestQuestions.find({
       _id: id,
     }).populate("getUserBadge", "badges");
@@ -814,7 +814,16 @@ const getQuestById = async (req, res) => {
     // getQuestionsWithUserSettings
     const result1 = await getQuestionsWithUserSettings(result, uuid);
 
-    const resultArray = result1.map((item)=>getPercentage(item,page));
+    let quest;
+
+    if (page === "SharedLink") {
+      quest = await UserQuestSetting.findOne({ link: postLink });
+    }
+    console.log("questSharedLink", quest);
+
+    const resultArray = result1.map((item) =>
+      getPercentage(item, page, quest)
+    );
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
@@ -843,12 +852,14 @@ const getQuestByUniqueShareLink = async (req, res) => {
     const userQuestSetting = await UserQuestSetting.findOne({
       // uuid,
       link: uniqueShareLink,
-      linkStatus: 'Enable'
+      linkStatus: "Enable",
     });
 
     if (!userQuestSetting) {
       // If the document doesn't exist, you may want to handle this case
-      return res.status(404).json({ status: false, message: "This link is not active" });
+      return res
+        .status(404)
+        .json({ status: false, message: "This link is not active" });
     }
 
     const infoQuest = await InfoQuestQuestions.find({
@@ -909,7 +920,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       // filterObj.uuid=req.body.uuid;
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
       });
 
       // Extract userSettingIds from hiddenUserSettings
@@ -919,7 +930,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       // filterObj.uuid = req.body.uuid;
       const Questions = await BookmarkQuests.find({
         questForeignKey: { $nin: hiddenUserSettingIds },
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
         ...filterObj,
       }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
@@ -1067,7 +1078,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       // filterObj.uuid=req.body.uuid;
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
       });
 
       // Extract userSettingIds from hiddenUserSettings
@@ -1077,7 +1088,7 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
       // filterObj.uuid = req.body.uuid;
       const Questions = await BookmarkQuests.find({
         questForeignKey: { $nin: hiddenUserSettingIds },
-        uuid:req.body.uuid,
+        uuid: req.body.uuid,
         ...filterObj,
       }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
@@ -1245,10 +1256,10 @@ async function getQuestionsWithUserSettings(allQuestions, uuid) {
       const userQuestSettings = await UserQuestSetting.find({
         uuid: uuid,
       });
-      console.log(
-        "🚀 ~ getQuestionsWithUserSettings ~ userQuestSettings:",
-        userQuestSettings
-      );
+      // console.log(
+      //   "🚀 ~ getQuestionsWithUserSettings ~ userQuestSettings:",
+      //   userQuestSettings
+      // );
 
       let Result = [];
       await allQuestions.map(async function (rcrd) {

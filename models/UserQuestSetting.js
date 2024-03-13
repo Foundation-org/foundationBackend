@@ -22,7 +22,7 @@ const UserQuestSetting = mongoose.Schema(
     },
     linkStatus: {
       type: String,
-      enum: ["Enable", "Disable", "Remove"],
+      enum: ["Enable", "Disable", "Delete"],
       default: "Enable"
     },
     hidden: {
@@ -40,6 +40,11 @@ const UserQuestSetting = mongoose.Schema(
     questsCompleted: {
       type: Number,
       default: 0,
+    },
+    result: {
+      type: Array,
+      // default: [{ answer: {}, contended: {} }],
+      default: undefined,
     },
   },
   { timestamps: true }

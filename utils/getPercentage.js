@@ -1,14 +1,13 @@
-module.exports.getPercentage = (document, page) => {
-  console.log("page", page);
+const UserQuestSetting = require("../models/UserQuestSetting");
+
+module.exports.getPercentage = (document, page, quest ) => {
   let result;
   let totalStartQuest;
 
   if (page === "SharedLink") {
-    console.log('Inside SharedLink')
-    result = document?.shareLinkResult;
-    totalStartQuest = document?.shareLinkTotalStartQuest;
+    result = quest?.result;
+    totalStartQuest = quest?.questsCompleted;
   } else {
-    console.log('Inside Else SharedLink')
     result = document?.result;
     totalStartQuest = document?.totalStartQuest;
   }

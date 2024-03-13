@@ -4,7 +4,7 @@ const { createLedger } = require("../utils/createLedger");
 const crypto = require("crypto");
 const UserModel = require("../models/UserModel");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
-const AWS = require('aws-sdk');
+const AWS = require("aws-sdk");
 const { uploadS3Bucket } = require("../utils/uploadS3Bucket");
 
 const createOrUpdate = async (req, res) => {
@@ -87,21 +87,29 @@ const link = async (req, res) => {
           new: true, // Return the modified document rather than the original
         }
       );
-      await uploadS3Bucket({ fileName: savedOrUpdatedUserQuestSetting.link, description: savedOrUpdatedUserQuestSetting.Question })
+      await uploadS3Bucket({
+        fileName: savedOrUpdatedUserQuestSetting.link,
+        description: savedOrUpdatedUserQuestSetting.Question,
+      });
     } else {
       // Create a short link
       const userQuestSetting = new UserQuestSetting({
         ...payload,
       });
       savedOrUpdatedUserQuestSetting = await userQuestSetting.save();
-      await uploadS3Bucket({ fileName: savedOrUpdatedUserQuestSetting.link, description: savedOrUpdatedUserQuestSetting.Question })
-    };
-    
+      await uploadS3Bucket({
+        fileName: savedOrUpdatedUserQuestSetting.link,
+        description: savedOrUpdatedUserQuestSetting.Question,
+      });
+    }
+
     return res
       .status(201)
-      .json({ message: "UserQuestSetting link Created Successfully!", data: savedOrUpdatedUserQuestSetting });
-
-  } catch(error){
+      .json({
+        message: "UserQuestSetting link Created Successfully!",
+        data: savedOrUpdatedUserQuestSetting,
+      });
+  } catch (error) {
     console.error(error);
     res.status(500).json({
       message: ` An error occurred while create UserQuestSetting link: ${error.message}`,
@@ -115,7 +123,7 @@ const impression = async (req, res) => {
 
     // Update the document using findOneAndUpdate with $inc operator
     const updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
-      { link, linkStatus:"Enable" },
+      { link, linkStatus: "Enable" },
       { $inc: { questImpression: 1 } }, // Increment questImpression field by 1
       { new: true } // Return the updated document
     );
@@ -142,27 +150,28 @@ const status = async (req, res) => {
     const { link } = req.params;
     const { status } = req.body;
     let updatedUserQuestSetting;
-
-    if (status === 'Delete') {
-      updatedUserQuestSetting = await UserQuestSetting.findOneAndDelete({ link }).exec();
-      if (!updatedUserQuestSetting) {
-        return res.status(404).json({ message: "Share link not found or already deleted" });
-      }
-      return res.status(200).json({ message: "Share link Deleted Successfully" });
-    } else {
+    if (status === "Delete" || status === "Disable") {
       updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
         { link },
-        { linkStatus: status },
+        { linkStatus: status, link:"", questImpression:0, questsCompleted:0, result:"" },
         { new: true }
       );
-      if (!updatedUserQuestSetting) {
-        return res.status(404).json({ message: "Share link not found" });
-      }
-      return res.status(200).json({
-        message: `Share link ${status === 'Disable' ? 'Disabled' : 'Enabled'} Successfully`,
-        data: updatedUserQuestSetting,
-      });
+    } else {
+    updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
+      { link },
+      { linkStatus: status, },
+      { new: true }
+    );
+  }
+    if (!updatedUserQuestSetting) {
+      return res.status(404).json({ message: "Share link not found" });
     }
+    return res.status(200).json({
+      message: `Share link ${
+        status === "Disable" ? "Disabled" : status === "Delete" ? "Deleted" : "Enabled"
+      } Successfully`,
+      data: updatedUserQuestSetting,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({

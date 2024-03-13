@@ -13,7 +13,10 @@ const {
   QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
-const { getQuestionsWithStatus, getQuestionsWithUserSettings } = require("./InfoQuestQuestionController");
+const {
+  getQuestionsWithStatus,
+  getQuestionsWithUserSettings,
+} = require("./InfoQuestQuestionController");
 const { getPercentage } = require("../utils/getPercentage");
 const UserQuestSetting = require("../models/UserQuestSetting");
 
@@ -34,7 +37,7 @@ const updateViolationCounter = async (req, res) => {
 const createStartQuest = async (req, res) => {
   try {
     const currentDate = new Date();
-    const { postLink } = req.body
+    const { postLink } = req.body;
     // Update InfoQuestQuestions and get the data
     const getInfoQuestQuestion = await InfoQuestQuestions.findByIdAndUpdate(
       { _id: req.body.questForeignKey },
@@ -202,7 +205,10 @@ const createStartQuest = async (req, res) => {
       getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
       getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
     ) {
-      if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
+      if (
+        getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+        getInfoQuestQuestion.whichTypeQuestion === "open choice"
+      ) {
         req.body.data?.selected?.forEach((item) => {
           selectedCounter[`result.selected.${item.question}`] = 1;
         });
@@ -210,12 +216,12 @@ const createStartQuest = async (req, res) => {
           contendedCounter[`result.contended.${item.question}`] = 1;
         });
 
-        if(postLink) {
+        if (postLink) {
           req.body.data?.selected?.forEach((item) => {
-            shareLinkSelectedCounter[`shareLinkResult.selected.${item.question}`] = 1;
+            shareLinkSelectedCounter[`result.selected.${item.question}`] = 1;
           });
           req.body.data?.contended?.forEach((item) => {
-            shareLinkContendedCounter[`shareLinkResult.contended.${item.question}`] = 1;
+            shareLinkContendedCounter[`result.contended.${item.question}`] = 1;
           });
         }
       }
@@ -228,21 +234,23 @@ const createStartQuest = async (req, res) => {
           contendedCounter[`result.contended.${item.question}`] = 1;
         });
 
-        if(postLink) {
+        if (postLink) {
           req.body.data?.selected?.forEach((item, index) => {
             const count = req.body.data?.selected.length - index - 1;
-            shareLinkSelectedCounter[`shareLinkResult.selected.${item.question}`] = count;
+            shareLinkSelectedCounter[`result.selected.${item.question}`] =
+              count;
           });
           req.body.data?.contended?.forEach((item) => {
-            shareLinkContendedCounter[`shareLinkResult.contended.${item.question}`] = 1;
+            shareLinkContendedCounter[`result.contended.${item.question}`] = 1;
           });
         }
       }
-    } 
-    else {
+    } else {
       selectedCounter[`result.selected.${req.body.data.selected}`] = 1;
-      if(postLink) {
-        shareLinkContendedCounter[`shareLinkResult.selected.${req.body.data.selected}`] = 1;
+      if (postLink) {
+        shareLinkContendedCounter[
+          `result.selected.${req.body.data.selected}`
+        ] = 1;
       }
     }
     await getInfoQuestQuestion.updateOne({
@@ -250,14 +258,21 @@ const createStartQuest = async (req, res) => {
         totalStartQuest: 1,
         ...selectedCounter,
         ...contendedCounter,
-        ...shareLinkSelectedCounter,
-        ...shareLinkContendedCounter,
-        ...(postLink && { shareLinkTotalStartQuest: 1 }) // Conditional property assignment
       },
       // $set: {
       //   startQuestData: question._id,
       // },
     });
+    await UserQuestSetting.findOneAndUpdate(
+      { link: postLink },
+      {
+        $inc: {
+          ...shareLinkSelectedCounter,
+          ...shareLinkContendedCounter,
+          ...(postLink && { shareLinkTotalStartQuest: 1 }),
+        },
+      }
+    );
 
     // increment the result answers count
     // await getInfoQuestQuestion.updateOne({
@@ -445,7 +460,7 @@ const createStartQuest = async (req, res) => {
     res.status(200).json({
       message: "Start Quest Created Successfully",
       startQuestID: question._id,
-      data: desiredArray[0]
+      data: desiredArray[0],
     });
   } catch (err) {
     console.error(err);
@@ -503,24 +518,29 @@ const updateChangeAnsStartQuest = async (req, res) => {
       }
     }
 
-    if(getInfoQuestQuestion.whichTypeQuestion==="open choice" || getInfoQuestQuestion.whichTypeQuestion==="ranked choise" || getInfoQuestQuestion.whichTypeQuestion==="multiple choise"){
-
-      const beforeAnsLength = startQuestQuestion.data[startQuestQuestion.data.length - 1].contended.length;
+    if (
+      getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
+      getInfoQuestQuestion.whichTypeQuestion === "ranked choise" ||
+      getInfoQuestQuestion.whichTypeQuestion === "multiple choise"
+    ) {
+      const beforeAnsLength =
+        startQuestQuestion.data[startQuestQuestion.data.length - 1].contended
+          .length;
       const afterAnsLength = lastDataElement.contended.length;
       if (beforeAnsLength !== afterAnsLength) {
         const actualAnsLength = afterAnsLength - beforeAnsLength;
-        
+
         await User.findOneAndUpdate(
-        { uuid: getInfoQuestQuestion.uuid },
-        {
-          $inc: {
-            contentionsOnAddedAns: actualAnsLength,
-          },
-        }
+          { uuid: getInfoQuestQuestion.uuid },
+          {
+            $inc: {
+              contentionsOnAddedAns: actualAnsLength,
+            },
+          }
         );
       }
     }
-      
+
     // INCREMENT
     // Function to process an array
     // const incrementProcessArray = async (array, fieldToUpdate) => {
@@ -609,7 +629,12 @@ const updateChangeAnsStartQuest = async (req, res) => {
 
     // Increment 'contentionsGiven' based on the length of 'contended' array
     const contendedArray = req.body.changeAnswerAddedObj?.contended || [];
-    const contentionsGivenIncrement = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'] && contendedArray.length === 0 ? -1 : contendedArray.length;
+    const contentionsGivenIncrement =
+      startQuestQuestion?.data[startQuestQuestion?.data.length - 1][
+        "contended"
+      ] && contendedArray.length === 0
+        ? -1
+        : contendedArray.length;
     // requested contention - saved contention
     const requestedContention = contendedArray.length;
     // const savedContention = startQuestQuestion?.data[startQuestQuestion?.data.length-1]['contended'].length;
@@ -621,7 +646,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
     // Increment Counter
     if (contentionGivenCounter > 0) {
       const userBalance = await getUserBalance(req.body.uuid);
-      if (userBalance < QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter)
+      if (
+        userBalance <
+        QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter
+      )
         throw new Error("The balance is insufficient to give the contention!");
       // Create Ledger
       await createLedger({
@@ -658,8 +686,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         dec: true,
         uuid: req.body.uuid,
       });
-
-    } else if(contentionGivenCounter < 0) {
+    } else if (contentionGivenCounter < 0) {
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
@@ -680,18 +707,24 @@ const updateChangeAnsStartQuest = async (req, res) => {
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
-        txAmount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter),
+        txAmount:
+          QUEST_OPTION_CONTENTION_REMOVED_AMOUNT *
+          Math.abs(contentionGivenCounter),
         // txData : req.body.uuid,
         // txDescription : "DisInsentive for giving contention"
       });
       // increment the Treasury
       await updateTreasury({
-        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter),
+        amount:
+          QUEST_OPTION_CONTENTION_REMOVED_AMOUNT *
+          Math.abs(contentionGivenCounter),
         dec: true,
       });
       // Decrement the User Balance
       await updateUserBalance({
-        amount: QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter),
+        amount:
+          QUEST_OPTION_CONTENTION_REMOVED_AMOUNT *
+          Math.abs(contentionGivenCounter),
         inc: true,
         uuid: req.body.uuid,
       });
@@ -756,7 +789,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // decrement the selected and contended count
         let selectedCounter = {};
         let contendedCounter = {};
-        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
+        if (
+          getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+          getInfoQuestQuestion.whichTypeQuestion === "open choice"
+        ) {
           initialStartQuestData[
             initialStartQuestData.length - 1
           ]?.selected?.forEach((item) => {
@@ -819,7 +855,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // increment the selected and contended count
         selectedCounter = {};
         contendedCounter = {};
-        if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
+        if (
+          getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+          getInfoQuestQuestion.whichTypeQuestion === "open choice"
+        ) {
           startQuestQuestion.data[
             startQuestQuestion.data.length - 1
           ]?.selected?.forEach((item) => {
@@ -922,13 +961,11 @@ const updateChangeAnsStartQuest = async (req, res) => {
       contendedPercentage: item.contendedPercentage,
     }));
 
-    res
-      .status(200)
-      .json({
-        message: responseMsg,
-        startQuestID: startQuestQuestion._id,
-        data: desiredArray[0],
-      });
+    res.status(200).json({
+      message: responseMsg,
+      startQuestID: startQuestQuestion._id,
+      data: desiredArray[0],
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({
