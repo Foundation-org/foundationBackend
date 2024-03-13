@@ -103,12 +103,10 @@ const link = async (req, res) => {
       });
     }
 
-    return res
-      .status(201)
-      .json({
-        message: "UserQuestSetting link Created Successfully!",
-        data: savedOrUpdatedUserQuestSetting,
-      });
+    return res.status(201).json({
+      message: "UserQuestSetting link Created Successfully!",
+      data: savedOrUpdatedUserQuestSetting,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -151,24 +149,34 @@ const status = async (req, res) => {
     const { status } = req.body;
     let updatedUserQuestSetting;
     if (status === "Delete" || status === "Disable") {
-      updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
+      updatedUs65f2231a836660c4eb7e955eerQuestSetting = await UserQuestSetting.findOneAndUpdate(
         { link },
-        { linkStatus: status, link:"", questImpression:0, questsCompleted:0, result:"" },
+        {
+          linkStatus: status,
+          link: "",
+          questImpression: 0,
+          questsCompleted: 0,
+          $unset: { result: "" }, // This removes the "result" field from the document
+        },
         { new: true }
       );
     } else {
-    updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
-      { link },
-      { linkStatus: status, },
-      { new: true }
-    );
-  }
+      updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
+        { link },
+        { linkStatus: status },
+        { new: true }
+      );
+    }
     if (!updatedUserQuestSetting) {
       return res.status(404).json({ message: "Share link not found" });
     }
     return res.status(200).json({
       message: `Share link ${
-        status === "Disable" ? "Disabled" : status === "Delete" ? "Deleted" : "Enabled"
+        status === "Disable"
+          ? "Disabled"
+          : status === "Delete"
+          ? "Deleted"
+          : "Enabled"
       } Successfully`,
       data: updatedUserQuestSetting,
     });
