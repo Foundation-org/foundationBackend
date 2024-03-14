@@ -202,6 +202,7 @@ const userSchema = mongoose.Schema(
         email: { type: String },
         isVerified: { type: Boolean },
         type: { type: String },
+        primary:{type:Boolean},
         createdAt: { type: Date, default: new Date() },
         personal: { type: Object },
         web3:{ type: Object },
