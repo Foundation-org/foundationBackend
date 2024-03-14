@@ -30,7 +30,7 @@ router.post(
   "/getAllQuestsWithResult",
   InfoQuestQuestionController.getAllQuestsWithResult
 );
-router.get("/getQuest/:uuid/:id/:page?", InfoQuestQuestionController.getQuestById);
+router.get("/getQuest/:uuid/:id/:page?/:postLink?", InfoQuestQuestionController.getQuestById);
 
 
 router.get("/getQuest/:uniqueShareLink", InfoQuestQuestionController.getQuestByUniqueShareLink);
