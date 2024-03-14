@@ -804,7 +804,7 @@ const getAllQuestsWithResult = async (req, res) => {
 const getQuestById = async (req, res) => {
   try {
     const { uuid, id, page } = req.params; // Use req.params instead of req.body
-    const {postLink} = req.query;
+    const { postLink } = req.query;
     const infoQuest = await InfoQuestQuestions.find({
       _id: id,
     }).populate("getUserBadge", "badges");
@@ -821,13 +821,13 @@ const getQuestById = async (req, res) => {
     }
     console.log("questSharedLink", quest);
 
-    const resultArray = result1.map((item) =>
-      getPercentage(item, page, quest)
-    );
+    const resultArray = result1.map((item) => getPercentage(item, page, quest));
+
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
       contendedPercentage: item.contendedPercentage,
+      userQuestSetting: item.userQuestSetting,
     }));
 
     res.status(200).json({
