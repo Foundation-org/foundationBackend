@@ -159,7 +159,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       const regexBlockterms = req.body.blockedTerms.map(
         (term) => new RegExp(term, "i")
       );
-      filterObj.QuestTopic = { $nin: regexBlockterms };
+      filterObj.QuestTopic = { $in: regexBlockterms };
     }
 
     if (req.body.Page === "Bookmark") {
@@ -315,7 +315,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       const regexBlockterms = req.body.blockedTerms.map(
         (term) => new RegExp(term, "i")
       );
-      filterObj.QuestTopic = { $nin: regexBlockterms };
+      filterObj.QuestTopic = { $in: regexBlockterms };
     }
 
     if (req.body.Page === "Bookmark") {
@@ -498,7 +498,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     filterObj.QuestTopic = { $in: regexTerm };
   } else if (blockedTerms && blockedTerms.length > 0) {
     // const regexBlockterms = blockedTerms.map((term) => new RegExp(term, "i"));
-    filterObj.QuestTopic = { $nin: blockedTerms };
+    filterObj.QuestTopic = { $in: blockedTerms };
 
     // const hiddenQuestList = await InfoQuestQuestions.find({
     //   QuestTopic: { $in: blockedTerms },
@@ -695,7 +695,7 @@ const getAllQuestsWithResult = async (req, res) => {
     filterObj.QuestTopic = { $in: regexTerm };
   } else if (blockedTerms && blockedTerms.length > 0) {
     // const regexBlockterms = blockedTerms.map((term) => new RegExp(term, "i"));
-    filterObj.QuestTopic = { $nin: blockedTerms };
+    filterObj.QuestTopic = { $in: blockedTerms };
   }
 
   if (Page === "Bookmark") {
@@ -913,7 +913,7 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       const regexBlockterms = req.body.blockedTerms.map(
         (term) => new RegExp(term, "i")
       );
-      filterObj.QuestTopic = { $nin: regexBlockterms };
+      filterObj.QuestTopic = { $in: regexBlockterms };
     }
 
     if (req.body.Page === "Bookmark") {
