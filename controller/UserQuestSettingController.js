@@ -149,7 +149,7 @@ const status = async (req, res) => {
     const { status } = req.body;
     let updatedUserQuestSetting;
     if (status === "Delete" || status === "Disable") {
-      updatedUs65f2231a836660c4eb7e955eerQuestSetting = await UserQuestSetting.findOneAndUpdate(
+      updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
         { link },
         {
           linkStatus: status,
