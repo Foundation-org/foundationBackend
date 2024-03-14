@@ -46,7 +46,7 @@ module.exports.eduEmailCheck = async (req, res, eMail) => {
                 domain=stripDomain(domain);
                     if (countPeriods(domain) == 0 ) {
                     // res.json({ message: 'Not a valid EDU', status: 'FAIL' });
-                    return { message: 'Not a valid EDU', status: 'FAIL' };
+                    return { message: 'Please add a valid educational email.', status: 'FAIL' };
                     }
                 } else {
                     // res.json({ message: response.data, status: 'OK' });

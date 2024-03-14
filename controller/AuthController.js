@@ -132,7 +132,7 @@ const signUpUserBySocialLogin = async (req, res) => {
     // }
     // Check Google Account
     const payload = req.body;
-    // Check if email already exist
+     // Check if email already exist
     const alreadyUser = await User.findOne({ email: payload.email });
     if (alreadyUser) throw new Error("Email Already Exists");
 
@@ -150,6 +150,7 @@ const signUpUserBySocialLogin = async (req, res) => {
 
     // Create a Badge at starting index
     user.badges.unshift({
+      accountId: payload.sub,
       accountName: payload.provider,
       isVerified: true,
       type: type,
