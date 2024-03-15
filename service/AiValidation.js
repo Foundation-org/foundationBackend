@@ -1,4 +1,4 @@
-const { STATEMENT } = require("../constants");
+const { STATEMENT, MASTER_ARRAY_TOPICS } = require("../constants");
 const User = require("../models/UserModel");
 const crypto = require("crypto");
 const { createLedger } = require("../utils/createLedger");
@@ -117,12 +117,43 @@ module.exports.createQuestTopic = async(topic) => {
   try {
     const checkQuestTopic = await QuestTopics.findOne({ name: topic })
     if(checkQuestTopic) return
-    const questTopic = await new QuestTopics({ name: topic.charAt(0).toUpperCase() + topic.slice(1).toLowerCase() })
+    const questTopic = await new QuestTopics({ name: topic })
     await questTopic.save()
   } catch (error) {
     console.log(error);
   }
 }
+
+module.exports.checkTopicMasterArray = (topic) => {
+  try {
+    const checkQuestTopic = MASTER_ARRAY_TOPICS.includes(topic);
+    if(checkQuestTopic){
+      return topic
+    } else {
+      return "Other"
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports.capitalizeSentence = (sentence) => {
+  try {
+    // Split the sentence into an array of words
+    let words = sentence.split(' ');
+    
+    // Capitalize the first letter of each word
+    for (let i = 0; i < words.length; i++) {
+      words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+    }
+  
+    // Join the words back together to form the capitalized sentence
+    return words.join(' ');
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 
 module.exports.checkNonsenseInTopics = (sentence) => {
   const statements = [

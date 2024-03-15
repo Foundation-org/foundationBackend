@@ -18,6 +18,8 @@ const {
   checkNonsenseInTopics,
   numberToWords,
   extractAndSanitizeDollar,
+  capitalizeSentence,
+  checkTopicMasterArray,
 } = require("../service/AiValidation");
 const QuestTopics = require("../models/QuestTopics");
 
@@ -152,6 +154,8 @@ function checkResponse(responseData, userMessage, callType, req, res) {
 
   if (callType == 3) {
     filtered = removeTrailingPeriods(filtered);
+    filtered = capitalizeSentence(filtered);
+    filtered = checkTopicMasterArray(filtered);
     const found = checkNonsenseInTopics(filtered);
     if (found) {
       filtered = userMessage;
