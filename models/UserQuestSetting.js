@@ -26,7 +26,7 @@ const UserQuestSetting = mongoose.Schema(
     linkStatus: {
       type: String,
       enum: ["Enable", "Disable", "Delete"],
-      default: "Enable"
+      default: ""
     },
     hidden: {
         type: Boolean,
