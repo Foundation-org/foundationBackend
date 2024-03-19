@@ -16,28 +16,93 @@ const update = async (req, res) => {
   }
 };
 
+// const getAllTopic = async (req, res) => {
+//   try {
+//     const { page, limit, uuid } = req.query;
+//     const skip = (page - 1) * limit;
+
+//     const questTopics = await QuestTopics.find()
+//       .sort({ _id: 1 }) // Adjust the sorting based on your needs
+//       .skip(skip)
+//       .limit(parseInt(limit));
+
+//     const namesArray = questTopics.map((topic) => topic.name);
+
+//     const totalCount = await QuestTopics.countDocuments({ uuid });
+//     const pageCount = Math.ceil(totalCount / limit);
+
+//     console.log(questTopics);
+
+//     res.status(200).json({
+//       // data: questTopics,
+//       data: namesArray,
+//       pageCount,
+//       totalCount,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       message: `An error occurred while getAll QuestTopic: ${error.message}`,
+//     });
+//   }
+// };
 const getAllTopic = async (req, res) => {
   try {
-    const { page, limit, uuid } = req.query;
-    const skip = (page - 1) * limit;
+    // const { page, limit, uuid } = req.query;
+    // const skip = (page - 1) * limit;
 
-    const questTopics = await QuestTopics.find()
-      .sort({ _id: 1 }) // Adjust the sorting based on your needs
-      .skip(skip)
-      .limit(parseInt(limit));
+    // const questTopics = await QuestTopics.find()
+    //   .sort({ _id: 1 }) // Adjust the sorting based on your needs
+    //   .skip(skip)
+    //   .limit(parseInt(limit));
 
-    const namesArray = questTopics.map((topic) => topic.name);
+    // const namesArray = questTopics.map((topic) => topic.name);
 
-    const totalCount = await QuestTopics.countDocuments({ uuid });
-    const pageCount = Math.ceil(totalCount / limit);
+    // const totalCount = await QuestTopics.countDocuments({ uuid });
+    // const pageCount = Math.ceil(totalCount / limit);
 
-    console.log(questTopics);
+    // console.log(questTopics);
+    const masterArr = [
+      "Architecture",
+      "Arts",
+      "Business",
+      "Culture",
+      "Economics",
+      "Education",
+      "Entertainment",
+      "Environment",
+      "Ethics",
+      "Finance",
+      "Fitness",
+      "Food",
+      "Geography",
+      "Health",
+      "History",
+      "Hobbies",
+      "Home",
+      "Law",
+      "Media",
+      "Music",
+      "Parenting",
+      "Pets",
+      "Philosophy",
+      "Personal",
+      "Politics",
+      "Preferences",
+      "Psychology",
+      "Religion",
+      "Science",
+      "Society",
+      "Sports",
+      "Technology",
+      "Other",
+    ];
 
     res.status(200).json({
       // data: questTopics,
-      data: namesArray,
-      pageCount,
-      totalCount,
+      data: masterArr,
+      // pageCount,
+      // totalCount,
     });
   } catch (error) {
     console.error(error);
