@@ -8,5 +8,6 @@ const protect = require("../middleware/protect");
 router.post("/easySearch", SearchController.easySearch);
 router.post("/searchBookmarks", SearchController.searchBookmarks);
 router.post("/searchHiddenQuest", SearchController.searchHiddenQuest);
+router.post("/searchCities", SearchController.searchCities);
 
 module.exports = router;

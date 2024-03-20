@@ -6,6 +6,7 @@ const {
 } = require("./InfoQuestQuestionController");
 const { getPercentage } = require("../utils/getPercentage");
 const UserQuestSetting = require("../models/UserQuestSetting");
+const Cities = require("../models/Cities");
 
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
@@ -62,8 +63,6 @@ const searchBookmarks = async (req, res) => {
       hidden: true,
       uuid,
     });
-    console.log("wamiq", hiddenUserSettings);
-
     // Extract userSettingIds from hiddenUserSettings
     const hiddenUserSettingIds = hiddenUserSettings.map(
       (userSetting) => userSetting.questForeignKey
@@ -169,8 +168,28 @@ const searchHiddenQuest = async (req, res) => {
   }
 };
 
+
+
+const searchCities = async (req, res) => {
+  const cityName = req.query.name;
+  
+  try {
+    const regex = new RegExp(`^${cityName}`, 'i');
+    const data = await Cities.find({ name: { $regex:regex } });
+  
+    if (data.length === 0) {
+      return res.status(404).json({ message: 'City not found' });
+    }
+  
+    res.json({data});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+  };
 module.exports = {
   easySearch,
   searchBookmarks,
   searchHiddenQuest,
+  searchCities
 };
