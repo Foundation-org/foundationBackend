@@ -28,6 +28,8 @@ router.post("/removeContactBadge", BadgeController.removeContactBadge);
 
 router.post("/removePersonalBadge", BadgeController.removePersonalBadge);
 
+router.post("/removeWeb3Badge", BadgeController.removeWeb3Badge);
+
 router.post("/addBadge/web3/add", BadgeController.addWeb3Badge);
 
 
