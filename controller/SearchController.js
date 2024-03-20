@@ -181,7 +181,7 @@ const searchCities = async (req, res) => {
       return res.status(404).json({ message: 'City not found' });
     }
   
-    res.json({data});
+    res.json(data.map(city => ({ id: city.id, name: city.name })) );;
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
