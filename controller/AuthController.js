@@ -1144,6 +1144,46 @@ const deleteBadgeById = async (req, res) => {
     });
   }
 };
+
+const getLinkedInUserInfo = async (req, res) => {
+  try {
+    const { code, grant_type, redirect_uri, client_id, client_secret } = req.body;
+
+    console.log('Request Body getLinkedInUserInfo:', req.body);
+    const params = new URLSearchParams();
+    params.append('grant_type', grant_type);
+    params.append('code', code);
+    params.append('client_id', client_id);
+    params.append('client_secret', client_secret);
+    params.append('redirect_uri', redirect_uri);
+    console.log("🚀 ~ getLinkedInUserInfo ~ params:", params)
+    // First Axios request to get the access token
+    const getAccessToken = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', params, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      timeout: 10000 // Set timeout to 10 seconds (adjust as needed)
+    });
+    console.log("🚀 ~ getLinkedInUserInfo ~ getAccessToken:", getAccessToken.data)
+    // if token found
+    if(!getAccessToken?.data?.access_token) throw new Error("Token not found!")
+
+    // Second Axios request to get user info using the access token
+    const response = await axios.get('https://api.linkedin.com/v2/userinfo', {
+      headers: {
+        Authorization: `Bearer ${getAccessToken.data.access_token}`,
+        "Content-Type": 'application/json'
+      },
+      timeout: 10000 // Set timeout to 10 seconds (adjust as needed)
+    });
+    console.log('LinkedIn API Response:', response.data);
+    res.json(response.data);
+  } catch (error) {
+    // console.error('Error:', error);
+    res.status(error.response ? error.response.status : 500).json({ error: error });
+  }
+};
+
 module.exports = {
   changePassword,
   signUpUser,
@@ -1167,5 +1207,6 @@ module.exports = {
   deleteBadgeById,
   userInfoById,
   AuthenticateJWT,
-  getInstaToken
+  getInstaToken,
+  getLinkedInUserInfo
 };

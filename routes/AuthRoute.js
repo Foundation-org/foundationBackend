@@ -53,4 +53,6 @@ router.delete("/badge/:id/:uuid", AuthController.deleteBadgeById);
 
 router.post("/get-insta-token",AuthController.getInstaToken)
 
+router.post("/getLinkedInUserInfo",AuthController.getLinkedInUserInfo)
+
 module.exports = router;
