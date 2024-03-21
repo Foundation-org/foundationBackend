@@ -7,7 +7,7 @@ const {
 const { getPercentage } = require("../utils/getPercentage");
 const UserQuestSetting = require("../models/UserQuestSetting");
 const Cities = require("../models/Cities");
-
+const Education = require("../models/Education");
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
   const uuid = req.cookies.uuid;
@@ -187,9 +187,28 @@ const searchCities = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
   };
+
+  const searchUniversities = async (req, res) => {
+    const uniName = req.query.name;
+    
+    try {
+      const regex = new RegExp(`^${uniName}`, 'i');
+      const data = await Education.find({ name: { $regex:regex } }).limit(20);
+      if (data.length === 0) {
+        return res.status(404).json({ message: 'City not found' });
+      }
+    
+      res.json(data.map(uni => ({ id: uni.id, name: uni.name ,country:uni.country})) );;
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+    };
+
 module.exports = {
   easySearch,
   searchBookmarks,
   searchHiddenQuest,
-  searchCities
+  searchCities,
+  searchUniversities
 };
