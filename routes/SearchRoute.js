@@ -9,6 +9,5 @@ router.post("/easySearch", SearchController.easySearch);
 router.post("/searchBookmarks", SearchController.searchBookmarks);
 router.post("/searchHiddenQuest", SearchController.searchHiddenQuest);
 router.post("/searchCities", SearchController.searchCities);
-router.post("/searchUniversities", SearchController.searchUniversities);
 
 module.exports = router;

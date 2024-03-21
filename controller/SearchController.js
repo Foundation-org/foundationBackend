@@ -175,7 +175,12 @@ const searchCities = async (req, res) => {
 
   try {
     const regex = new RegExp(`^${cityName}`, "i");
-    const data = await Cities.find({ name: { $regex: regex } }).limit(20);
+    const data = await Cities.aggregate([
+      { $match: { name: { $regex: regex } } },
+      { $group: { _id: "$name", city: { $first: "$$ROOT" } } },
+      { $replaceRoot: { newRoot: "$city" } },
+      { $limit: 20 },
+    ]);
 
     if (data.length === 0) {
       return res.status(404).json({ message: "City not found" });
