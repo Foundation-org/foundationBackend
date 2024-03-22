@@ -12,6 +12,8 @@ const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
   const uuid = req.cookies.uuid;
 
+  const { moderationRatingFilter } = req.body;
+
   try {
     const hiddenUserSettings = await UserQuestSetting.find({
       hidden: true,
@@ -30,6 +32,7 @@ const easySearch = async (req, res) => {
         { QuestTopic: { $regex: searchTerm, $options: "i" } },
       ],
       _id: { $nin: hiddenUserSettingIds },
+      moderationRatingCount : { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
     }).populate("getUserBadge", "badges");
 
     const resultArray = results.map(getPercentage);

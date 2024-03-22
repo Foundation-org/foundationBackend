@@ -14,4 +14,10 @@ router.get(
   AiValidationController.validation
 );
 
+router.post(
+  "/ai-validation/moderator",
+  // aiValidationModerator,
+  AiValidationController.moderator
+);
+
 module.exports = router;

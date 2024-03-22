@@ -22,6 +22,8 @@ const {
   checkTopicMasterArray,
 } = require("../service/AiValidation");
 const QuestTopics = require("../models/QuestTopics");
+const OpenAI = require("openai");
+const openai = new OpenAI({ apiKey: OPEN_AI_KEY });
 
 
 const validation = async (req, res) => {
@@ -186,6 +188,32 @@ function handleErrorResponse(res, error) {
     .json({ message: "GPT Request Error", status: "ERROR" });
 }
 
+const moderator = async(req, res) => {
+  try {
+    let userMessage = req.query.userMessage;
+    const moderation = await openai.moderations.create({ input: userMessage });
+
+    const categoryScores = moderation.results[0].category_scores;
+
+    let maxCategory = null;
+    let maxScore = Number.NEGATIVE_INFINITY;
+
+    for (const [category, score] of Object.entries(categoryScores)) {
+      const percentage = score * 100;
+      if (percentage > maxScore) {
+        maxScore = percentage;
+        maxCategory = category;
+      }
+    }
+
+    res.status(200).json({ moderationRatingCount: maxScore.toFixed(2) })
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while create moderation: ${error.message}`,
+    });
+  }
+}
+
 // new
 function checkNonsenseInSentence(sentence) {
   const statements = [
@@ -218,4 +246,5 @@ function checkNonsenseInSentence(sentence) {
 
 module.exports = {
   validation,
+  moderator
 };
