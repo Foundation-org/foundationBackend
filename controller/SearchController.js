@@ -200,7 +200,7 @@ const searchUniversities = async (req, res) => {
     const regex = new RegExp(`^${uniName}`, "i");
     const data = await Education.find({ name: { $regex: regex } }).limit(20);
     if (data.length === 0) {
-      return res.status(404).json({ message: "City not found" });
+      return res.status(404).json({ message: "School not found" });
     }
 
     res.json(
