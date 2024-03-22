@@ -1,5 +1,5 @@
 const emailValidator = require('email-validator');
-const axios = require('axios');
+const Education = require('../models/Education');
 
 const stripDelay = 1000;
 const minApiCallDelay = 3000;
@@ -13,7 +13,7 @@ setInterval(() => {
     apiCallCount = 0;
 }, oneDayInMillis);
 
-const apiUrl = 'http://universities.hipolabs.com/search?domain=';
+
 
 module.exports.eduEmailCheck = async (req, res, eMail) => {
     try {
@@ -38,18 +38,16 @@ module.exports.eduEmailCheck = async (req, res, eMail) => {
             apiCallCount++;
 
             while (true) {
-                let url=apiUrl+domain
-                let response = await axios.get(url);
-                let data=response.data
+                
+                let response = await Education.find({domains:domain});
+                let data=response
             
                 if (data.length < 1) {
                 domain=stripDomain(domain);
                     if (countPeriods(domain) == 0 ) {
-                    // res.json({ message: 'Not a valid EDU', status: 'FAIL' });
                     return { message: 'Please add a valid educational email.', status: 'FAIL' };
                     }
                 } else {
-                    // res.json({ message: response.data, status: 'OK' });
                     return { message: response.data, status: 'OK' };
                 }
                 await new Promise(resolve => setTimeout(resolve, stripDelay));

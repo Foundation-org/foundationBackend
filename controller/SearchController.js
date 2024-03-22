@@ -7,10 +7,12 @@ const {
 const { getPercentage } = require("../utils/getPercentage");
 const UserQuestSetting = require("../models/UserQuestSetting");
 const Cities = require("../models/Cities");
-
+const Education = require("../models/Education");
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
   const uuid = req.cookies.uuid;
+
+  const { moderationRatingFilter } = req.body;
 
   try {
     const hiddenUserSettings = await UserQuestSetting.find({
@@ -30,6 +32,7 @@ const easySearch = async (req, res) => {
         { QuestTopic: { $regex: searchTerm, $options: "i" } },
       ],
       _id: { $nin: hiddenUserSettingIds },
+      moderationRatingCount : { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
     }).populate("getUserBadge", "badges");
 
     const resultArray = results.map(getPercentage);
@@ -67,7 +70,7 @@ const searchBookmarks = async (req, res) => {
     const hiddenUserSettingIds = hiddenUserSettings.map(
       (userSetting) => userSetting.questForeignKey
     );
-    
+
     const infoQuestQuestions = await InfoQuestQuestions.find({
       $or: [
         { Question: { $regex: searchTerm, $options: "i" } },
@@ -79,16 +82,13 @@ const searchBookmarks = async (req, res) => {
     }).populate("getUserBadge", "badges");
 
     // Extract QuestId from infoQuestQuestions
-    const questIds = infoQuestQuestions.map(
-      (ob) => ob._id
-    );
+    const questIds = infoQuestQuestions.map((ob) => ob._id);
 
     const results = await BookmarkQuests.find({
       questForeignKey: { $in: questIds },
       // Question: { $regex: searchTerm, $options: "i" },
       uuid: uuid,
     });
-
 
     const reversedResults = results.reverse();
     const mapPromises = reversedResults.map(async function (record) {
@@ -112,7 +112,10 @@ const searchBookmarks = async (req, res) => {
       uuid
     );
     // getQuestionsWithUserSettings
-    const result = await getQuestionsWithUserSettings(questionsWithStatus, uuid);
+    const result = await getQuestionsWithUserSettings(
+      questionsWithStatus,
+      uuid
+    );
 
     res.status(200).json({
       data: result,
@@ -130,9 +133,8 @@ const searchHiddenQuest = async (req, res) => {
   try {
     const results = await UserQuestSetting.find({
       Question: { $regex: searchTerm, $options: "i" },
-      uuid: uuid
+      uuid: uuid,
     });
-
 
     const reversedResults = results.reverse();
     const mapPromises = reversedResults.map(async function (record) {
@@ -156,7 +158,10 @@ const searchHiddenQuest = async (req, res) => {
       uuid
     );
     // getQuestionsWithUserSettings
-    const result = await getQuestionsWithUserSettings(questionsWithStatus, uuid);
+    const result = await getQuestionsWithUserSettings(
+      questionsWithStatus,
+      uuid
+    );
 
     res.status(200).json({
       data: result,
@@ -168,28 +173,52 @@ const searchHiddenQuest = async (req, res) => {
   }
 };
 
-
-
 const searchCities = async (req, res) => {
   const cityName = req.query.name;
-  
+
   try {
-    const regex = new RegExp(`^${cityName}`, 'i');
-    const data = await Cities.find({ name: { $regex:regex } });
-  
+    const regex = new RegExp(`^${cityName}`, "i");
+    const data = await Cities.aggregate([
+      { $match: { name: { $regex: regex } } },
+      { $group: { _id: "$name", city: { $first: "$$ROOT" } } },
+      { $replaceRoot: { newRoot: "$city" } },
+      { $limit: 20 },
+    ]);
+
     if (data.length === 0) {
-      return res.status(404).json({ message: 'City not found' });
+      return res.status(404).json({ message: "City not found" });
     }
-  
-    res.json(data.map(city => ({ id: city.id, name: city.name })) );;
+
+    res.json(data.map((city) => ({ id: city.id, name: city.name })));
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
-  };
+};
+
+const searchUniversities = async (req, res) => {
+  const uniName = req.query.name;
+
+  try {
+    const regex = new RegExp(`^${uniName}`, "i");
+    const data = await Education.find({ name: { $regex: regex } }).limit(20);
+    if (data.length === 0) {
+      return res.status(404).json({ message: "School not found" });
+    }
+
+    res.json(
+      data.map((uni) => ({ id: uni.id, name: uni.name, country: uni.country }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   easySearch,
   searchBookmarks,
   searchHiddenQuest,
-  searchCities
+  searchCities,
+  searchUniversities,
 };
