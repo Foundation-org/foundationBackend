@@ -39,6 +39,7 @@ const createInfoQuestQuest = async (req, res) => {
       uuid: req.body.uuid,
       getUserBadge: user._id,
       uniqueShareLink: shortLink.generate(8),
+      moderationRatingCount: req.body.moderationRatingCount
     });
 
     const createdQuestion = await question.save();

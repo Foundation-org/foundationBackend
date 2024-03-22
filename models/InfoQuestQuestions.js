@@ -71,6 +71,10 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     startQuestData: {
       type: Object,
     },
+    moderationRatingCount: {
+      type: Number,
+      // default: 0,
+    },
   },
   { timestamps: true }
 );
