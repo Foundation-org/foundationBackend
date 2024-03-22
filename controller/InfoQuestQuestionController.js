@@ -139,6 +139,7 @@ const getAllQuests = async (req, res) => {
 };
 const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
   try {
+    const { moderationRatingFilter } = req.body;
     let allQuestions;
 
     let filterObj = {};
@@ -225,6 +226,8 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       allQuestions = await Promise.all(mapPromises);
       totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
+      // moderation filter
+      filterObj.moderationRatingCount = { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
       // First, find UserQuestSettings with hidden: false
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
@@ -295,6 +298,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
 };
 const getAllQuestsWithAnsweredStatus = async (req, res) => {
   try {
+    const { moderationRatingFilter } = req.body;
     let allQuestions;
 
     let filterObj = {};
@@ -381,6 +385,8 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       allQuestions = await Promise.all(mapPromises);
       totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
     } else {
+      // moderation filter
+      filterObj.moderationRatingCount = { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
       // First, find UserQuestSettings with hidden: false
       const hiddenUserSettings = await UserQuestSetting.find({
         hidden: true,
