@@ -39,7 +39,7 @@ const createInfoQuestQuest = async (req, res) => {
       uuid: req.body.uuid,
       getUserBadge: user._id,
       uniqueShareLink: shortLink.generate(8),
-      moderationRatingCount: req.body.moderationRatingCount
+      moderationRatingCount: req.body.moderationRatingCount,
     });
 
     const createdQuestion = await question.save();
@@ -472,8 +472,18 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
 };
 
 const getAllQuestsWithDefaultStatus = async (req, res) => {
-  const { uuid, _page, _limit, filter, sort, type, Page, terms, blockedTerms } =
-    req.body;
+  const {
+    uuid,
+    _page,
+    _limit,
+    filter,
+    sort,
+    type,
+    Page,
+    terms,
+    blockedTerms,
+    moderationRatingFilter,
+  } = req.body;
   const page = parseInt(_page);
   const pageSize = parseInt(_limit);
 
@@ -601,6 +611,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     allQuestions = await Promise.all(mapPromises);
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
   } else {
+    // moderation filter
+    filterObj.moderationRatingCount = { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
     // First, find UserQuestSettings with hidden: false
     const hiddenUserSettings = await UserQuestSetting.find({
       hidden: true,
