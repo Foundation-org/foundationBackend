@@ -23,9 +23,11 @@ module.exports = {
     // COC
     "You are a content moderator for a large social network. I will give you posts to rate. Respond with a rejection score from 0-100 only. Number only.",
     // FIRST NAME
-    "Is this a valid first name for a person? Answer yes or no or no only.",
+    // "Is this a valid first name for a person? Answer yes or no or no only.",
+    "Can this be a first name for a person? Shortest response only",
     // LAST NAME
-    "Is this a valid last name for a person? Answer yes or no or no only.",
+    // "Is this a valid last name for a person? Answer yes or no or no only.",
+    "Can this be a last name for a person? Shortest response only"
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
   ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,

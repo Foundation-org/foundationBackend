@@ -82,7 +82,7 @@ const signUpUser = async (req, res) => {
       email: req.body.userEmail,
       password: hashPassword,
       uuid: uuid,
-      role: 'user' 
+      role: 'user'
     });
     const users = await user.save();
     if (!users) throw new Error("User not Created");
@@ -114,7 +114,7 @@ const signUpUser = async (req, res) => {
     //   txData: user.uuid,
     //   // txDescription : "user logs in"
     // });
-    
+
     await sendVerifyEmail(req, res);
     // res.status(200).json({ ...user._doc, token });
   } catch (error) {
@@ -132,7 +132,7 @@ const signUpUserBySocialLogin = async (req, res) => {
     // }
     // Check Google Account
     const payload = req.body;
-     // Check if email already exist
+    // Check if email already exist
     const alreadyUser = await User.findOne({ email: payload.email });
     if (alreadyUser) throw new Error("Email Already Exists");
 
@@ -352,7 +352,7 @@ const signUpGuestMode = async (req, res) => {
           email: req.body.email,
           password: hashPassword,
           role: "user",
-          isGuestMode:false
+          isGuestMode: false
         },
       }
     );
@@ -400,7 +400,7 @@ const signUpSocialGuestMode = async (req, res) => {
         $set: {
           email: payload.email,
           role: "user",
-          isGuestMode:false
+          isGuestMode: false
         },
       }
     );
@@ -615,7 +615,7 @@ const sendVerifyEmailGuest = async (req, res) => {
 
     // Step 3 - Email the user a unique verification link
     const url = `${FRONTEND_URL}/VerifyCode/?${verificationTokenFull}`;
-  
+
     const SES_CONFIG = {
       region: process.env.AWS_SES_REGION,
       credentials: {
@@ -798,16 +798,16 @@ const sendEmail = async (req, res) => {
 //   try {
 //     const referralCode = "Jan2024";
 //     const { code, uuid } = req.body;
-    
+
 //     // const user = User.
 //     const user = await User.findOne({ uuid });
 //     if (!user) throw new Error("User Not Exist");
-  
+
 //     if(code !== referralCode) throw new Error("Referral code not exist!");
 
 //     // Generate a token
 //     const token = createToken({ uuid: user.uuid });
-  
+
 //     res.cookie("uuid", user.uuid, cookieConfiguration());
 //     res.cookie("jwt", token, cookieConfiguration());
 //     user.referral = true;
@@ -820,11 +820,11 @@ const sendEmail = async (req, res) => {
 //   }
 // };
 
-const verifyReferralCode = async(req, res) => {
+const verifyReferralCode = async (req, res) => {
   try {
     const referralCode = "Jan2024";
-    const { code} = req.body;
-    if(code !== referralCode) throw new Error("Referral code not exist!");
+    const { code } = req.body;
+    if (code !== referralCode) throw new Error("Referral code not exist!");
     // Generate a token
     res.json({ message: "Successful" });
   } catch (error) {
@@ -834,8 +834,8 @@ const verifyReferralCode = async(req, res) => {
   }
 };
 
-const AuthenticateJWT=async(req,res)=>{
-  try{
+const AuthenticateJWT = async (req, res) => {
+  try {
 
     const token = req.headers.authorization;
     const decodedToken = jwt.verify(token, JWT_SECRET);
@@ -846,11 +846,11 @@ const AuthenticateJWT=async(req,res)=>{
 
     if (user.verification) {
       return res.status(409).json({ message: 'Already Verified' });
-    } 
+    }
     return res.status(200).json({ message: 'Continue' });
 
   }
-  catch(error){
+  catch (error) {
     return res.status(500).json({
       message: error.message,
     });
@@ -893,7 +893,7 @@ const verify = async (req, res) => {
         message: "User does not exists",
       });
     }
- 
+
 
     // Create a Badge
     user.badges.unshift({ accountName: "Email", isVerified: true });
@@ -942,7 +942,7 @@ const verify = async (req, res) => {
     await user.save();
     // Generate a token
     const generateToken = createToken({ uuid: req.user.uuid });
-  
+
     res.cookie("uuid", req.user.uuid, cookieConfiguration());
     res.cookie("jwt", generateToken, cookieConfiguration());
     res.status(200).json({ ...user._doc, token: generateToken });
@@ -1008,7 +1008,7 @@ const logout = async (req, res) => {
     // Clear cookies and respond to the client
     res.clearCookie("uuid", cookieConfiguration());
     res.clearCookie("jwt", cookieConfiguration());
-    res.status(200).json({ message: "User has been logout successfully!"});
+    res.status(200).json({ message: "User has been logout successfully!" });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -1038,7 +1038,7 @@ const setStates = async (req, res) => {
     );
 
 
-    res.status(200).json({ message: "Filters Updated", updatedUser});
+    res.status(200).json({ message: "Filters Updated", updatedUser });
 
   } catch (error) {
     console.error(error.message);
@@ -1069,7 +1069,7 @@ const setBookmarkStates = async (req, res) => {
     );
 
 
-    res.status(200).json({ message: "Filters Updated", updatedUser});
+    res.status(200).json({ message: "Filters Updated", updatedUser });
 
   } catch (error) {
     console.error(error.message);
@@ -1108,7 +1108,7 @@ const getInstaToken = async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Error:', error.message);
-    res.status(error.response ? error.response.status : 500).json({ error: 'Internal Server Error' });
+    res.status(error.response ? error.response.status : 500).json({ error: error.message });
   }
 };
 
@@ -1166,7 +1166,7 @@ const getLinkedInUserInfo = async (req, res) => {
     });
     console.log("🚀 ~ getLinkedInUserInfo ~ getAccessToken:", getAccessToken.data)
     // if token found
-    if(!getAccessToken?.data?.access_token) throw new Error("Token not found!")
+    if (!getAccessToken?.data?.access_token) throw new Error("Token not found!")
 
     // Second Axios request to get user info using the access token
     const response = await axios.get('https://api.linkedin.com/v2/userinfo', {
