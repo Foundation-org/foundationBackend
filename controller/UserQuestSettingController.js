@@ -198,19 +198,44 @@ const create = async (req, res) => {
     //   payload.link = shortLink.generate(8);
     // }
 
-    const userQuestSettingExist = await UserQuestSetting.findOne({
-      uuid: payload.uuid,
-      questForeignKey: payload.questForeignKey,
-    });
+    // const userQuestSettingExist = await UserQuestSetting.findOne({
+    //   uuid: payload.uuid,
+    //   questForeignKey: payload.questForeignKey,
+    // });
+    let userQuestSettingSaved;
+    userQuestSettingSaved = await UserQuestSetting.findOneAndUpdate(
+      // Query criteria
+      { uuid: payload.uuid, questForeignKey: payload.questForeignKey },
+      // Update or insert payload
+      { $set: payload },
+      // Options
+      { new: true, upsert: true }
+    );
+    
     // To check the record exist
-    if (userQuestSettingExist)
-      throw new Error("userQuestSetting already exist");
+    // if (userQuestSettingExist){
+    //    // If the record exists, update it
+    //    userQuestSettingSaved = await UserQuestSetting.findOneAndUpdate(
+    //     {
+    //       uuid: payload.uuid,
+    //       questForeignKey: payload.questForeignKey,
+    //     },
+    //     {
+    //       // Update fields and values here
+    //       $set: payload,
+    //     },
+    //     {
+    //       new: true, // Return the modified document rather than the original
+    //     }
+    //   );
+    // } else {
+    //   // Create
+    //   const userQuestSetting = new UserQuestSetting({
+    //     ...payload,
+    //   });
+    //   userQuestSettingSaved = await userQuestSetting.save();
+    // }
 
-    // Create a short link
-    const userQuestSetting = new UserQuestSetting({
-      ...payload,
-    });
-    const savedUserQuestSetting = await userQuestSetting.save();
     // Get quest owner uuid
     const infoQuestQuestion = await InfoQuestQuestions.findOne({
       _id: payload.questForeignKey,
@@ -219,11 +244,14 @@ const create = async (req, res) => {
     if (payload.hidden) {
       await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
+    } else if (payload.hidden === false) {
+      await hiddenPostCount(infoQuestQuestion.uuid, false);
+      await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
 
     return res.status(201).json({
-      message: "UserQuestSetting Created Successfully!",
-      data: savedUserQuestSetting,
+      message: "UserQuestSetting Upsert Successfully!",
+      data: userQuestSettingSaved,
     });
   } catch (error) {
     console.error(error);
