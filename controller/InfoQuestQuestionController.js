@@ -188,6 +188,7 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
           ...filterObj,
+          moderationRatingCount : { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
         }).populate("getUserBadge", "badges");
       });
 
@@ -347,6 +348,7 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
         return await InfoQuestQuestions.findOne({
           _id: record.questForeignKey,
           ...filterObj,
+          moderationRatingCount : { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
         }).populate("getUserBadge", "badges");
       });
 
@@ -571,6 +573,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
         ...filterObj,
+        moderationRatingCount : { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
       });
     });
     console.log(mapPromises);
