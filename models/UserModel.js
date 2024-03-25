@@ -199,13 +199,14 @@ const userSchema = mongoose.Schema(
       {
         accountId: { type: String },
         accountName: { type: String },
+        details: { type: Object },
         email: { type: String },
         isVerified: { type: Boolean },
         type: { type: String },
-        primary:{type:Boolean},
+        primary: { type: Boolean },
         createdAt: { type: Date, default: new Date() },
         personal: { type: Object },
-        web3:{ type: Object },
+        web3: { type: Object },
       },
     ],
     role: {

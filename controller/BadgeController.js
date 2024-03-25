@@ -146,8 +146,9 @@ const addContactBadge = async (req, res) => {
       const usersWithEmail = await UserModel.find({
         email: req.body.email,
       });
+      console.log("wamiq", usersWithBadge);
       if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0)
-        throw new Error("Badge already exist");
+        throw new Error("Oops! This account is already linked.");
 
       // Send an email
       await sendVerifyEmail({
@@ -162,9 +163,12 @@ const addContactBadge = async (req, res) => {
     }
     // Find the Badge
     const usersWithBadge = await UserModel.find({
-      badges: { $elemMatch: { accountId: req.body.sub } },
+      badges: {
+        $elemMatch: { accountId: req.body.sub, accountName: req.body.provider },
+      },
     });
-    if (usersWithBadge.length !== 0) throw new Error("Badge already exist");
+    if (usersWithBadge.length !== 0)
+      throw new Error("Oops! This account is already linked.");
 
     const userBadges = User.badges;
     const updatedUserBadges = [
@@ -174,6 +178,7 @@ const addContactBadge = async (req, res) => {
         accountName: req.body.provider,
         isVerified: true,
         type: req.body.type,
+        details: req.body.data,
       },
     ];
     // Update the user badges
@@ -229,7 +234,12 @@ const addBadge = async (req, res) => {
     if (!User) throw new Error("No such User!");
     // Find the Badge
     const usersWithBadge = await UserModel.find({
-      badges: { $elemMatch: { accountId: req.body.badgeAccountId } },
+      badges: {
+        $elemMatch: {
+          accountId: req.body.badgeAccountId,
+          accountName: req.body.provider,
+        },
+      },
     });
     if (usersWithBadge.length !== 0)
       throw new Error("Oops! This account is already linked.");
@@ -240,6 +250,7 @@ const addBadge = async (req, res) => {
       {
         accountId: req.body.badgeAccountId,
         accountName: req.body.provider,
+        details: req.body.data,
         isVerified: true,
         type: "default",
       },
@@ -360,6 +371,7 @@ const addWorkEducationBadge = async (req, res) => {
     );
     if (personalBadgeIndex !== -1) {
       const existingPersonalBadge = userBadges[personalBadgeIndex].personal;
+      console.log(existingPersonalBadge);
       existingPersonalBadge[req.body.type].push(newData);
       userBadges[personalBadgeIndex].personal = existingPersonalBadge;
       User.badges = userBadges;
@@ -408,7 +420,6 @@ const addWorkEducationBadge = async (req, res) => {
       inc: true,
     });
     const data = await User.save();
-    console.log(data.badges);
 
     res.status(200).json({ data, message: "Successful" });
   } catch (error) {
@@ -849,8 +860,9 @@ const addContactBadgeAdd = async (req, res) => {
     const usersWithEmail = await UserModel.find({
       email: decodedToken.email,
     });
+    console.log("wamiq", usersWithBadge);
     if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0)
-      throw new Error("Badge already exist");
+      throw new Error("Oops! This account is already linked.");
 
     const userBadges = User.badges;
     const updatedUserBadges = [
