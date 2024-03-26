@@ -9,8 +9,14 @@ router.post("/redeem/create", RedeemController.create);
 
 router.post("/redeem/transfer", RedeemController.transfer);
 
-router.get("/redeem/getUnredeemedById", RedeemController.getUnredeemedById);
+router.get(
+  "/redeem/getUnredeemedById/:id/:uuid",
+  RedeemController.getUnredeemedById
+);
 
-router.get("/redeem/getRedeemHistoryById", RedeemController.getRedeemHistoryById);
+router.get(
+  "/redeem/getRedeemHistoryById/:id/:uuid",
+  RedeemController.getRedeemHistoryById
+);
 
 module.exports = router;
