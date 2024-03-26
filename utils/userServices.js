@@ -14,7 +14,6 @@ module.exports.getUserBalance = async (uuid) => {
 module.exports.checkUserBalance = async ({uuid, req, res}) => {
   try {
       const user = await UserModel.findOne({ uuid });
-      user = 'test';
       return parseFloat(user.balance).toFixed(2);
     } catch (error) {
       // console.error(error.message);
