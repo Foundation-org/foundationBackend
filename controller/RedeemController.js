@@ -134,7 +134,7 @@ const transfer = async (req, res) => {
       const { page, limit } = req.query;
       const { _id, uuid } = req.body;
   
-      const redeem = await Redeem.find({ creator: _id, owner: { $nin: _id } })
+      const redeem = await Redeem.find({ creator: _id, owner: { $ne: _id } })
   
       res.status(200).json({
         data: redeem
