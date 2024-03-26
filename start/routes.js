@@ -10,6 +10,7 @@ const StartQuestRoute = require("../routes/StartQuestRoute");
 const BadgesRoutes = require("../routes/BadgesRoutes");
 const UserQuestSettingRoute = require("../routes/UserQuestSettingRoute");
 const PassportRoutes = require("../routes/PassportRoutes");
+const RedeemRoute = require("../routes/RedeemRoute");
 const isUnderMaintenance = require("../middleware/maintenance");
 
 module.exports = function (app) {
@@ -17,6 +18,7 @@ module.exports = function (app) {
     app.use("/",isUnderMaintenance, AiValidationRoutes)
     app.use("/",isUnderMaintenance, BadgesRoutes)
     app.use("/",isUnderMaintenance, UserQuestSettingRoute)
+    app.use("/",isUnderMaintenance, RedeemRoute)
     app.use("/user",isUnderMaintenance, AuthRoute)
     app.use("/bookmarkQuest",isUnderMaintenance, BookmarkQuestRoute)
     app.use("/infoquestions",isUnderMaintenance, InfoQuestQuestionRoute)

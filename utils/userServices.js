@@ -3,10 +3,26 @@ const UserModel = require("../models/UserModel");
 module.exports.getUserBalance = async (uuid) => {
     try {
         const user = await UserModel.findOne({ uuid });
+        user = 'test';
         return parseFloat(user.balance).toFixed(2);
       } catch (error) {
         console.error(error);
+        return error.message
       }
+};
+
+module.exports.checkUserBalance = async ({uuid, req, res}) => {
+  try {
+      const user = await UserModel.findOne({ uuid });
+      user = 'test';
+      return parseFloat(user.balance).toFixed(2);
+    } catch (error) {
+      // console.error(error.message);
+      throw new Error("An error occurred while checkUserBalance!")
+      // res.status(500).json({
+      //   message: `An error occurred while checkUserBalance: ${error.message}`,
+      // });
+    }
 };
 
 module.exports.updateUserBalance = async ({ uuid, amount, inc, dec }) => {
