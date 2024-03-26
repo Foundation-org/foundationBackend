@@ -74,7 +74,7 @@ const userSchema = mongoose.Schema(
         type: String,
         default: "Newest First",
       },
-      columns: {
+      topics: {
         All: columnsSchema,
         // Preferences: columnsSchema,
         Block: columnsSchema,
