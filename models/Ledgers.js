@@ -13,6 +13,7 @@ const Ledgers = mongoose.Schema(
     txDate: { type: Date, default: Date.now },
     // type: { type: String, default: "User" },
     txDescription: { type: String },
+    type: { type: String }
   },
   { timestamps: true }
 );

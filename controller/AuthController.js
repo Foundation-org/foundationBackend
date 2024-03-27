@@ -1,7 +1,7 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const axios = require('axios');
+const axios = require("axios");
 // const nodemailer = require("nodemailer");
 const AWS = require("aws-sdk");
 const crypto = require("crypto");
@@ -71,7 +71,10 @@ const signUpUser = async (req, res) => {
     if (alreadyUser) throw new Error("Email Already Exists");
 
     const checkGoogleEmail = await isGoogleEmail(req.body.userEmail);
-    if (checkGoogleEmail) throw new Error("We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'");
+    if (checkGoogleEmail)
+      throw new Error(
+        "We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'"
+      );
 
     const uuid = crypto.randomBytes(11).toString("hex");
     console.log(uuid);
@@ -82,7 +85,7 @@ const signUpUser = async (req, res) => {
       email: req.body.userEmail,
       password: hashPassword,
       uuid: uuid,
-      role: 'user'
+      role: "user",
     });
     const users = await user.save();
     if (!users) throw new Error("User not Created");
@@ -140,7 +143,7 @@ const signUpUserBySocialLogin = async (req, res) => {
     const user = await new User({
       email: payload.email,
       uuid: uuid,
-      role: 'user'
+      role: "user",
     });
 
     // Check Email Category
@@ -239,7 +242,9 @@ const signInUser = async (req, res) => {
 
     // To check the google account
     if (user?.badges[0]?.accountName === "Gmail")
-      throw new Error("We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'");
+      throw new Error(
+        "We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'"
+      );
     // To check the facebook account
     if (user?.badges[0]?.accountName === "Fmail")
       throw new Error("Please Login with Facebook Account");
@@ -332,7 +337,6 @@ const createGuestMode = async (req, res) => {
 
 const signUpGuestMode = async (req, res) => {
   try {
-
     console.log(req.body.uuid);
     const guestUserMode = await User.findOne({ uuid: req.body.uuid });
     if (!guestUserMode) throw new Error("Guest Mode not Exist!");
@@ -341,7 +345,10 @@ const signUpGuestMode = async (req, res) => {
     if (alreadyUser) throw new Error("Email Already Exists");
 
     const checkGoogleEmail = await isGoogleEmail(req.body.email);
-    if (checkGoogleEmail) throw new Error("We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'");
+    if (checkGoogleEmail)
+      throw new Error(
+        "We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'"
+      );
 
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req.body.password, salt);
@@ -352,7 +359,7 @@ const signUpGuestMode = async (req, res) => {
           email: req.body.email,
           password: hashPassword,
           role: "user",
-          isGuestMode: false
+          isGuestMode: false,
         },
       }
     );
@@ -400,7 +407,7 @@ const signUpSocialGuestMode = async (req, res) => {
         $set: {
           email: payload.email,
           role: "user",
-          isGuestMode: false
+          isGuestMode: false,
         },
       }
     );
@@ -535,7 +542,9 @@ const signInUserBySocialLogin = async (req, res) => {
 
 const userInfo = async (req, res) => {
   try {
-    const user = await User.findOne({ uuid: req.cookies.uuid || req.body.uuid });
+    const user = await User.findOne({
+      uuid: req.cookies.uuid || req.body.uuid,
+    });
     res.status(200).json(user);
   } catch (error) {
     console.error(error.message);
@@ -562,7 +571,6 @@ const userInfoById = async (req, res) => {
     });
   }
 };
-
 
 const setUserWallet = async (req, res) => {
   try {
@@ -603,15 +611,16 @@ const signedUuid = async (req, res) => {
 
 const sendVerifyEmailGuest = async (req, res) => {
   try {
-
-
-    const verificationTokenFull = jwt.sign({ uuid: req.body.uuid }, JWT_SECRET, {
-      expiresIn: "2m",
-    });
+    const verificationTokenFull = jwt.sign(
+      { uuid: req.body.uuid },
+      JWT_SECRET,
+      {
+        expiresIn: "2m",
+      }
+    );
     const verificationToken = verificationTokenFull.substr(
       verificationTokenFull.length - 6
     );
-
 
     // Step 3 - Email the user a unique verification link
     const url = `${FRONTEND_URL}/VerifyCode/?${verificationTokenFull}`;
@@ -782,7 +791,12 @@ const sendVerifyEmail = async (req, res) => {
 const sendEmail = async (req, res) => {
   try {
     const { subject, message } = req.body;
-    const response = await sendEmailMessage(req.body.email, subject, message, req.body.sender);
+    const response = await sendEmailMessage(
+      req.body.email,
+      subject,
+      message,
+      req.body.sender
+    );
     if (response) {
       res.status(200).json({ message: `Email Sent Successfully!` });
     }
@@ -836,26 +850,23 @@ const verifyReferralCode = async (req, res) => {
 
 const AuthenticateJWT = async (req, res) => {
   try {
-
     const token = req.headers.authorization;
     const decodedToken = jwt.verify(token, JWT_SECRET);
     const user = await User.findOne({ uuid: decodedToken.uuid });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     if (user.verification) {
-      return res.status(409).json({ message: 'Already Verified' });
+      return res.status(409).json({ message: "Already Verified" });
     }
-    return res.status(200).json({ message: 'Continue' });
-
-  }
-  catch (error) {
+    return res.status(200).json({ message: "Continue" });
+  } catch (error) {
     return res.status(500).json({
       message: error.message,
     });
   }
-}
+};
 
 const verify = async (req, res) => {
   const verificationCode = req.body.verificationCode;
@@ -893,7 +904,6 @@ const verify = async (req, res) => {
         message: "User does not exists",
       });
     }
-
 
     // Create a Badge
     user.badges.unshift({ accountName: "Email", isVerified: true });
@@ -1024,22 +1034,22 @@ const setStates = async (req, res) => {
       { uuid: uuid },
       {
         $set: {
-          'States.expandedView': req.body.expandedView,
-          'States.searchData': req.body.searchData,
-          'States.filterByStatus': req.body.filterByStatus,
-          'States.filterByType': req.body.filterByType,
-          'States.filterByScope': req.body.filterByScope,
-          'States.filterBySort': req.body.filterBySort,
-          'States.columns': req.body.columns,
-          'States.lightMode': req.body.LightMode,
+          "States.expandedView": req.body.expandedView,
+          "States.searchData": req.body.searchData,
+          "States.filterByStatus": req.body.filterByStatus,
+          "States.filterByType": req.body.filterByType,
+          "States.filterByScope": req.body.filterByScope,
+          "States.filterBySort": req.body.filterBySort,
+          "States.topics": req.body.topics,
+          "States.lightMode": req.body.LightMode,
+          "States.moderationRatingFilter": req.body.moderationRatingFilter,
+          "States.selectedBtnId": req.body.selectedBtnId,
         },
       },
       { new: true }
     );
 
-
     res.status(200).json({ message: "Filters Updated", updatedUser });
-
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -1055,22 +1065,22 @@ const setBookmarkStates = async (req, res) => {
       { uuid: uuid },
       {
         $set: {
-          'bookmarkStates.expandedView': req.body.expandedView,
-          'bookmarkStates.searchData': req.body.searchData,
-          'bookmarkStates.filterByStatus': req.body.filterByStatus,
-          'bookmarkStates.filterByType': req.body.filterByType,
-          'bookmarkStates.filterByScope': req.body.filterByScope,
-          'bookmarkStates.filterBySort': req.body.filterBySort,
-          'bookmarkStates.columns': req.body.columns,
-          'bookmarkStates.lightMode': req.body.LightMode,
+          "bookmarkStates.expandedView": req.body.expandedView,
+          "bookmarkStates.searchData": req.body.searchData,
+          "bookmarkStates.filterByStatus": req.body.filterByStatus,
+          "bookmarkStates.filterByType": req.body.filterByType,
+          "bookmarkStates.filterByScope": req.body.filterByScope,
+          "bookmarkStates.filterBySort": req.body.filterBySort,
+          "bookmarkStates.columns": req.body.columns,
+          "bookmarkStates.lightMode": req.body.LightMode,
+          "bookmarkStates.moderationRatingFilter":
+            req.body.moderationRatingFilter,
         },
       },
       { new: true }
     );
 
-
     res.status(200).json({ message: "Filters Updated", updatedUser });
-
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -1086,34 +1096,33 @@ const getInstaToken = async (req, res) => {
     const redirectUri = req.body.redirectUri;
     const code = req.body.code;
 
-    console.log('Request Body:', req.body);
+    console.log("Request Body:", req.body);
 
     const response = await axios.post(
-      'https://api.instagram.com/oauth/access_token',
+      "https://api.instagram.com/oauth/access_token",
       new URLSearchParams({
         client_id: clientId,
         client_secret: clientSecret,
-        grant_type: 'authorization_code',
+        grant_type: "authorization_code",
         redirect_uri: redirectUri,
         code: code,
       }),
       {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );
 
-    console.log('Instagram API Response:', response.data);
+    console.log("Instagram API Response:", response.data);
     res.json(response.data);
   } catch (error) {
-    console.error('Error:', error.message);
-    res.status(error.response ? error.response.status : 500).json({ error: error.message });
+    console.error("Error:", error.message);
+    res
+      .status(error.response ? error.response.status : 500)
+      .json({ error: error.message });
   }
 };
-
-
-
 
 const deleteBadgeById = async (req, res) => {
   try {
@@ -1147,40 +1156,51 @@ const deleteBadgeById = async (req, res) => {
 
 const getLinkedInUserInfo = async (req, res) => {
   try {
-    const { code, grant_type, redirect_uri, client_id, client_secret } = req.body;
+    const { code, grant_type, redirect_uri, client_id, client_secret } =
+      req.body;
 
-    console.log('Request Body getLinkedInUserInfo:', req.body);
+    console.log("Request Body getLinkedInUserInfo:", req.body);
     const params = new URLSearchParams();
-    params.append('grant_type', grant_type);
-    params.append('code', code);
-    params.append('client_id', client_id);
-    params.append('client_secret', client_secret);
-    params.append('redirect_uri', redirect_uri);
-    console.log("🚀 ~ getLinkedInUserInfo ~ params:", params)
+    params.append("grant_type", grant_type);
+    params.append("code", code);
+    params.append("client_id", client_id);
+    params.append("client_secret", client_secret);
+    params.append("redirect_uri", redirect_uri);
+    console.log("🚀 ~ getLinkedInUserInfo ~ params:", params);
     // First Axios request to get the access token
-    const getAccessToken = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', params, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      timeout: 10000 // Set timeout to 10 seconds (adjust as needed)
-    });
-    console.log("🚀 ~ getLinkedInUserInfo ~ getAccessToken:", getAccessToken.data)
+    const getAccessToken = await axios.post(
+      "https://www.linkedin.com/oauth/v2/accessToken",
+      params,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        timeout: 10000, // Set timeout to 10 seconds (adjust as needed)
+      }
+    );
+    console.log(
+      "🚀 ~ getLinkedInUserInfo ~ getAccessToken:",
+      getAccessToken.data
+    );
     // if token found
-    if (!getAccessToken?.data?.access_token) throw new Error("Token not found!")
+    if (!getAccessToken?.data?.access_token)
+      throw new Error("Token not found!");
 
     // Second Axios request to get user info using the access token
-    const response = await axios.get('https://api.linkedin.com/v2/userinfo', {
+    const response = await axios.get("https://api.linkedin.com/v2/userinfo", {
       headers: {
         Authorization: `Bearer ${getAccessToken.data.access_token}`,
-        "Content-Type": 'application/json'
+        "Content-Type": "application/json",
       },
-      timeout: 10000 // Set timeout to 10 seconds (adjust as needed)
+      timeout: 10000, // Set timeout to 10 seconds (adjust as needed)
     });
-    console.log('LinkedIn API Response:', response.data);
+    console.log("LinkedIn API Response:", response.data);
     res.json(response.data);
   } catch (error) {
     // console.error('Error:', error);
-    res.status(error.response ? error.response.status : 500).json({ error: error });
+    res
+      .status(error.response ? error.response.status : 500)
+      .json({ error: error });
   }
 };
 
@@ -1208,5 +1228,5 @@ module.exports = {
   userInfoById,
   AuthenticateJWT,
   getInstaToken,
-  getLinkedInUserInfo
+  getLinkedInUserInfo,
 };
