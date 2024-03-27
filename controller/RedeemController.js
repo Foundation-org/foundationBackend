@@ -70,49 +70,98 @@ const transfer = async (req, res) => {
       throw new Error("You're already the owner of this redemption");
 
     // Create Ledger
-    // receiver
-    await createLedger({
-      uuid: req.body.uuid,
-      txUserAction: "receivedRedeem",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "DAO",
-      txFrom: getRedeem.owner.uuid,
-      txTo: req.body.uuid,
-      txAmount: getRedeem.amount,
-      // txDescription : "User update redemption code"
-      type: "redemption",
-    });
+        // receiver
+        await createLedger({
+          uuid: req.body.uuid,
+          txUserAction: "receivedRedeem",
+          txID: crypto.randomBytes(11).toString("hex"),
+          txAuth: "DAO",
+          txFrom: getRedeem.owner.uuid,
+          txTo: req.body.uuid,
+          txAmount: getRedeem.amount,
+          // txDescription : "User update redemption code"
+          type: 'redemption'
+        });
+        // Create Ledger
+        // sender
+        await createLedger({
+            uuid: getRedeem.owner.uuid,
+            txUserAction: "transferredRedeem",
+            txID: crypto.randomBytes(11).toString("hex"),
+            txAuth: "DAO",
+            txFrom: getRedeem.owner.uuid,
+            txTo: req.body.uuid,
+            txAmount: getRedeem.amount,
+            // txDescription : "User update redemption code"
+            type: 'redemption'
+          });
+        // Decrement the UserBalance
+        // await updateUserBalance({
+        //   uuid: req.body.uuid,
+        //   amount: getRedeem.amount,
+        //   inc: true,
+        // });
+        // Update the Redeem
+        getRedeem.code = shortlink.generate(10),
+        getRedeem.owner = User._id
+        const updatedRedeem = await getRedeem.save();
+        if (!updatedRedeem) throw new Error("Redeem Not updated Successfully!");
+        res.status(201).json({ data: updatedRedeem });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: `An error occurred while create Redeem: ${error.message}`,
+      });
+    }
+  };
+
+  const balance = async (req, res) => {
+    try {
+      const { uuid, code } = req.body;
+      // check receiver balance exist
+      const User = await UserModel.findOne({ uuid });
+      if (!User) throw new Error("No such User!");
+        
+    //   Fetch the redeem data
+        const getRedeem = await Redeem.findOne({ code }).populate("owner", "uuid");
+      if (!getRedeem) throw new Error("Code is invalid!");
+
+    //   check the owner
+      if(getRedeem.owner.uuid !== uuid)
+        throw new Error("You cannot redeem!")
+
     // Create Ledger
-    // sender
-    await createLedger({
-      uuid: getRedeem.owner.uuid,
-      txUserAction: "transferredRedeem",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "DAO",
-      txFrom: getRedeem.owner.uuid,
-      txTo: req.body.uuid,
-      txAmount: getRedeem.amount,
-      // txDescription : "User update redemption code"
-      type: "redemption",
-    });
-    // Decrement the UserBalance
-    // await updateUserBalance({
-    //   uuid: req.body.uuid,
-    //   amount: getRedeem.amount,
-    //   inc: true,
-    // });
-    // Update the Redeem
-    (getRedeem.code = shortlink.generate(10)), (getRedeem.owner = User._id);
-    const updatedRedeem = await getRedeem.save();
-    if (!updatedRedeem) throw new Error("Redeem Not updated Successfully!");
-    res.status(201).json({ data: updatedRedeem });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: `An error occurred while create Redeem: ${error.message}`,
-    });
-  }
-};
+        // receiver
+        await createLedger({
+          uuid: req.body.uuid,
+          txUserAction: "balanceRedeem",
+          txID: crypto.randomBytes(11).toString("hex"),
+          txAuth: "DAO",
+          txFrom: getRedeem.owner.uuid,
+          txTo: req.body.uuid,
+          txAmount: getRedeem.amount,
+          // txDescription : "User update redemption code"
+          type: 'redemption'
+        });
+        
+        // Increment the UserBalance
+        await updateUserBalance({
+          uuid: req.body.uuid,
+          amount: getRedeem.amount,
+          inc: true,
+        });
+
+        // Delete the Redeem
+        const deletedRedeem = await getRedeem.deleteOne();
+        // if (!deletedRedeem) throw new Error("Redeem Not deleted Successfully!");
+        res.status(201).json({ data: deletedRedeem });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: `An error occurred while create Redeem: ${error.message}`,
+      });
+    }
+  };
 
 const getUnredeemedById = async (req, res) => {
   try {
@@ -263,6 +312,7 @@ const getAll = async (req, res) => {
 module.exports = {
   create,
   transfer,
+  balance,
   getUnredeemedById,
   getRedeemHistoryById,
 };
