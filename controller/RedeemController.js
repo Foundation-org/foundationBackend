@@ -23,11 +23,11 @@ const create = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
-      txUserAction: "createRedeem",
+      txUserAction: "createdRedeem",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: req.body.uuid,
-      txTo: "Redemption",
+      txTo: req.body.uuid,
       txAmount: parseInt(amount),
       // txDescription : "User create redemption code"
       type: "redemption",
