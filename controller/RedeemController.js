@@ -95,12 +95,16 @@ const transfer = async (req, res) => {
             // txDescription : "User update redemption code"
             type: 'redemption'
           });
-        // Decrement the UserBalance
-        // await updateUserBalance({
-        //   uuid: req.body.uuid,
-        //   amount: getRedeem.amount,
-        //   inc: true,
-        // });
+        // Increment the UserBalance
+        await updateUserBalance({
+          uuid: req.body.uuid,
+          amount: getRedeem.amount,
+          inc: true,
+        });
+        // For maintaining hisotry
+        // transfer (old owner)
+
+        // Receiver (new owner)
         // Update the Redeem
         getRedeem.code = shortlink.generate(10),
         getRedeem.owner = User._id
@@ -188,7 +192,7 @@ const getRedeemHistoryById = async (req, res) => {
     const _id = req.params.id;
     const uuid = req.params.uuid;
 
-    const redeem = await Redeem.find({ creator: _id, owner: { $ne: _id } });
+    const redeem = await Redeem.find({ creator: { $ne: _id }, owner: _id });
 
     res.status(200).json({
       data: redeem,
