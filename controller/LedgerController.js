@@ -26,7 +26,7 @@ const getById = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
-    const totalCount = await Ledgers.countDocuments({ uuid });
+    const totalCount = await Ledgers.countDocuments({ uuid, type });
     const pageCount = Math.ceil(totalCount / limit);
 
     res.status(200).json({
