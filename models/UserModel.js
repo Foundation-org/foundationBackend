@@ -74,7 +74,7 @@ const userSchema = mongoose.Schema(
         type: String,
         default: "Newest First",
       },
-      columns: {
+      topics: {
         All: columnsSchema,
         // Preferences: columnsSchema,
         Block: columnsSchema,
@@ -82,6 +82,14 @@ const userSchema = mongoose.Schema(
       lightMode: {
         type: Boolean,
         default: true,
+      },
+      moderationRatingFilter: {
+        type: Object,
+        default: { initial: 0, final: 0 },
+      },
+      selectedBtnId: {
+        type: String,
+        default: "newButton",
       },
     },
     bookmarkStates: {
@@ -111,14 +119,18 @@ const userSchema = mongoose.Schema(
       },
       columns: {
         All: columnsSchema,
-        // Preferences: columnsSchema,
         Block: columnsSchema,
       },
       lightMode: {
         type: Boolean,
         default: true,
       },
+      moderationRatingFilter: {
+        type: Object,
+        default: { initial: 0, final: 0 },
+      },
     },
+
     violationCounter: {
       type: Number,
       default: 0,
