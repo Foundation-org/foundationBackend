@@ -1042,6 +1042,7 @@ const setStates = async (req, res) => {
           "States.filterBySort": req.body.filterBySort,
           "States.topics": req.body.topics,
           "States.lightMode": req.body.LightMode,
+          "States.moderationRatingFilter": req.body.moderationRatingFilter,
         },
       },
       { new: true }
@@ -1071,6 +1072,8 @@ const setBookmarkStates = async (req, res) => {
           "bookmarkStates.filterBySort": req.body.filterBySort,
           "bookmarkStates.columns": req.body.columns,
           "bookmarkStates.lightMode": req.body.LightMode,
+          "bookmarkStates.moderationRatingFilter":
+            req.body.moderationRatingFilter,
         },
       },
       { new: true }

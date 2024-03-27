@@ -83,6 +83,10 @@ const userSchema = mongoose.Schema(
         type: Boolean,
         default: true,
       },
+      moderationRatingFilter: {
+        type: Object,
+        default: { initial: 0, final: 0 },
+      },
     },
     bookmarkStates: {
       expandedView: {
@@ -111,14 +115,18 @@ const userSchema = mongoose.Schema(
       },
       columns: {
         All: columnsSchema,
-        // Preferences: columnsSchema,
         Block: columnsSchema,
       },
       lightMode: {
         type: Boolean,
         default: true,
       },
+      moderationRatingFilter: {
+        type: Object,
+        default: { initial: 0, final: 0 },
+      },
     },
+
     violationCounter: {
       type: Number,
       default: 0,
