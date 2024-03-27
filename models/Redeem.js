@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const Redeem = mongoose.Schema(
   {
-    creator: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'user'
-    },
+    // creator: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: 'user'
+    // },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'user'
@@ -15,6 +15,7 @@ const Redeem = mongoose.Schema(
     to: { type: String },
     expiry: { type: Date },
     code: { type: String },
+    status: { type: String, default: 'unredeemed'},
   },
   { timestamps: true }
 );

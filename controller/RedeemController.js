@@ -12,7 +12,7 @@ const create = async (req, res) => {
   try {
     const { creator, owner, uuid, amount, description, to, expiry, code } =
       req.body;
-    // check owner exist
+    // check user exist
     const User = await UserModel.findOne({ uuid });
     if (!User) throw new Error("No such User!");
 
@@ -61,13 +61,19 @@ const transfer = async (req, res) => {
     const User = await UserModel.findOne({ uuid });
     if (!User) throw new Error("No such User!");
 
+    
+    
     //   Fetch the redeem data
     const getRedeem = await Redeem.findOne({ code }).populate("owner", "uuid");
     if (!getRedeem) throw new Error("Code is invalid!");
+    
+    // Check Already redeemed 
+    if(getRedeem.status === "redeemed")
+      throw new Error("Already Redeemed!");
 
     //   check the owner
-    if (getRedeem.owner.uuid === uuid)
-      throw new Error("You're already the owner of this redemption");
+    // if (getRedeem.owner.uuid === uuid)
+    //   throw new Error("You're already the owner of this redemption");
 
     // Create Ledger
         // receiver
@@ -106,8 +112,9 @@ const transfer = async (req, res) => {
 
         // Receiver (new owner)
         // Update the Redeem
-        getRedeem.code = shortlink.generate(10),
+        // getRedeem.code = shortlink.generate(10),
         getRedeem.owner = User._id
+        getRedeem.status = 'redeemed';
         const updatedRedeem = await getRedeem.save();
         if (!updatedRedeem) throw new Error("Redeem Not updated Successfully!");
         res.status(201).json({ data: updatedRedeem });
@@ -193,7 +200,7 @@ const getUnredeemedById = async (req, res) => {
     const _id = req.params.id;
     const uuid = req.params.uuid;
 
-    const redeem = await Redeem.find({ creator: _id, owner: _id });
+    const redeem = await Redeem.find({ owner: _id, status: 'unredeemed' }).sort({ _id: 1 });
 
     res.status(200).json({
       data: redeem,
@@ -212,7 +219,7 @@ const getRedeemHistoryById = async (req, res) => {
     const _id = req.params.id;
     const uuid = req.params.uuid;
 
-    const redeem = await Redeem.find({ creator: { $ne: _id }, owner: _id });
+    const redeem = await Redeem.find({ owner: _id, status: 'redeemed' });
 
     res.status(200).json({
       data: redeem,
