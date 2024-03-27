@@ -119,6 +119,26 @@ const transfer = async (req, res) => {
     }
   };
 
+  const deleteRedeem = async (req, res) => {
+    try {
+      const { uuid, code } = req.body;
+      // check receiver account exist
+      const User = await UserModel.findOne({ uuid });
+      if (!User) throw new Error("No such User!");
+  
+      //   Fetch the redeem data
+      const deletedRedeem = await Redeem.findOneAndDelete({ code });
+      // if (!deletedRedeem) throw new Error("Code is invalid!");
+  
+          res.status(201).json({ data: deletedRedeem });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({
+          message: `An error occurred while create Redeem: ${error.message}`,
+        });
+      }
+    };
+
   const balance = async (req, res) => {
     try {
       const { uuid, code } = req.body;
@@ -316,6 +336,7 @@ const getAll = async (req, res) => {
 module.exports = {
   create,
   transfer,
+  deleteRedeem,
   balance,
   getUnredeemedById,
   getRedeemHistoryById,
