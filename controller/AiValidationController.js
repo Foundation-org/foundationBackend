@@ -206,7 +206,7 @@ const moderator = async(req, res) => {
       }
     }
 
-    res.status(200).json({ moderationRatingCount: maxScore.toFixed(2) })
+    res.status(200).json({ moderationRatingCount: Math.floor(maxScore.toFixed(2)) })
   } catch (error) {
     res.status(500).json({
       message: `An error occurred while create moderation: ${error.message}`,
