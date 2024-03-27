@@ -13,7 +13,7 @@ const Redeem = mongoose.Schema(
     amount: { type: String, required: true },
     description: { type: String, required: true },
     to: { type: String },
-    expiry: { type: Date },
+    expiry: { type: String },
     code: { type: String },
     status: { type: String, default: 'unredeemed'},
   },

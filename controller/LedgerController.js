@@ -70,12 +70,13 @@ const getAll = async (req, res) => {
 
 const search = async (req, res) => {
   try {
-    const { page, limit, sort, term, type } = req.body.params;
+    const { page, limit, sort, term, type, uuid } = req.body.params;
     const skip = (page - 1) * limit;
     const searchTerm = term || "";
 
     const ledger = await Ledgers.find({
       type,
+      uuid,
       $or: [
         { txUserAction: { $regex: searchTerm, $options: "i" } },
         { txID: { $regex: searchTerm, $options: "i" } },
@@ -88,6 +89,7 @@ const search = async (req, res) => {
 
     const totalCount = await Ledgers.countDocuments({
       type,
+      uuid,
       $or: [
         { txUserAction: { $regex: searchTerm, $options: "i" } },
         { txID: { $regex: searchTerm, $options: "i" } },
