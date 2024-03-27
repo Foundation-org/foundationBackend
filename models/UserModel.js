@@ -87,6 +87,10 @@ const userSchema = mongoose.Schema(
         type: Object,
         default: { initial: 0, final: 0 },
       },
+      selectedButtonId: {
+        type: String,
+        default: "newButton",
+      },
     },
     bookmarkStates: {
       expandedView: {
