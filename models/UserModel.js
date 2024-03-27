@@ -87,7 +87,7 @@ const userSchema = mongoose.Schema(
         type: Object,
         default: { initial: 0, final: 0 },
       },
-      selectedButtonId: {
+      selectedBtnId: {
         type: String,
         default: "newButton",
       },
