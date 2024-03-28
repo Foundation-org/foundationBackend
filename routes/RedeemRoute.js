@@ -9,6 +9,8 @@ router.post("/redeem/create", RedeemController.create);
 
 router.post("/redeem/transfer", RedeemController.transfer);
 
+router.post("/redeem/delete", RedeemController.deleteRedeem);
+
 router.post("/redeem/balance", RedeemController.balance);
 
 router.get(

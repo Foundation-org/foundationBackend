@@ -26,7 +26,7 @@ const getById = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
-    const totalCount = await Ledgers.countDocuments({ uuid });
+    const totalCount = await Ledgers.countDocuments({ uuid, type });
     const pageCount = Math.ceil(totalCount / limit);
 
     res.status(200).json({
@@ -70,11 +70,13 @@ const getAll = async (req, res) => {
 
 const search = async (req, res) => {
   try {
-    const { page, limit, sort, term } = req.body.params;
+    const { page, limit, sort, term, type, uuid } = req.body.params;
     const skip = (page - 1) * limit;
     const searchTerm = term || "";
 
     const ledger = await Ledgers.find({
+      type,
+      uuid,
       $or: [
         { txUserAction: { $regex: searchTerm, $options: "i" } },
         { txID: { $regex: searchTerm, $options: "i" } },
@@ -86,6 +88,8 @@ const search = async (req, res) => {
       .limit(parseInt(limit));
 
     const totalCount = await Ledgers.countDocuments({
+      type,
+      uuid,
       $or: [
         { txUserAction: { $regex: searchTerm, $options: "i" } },
         { txID: { $regex: searchTerm, $options: "i" } },
