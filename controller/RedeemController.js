@@ -210,7 +210,7 @@ const getUnredeemedById = async (req, res) => {
     const _id = req.params.id;
     const uuid = req.params.uuid;
 
-    const redeem = await Redeem.find({ owner: _id, status: 'unredeemed' }).sort({ _id: 1 });
+    const redeem = await Redeem.find({ owner: _id, status: 'unredeemed' }).sort({ _id: -1 });
 
     res.status(200).json({
       data: redeem,
