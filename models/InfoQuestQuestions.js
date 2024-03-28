@@ -29,10 +29,10 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     },
     getUserBadge: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'user'
+      ref: "user",
     },
     uniqueShareLink: {
-      type: String
+      type: String,
     },
     usersAddTheirAns: {
       type: Boolean,
@@ -74,6 +74,14 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     moderationRatingCount: {
       type: Number,
       // default: 0,
+    },
+    url: {
+      type: String,
+      default: "",
+    },
+    description: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true }
