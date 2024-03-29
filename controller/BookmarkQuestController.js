@@ -37,7 +37,10 @@ const createBookmarkQuest = async (req, res) => {
       // txDescription : "User adds a quest to their bookmarks"
     });
 
-    res.status(201).send("Quest has been Created");
+    res.status(201).send({
+      message: "Bookmarked Successfully",
+      id: req.body.questForeignKey,
+    });
   } catch (err) {
     res.status(500).send("Not Created 2" + err.message);
   }
@@ -64,7 +67,10 @@ const deleteBookmarkQuest = async (req, res) => {
       txData: questions._id,
       // txDescription : "User removes a quest from their bookmarks"
     });
-    res.status(201).send("Quest has been deleted");
+    res.status(201).send({
+      message: "Unbookmarked Successfully",
+      id: req.body.questForeignKey,
+    });
   } catch (err) {
     res.status(500).send("Not Deleted 2" + err.message);
   }

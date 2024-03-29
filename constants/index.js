@@ -17,7 +17,7 @@ module.exports = {
     // Q/S
     "Correct provided statement to standard English without contractions. Shortest responses only.",
     // OPTION
-    "Correct text to standard English without contractions. Never correct brand names or informal words like Coke. Shortest responses only",
+    "Correct text to standard English without contractions. NEVER correct brand names, informal words or trademarks like Coke. Do not introduce synonyms. Shortest responses only",
     // CATEGORY
     "Give the closest category using only these: Architecture, Arts, Business, Culture, Economics, Education, Entertainment, Environment, Ethics, Finance, Fitness, Food, Geography, Health, History, Hobbies, Home, Law, Media, Music, Parenting, Pets, Philosophy, Personal, Politics, Preferences, Psychology, Religion, Science, Society, Sports, Technology. Return one category only. Shortest responses only",
     // COC
