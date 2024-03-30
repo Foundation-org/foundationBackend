@@ -21,7 +21,11 @@ const getById = async (req, res) => {
     // filter Object
     const filterObj = {};
     if(txAuth){
-      filterObj.txAuth = txAuth
+      filterObj.txAuth = txAuth;
+      filterObj.$or = [
+        { txFrom: { $regex: "DAO Treasury", $options: "i" } }, // Case-insensitive match for txFrom
+        { txTo: { $regex: "DAO Treasury", $options: "i" } }    // Case-insensitive match for txTo
+      ]
     } else {
       filterObj.uuid = uuid
     }
