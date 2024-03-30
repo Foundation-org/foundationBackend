@@ -16,17 +16,22 @@ const create = async (req, res) => {
 
 const getById = async (req, res) => {
   try {
-    const { page, limit, type } = req.query;
+    const { page, limit, txAuth } = req.query;
     const uuid = req.cookies.uuid || req.body.uuid;
+    // filter Object
+    const filterObj = { uuid };
+    if(txAuth){
+      filterObj.txAuth = txAuth
+    }
     const skip = (page - 1) * limit;
 
-    const ledger = await Ledgers.find({ uuid, type })
+    const ledger = await Ledgers.find(filterObj)
       // .sort({ _id: 1 }) // Adjust the sorting based on your needs
       .sort(req.query.sort === "newest" ? { _id: -1 } : { _id: 1 }) // Adjust the sorting based on your needs
       .skip(skip)
       .limit(parseInt(limit));
 
-    const totalCount = await Ledgers.countDocuments({ uuid, type });
+    const totalCount = await Ledgers.countDocuments(filterObj);
     const pageCount = Math.ceil(totalCount / limit);
 
     res.status(200).json({
