@@ -19,9 +19,11 @@ const getById = async (req, res) => {
     const { page, limit, txAuth } = req.query;
     const uuid = req.cookies.uuid || req.body.uuid;
     // filter Object
-    const filterObj = { uuid };
+    const filterObj = {};
     if(txAuth){
       filterObj.txAuth = txAuth
+    } else {
+      filterObj.uuid = uuid
     }
     const skip = (page - 1) * limit;
 
