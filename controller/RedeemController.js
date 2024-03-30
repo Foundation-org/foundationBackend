@@ -19,7 +19,7 @@ const create = async (req, res) => {
     // check user balance
     const userBalance = await checkUserBalance({ uuid: req.body.uuid, res });
     if (parseInt(userBalance) <= parseInt(amount))
-      throw new Error("The balance is insufficient to create this redemption!");
+      throw new Error("Your balance is insufficient to create this redemption");
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
@@ -61,148 +61,146 @@ const transfer = async (req, res) => {
     const User = await UserModel.findOne({ uuid });
     if (!User) throw new Error("No such User!");
 
-    
-    
     //   Fetch the redeem data
     const getRedeem = await Redeem.findOne({ code }).populate("owner", "uuid");
     if (!getRedeem) throw new Error("Code is invalid!");
-    
-    // Check Already redeemed 
-    if(getRedeem.status === "redeemed")
-      throw new Error("Already Redeemed!");
+
+    // Check Already redeemed
+    if (getRedeem.status === "redeemed") throw new Error("Already Redeemed!");
 
     //   check the owner
     // if (getRedeem.owner.uuid === uuid)
     //   throw new Error("You're already the owner of this redemption");
 
-        // Create Ledger
-        // sender
-        await createLedger({
-            uuid: getRedeem.owner.uuid,
-            txUserAction: "redemptionTransferred",
-            txID: crypto.randomBytes(11).toString("hex"),
-            txAuth: "DAO",
-            txFrom: getRedeem.owner.uuid,
-            txTo: req.body.uuid,
-            txAmount: getRedeem.amount,
-            // txDescription : "User update redemption code"
-            type: 'redemption'
-          });
-        // Create Ledger
-        // receiver
-        await createLedger({
-          uuid: req.body.uuid,
-          txUserAction: "redemptionReceived",
-          txID: crypto.randomBytes(11).toString("hex"),
-          txAuth: "DAO",
-          txFrom: getRedeem.owner.uuid,
-          txTo: req.body.uuid,
-          txAmount: getRedeem.amount,
-          // txDescription : "User update redemption code"
-          type: 'redemption'
-        });
-        // Increment the UserBalance
-        await updateUserBalance({
-          uuid: req.body.uuid,
-          amount: getRedeem.amount,
-          inc: true,
-        });
-        // Update the Redeem
-        // getRedeem.code = shortlink.generate(10),
-        getRedeem.owner = User._id
-        getRedeem.status = 'redeemed';
-        const updatedRedeem = await getRedeem.save();
-        if (!updatedRedeem) throw new Error("Redeem Not updated Successfully!");
-        res.status(201).json({ data: updatedRedeem });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: `An error occurred while transfer Redeem: ${error.message}`,
-      });
-    }
-  };
+    // Create Ledger
+    // sender
+    await createLedger({
+      uuid: getRedeem.owner.uuid,
+      txUserAction: "redemptionTransferred",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: getRedeem.owner.uuid,
+      txTo: req.body.uuid,
+      txAmount: getRedeem.amount,
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
+    // Create Ledger
+    // receiver
+    await createLedger({
+      uuid: req.body.uuid,
+      txUserAction: "redemptionReceived",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: getRedeem.owner.uuid,
+      txTo: req.body.uuid,
+      txAmount: getRedeem.amount,
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
+    // Increment the UserBalance
+    await updateUserBalance({
+      uuid: req.body.uuid,
+      amount: getRedeem.amount,
+      inc: true,
+    });
+    // Update the Redeem
+    // getRedeem.code = shortlink.generate(10),
+    getRedeem.owner = User._id;
+    getRedeem.status = "redeemed";
+    const updatedRedeem = await getRedeem.save();
+    if (!updatedRedeem) throw new Error("Redeem Not updated Successfully!");
+    res.status(201).json({ data: updatedRedeem });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while transfer Redeem: ${error.message}`,
+    });
+  }
+};
 
-  const deleteRedeem = async (req, res) => {
-    try {
-      const { uuid, code } = req.body;
-      // check receiver account exist
-      const User = await UserModel.findOne({ uuid });
-      if (!User) throw new Error("No such User!");
-  
-      //   Fetch the redeem data
-      const deletedRedeem = await Redeem.findOneAndDelete({ code }).populate("owner", "uuid");
-      // if (!deletedRedeem) throw new Error("Code is invalid!");
+const deleteRedeem = async (req, res) => {
+  try {
+    const { uuid, code } = req.body;
+    // check receiver account exist
+    const User = await UserModel.findOne({ uuid });
+    if (!User) throw new Error("No such User!");
 
-      // Create ledger
-      await createLedger({
-        uuid: uuid,
-        txUserAction: "redemptionDeleted",
-        txID: crypto.randomBytes(11).toString("hex"),
-        txAuth: "DAO",
-        txFrom: deletedRedeem.owner.uuid,
-        txTo: req.body.uuid,
-        txAmount: deletedRedeem.amount,
-        // txDescription : "User update redemption code"
-        type: 'redemption'
-      });
-  
-      res.status(200).json({ data: "", msg: "Successfully deleted!" });
-  
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({
-          message: `An error occurred while delete Redeem: ${error.message}`,
-        });
-      }
-    };
-
-  const balance = async (req, res) => {
-    try {
-      const { uuid, code } = req.body;
-      // check receiver balance exist
-      const User = await UserModel.findOne({ uuid });
-      if (!User) throw new Error("No such User!");
-        
     //   Fetch the redeem data
-        const getRedeem = await Redeem.findOne({ code }).populate("owner", "uuid");
-      if (!getRedeem) throw new Error("Code is invalid!");
+    const deletedRedeem = await Redeem.findOneAndDelete({ code }).populate(
+      "owner",
+      "uuid"
+    );
+    // if (!deletedRedeem) throw new Error("Code is invalid!");
+
+    // Create ledger
+    await createLedger({
+      uuid: uuid,
+      txUserAction: "redemptionDeleted",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: deletedRedeem.owner.uuid,
+      txTo: req.body.uuid,
+      txAmount: deletedRedeem.amount,
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
+
+    res.status(200).json({ data: "", msg: "Successfully deleted!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while delete Redeem: ${error.message}`,
+    });
+  }
+};
+
+const balance = async (req, res) => {
+  try {
+    const { uuid, code } = req.body;
+    // check receiver balance exist
+    const User = await UserModel.findOne({ uuid });
+    if (!User) throw new Error("No such User!");
+
+    //   Fetch the redeem data
+    const getRedeem = await Redeem.findOne({ code }).populate("owner", "uuid");
+    if (!getRedeem) throw new Error("Code is invalid!");
 
     //   check the owner
-      if(getRedeem.owner.uuid !== uuid)
-        throw new Error("You cannot redeem!")
+    if (getRedeem.owner.uuid !== uuid) throw new Error("You cannot redeem!");
 
     // Create Ledger
-        // receiver
-        await createLedger({
-          uuid: req.body.uuid,
-          txUserAction: "balanceRedeem",
-          txID: crypto.randomBytes(11).toString("hex"),
-          txAuth: "DAO",
-          txFrom: getRedeem.owner.uuid,
-          txTo: req.body.uuid,
-          txAmount: getRedeem.amount,
-          // txDescription : "User update redemption code"
-          type: 'redemption'
-        });
-        
-        // Increment the UserBalance
-        await updateUserBalance({
-          uuid: req.body.uuid,
-          amount: getRedeem.amount,
-          inc: true,
-        });
+    // receiver
+    await createLedger({
+      uuid: req.body.uuid,
+      txUserAction: "balanceRedeem",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: getRedeem.owner.uuid,
+      txTo: req.body.uuid,
+      txAmount: getRedeem.amount,
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
 
-        // Delete the Redeem
-        const deletedRedeem = await getRedeem.deleteOne();
-        // if (!deletedRedeem) throw new Error("Redeem Not deleted Successfully!");
-        res.status(201).json({ data: deletedRedeem });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({
-        message: `An error occurred while create Redeem: ${error.message}`,
-      });
-    }
-  };
+    // Increment the UserBalance
+    await updateUserBalance({
+      uuid: req.body.uuid,
+      amount: getRedeem.amount,
+      inc: true,
+    });
+
+    // Delete the Redeem
+    const deletedRedeem = await getRedeem.deleteOne();
+    // if (!deletedRedeem) throw new Error("Redeem Not deleted Successfully!");
+    res.status(201).json({ data: deletedRedeem });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while create Redeem: ${error.message}`,
+    });
+  }
+};
 
 const getUnredeemedById = async (req, res) => {
   try {
@@ -210,7 +208,9 @@ const getUnredeemedById = async (req, res) => {
     const _id = req.params.id;
     const uuid = req.params.uuid;
 
-    const redeem = await Redeem.find({ owner: _id, status: 'unredeemed' }).sort({ _id: -1 });
+    const redeem = await Redeem.find({ owner: _id, status: "unredeemed" }).sort(
+      { _id: -1 }
+    );
 
     res.status(200).json({
       data: redeem,
@@ -229,7 +229,7 @@ const getRedeemHistoryById = async (req, res) => {
     const _id = req.params.id;
     const uuid = req.params.uuid;
 
-    const redeem = await Redeem.find({ owner: _id, status: 'redeemed' });
+    const redeem = await Redeem.find({ owner: _id, status: "redeemed" });
 
     res.status(200).json({
       data: redeem,
