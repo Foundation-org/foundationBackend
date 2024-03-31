@@ -370,21 +370,11 @@ const addWorkEducationBadge = async (req, res) => {
       (badge) => badge.personal && badge.personal[req.body.type]
     );
     if (personalBadgeIndex !== -1) {
-      const existingPersonalBadge = userBadges[personalBadgeIndex].personal;
-      console.log(existingPersonalBadge);
-      existingPersonalBadge[req.body.type].push(newData);
-      userBadges[personalBadgeIndex].personal = existingPersonalBadge;
-      User.badges = userBadges;
+      User.badges[personalBadgeIndex].personal[req.body.type].push(newData);
     } else {
-      const newPersonalBadge = {
-        personal: {
-          [req.body.type]: [newData],
-        },
-      };
-      const updatedUserBadges = [...userBadges, newPersonalBadge];
-      User.badges = updatedUserBadges;
+      User.badges.push({ personal: { [req.body.type]: [newData] } });
     }
-
+    const data = await User.save();
     // Update the action
 
     // Create Ledger
@@ -419,7 +409,6 @@ const addWorkEducationBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
-    const data = await User.save();
 
     res.status(200).json({ data, message: "Successful" });
   } catch (error) {

@@ -16,13 +16,14 @@ const BookmarkQuestsSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    createdBy:{
-      type:String,
+    createdBy: {
+      type: String,
+    },
+    moderationRatingCount: {
+      type: Number,
     },
   },
   { timestamps: true }
 );
 
 module.exports = mongoose.model("BookmarkQuests", BookmarkQuestsSchema);
-
-
