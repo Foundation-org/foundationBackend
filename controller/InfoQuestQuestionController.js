@@ -182,6 +182,10 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
         questForeignKey: { $nin: hiddenUserSettingIds },
         uuid: req.body.uuid,
         ...filterObj,
+        moderationRatingCount: {
+          $gte: moderationRatingFilter?.initial,
+          $lte: moderationRatingFilter?.final,
+        },
       }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -348,6 +352,10 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
         questForeignKey: { $nin: hiddenUserSettingIds },
         uuid: req.body.uuid,
         ...filterObj,
+        moderationRatingCount: {
+          $gte: moderationRatingFilter?.initial,
+          $lte: moderationRatingFilter?.final,
+        },
       }).sort(
         req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
       );
@@ -578,10 +586,16 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const Questions = await BookmarkQuests.find({
       questForeignKey: { $nin: hiddenUserSettingIds },
       uuid: uuid,
+      moderationRatingCount: {
+        $gte: moderationRatingFilter?.initial,
+        $lte: moderationRatingFilter?.final,
+      },
     })
       .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
       .skip(skip)
       .limit(pageSize);
+
+    console.log(Questions);
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -600,6 +614,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     totalQuestionsCount = await BookmarkQuests.countDocuments({
       questForeignKey: { $nin: hiddenUserSettingIds },
       uuid: uuid,
+      moderationRatingCount: {
+        $gte: moderationRatingFilter?.initial,
+        $lte: moderationRatingFilter?.final,
+      },
     });
   } else if (Page === "Hidden") {
     console.log("running");
