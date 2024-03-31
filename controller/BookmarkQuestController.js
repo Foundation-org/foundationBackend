@@ -20,6 +20,7 @@ const createBookmarkQuest = async (req, res) => {
       uuid: req.cookies.uuid,
       whichTypeQuestion: req.body.whichTypeQuestion,
       createdBy: owner.uuid,
+      moderationRatingCount: req.body.moderationRatingCount,
     });
 
     const questions = await question.save();
