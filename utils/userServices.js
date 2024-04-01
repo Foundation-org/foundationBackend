@@ -3,11 +3,10 @@ const UserModel = require("../models/UserModel");
 module.exports.getUserBalance = async (uuid) => {
     try {
         const user = await UserModel.findOne({ uuid });
-        user = 'test';
         return parseFloat(user.balance).toFixed(2);
       } catch (error) {
-        console.error(error);
-        return error.message
+        console.error(error.message);
+        throw new Error("An error occurred while getUserBalance!")
       }
 };
 
