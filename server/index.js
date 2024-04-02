@@ -19,7 +19,7 @@ dotenv.config();
 
 // app.use(cors());
 app.use(cors({
-  origin: [FRONTEND_URL, FRONTEND_URL_1],
+  origin: FRONTEND_URL.split(','),
     // methods: "GET,POST,PUT,DELETE",
     credentials: true,
   }));
