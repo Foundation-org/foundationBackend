@@ -26,6 +26,23 @@ router.post(
   BadgeController.addWorkEducationBadge
 );
 
+router.post(
+  "/addBadge/personal/deleteWorkOrEducation",
+  BadgeController.removeAWorkEducationBadge
+);
+
+router.post(
+  "/addBadge/personal/getWorkOrEducation",
+  BadgeController.getAWorkAndEducationBadge
+);
+
+router.post(
+  "/addBadge/personal/updateWorkOrEducation",
+  BadgeController.updateWorkAndEducationBadge
+);
+
+router.post("/addBadge/company/add", BadgeController.addCompany);
+
 router.post("/removeBadge", BadgeController.removeBadge);
 
 router.post("/removeContactBadge", BadgeController.removeContactBadge);
