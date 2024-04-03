@@ -80,7 +80,7 @@ app.use(morgan("common"));
 require("../start/routes")(app)
 
 // A unique identifier for your website
-const rpID = rpID;
+// const rpID = rpID;
 // The URL at which registrations and authentications should occur
 const origin = `https://${rpID}`;
 
