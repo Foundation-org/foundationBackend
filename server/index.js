@@ -186,7 +186,7 @@ app.post('/verify-registration', async (req, res) => {
   try {
     const opts = {
       response: body,
-      expectedChallenge: `${expectedChallenge}`,
+      expectedChallenge: `${req.body.challenge}`,
       expectedOrigin: origin,
       expectedRPID: rpID,
       requireUserVerification: false,
