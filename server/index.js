@@ -8,7 +8,7 @@ const colors = require("colors");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
-const { BASE_PORT, FRONTEND_URL, FRONTEND_URL_1 } = require("../config/env");
+const { BASE_PORT, FRONTEND_URL, FRONTEND_URL_1, rpID } = require("../config/env");
 const passport = require("passport");
 
 const {
@@ -79,6 +79,10 @@ app.use(morgan("common"));
 // All Routes
 require("../start/routes")(app)
 
+// A unique identifier for your website
+const rpID = rpID;
+// The URL at which registrations and authentications should occur
+const origin = `https://${rpID}`;
 
 /**
  * Registration (a.k.a. "Registration")
@@ -140,7 +144,7 @@ app.get('/generate-registration-options', async (req, res) => {
 
 const options = await generateRegistrationOptions({
   rpName: "SimpleWebAuthn Example",
-  rpID: "localhost",
+  rpID: rpID,
   userID: "userID",
   userName: "userName",
   // Don't prompt users for additional information about the authenticator
@@ -183,8 +187,8 @@ app.post('/verify-registration', async (req, res) => {
     const opts = {
       response: body,
       expectedChallenge: `${expectedChallenge}`,
-      expectedOrigin,
-      expectedRPID: 'rpID',
+      expectedOrigin: origin,
+      expectedRPID: rpID,
       requireUserVerification: false,
     };
     verification = await verifyRegistrationResponse(opts);
@@ -196,26 +200,26 @@ app.post('/verify-registration', async (req, res) => {
 
   const { verified, registrationInfo } = verification;
 
-  if (verified && registrationInfo) {
-    const { credentialPublicKey, credentialID, counter } = registrationInfo;
+  // if (verified && registrationInfo) {
+  //   const { credentialPublicKey, credentialID, counter } = registrationInfo;
 
-    // const existingDevice = user.devices.find((device) =>
-    //   isoUint8Array.areEqual(device.credentialID, credentialID)
-    // );
+  //   // const existingDevice = user.devices.find((device) =>
+  //   //   isoUint8Array.areEqual(device.credentialID, credentialID)
+  //   // );
 
-    if (!existingDevice) {
-      /**
-       * Add the returned device to the user's list of devices
-       */
-      const newDevice = {
-        credentialPublicKey,
-        credentialID,
-        counter,
-        transports: body.response.transports,
-      };
-      // user.devices.push(newDevice);
-    }
-  }
+  //   if (!existingDevice) {
+  //     /**
+  //      * Add the returned device to the user's list of devices
+  //      */
+  //     const newDevice = {
+  //       credentialPublicKey,
+  //       credentialID,
+  //       counter,
+  //       transports: body.response.transports,
+  //     };
+  //     // user.devices.push(newDevice);
+  //   }
+  // }
 
   // req.session.currentChallenge = undefined;
 

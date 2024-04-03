@@ -26,4 +26,5 @@ module.exports = {
     AWS_S3_ACCESS_KEY: process.env.AWS_S3_ACCESS_KEY,
     AWS_S3_SECRET_ACCESS_KEY: process.env.AWS_S3_SECRET_ACCESS_KEY,
     AWS_S3_REGION: process.env.AWS_S3_REGION,
+    rpID: process.env.rpID,
   };
