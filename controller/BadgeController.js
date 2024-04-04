@@ -470,6 +470,34 @@ const getAWorkAndEducationBadge = async (req, res) => {
   }
 };
 
+const getPersonalBadge = async (req, res) => {
+  try {
+    const User = await UserModel.findOne({ uuid: req.body.uuid });
+    if (!User) throw new Error("No such User!");
+
+    const userBadges = User.badges;
+
+    // Find the index of the object to remove
+    const index = userBadges.findIndex((badge) => {
+      return badge.personal && badge.personal[req.body.type];
+    });
+
+    let obj;
+    if (index !== -1) {
+      // Find the index of the education object within the found badge
+      obj = userBadges[index].personal[req.body.type];
+    } else {
+      throw new Error("Badges Not Found");
+    }
+
+    res.status(200).json({ obj, message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while removeAWorkEducationBadge: ${error.message}`,
+    });
+  }
+};
+
 const updateWorkAndEducationBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -634,7 +662,6 @@ const addWeb3Badge = async (req, res) => {
   }
 };
 
-
 const removePersonalBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -714,17 +741,21 @@ const updatePersonalBadge = async (req, res) => {
 
     const userBadges = User.badges;
 
-    userBadges?.forEach((badge) => {
-      if (badge?.personal?.hasOwnProperty(req.body.type)) {
-        badge.personal[itemType] = req.body.newValue;
-      }
+    const index = userBadges.findIndex((badge) => {
+      return badge.personal && badge.personal[req.body.type];
     });
-    // Update the user badges
-    User.badges = updatedUserBadges;
-    // Update the action
-    await User.save();
 
-    res.status(200).json({ message: "Successful" });
+    if (index !== -1) {
+      userBadges[index].personal[req.body.type] = req.body.newData;
+    } else {
+      throw new Error("Badge Not Found");
+    }
+    // Update the user badges
+    User.badges = userBadges;
+    User.markModified("badges");
+    const data = await User.save();
+
+    res.status(200).json({ data, message: "Successful" });
   } catch (error) {
     res.status(500).json({
       message: `An error occurred while updatePersonalBadge: ${error.message}`,
@@ -1047,7 +1078,10 @@ const addPasskeyBadge = async (req, res) => {
     // Find the Badge
     const usersWithBadge = await UserModel.find({
       badges: {
-        $elemMatch: { accountId: req.body.accountId, accountName: req.body.accountName },
+        $elemMatch: {
+          accountId: req.body.accountId,
+          accountName: req.body.accountName,
+        },
       },
     });
     if (usersWithBadge.length !== 0)
@@ -1124,7 +1158,11 @@ const removePasskeyBadge = async (req, res) => {
     if (!User) throw new Error("No such User!");
 
     const userBadges = User.badges;
-    const updatedUserBadges = userBadges.filter((badge) => badge.accountName !== req.body.accountName && badge.type !== req.body.type)
+    const updatedUserBadges = userBadges.filter(
+      (badge) =>
+        badge.accountName !== req.body.accountName &&
+        badge.type !== req.body.type
+    );
     // Update the user badges
     User.badges = updatedUserBadges;
     // Update the action
@@ -1142,8 +1180,6 @@ const removePasskeyBadge = async (req, res) => {
       txData: User.badges[0]._id,
       // txDescription : "User adds a verification badge"
     });
-
-    
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -1174,5 +1210,6 @@ module.exports = {
   getAWorkAndEducationBadge,
   updateWorkAndEducationBadge,
   addPasskeyBadge,
-  removePasskeyBadge
+  removePasskeyBadge,
+  getPersonalBadge,
 };
