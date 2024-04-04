@@ -1158,11 +1158,7 @@ const removePasskeyBadge = async (req, res) => {
     if (!User) throw new Error("No such User!");
 
     const userBadges = User.badges;
-    const updatedUserBadges = userBadges.filter(
-      (badge) =>
-        badge.accountName !== req.body.accountName &&
-        badge.type !== req.body.type
-    );
+    const updatedUserBadges = userBadges.filter((badge) => badge.accountName !== req.body.accountName || badge.type !== req.body.type)
     // Update the user badges
     User.badges = updatedUserBadges;
     // Update the action
