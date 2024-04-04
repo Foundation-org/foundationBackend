@@ -53,4 +53,8 @@ router.post("/removeWeb3Badge", BadgeController.removeWeb3Badge);
 
 router.post("/addBadge/web3/add", BadgeController.addWeb3Badge);
 
+router.post("/addBadge/passkey/add", BadgeController.addPasskeyBadge);
+
+router.post("/removePasskey", BadgeController.removePasskeyBadge);
+
 module.exports = router;
