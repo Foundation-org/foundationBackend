@@ -45,8 +45,8 @@ router.post(
 );
 
 router.get(
-  "/checkMediaId/:id",
-  InfoQuestQuestionController.checkMediaId
+  "/checkMediaDuplicateUrl/:id",
+  InfoQuestQuestionController.checkMediaDuplicateUrl
 );
 
 module.exports = router;

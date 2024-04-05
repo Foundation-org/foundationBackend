@@ -1351,7 +1351,7 @@ async function getQuestionsWithUserSettings(allQuestions, uuid) {
 
 
 // Controller function to check if ID exists in the database collection
-const checkMediaId = async (req, res) => {
+const checkMediaDuplicateUrl = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -1363,13 +1363,13 @@ const checkMediaId = async (req, res) => {
 
     if (question) {
       // ID exists in the URL field, return an error
-      return res.status(400).json({ error: 'This link already exists.', success: false });
+      return res.status(400).json({ error: 'This link already exists.', duplicate: true });
     }
 
     // ID does not exist in the URL field, continue with other operations
     // For example, you can insert the ID into the database here
 
-    res.status(200).json({ message: 'Link does not exist in the URL field. Proceed with other operations.', success: true });
+    res.status(200).json({ message: 'Link does not exist in the URL field. Proceed with other operations.', duplicate: false });
   } catch (error) {
     console.error('Error checking ID in URL field:', error.message);
     res.status(500).json({ error: `Error checking ID in URL field: ${error.message}`,  });
@@ -1391,5 +1391,5 @@ module.exports = {
   getQuestionsWithStatus,
   getQuestByUniqueShareLink,
   getQuestionsWithUserSettings,
-  checkMediaId
+  checkMediaDuplicateUrl
 };
