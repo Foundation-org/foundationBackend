@@ -163,6 +163,32 @@ const addContactBadge = async (req, res) => {
       });
       return;
     }
+    if (req.body.type === "cell-phone") {
+      // Find the Badge
+      const usersWithBadge = await UserModel.find({
+        badges: {
+          $elemMatch: { details: req.body.data },
+        },
+      });
+      if (usersWithBadge.length !== 0) {
+        throw new Error("Oops! This account is already linked.");
+      }
+      const userBadges = User.badges;
+      const updatedUserBadges = [
+        ...userBadges,
+        {
+          type: req.body.type,
+          details: req.body.data,
+        },
+      ];
+      // Update the user badges
+      User.badges = updatedUserBadges;
+      // Update the action
+      await User.save();
+
+      res.status(200).json({ message: "Badge Added Successfully" });
+      return;
+    }
     // Find the Badge
     const usersWithBadge = await UserModel.find({
       badges: {
@@ -1158,7 +1184,11 @@ const removePasskeyBadge = async (req, res) => {
     if (!User) throw new Error("No such User!");
 
     const userBadges = User.badges;
-    const updatedUserBadges = userBadges.filter((badge) => badge.accountName !== req.body.accountName || badge.type !== req.body.type)
+    const updatedUserBadges = userBadges.filter(
+      (badge) =>
+        badge.accountName !== req.body.accountName ||
+        badge.type !== req.body.type
+    );
     // Update the user badges
     User.badges = updatedUserBadges;
     // Update the action
