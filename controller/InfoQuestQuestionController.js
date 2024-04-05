@@ -1349,6 +1349,34 @@ async function getQuestionsWithUserSettings(allQuestions, uuid) {
   }
 }
 
+
+// Controller function to check if ID exists in the database collection
+const checkMediaId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Construct a regex pattern to match the YouTube URL format
+    const regex = new RegExp(`${id}`, 'i');
+
+    // Use the regex pattern in the find query
+    const question = await InfoQuestQuestions.findOne({ url: regex });
+
+    if (question) {
+      // ID exists in the URL field, return an error
+      return res.status(400).json({ error: 'This link already exists.', success: false });
+    }
+
+    // ID does not exist in the URL field, continue with other operations
+    // For example, you can insert the ID into the database here
+
+    res.status(200).json({ message: 'Link does not exist in the URL field. Proceed with other operations.', success: true });
+  } catch (error) {
+    console.error('Error checking ID in URL field:', error.message);
+    res.status(500).json({ error: `Error checking ID in URL field: ${error.message}`,  });
+  }
+};
+
+
 module.exports = {
   createInfoQuestQuest,
   constraintForUniqueQuestion,
@@ -1363,4 +1391,5 @@ module.exports = {
   getQuestionsWithStatus,
   getQuestByUniqueShareLink,
   getQuestionsWithUserSettings,
+  checkMediaId
 };

@@ -44,4 +44,9 @@ router.post(
   InfoQuestQuestionController.getAllQuestsWithChangeAnsStatus
 );
 
+router.get(
+  "/checkMediaId/:id",
+  InfoQuestQuestionController.checkMediaId
+);
+
 module.exports = router;
