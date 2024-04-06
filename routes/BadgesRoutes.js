@@ -26,6 +26,33 @@ router.post(
   BadgeController.addWorkEducationBadge
 );
 
+router.post(
+  "/addBadge/personal/deleteWorkOrEducation",
+  BadgeController.removeAWorkEducationBadge
+);
+
+router.post(
+  "/addBadge/personal/getWorkOrEducation",
+  BadgeController.getAWorkAndEducationBadge
+);
+
+router.post(
+  "/addBadge/personal/updateWorkOrEducation",
+  BadgeController.updateWorkAndEducationBadge
+);
+
+router.post(
+  "/addBadge/personal/getPersonalBadge",
+  BadgeController.getPersonalBadge
+);
+
+router.post(
+  "/addBadge/personal/updatePersonalBadge",
+  BadgeController.updatePersonalBadge
+);
+
+router.post("/addBadge/company/add", BadgeController.addCompany);
+
 router.post("/removeBadge", BadgeController.removeBadge);
 
 router.post("/removeContactBadge", BadgeController.removeContactBadge);
@@ -35,5 +62,9 @@ router.post("/removePersonalBadge", BadgeController.removePersonalBadge);
 router.post("/removeWeb3Badge", BadgeController.removeWeb3Badge);
 
 router.post("/addBadge/web3/add", BadgeController.addWeb3Badge);
+
+router.post("/addBadge/passkey/add", BadgeController.addPasskeyBadge);
+
+router.post("/removePasskey", BadgeController.removePasskeyBadge);
 
 module.exports = router;
