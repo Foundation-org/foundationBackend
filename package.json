@@ -13,6 +13,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.549.0",
+    "@simplewebauthn/server": "^9.0.3",
+    "@simplewebauthn/types": "^9.0.1",
     "aws-sdk": "^2.1575.0",
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",

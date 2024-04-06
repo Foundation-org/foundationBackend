@@ -8,6 +8,7 @@ const { getPercentage } = require("../utils/getPercentage");
 const UserQuestSetting = require("../models/UserQuestSetting");
 const Cities = require("../models/Cities");
 const Education = require("../models/Education");
+const Company = require("../models/Company");
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
   const uuid = req.cookies.uuid;
@@ -32,7 +33,10 @@ const easySearch = async (req, res) => {
         { QuestTopic: { $regex: searchTerm, $options: "i" } },
       ],
       _id: { $nin: hiddenUserSettingIds },
-      moderationRatingCount : { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
+      moderationRatingCount: {
+        $gte: moderationRatingFilter?.initial,
+        $lte: moderationRatingFilter?.final,
+      },
     }).populate("getUserBadge", "badges");
 
     const resultArray = results.map(getPercentage);
@@ -80,7 +84,10 @@ const searchBookmarks = async (req, res) => {
         { QuestTopic: { $regex: searchTerm, $options: "i" } },
       ],
       _id: { $nin: hiddenUserSettingIds },
-      moderationRatingCount : { $gte: moderationRatingFilter?.initial, $lte: moderationRatingFilter?.final }
+      moderationRatingCount: {
+        $gte: moderationRatingFilter?.initial,
+        $lte: moderationRatingFilter?.final,
+      },
     }).populate("getUserBadge", "badges");
 
     // Extract QuestId from infoQuestQuestions
@@ -180,18 +187,20 @@ const searchCities = async (req, res) => {
 
   try {
     const regex = new RegExp(`^${cityName}`, "i");
-    const data = await Cities.aggregate([
-      { $match: { name: { $regex: regex } } },
-      { $group: { _id: "$name", city: { $first: "$$ROOT" } } },
-      { $replaceRoot: { newRoot: "$city" } },
-      { $limit: 20 },
-    ]);
-
+    const data = await Cities.find({ name: { $regex: regex } }).limit(20);
     if (data.length === 0) {
       return res.status(404).json({ message: "City not found" });
     }
 
-    res.json(data.map((city) => ({ id: city.id, name: city.name })));
+    res.json(
+      data.map((city) => {
+        console.log(city["country"]);
+        return {
+          id: city.id,
+          name: city.name + "," + city.state_name + "," + city.country_name,
+        };
+      })
+    );
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -205,11 +214,34 @@ const searchUniversities = async (req, res) => {
     const regex = new RegExp(`^${uniName}`, "i");
     const data = await Education.find({ name: { $regex: regex } }).limit(20);
     if (data.length === 0) {
-      return res.status(404).json({ message: "School not found" });
+      return res.status(404).json({ message: "University not found" });
     }
 
     res.json(
       data.map((uni) => ({ id: uni.id, name: uni.name, country: uni.country }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const searchCompanies = async (req, res) => {
+  const compName = req.query.name;
+
+  try {
+    const regex = new RegExp(`^${compName}`, "i");
+    const data = await Company.find({ name: { $regex: regex } }).limit(20);
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    res.json(
+      data.map((comp) => ({
+        id: comp.id,
+        name: comp.name,
+        country: comp.country,
+      }))
     );
   } catch (error) {
     console.error(error);
@@ -223,4 +255,5 @@ module.exports = {
   searchHiddenQuest,
   searchCities,
   searchUniversities,
+  searchCompanies,
 };

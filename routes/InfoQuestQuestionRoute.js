@@ -44,4 +44,9 @@ router.post(
   InfoQuestQuestionController.getAllQuestsWithChangeAnsStatus
 );
 
+router.get(
+  "/checkMediaDuplicateUrl/:id",
+  InfoQuestQuestionController.checkMediaDuplicateUrl
+);
+
 module.exports = router;

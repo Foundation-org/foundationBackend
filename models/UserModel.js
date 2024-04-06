@@ -219,6 +219,7 @@ const userSchema = mongoose.Schema(
         createdAt: { type: Date, default: new Date() },
         personal: { type: Object },
         web3: { type: Object },
+        data: { type: Object },
       },
     ],
     role: {

@@ -4,7 +4,7 @@ const UserModel = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
 const {
   updateUserBalance,
-  checkUserBalance,
+  getUserBalance,
 } = require("../utils/userServices");
 const crypto = require("crypto");
 
@@ -17,8 +17,8 @@ const create = async (req, res) => {
     if (!User) throw new Error("No such User!");
 
     // check user balance
-    const userBalance = await checkUserBalance({ uuid: req.body.uuid, res });
-    if (parseInt(userBalance) <= parseInt(amount))
+    const userBalance = await getUserBalance(req.body.uuid);
+    if (userBalance <= amount)
       throw new Error("Your balance is insufficient to create this redemption");
     // Create Ledger
     await createLedger({
@@ -28,20 +28,20 @@ const create = async (req, res) => {
       txAuth: "DAO",
       txFrom: req.body.uuid,
       txTo: req.body.uuid,
-      txAmount: parseInt(amount),
+      txAmount: amount,
       // txDescription : "User create redemption code"
       type: "redemption",
     });
     // Decrement the UserBalance
     await updateUserBalance({
       uuid: req.body.uuid,
-      amount: parseInt(amount),
+      amount: amount,
       dec: true,
     });
     //   Generate unique code
     req.body.code = shortlink.generate(10);
     // convert into integer
-    req.body.amount = parseInt(amount);
+    // req.body.amount = amount;
     const redeem = await new Redeem({ ...req.body });
     const savedRedeem = await redeem.save();
     if (!savedRedeem) throw new Error("Redeem Not Created Successfully!");
