@@ -186,9 +186,10 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
           $gte: moderationRatingFilter?.initial,
           $lte: moderationRatingFilter?.final,
         },
-      }).sort(
-        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      }).sort({ createdAt: -1 });
+      // .sort(
+      //   req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      // );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -207,9 +208,12 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       console.log("running");
       filterObj.uuid = uuid;
       filterObj.hidden = true;
-      const Questions = await UserQuestSetting.find(filterObj).sort(
-        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      const Questions = await UserQuestSetting.find(filterObj).sort({
+        createdAt: -1,
+      });
+      // .sort(
+      //   sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      // );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -223,9 +227,12 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
       console.log("running");
       filterObj.uuid = uuid;
       filterObj.linkStatus = "Enable";
-      const Questions = await UserQuestSetting.find(filterObj).sort(
-        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      const Questions = await UserQuestSetting.find(filterObj).sort({
+        createdAt: -1,
+      });
+      // .sort(
+      //   sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      // );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -256,15 +263,16 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
         _id: { $nin: hiddenUserSettingIds },
         ...filterObj,
       })
-        .sort(
-          req.body.sort === "Newest First"
-            ? { createdAt: -1 }
-            : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
-        )
+        .sort({ createdAt: -1 })
+        // .sort(
+        //   req.body.sort === "Newest First"
+        //     ? { createdAt: -1 }
+        //     : req.body.sort === "Last Updated"
+        //     ? { lastInteractedAt: -1 }
+        //     : req.body.sort === "Most Popular"
+        //     ? { interactingCounter: -1 }
+        //     : "createdAt"
+        // )
         .populate("getUserBadge", "badges");
     }
 
@@ -356,9 +364,10 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
           $gte: moderationRatingFilter?.initial,
           $lte: moderationRatingFilter?.final,
         },
-      }).sort(
-        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      }).sort({ createdAt: -1 });
+      // .sort(
+      //   req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      // );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -377,9 +386,10 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       console.log("running");
       filterObj.uuid = uuid;
       filterObj.hidden = true;
-      const Questions = await UserQuestSetting.find(filterObj).sort(
-        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      const Questions = await UserQuestSetting.find(filterObj).sort({
+        createdAt: -1,
+      });
+      // .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt");
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -393,9 +403,10 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
       console.log("running");
       filterObj.uuid = uuid;
       filterObj.linkStatus = "Enable";
-      const Questions = await UserQuestSetting.find(filterObj).sort(
-        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      const Questions = await UserQuestSetting.find(filterObj).sort({
+        createdAt: -1,
+      });
+      // .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt");
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -426,15 +437,16 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
         _id: { $nin: hiddenUserSettingIds },
         ...filterObj,
       })
-        .sort(
-          req.body.sort === "Newest First"
-            ? { createdAt: -1 }
-            : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
-        )
+        .sort({ createdAt: -1 })
+        // .sort(
+        //   req.body.sort === "Newest First"
+        //     ? { createdAt: -1 }
+        //     : req.body.sort === "Last Updated"
+        //     ? { lastInteractedAt: -1 }
+        //     : req.body.sort === "Most Popular"
+        //     ? { interactingCounter: -1 }
+        //     : "createdAt"
+        // )
         .populate("getUserBadge", "badges");
     }
 
@@ -591,7 +603,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
         $lte: moderationRatingFilter?.final,
       },
     })
-      .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
+      .sort({ createdAt: -1 })
+      // .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
       .skip(skip)
       .limit(pageSize);
 
@@ -624,7 +637,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     filterObj.uuid = uuid;
     filterObj.hidden = true;
     const Questions = await UserQuestSetting.find(filterObj)
-      .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
+      .sort({ createdAt: -1 })
+      // .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
       .skip(skip)
       .limit(pageSize);
 
@@ -642,7 +656,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     filterObj.linkStatus = { $in: ["Enable", "Disable"] };
     console.log("filterObj", filterObj);
     const Questions = await UserQuestSetting.find(filterObj)
-      .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
+      .sort({ createdAt: -1 })
+      // .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
       .limit(pageSize)
       .skip(skip);
 
@@ -676,15 +691,16 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
     })
-      .sort(
-        sort === "Newest First"
-          ? { createdAt: -1 }
-          : sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
-      ) // Sort by createdAt field in descending order
+      .sort({ createdAt: -1 })
+      // .sort(
+      //   sort === "Newest First"
+      //     ? { createdAt: -1 }
+      //     : sort === "Last Updated"
+      //     ? { lastInteractedAt: -1 }
+      //     : sort === "Most Popular"
+      //     ? { interactingCounter: -1 }
+      //     : "createdAt"
+      // )
       .skip(skip)
       .limit(pageSize)
       .populate("getUserBadge", "badges");
@@ -773,7 +789,8 @@ const getAllQuestsWithResult = async (req, res) => {
     const Questions = await BookmarkQuests.find({
       questForeignKey: { $nin: hiddenUserSettingIds },
       uuid: uuid,
-    }).sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt");
+    }).sort({ createdAt: -1 });
+    // .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt");
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -789,9 +806,12 @@ const getAllQuestsWithResult = async (req, res) => {
     console.log("running");
     filterObj.uuid = uuid;
     filterObj.hidden = true;
-    const Questions = await UserQuestSetting.find(filterObj).sort(
-      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-    );
+    const Questions = await UserQuestSetting.find(filterObj).sort({
+      createdAt: -1,
+    });
+    // .sort(
+    //   sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    // );
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -805,9 +825,12 @@ const getAllQuestsWithResult = async (req, res) => {
     console.log("running");
     filterObj.uuid = uuid;
     filterObj.linkStatus = "Enable";
-    const Questions = await UserQuestSetting.find(filterObj).sort(
-      sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-    );
+    const Questions = await UserQuestSetting.find(filterObj).sort({
+      createdAt: -1,
+    });
+    // .sort(
+    //   sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+    // );
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -992,9 +1015,10 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
         questForeignKey: { $nin: hiddenUserSettingIds },
         uuid: req.body.uuid,
         ...filterObj,
-      }).sort(
-        req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      }).sort({ createdAt: -1 });
+      // .sort(
+      //   req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      // );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -1009,9 +1033,12 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       console.log("running");
       filterObj.uuid = uuid;
       filterObj.hidden = true;
-      const Questions = await UserQuestSetting.find(filterObj).sort(
-        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      const Questions = await UserQuestSetting.find(filterObj).sort({
+        createdAt: -1,
+      });
+      // .sort(
+      //   sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      // );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -1025,9 +1052,12 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
       console.log("running");
       filterObj.uuid = uuid;
       filterObj.linkStatus = "Enable";
-      const Questions = await UserQuestSetting.find(filterObj).sort(
-        sort === "Newest First" ? { createdAt: -1 } : "createdAt"
-      );
+      const Questions = await UserQuestSetting.find(filterObj).sort({
+        createdAt: -1,
+      });
+      // .sort(
+      //   sort === "Newest First" ? { createdAt: -1 } : "createdAt"
+      // );
 
       const mapPromises = Questions.map(async function (record) {
         return await InfoQuestQuestions.findOne({
@@ -1349,33 +1379,39 @@ async function getQuestionsWithUserSettings(allQuestions, uuid) {
   }
 }
 
-
 // Controller function to check if ID exists in the database collection
 const checkMediaDuplicateUrl = async (req, res) => {
   try {
     const { id } = req.params;
 
     // Construct a regex pattern to match the YouTube URL format
-    const regex = new RegExp(`${id}`, 'i');
+    const regex = new RegExp(`${id}`, "i");
 
     // Use the regex pattern in the find query
     const question = await InfoQuestQuestions.findOne({ url: regex });
 
     if (question) {
       // ID exists in the URL field, return an error
-      return res.status(400).json({ error: 'This link already exists.', duplicate: true });
+      return res
+        .status(400)
+        .json({ error: "This link already exists.", duplicate: true });
     }
 
     // ID does not exist in the URL field, continue with other operations
     // For example, you can insert the ID into the database here
 
-    res.status(200).json({ message: 'Link does not exist in the URL field. Proceed with other operations.', duplicate: false });
+    res.status(200).json({
+      message:
+        "Link does not exist in the URL field. Proceed with other operations.",
+      duplicate: false,
+    });
   } catch (error) {
-    console.error('Error checking ID in URL field:', error.message);
-    res.status(500).json({ error: `Error checking ID in URL field: ${error.message}`,  });
+    console.error("Error checking ID in URL field:", error.message);
+    res
+      .status(500)
+      .json({ error: `Error checking ID in URL field: ${error.message}` });
   }
 };
-
 
 module.exports = {
   createInfoQuestQuest,
@@ -1391,5 +1427,5 @@ module.exports = {
   getQuestionsWithStatus,
   getQuestByUniqueShareLink,
   getQuestionsWithUserSettings,
-  checkMediaDuplicateUrl
+  checkMediaDuplicateUrl,
 };
