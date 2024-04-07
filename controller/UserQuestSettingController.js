@@ -211,7 +211,7 @@ const create = async (req, res) => {
       // Options
       { new: true, upsert: true }
     );
-    
+
     // To check the record exist
     // if (userQuestSettingExist){
     //    // If the record exists, update it
@@ -333,7 +333,8 @@ const getAllHiddenQuestions = async (req, res) => {
     }
 
     const Questions = await BookmarkQuests.find(filterObj)
-      .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt")
+      .sort({ createdAt: -1 })
+      // .sort(req.body.sort === "Newest First" ? { createdAt: -1 } : "createdAt")
       .skip(skip)
       .limit(pageSize);
 
