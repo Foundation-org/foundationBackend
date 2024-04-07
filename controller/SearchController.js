@@ -183,23 +183,52 @@ const searchHiddenQuest = async (req, res) => {
 };
 
 const searchCities = async (req, res) => {
-  const cityName = req.query.name;
+  const query = req.query.name.trim();
 
   try {
-    const regex = new RegExp(`^${cityName}`, "i");
-    const data = await Cities.find({ name: { $regex: regex } }).limit(20);
+    let data;
+
+    // Extract the city name from the query
+    const cityTerms = query.split(" ").filter((term) => term.trim() !== "");
+    const cityName = cityTerms.find((term) => term.toLowerCase() !== "");
+
+    // If query contains only the city name, return all records containing the city name
+    if (cityName && cityTerms.length === 1) {
+      data = await Cities.find({ name: new RegExp(cityName, "i") }).limit(20);
+    } else {
+      // Otherwise, split the query into individual terms
+      const queryTerms = query.split(" ").filter((term) => term.trim() !== "");
+
+      // Check if the query contains the city name along with a country or state name
+      const hasCityName = cityTerms.length > 0;
+      const countryOrStateName = queryTerms.find(
+        (term) => term.toLowerCase() !== cityName.toLowerCase()
+      );
+
+      // If the query contains the city name along with a country or state name, search for records in that country or state
+      if (hasCityName && countryOrStateName) {
+        data = await Cities.find({
+          name: new RegExp(cityName, "i"),
+          $or: [
+            { country_name: new RegExp(countryOrStateName, "i") },
+            { state_name: new RegExp(countryOrStateName, "i") },
+          ],
+        }).limit(20);
+      } else {
+        // If no country or state is specified, return all records containing the city name
+        data = await Cities.find({ name: new RegExp(cityName, "i") }).limit(20);
+      }
+    }
+
     if (data.length === 0) {
       return res.status(404).json({ message: "City not found" });
     }
 
     res.json(
-      data.map((city) => {
-        console.log(city["country"]);
-        return {
-          id: city.id,
-          name: city.name + "," + city.state_name + "," + city.country_name,
-        };
-      })
+      data.map((city) => ({
+        id: city.id,
+        name: `${city.name}, ${city.state_name}, ${city.country_name}`,
+      }))
     );
   } catch (error) {
     console.error(error);
