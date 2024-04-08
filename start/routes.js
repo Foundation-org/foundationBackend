@@ -12,6 +12,7 @@ const UserQuestSettingRoute = require("../routes/UserQuestSettingRoute");
 const PassportRoutes = require("../routes/PassportRoutes");
 const RedeemRoute = require("../routes/RedeemRoute");
 const OtpRoutes = require("../routes/OtpRoutes");
+const DirectMessageRoutes = require("../routes/DirectMessageRoutes");
 const isUnderMaintenance = require("../middleware/maintenance");
 
 module.exports = function (app) {
@@ -21,6 +22,7 @@ module.exports = function (app) {
     app.use("/",isUnderMaintenance, UserQuestSettingRoute)
     app.use("/",isUnderMaintenance, RedeemRoute)
     app.use("/",isUnderMaintenance, OtpRoutes)
+    app.use("/",isUnderMaintenance, DirectMessageRoutes)
     app.use("/user",isUnderMaintenance, AuthRoute)
     app.use("/bookmarkQuest",isUnderMaintenance, BookmarkQuestRoute)
     app.use("/infoquestions",isUnderMaintenance, InfoQuestQuestionRoute)
