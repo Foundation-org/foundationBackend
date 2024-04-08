@@ -49,4 +49,9 @@ router.get(
   InfoQuestQuestionController.checkMediaDuplicateUrl
 );
 
+router.get(
+  "/getFullSoundcloudUrlFromShortUrl",
+  InfoQuestQuestionController.getFullSoundcloudUrlFromShortUrl
+);
+
 module.exports = router;

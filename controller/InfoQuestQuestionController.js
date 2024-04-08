@@ -9,6 +9,7 @@ const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const BookmarkQuests = require("../models/BookmarkQuests");
 const { getPercentage } = require("../utils/getPercentage");
 const shortLink = require("shortlink");
+const { execSync } = require('child_process');
 const UserQuestSetting = require("../models/UserQuestSetting");
 
 const createInfoQuestQuest = async (req, res) => {
@@ -1413,6 +1414,29 @@ const checkMediaDuplicateUrl = async (req, res) => {
   }
 };
 
+// Function to get the final redirect URL from a short URL
+function getFinalRedirectSoundCloud(shortUrl) {
+  const command = `curl -Ls -o /dev/null -w %{url_effective} ${shortUrl}`;
+  return execSync(command, { encoding: 'utf-8' }).trim();
+}
+
+// Controller function to check if ID exists in the database collection
+const getFullSoundcloudUrlFromShortUrl = async (req, res) => {
+  const shortUrl = req.query.shortUrl;
+
+  if (!shortUrl) {
+      return res.status(400).json({ error: 'Short URL parameter is missing' });
+  }
+
+  try {
+      const finalUrl = getFinalRedirectSoundCloud(shortUrl);
+      res.json({ finalUrl });
+  } catch (error) {
+      console.error('Error retrieving final redirect URL:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   createInfoQuestQuest,
   constraintForUniqueQuestion,
@@ -1428,4 +1452,5 @@ module.exports = {
   getQuestByUniqueShareLink,
   getQuestionsWithUserSettings,
   checkMediaDuplicateUrl,
+  getFullSoundcloudUrlFromShortUrl
 };
