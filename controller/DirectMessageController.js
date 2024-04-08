@@ -10,7 +10,7 @@ const crypto = require("crypto");
 
 const send = async (req, res) => {
   try {
-    const { from, to, message } = req.body;
+    const { from, to, subject, message } = req.body;
 
     // check user exist Sender
     const senderUser = await UserModel.findOne({ email: from });
@@ -47,7 +47,7 @@ const send = async (req, res) => {
     const savedSendMessage = await sendMessage.save();
     if (!savedSendMessage) throw new Error("Message Not Send Successfully!");
 
-    const receiveMessage = await new ReceiveMessage({ sender: senderUser.uuid, receiver: receiverUser.uuid, shortMessage: message, senderMessageId: savedSendMessage._id });
+    const receiveMessage = await new ReceiveMessage({ sender: senderUser.uuid, receiver: receiverUser.uuid, shortMessage: message, subject, senderMessageId: savedSendMessage._id });
     const savedReceiveMessage = await receiveMessage.save();
     if (!savedReceiveMessage) throw new Error("Message Not Receive Successfully!");
 
@@ -55,7 +55,7 @@ const send = async (req, res) => {
      savedSendMessage.unView = savedSendMessage.unView + 1;
      await savedSendMessage.save();
 
-    res.status(201).json({ data: savedSendMessage, temp: savedReceiveMessage });
+    res.status(201).json({ data: savedSendMessage });
   } catch (error) {
     console.error(error);
     res.status(500).json({

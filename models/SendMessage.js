@@ -4,6 +4,7 @@ const SendMessage = mongoose.Schema(
   {
     from: String,
     to: String,
+    subject: String,
     message: String,
     send: { type: Boolean, default: true },
     fail: { type: Boolean, default: false },

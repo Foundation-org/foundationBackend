@@ -4,6 +4,7 @@ const ReceiveMessage = mongoose.Schema(
   {
     sender: String,
     receiver: String,
+    subject: String,
     shortMessage: String,
     viewed: { type: Boolean, default: false },
     senderMessageId: {
