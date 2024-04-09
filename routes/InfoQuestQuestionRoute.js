@@ -54,4 +54,9 @@ router.get(
   InfoQuestQuestionController.getFullSoundcloudUrlFromShortUrl
 );
 
+router.get(
+  "/getFlickerUrl",
+  InfoQuestQuestionController.getFlickerUrl
+);
+
 module.exports = router;

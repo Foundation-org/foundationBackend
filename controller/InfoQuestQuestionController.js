@@ -11,6 +11,7 @@ const { getPercentage } = require("../utils/getPercentage");
 const shortLink = require("shortlink");
 const { execSync } = require('child_process');
 const UserQuestSetting = require("../models/UserQuestSetting");
+const axios = require("axios");
 
 const createInfoQuestQuest = async (req, res) => {
   try {
@@ -716,21 +717,21 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.selectedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.selectedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
     contendedPercentage: item?.contendedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.contendedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.contendedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
   }));
   // Query the database with skip and limit options to get questions for the requested page
@@ -861,10 +862,10 @@ const getAllQuestsWithResult = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : sort === "Most Popular"
+              ? { interactingCounter: -1 }
+              : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
       .limit(pageSize);
@@ -1088,10 +1089,10 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -1246,10 +1247,10 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -1425,17 +1426,48 @@ const getFullSoundcloudUrlFromShortUrl = async (req, res) => {
   const shortUrl = req.query.shortUrl;
 
   if (!shortUrl) {
-      return res.status(400).json({ error: 'Short URL parameter is missing' });
+    return res.status(400).json({ error: 'Short URL parameter is missing' });
   }
 
   try {
-      const finalUrl = getFinalRedirectSoundCloud(shortUrl);
-      res.json({ finalUrl });
+    const finalUrl = getFinalRedirectSoundCloud(shortUrl);
+    res.json({ finalUrl });
   } catch (error) {
-      console.error('Error retrieving final redirect URL:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.error('Error retrieving final redirect URL:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
+// Controller function to check if ID exists in the database collection
+const getFlickerUrl = async (req, res) => {
+  try {
+    // Extract the Flickr photo URL from the query parameters
+    const flickrUrl = req.query.url;
+
+    // Make a GET request to Flickr's API with the dynamic URL
+    const response = await axios.get(
+      `http://www.flickr.com/services/oembed/?format=json&url=${encodeURIComponent(flickrUrl)}`
+    );
+
+    // Check if the response from Flickr contains the image URL
+    if (!response.data.url) {
+      // If the response does not contain the image URL, throw an error
+      throw new Error('Invalid Flickr photo URL');
+    }
+
+    // Extract the image URL from the response data
+    const imageUrl = response.data.url;
+
+    // Return the image URL as the API response
+    res.json({ imageUrl });
+  } catch (error) {
+    // If an error occurs, return an error response
+    // console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
 
 module.exports = {
   createInfoQuestQuest,
@@ -1452,5 +1484,6 @@ module.exports = {
   getQuestByUniqueShareLink,
   getQuestionsWithUserSettings,
   checkMediaDuplicateUrl,
-  getFullSoundcloudUrlFromShortUrl
+  getFullSoundcloudUrlFromShortUrl,
+  getFlickerUrl
 };
