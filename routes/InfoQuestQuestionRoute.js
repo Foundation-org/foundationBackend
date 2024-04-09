@@ -49,4 +49,14 @@ router.get(
   InfoQuestQuestionController.checkMediaDuplicateUrl
 );
 
+router.get(
+  "/getFullSoundcloudUrlFromShortUrl",
+  InfoQuestQuestionController.getFullSoundcloudUrlFromShortUrl
+);
+
+router.get(
+  "/getFlickerUrl",
+  InfoQuestQuestionController.getFlickerUrl
+);
+
 module.exports = router;

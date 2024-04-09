@@ -1178,6 +1178,89 @@ const addPasskeyBadge = async (req, res) => {
   }
 };
 
+
+const addFarCasterBadge = async (req, res) => {
+  try {
+    const User = await UserModel.findOne({ uuid: req.body.uuid });
+    if (!User) throw new Error("No such User!");
+
+    // Find the Badge
+    const usersWithBadge = await UserModel.find({
+      badges: {
+        $elemMatch: {
+          accountId: req.body.accountId,
+          accountName: req.body.accountName,
+        },
+      },
+    });
+    if (usersWithBadge.length !== 0)
+      throw new Error("Oops! This account is already linked.");
+
+    const userBadges = User.badges;
+    const updatedUserBadges = [
+      ...userBadges,
+      {
+        accountId: req.body.accountId,
+        accountName: req.body.accountName,
+        isVerified: req.body.isVerified,
+        type: req.body.type,
+        data: req.body.data,
+      },
+    ];
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
+    // const userBadges = User.badges;
+    // const updatedUserBadges = [
+    //   ...userBadges,
+    //   {
+    //     passKey: req.body.passKey,
+    //   },
+    // ];
+    // // Update the user badges
+    // User.badges = updatedUserBadges;
+    // // Update the action
+    // await User.save();
+
+    // Create Ledger
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "farCasterBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: User.badges[0]._id,
+    });
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "farCasterBadgeAdded",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: "DAO Treasury",
+      txTo: User.uuid,
+      txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+    });
+    // Decrement the Treasury
+    await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
+
+    // Increment the UserBalance
+    await updateUserBalance({
+      uuid: User.uuid,
+      amount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      inc: true,
+    });
+
+    res.status(200).json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while addFarCasterBadge: ${error.message}`,
+    });
+  }
+};
+
 const removePasskeyBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -1215,6 +1298,43 @@ const removePasskeyBadge = async (req, res) => {
   }
 };
 
+const removeFarCasterBadge = async (req, res) => {
+  try {
+    const User = await UserModel.findOne({ uuid: req.body.uuid });
+    if (!User) throw new Error("No such User!");
+
+    const userBadges = User.badges;
+    const updatedUserBadges = userBadges.filter(
+      (badge) =>
+        badge.accountName !== req.body.accountName ||
+        badge.type !== req.body.type
+    );
+    // Update the user badges
+    User.badges = updatedUserBadges;
+    // Update the action
+    await User.save();
+
+    // Create Ledger
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "farCasterBadgeRemoved",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: User.badges[0]._id,
+      // txDescription : "User adds a verification badge"
+    });
+
+    res.status(200).json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while removeFarCasterBadge: ${error.message}`,
+    });
+  }
+};
+
 module.exports = {
   update,
   getBadges,
@@ -1238,4 +1358,6 @@ module.exports = {
   addPasskeyBadge,
   removePasskeyBadge,
   getPersonalBadge,
+  addFarCasterBadge,
+  removeFarCasterBadge
 };
