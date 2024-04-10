@@ -363,7 +363,7 @@ const addPersonalBadge = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "personalBadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: User.uuid,
@@ -374,7 +374,7 @@ const addPersonalBadge = async (req, res) => {
     });
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "personalBadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: "DAO Treasury",
@@ -596,7 +596,7 @@ const addWorkEducationBadge = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "personalBadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: User.uuid,
@@ -607,7 +607,7 @@ const addWorkEducationBadge = async (req, res) => {
     });
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "personalBadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: "DAO Treasury",
@@ -653,7 +653,7 @@ const addWeb3Badge = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "web3BadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: User.uuid,
@@ -663,7 +663,7 @@ const addWeb3Badge = async (req, res) => {
     });
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "web3BadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: "DAO Treasury",
@@ -702,7 +702,7 @@ const removePersonalBadge = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "personalBadgeRemoved",
+      txUserAction: "accountBadgeRemoved",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: User.uuid,
@@ -738,7 +738,7 @@ const removeWeb3Badge = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "web3BadgeRemoved",
+      txUserAction: "accountBadgeRemoved",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: User.uuid,
@@ -1143,7 +1143,7 @@ const addPasskeyBadge = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "passKeyBadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: User.uuid,
@@ -1153,7 +1153,7 @@ const addPasskeyBadge = async (req, res) => {
     });
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "passKeyBadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: "DAO Treasury",
@@ -1226,7 +1226,7 @@ const addFarCasterBadge = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "farCasterBadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: User.uuid,
@@ -1236,7 +1236,7 @@ const addFarCasterBadge = async (req, res) => {
     });
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "farCasterBadgeAdded",
+      txUserAction: "accountBadgeAdded",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: "DAO Treasury",
@@ -1280,7 +1280,7 @@ const removePasskeyBadge = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "passKeyBadgeRemoved",
+      txUserAction: "accountBadgeRemoved",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: User.uuid,
@@ -1317,7 +1317,7 @@ const removeFarCasterBadge = async (req, res) => {
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
-      txUserAction: "farCasterBadgeRemoved",
+      txUserAction: "accountBadgeRemoved",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: User.uuid,
