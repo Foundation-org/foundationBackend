@@ -188,46 +188,36 @@ const searchCities = async (req, res) => {
   try {
     let data;
 
-    // Extract the city name from the query
-    const cityTerms = query.split(" ").filter((term) => term.trim() !== "");
-    const cityName = cityTerms.find((term) => term.toLowerCase() !== "");
+    // Split the query string using commas and spaces as delimiters
+    const queryTerms = query.split(/[\s,]+/).filter(term => term.trim() !== "");
 
-    // If query contains only the city name, return all records containing the city name
-    if (cityName && cityTerms.length === 1) {
-      data = await Cities.find({ name: new RegExp(cityName, "i") }).limit(20);
-    } else {
-      // Otherwise, split the query into individual terms
-      const queryTerms = query.split(" ").filter((term) => term.trim() !== "");
+    // Extract city name from the first term
+    const cityName = queryTerms.shift().replace(',', '');
 
-      // Check if the query contains the city name along with a country or state name
-      const hasCityName = cityTerms.length > 0;
-      const countryOrStateName = queryTerms.find(
-        (term) => term.toLowerCase() !== cityName.toLowerCase()
-      );
+    // Construct the database query
+    const queryConditions = { name: new RegExp(cityName, "i") };
 
-      // If the query contains the city name along with a country or state name, search for records in that country or state
-      if (hasCityName && countryOrStateName) {
-        data = await Cities.find({
-          name: new RegExp(cityName, "i"),
-          $or: [
-            { country_name: new RegExp(countryOrStateName, "i") },
-            { state_name: new RegExp(countryOrStateName, "i") },
-          ],
-        }).limit(20);
-      } else {
-        // If no country or state is specified, return all records containing the city name
-        data = await Cities.find({ name: new RegExp(cityName, "i") }).limit(20);
-      }
+    // Check for additional country/state names
+    if (queryTerms.length > 0) {
+      const countryOrStateName = queryTerms.join(' ').replace(',', '');
+      queryConditions.$or = [
+        { country_name: new RegExp(countryOrStateName, "i") },
+        { state_name: new RegExp(countryOrStateName, "i") }
+      ];
     }
+
+    // Execute the database query
+    data = await Cities.find(queryConditions).limit(20);
 
     if (data.length === 0) {
       return res.status(404).json({ message: "City not found" });
     }
 
+    // Return the response
     res.json(
-      data.map((city) => ({
+      data.map(city => ({
         id: city.id,
-        name: `${city.name}, ${city.state_name}, ${city.country_name}`,
+        name: `${city.name}, ${city.state_name}, ${city.country_name}`
       }))
     );
   } catch (error) {
@@ -235,6 +225,7 @@ const searchCities = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const searchUniversities = async (req, res) => {
   const uniName = req.query.name;
