@@ -265,16 +265,16 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
         _id: { $nin: hiddenUserSettingIds },
         ...filterObj,
       })
-        .sort({ createdAt: -1 })
-        // .sort(
-        //   req.body.sort === "Newest First"
-        //     ? { createdAt: -1 }
-        //     : req.body.sort === "Last Updated"
-        //     ? { lastInteractedAt: -1 }
-        //     : req.body.sort === "Most Popular"
-        //     ? { interactingCounter: -1 }
-        //     : "createdAt"
-        // )
+        // .sort({ createdAt: -1 })
+        .sort(
+          req.body.sort === "Newest First"
+            ? { createdAt: -1 }
+            : req.body.sort === "Last Updated"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
+        )
         .populate("getUserBadge", "badges");
     }
 
@@ -439,16 +439,16 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
         _id: { $nin: hiddenUserSettingIds },
         ...filterObj,
       })
-        .sort({ createdAt: -1 })
-        // .sort(
-        //   req.body.sort === "Newest First"
-        //     ? { createdAt: -1 }
-        //     : req.body.sort === "Last Updated"
-        //     ? { lastInteractedAt: -1 }
-        //     : req.body.sort === "Most Popular"
-        //     ? { interactingCounter: -1 }
-        //     : "createdAt"
-        // )
+        // .sort({ createdAt: -1 })
+        .sort(
+          req.body.sort === "Newest First"
+            ? { createdAt: -1 }
+            : req.body.sort === "Last Updated"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
+        )
         .populate("getUserBadge", "badges");
     }
 
@@ -693,16 +693,16 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
     })
-      .sort({ createdAt: -1 })
-      // .sort(
-      //   sort === "Newest First"
-      //     ? { createdAt: -1 }
-      //     : sort === "Last Updated"
-      //     ? { lastInteractedAt: -1 }
-      //     : sort === "Most Popular"
-      //     ? { interactingCounter: -1 }
-      //     : "createdAt"
-      // )
+      // .sort({ createdAt: -1 })
+      .sort(
+        sort === "Newest First"
+          ? { createdAt: -1 }
+          : sort === "Last Updated"
+          ? { lastInteractedAt: -1 }
+          : sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
+      )
       .skip(skip)
       .limit(pageSize)
       .populate("getUserBadge", "badges");
