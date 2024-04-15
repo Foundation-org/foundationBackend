@@ -226,6 +226,8 @@ const signUpUserBySocialLogin = async (req, res) => {
       user.requiredAction = true;
       await user.save();
     }
+    res.cookie("uuid", user.uuid, cookieConfiguration());
+    res.cookie("jwt", token, cookieConfiguration());
     res.status(200).json({ ...user._doc, token });
   } catch (error) {
     console.error(error.message);
@@ -491,6 +493,8 @@ const signUpSocialGuestMode = async (req, res) => {
       user.requiredAction = true;
       await user.save();
     }
+    res.cookie("uuid", user.uuid, cookieConfiguration());
+    res.cookie("jwt", token, cookieConfiguration());
     res.status(200).json({ ...user._doc, token });
   } catch (error) {
     console.error(error.message);
@@ -528,6 +532,8 @@ const signInUserBySocialLogin = async (req, res) => {
     });
 
     // res.status(200).json(user);
+    res.cookie("uuid", user.uuid, cookieConfiguration());
+    res.cookie("jwt", token, cookieConfiguration());
     res.status(200).json({ ...user._doc, token });
     // res.status(201).send("Signed in Successfully");
     // if(req.query.GoogleAccount){
