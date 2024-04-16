@@ -11,6 +11,7 @@ const SendMessage = mongoose.Schema(
     view: { type: Number, default: 0 },
     unView: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false },
+    type: String,
   },
   { timestamps: true }
 );

@@ -275,8 +275,53 @@ const getAllDeletedMessage = async (req, res) => {
   }
 };
 
+const draft = async (req, res) => {
+  try {
+    const { from, to, subject, message } = req.body;
+
+    // check user exist Sender
+    const senderUser = await UserModel.findOne({ email: from });
+    if (!senderUser) throw new Error("No such User!");
+
+    const sendMessage = await new SendMessage({ ...req.body, type: "draft" });
+    const savedDraftedMessage = await sendMessage.save();
+    if (!savedDraftedMessage) throw new Error("Message Not drafted Successfully!");
+
+    res.status(201).json({ data: savedDraftedMessage });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while draft DirectMessage: ${error.message}`,
+    });
+  }
+};
+
+const getAllDraft = async (req, res) => {
+  try {
+    const { page, limit } = req.query;
+    const uuid = req.params.uuid;
+
+    const user = await UserModel.findOne({ uuid });
+
+    const sendMessage = await SendMessage.find({ from: user.email, type: "draft" }).sort({
+      _id: -1,
+    });
+
+    res.status(200).json({
+      data: sendMessage,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while getAllDraft DirectMessage: ${error.message}`,
+    });
+  }
+};
+
 module.exports = {
   send,
+  draft,
+  getAllDraft,
   getAllSend,
   getAllReceive,
   view,

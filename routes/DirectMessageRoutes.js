@@ -7,6 +7,10 @@ const protect = require("../middleware/protect");
 
 router.post("/directMessage/send", DirectMessageController.send);
 
+router.post("/directMessage/draft", DirectMessageController.draft);
+
+router.get("/directMessage/getAllDraft/:uuid", DirectMessageController.getAllDraft);
+
 router.get("/directMessage/getAllSend/:uuid", DirectMessageController.getAllSend);
 
 router.get("/directMessage/getAllReceive/:uuid", DirectMessageController.getAllReceive);
