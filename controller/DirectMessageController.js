@@ -2,10 +2,7 @@ const SendMessage = require("../models/SendMessage");
 const ReceiveMessage = require("../models/ReceiveMessage");
 const UserModel = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
-const {
-  updateUserBalance,
-  getUserBalance,
-} = require("../utils/userServices");
+const { updateUserBalance, getUserBalance } = require("../utils/userServices");
 const crypto = require("crypto");
 
 const send = async (req, res) => {
@@ -47,13 +44,20 @@ const send = async (req, res) => {
     const savedSendMessage = await sendMessage.save();
     if (!savedSendMessage) throw new Error("Message Not Send Successfully!");
 
-    const receiveMessage = await new ReceiveMessage({ sender: senderUser.uuid, receiver: receiverUser.uuid, shortMessage: message, subject, senderMessageId: savedSendMessage._id });
+    const receiveMessage = await new ReceiveMessage({
+      sender: senderUser.uuid,
+      receiver: receiverUser.uuid,
+      shortMessage: message,
+      subject,
+      senderMessageId: savedSendMessage._id,
+    });
     const savedReceiveMessage = await receiveMessage.save();
-    if (!savedReceiveMessage) throw new Error("Message Not Receive Successfully!");
+    if (!savedReceiveMessage)
+      throw new Error("Message Not Receive Successfully!");
 
-     // update the sender Message
-     savedSendMessage.unView = savedSendMessage.unView + 1;
-     await savedSendMessage.save();
+    // update the sender Message
+    savedSendMessage.unView = savedSendMessage.unView + 1;
+    await savedSendMessage.save();
 
     res.status(201).json({ data: savedSendMessage });
   } catch (error) {
@@ -71,7 +75,9 @@ const getAllSend = async (req, res) => {
 
     const user = await UserModel.findOne({ uuid });
 
-    const sendMessage = await SendMessage.find({ from: user.email }).sort({ _id: -1 });
+    const sendMessage = await SendMessage.find({ from: user.email }).sort({
+      _id: -1,
+    });
 
     res.status(200).json({
       data: sendMessage,
@@ -91,7 +97,10 @@ const getAllReceive = async (req, res) => {
 
     const user = await UserModel.findOne({ uuid });
 
-    const receiveMessage = await ReceiveMessage.find({ receiver: uuid }).sort({ _id: -1 });
+    const receiveMessage = await ReceiveMessage.find({
+      receiver: uuid,
+      isDeleted: false,
+    }).sort({ _id: -1 });
 
     res.status(200).json({
       data: receiveMessage,
@@ -107,7 +116,7 @@ const getAllReceive = async (req, res) => {
 const deleteMessage = async (req, res) => {
   try {
     const { messageType, _id } = req.body;
-    if(messageType === "sent"){
+    if (messageType === "sent") {
       const sendMessage = await SendMessage.findOneAndDelete({ _id });
       if (!sendMessage) throw new Error("Deletion failed!");
     } else {
@@ -122,7 +131,6 @@ const deleteMessage = async (req, res) => {
     });
   }
 };
-
 
 const view = async (req, res) => {
   try {
@@ -163,8 +171,12 @@ const view = async (req, res) => {
     // });
 
     // update the send Message
-    const updatedSendMessage = await SendMessage.findOneAndUpdate({_id: receiveMessage.senderMessageId}, { $inc: { view: 1, unView: -1 }});
-    if (!updatedSendMessage) throw new Error("Message Not Updated Successfully!");
+    const updatedSendMessage = await SendMessage.findOneAndUpdate(
+      { _id: receiveMessage.senderMessageId },
+      { $inc: { view: 1, unView: -1 } }
+    );
+    if (!updatedSendMessage)
+      throw new Error("Message Not Updated Successfully!");
 
     // update the receive Message
     receiveMessage.viewed = true;
@@ -175,7 +187,6 @@ const view = async (req, res) => {
     // if (!savedReceiveMessage) throw new Error("Message Not Receive Successfully!");
 
     res.status(201).json({ data: receiveMessage });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -188,11 +199,19 @@ const trashMessage = async (req, res) => {
   try {
     const { _id, messageType } = req.body;
     let message;
-    if(messageType === "sent"){
-      message = await SendMessage.findOneAndUpdate({ _id }, { $set: { isDeleted: true } }, { new: true });
+    if (messageType === "sent") {
+      message = await SendMessage.findOneAndUpdate(
+        { _id },
+        { $set: { isDeleted: true } },
+        { new: true }
+      );
       if (!message) throw new Error("Trash e failed!");
     } else {
-      message = await ReceiveMessage.findOneAndUpdate({ _id }, { $set: { isDeleted: true } }, { new: true });
+      message = await ReceiveMessage.findOneAndUpdate(
+        { _id },
+        { $set: { isDeleted: true } },
+        { new: true }
+      );
       if (!message) throw new Error("Trash failed!");
     }
     res.status(200).json({ data: message, msg: "Successfully trashed!" });
@@ -208,11 +227,19 @@ const restoreMessage = async (req, res) => {
   try {
     const { _id, messageType } = req.body;
     let message;
-    if(messageType === "sent"){
-      message = await SendMessage.findOneAndUpdate({ _id }, { $set: { isDeleted: false } }, { new: true });
+    if (messageType === "sent") {
+      message = await SendMessage.findOneAndUpdate(
+        { _id },
+        { $set: { isDeleted: false } },
+        { new: true }
+      );
       if (!message) throw new Error("Deletion failed!");
     } else {
-      message = await ReceiveMessage.findOneAndUpdate({ _id }, { $set: { isDeleted: false } }, { new: true });
+      message = await ReceiveMessage.findOneAndUpdate(
+        { _id },
+        { $set: { isDeleted: false } },
+        { new: true }
+      );
       if (!message) throw new Error("Deletion failed!");
     }
 
@@ -232,7 +259,10 @@ const getAllDeletedMessage = async (req, res) => {
 
     const user = await UserModel.findOne({ uuid });
 
-    const receiveMessage = await ReceiveMessage.find({ receiver: uuid, isDeleted: true }).sort({ _id: -1 });
+    const receiveMessage = await ReceiveMessage.find({
+      receiver: uuid,
+      isDeleted: true,
+    }).sort({ _id: -1 });
 
     res.status(200).json({
       data: receiveMessage,
@@ -246,12 +276,12 @@ const getAllDeletedMessage = async (req, res) => {
 };
 
 module.exports = {
-    send,
-    getAllSend,
-    getAllReceive,
-    view,
-    deleteMessage,
-    trashMessage,
-    restoreMessage,
-    getAllDeletedMessage
+  send,
+  getAllSend,
+  getAllReceive,
+  view,
+  deleteMessage,
+  trashMessage,
+  restoreMessage,
+  getAllDeletedMessage,
 };
