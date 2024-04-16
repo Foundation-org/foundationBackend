@@ -106,15 +106,14 @@ const getAllReceive = async (req, res) => {
 
 const deleteMessage = async (req, res) => {
   try {
-    const { receiver, _id } = req.body;
-    // check receiver account exist
-    const User = await UserModel.findOne({ uuid: receiver });
-    if (!User) throw new Error("No such User!");
-
-    //   Fetch the redeem data
-    const receiveMessage = await ReceiveMessage.findOneAndDelete({ _id });
-    if (!receiveMessage) throw new Error("Deletion failed!");
-
+    const { messageType, _id } = req.body;
+    if(messageType === "sent"){
+      const sendMessage = await SendMessage.findOneAndDelete({ _id });
+      if (!sendMessage) throw new Error("Deletion failed!");
+    } else {
+      const receiveMessage = await ReceiveMessage.findOneAndDelete({ _id });
+      if (!receiveMessage) throw new Error("Deletion failed!");
+    }
     res.status(200).json({ data: "", msg: "Successfully deleted!" });
   } catch (error) {
     console.error(error);
@@ -185,10 +184,74 @@ const view = async (req, res) => {
   }
 };
 
+const trashMessage = async (req, res) => {
+  try {
+    const { _id, messageType } = req.body;
+    let message;
+    if(messageType === "sent"){
+      message = await SendMessage.findOneAndUpdate({ _id }, { $set: { isDeleted: true } }, { new: true });
+      if (!message) throw new Error("Trash e failed!");
+    } else {
+      message = await ReceiveMessage.findOneAndUpdate({ _id }, { $set: { isDeleted: true } }, { new: true });
+      if (!message) throw new Error("Trash failed!");
+    }
+    res.status(200).json({ data: message, msg: "Successfully trashed!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while trashMessage DirectMessage: ${error.message}`,
+    });
+  }
+};
+
+const restoreMessage = async (req, res) => {
+  try {
+    const { _id, messageType } = req.body;
+    let message;
+    if(messageType === "sent"){
+      message = await SendMessage.findOneAndUpdate({ _id }, { $set: { isDeleted: false } }, { new: true });
+      if (!message) throw new Error("Deletion failed!");
+    } else {
+      message = await ReceiveMessage.findOneAndUpdate({ _id }, { $set: { isDeleted: false } }, { new: true });
+      if (!message) throw new Error("Deletion failed!");
+    }
+
+    res.status(200).json({ data: message, msg: "Successfully restored!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while restoreMessage DirectMessage: ${error.message}`,
+    });
+  }
+};
+
+const getAllDeletedMessage = async (req, res) => {
+  try {
+    const { page, limit } = req.query;
+    const uuid = req.params.uuid;
+
+    const user = await UserModel.findOne({ uuid });
+
+    const receiveMessage = await ReceiveMessage.find({ receiver: uuid, isDeleted: true }).sort({ _id: -1 });
+
+    res.status(200).json({
+      data: receiveMessage,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: `An error occurred while getAllDeletedMessage DirectMessage: ${error.message}`,
+    });
+  }
+};
+
 module.exports = {
     send,
     getAllSend,
     getAllReceive,
     view,
-    deleteMessage
+    deleteMessage,
+    trashMessage,
+    restoreMessage,
+    getAllDeletedMessage
 };

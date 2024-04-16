@@ -15,5 +15,11 @@ router.post("/directMessage/view", DirectMessageController.view);
 
 router.delete("/directMessage/delete", DirectMessageController.deleteMessage);
 
+router.post("/directMessage/trash", DirectMessageController.trashMessage);
+
+router.post("/directMessage/restore", DirectMessageController.restoreMessage);
+
+router.get("/directMessage/getAllDeletedMessage/:uuid", DirectMessageController.getAllDeletedMessage);
+
 
 module.exports = router;

@@ -11,6 +11,7 @@ const ReceiveMessage = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'sendMessage'
     },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
