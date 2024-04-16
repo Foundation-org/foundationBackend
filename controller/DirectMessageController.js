@@ -75,7 +75,10 @@ const getAllSend = async (req, res) => {
 
     const user = await UserModel.findOne({ uuid });
 
-    const sendMessage = await SendMessage.find({ from: user.email }).sort({
+    const sendMessage = await SendMessage.find({
+      from: user.email,
+      type: { $ne: "draft" },
+    }).sort({
       _id: -1,
     });
 
@@ -285,7 +288,8 @@ const draft = async (req, res) => {
 
     const sendMessage = await new SendMessage({ ...req.body, type: "draft" });
     const savedDraftedMessage = await sendMessage.save();
-    if (!savedDraftedMessage) throw new Error("Message Not drafted Successfully!");
+    if (!savedDraftedMessage)
+      throw new Error("Message Not drafted Successfully!");
 
     res.status(201).json({ data: savedDraftedMessage });
   } catch (error) {
@@ -303,7 +307,10 @@ const getAllDraft = async (req, res) => {
 
     const user = await UserModel.findOne({ uuid });
 
-    const sendMessage = await SendMessage.find({ from: user.email, type: "draft" }).sort({
+    const sendMessage = await SendMessage.find({
+      from: user.email,
+      type: "draft",
+    }).sort({
       _id: -1,
     });
 
