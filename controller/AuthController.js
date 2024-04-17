@@ -1050,6 +1050,7 @@ const setStates = async (req, res) => {
           "States.lightMode": req.body.LightMode,
           "States.moderationRatingFilter": req.body.moderationRatingFilter,
           "States.selectedBtnId": req.body.selectedBtnId,
+          "States.bookmarks": req.body.bookmarks,
         },
       },
       { new: true }

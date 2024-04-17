@@ -70,6 +70,10 @@ const userSchema = mongoose.Schema(
         type: String,
         default: "",
       },
+      bookmarks: {
+        type: Boolean,
+        default: false,
+      },
       filterBySort: {
         type: String,
         default: "Newest First",
