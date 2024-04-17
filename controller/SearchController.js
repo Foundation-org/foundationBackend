@@ -31,6 +31,7 @@ const easySearch = async (req, res) => {
         { whichTypeQuestion: { $regex: searchTerm, $options: "i" } },
         { "QuestAnswers.question": { $regex: searchTerm, $options: "i" } },
         { QuestTopic: { $regex: searchTerm, $options: "i" } },
+        { description: { $regex: searchTerm, $options: "i" } },
       ],
       _id: { $nin: hiddenUserSettingIds },
       moderationRatingCount: {
@@ -82,6 +83,7 @@ const searchBookmarks = async (req, res) => {
         { whichTypeQuestion: { $regex: searchTerm, $options: "i" } },
         { "QuestAnswers.question": { $regex: searchTerm, $options: "i" } },
         { QuestTopic: { $regex: searchTerm, $options: "i" } },
+        { description: { $regex: searchTerm, $options: "i" } },
       ],
       _id: { $nin: hiddenUserSettingIds },
       moderationRatingCount: {
