@@ -28,9 +28,10 @@ module.exports = {
     // LAST NAME
     // "Is this a valid last name for a person? Answer yes or no or no only.",
     "Can this be a last name for a person? Shortest response only",
-    // Degree
+    // Degree name
     "Correct provided text to a standard degree name. If it is not a degree name say Rejected. Shortest responses only.",
-    // 
+    // Degree field
+    "Correct provided text to a standard field of study. If it is not a field of study say Rejected. Shortest responses only."
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
   ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,
