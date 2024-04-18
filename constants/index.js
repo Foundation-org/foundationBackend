@@ -27,7 +27,10 @@ module.exports = {
     "Can this be a first name for a person? Shortest response only",
     // LAST NAME
     // "Is this a valid last name for a person? Answer yes or no or no only.",
-    "Can this be a last name for a person? Shortest response only"
+    "Can this be a last name for a person? Shortest response only",
+    // Degree
+    "Correct provided text to a standard degree name. If it is not a degree name say Rejected. Shortest responses only.",
+    // 
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
   ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,
