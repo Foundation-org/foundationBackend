@@ -346,6 +346,22 @@ const addCompany = async (req, res) => {
       .json({ message: "Error occured while adding company", err });
   }
 };
+
+const addJobTitle = async (req, res) => {
+  try {
+    const job = await new JobTitle({
+      name: req.body.name,
+      uuid: req.body.uuid,
+    });
+
+    const data = await job.save();
+    res.status(200).json({ message: "Success", data });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error occured while adding job title", err });
+  }
+};
 const addPersonalBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -1355,6 +1371,7 @@ module.exports = {
   addWorkEducationBadge,
   removeAWorkEducationBadge,
   addCompany,
+  addJobTitle,
   getAWorkAndEducationBadge,
   updateWorkAndEducationBadge,
   addPasskeyBadge,

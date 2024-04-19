@@ -11,5 +11,6 @@ router.post("/searchHiddenQuest", SearchController.searchHiddenQuest);
 router.post("/searchCities", SearchController.searchCities);
 router.post("/searchUniversities", SearchController.searchUniversities);
 router.post("/searchCompanies", SearchController.searchCompanies);
+router.post("/searchJobTitles", SearchController.searchJobTitles);
 
 module.exports = router;
