@@ -11,6 +11,7 @@ const AWS = require("aws-sdk");
 const { JWT_SECRET, FRONTEND_URL } = require("../config/env");
 const { error } = require("console");
 const Company = require("../models/Company");
+const JobTitle = require("../models/JobTitle");
 
 const update = async (req, res) => {
   try {

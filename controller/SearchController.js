@@ -9,6 +9,7 @@ const UserQuestSetting = require("../models/UserQuestSetting");
 const Cities = require("../models/Cities");
 const Education = require("../models/Education");
 const Company = require("../models/Company");
+const JobTitle = require("../models/JobTitle");
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
   const uuid = req.cookies.uuid;
