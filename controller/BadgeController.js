@@ -335,12 +335,15 @@ const addCompany = async (req, res) => {
       name: req.body.name,
       country: req.body.country,
       state_province: req.body.state_province,
+      uuid: req.body.uuid,
     });
 
     const data = await company.save();
     res.status(200).json({ message: "Success", data });
   } catch (err) {
-    res.status(500).json({ message: "Error occured while adding company" });
+    res
+      .status(500)
+      .json({ message: "Error occured while adding company", err });
   }
 };
 const addPersonalBadge = async (req, res) => {
@@ -1178,7 +1181,6 @@ const addPasskeyBadge = async (req, res) => {
   }
 };
 
-
 const addFarCasterBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -1359,5 +1361,5 @@ module.exports = {
   removePasskeyBadge,
   getPersonalBadge,
   addFarCasterBadge,
-  removeFarCasterBadge
+  removeFarCasterBadge,
 };

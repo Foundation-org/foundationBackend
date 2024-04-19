@@ -7,10 +7,13 @@ const companySchema = new mongoose.Schema({
   },
   country: {
     type: String,
-    required: true,
   },
   state_province: {
     type: String,
+  },
+  uuid: {
+    type: String,
+    required: true,
   },
 });
 
