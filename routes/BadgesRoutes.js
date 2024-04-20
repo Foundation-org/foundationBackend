@@ -55,6 +55,11 @@ router.post("/addBadge/company/add", BadgeController.addCompany);
 
 router.post("/addBadge/jobTitles/add", BadgeController.addJobTitle);
 
+router.post(
+  "/addBadge/degreesAndFields/add",
+  BadgeController.addDegreesAndFields
+);
+
 router.post("/removeBadge", BadgeController.removeBadge);
 
 router.post("/removeContactBadge", BadgeController.removeContactBadge);

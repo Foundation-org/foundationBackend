@@ -10,6 +10,7 @@ const Cities = require("../models/Cities");
 const Education = require("../models/Education");
 const Company = require("../models/Company");
 const JobTitle = require("../models/JobTitle");
+const DegreeAndFieldOfStudy = require("../models/DegreeAndFieldOfStudy");
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
   const uuid = req.cookies.uuid;
@@ -293,6 +294,31 @@ const searchJobTitles = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const searchDegreesAndFields = async (req, res) => {
+  const key = req.query.name;
+  const type = req.query.type;
+
+  try {
+    const regex = new RegExp(`^${key}`, "i");
+    const data = await DegreeAndFieldOfStudy.find({
+      name: { $regex: regex },
+      type: type,
+    }).limit(20);
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    res.json(
+      data.map((comp) => ({
+        id: comp.id,
+        name: comp.name,
+      }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 module.exports = {
   easySearch,
   searchBookmarks,
@@ -301,4 +327,5 @@ module.exports = {
   searchUniversities,
   searchCompanies,
   searchJobTitles,
+  searchDegreesAndFields,
 };
