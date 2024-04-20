@@ -31,7 +31,9 @@ module.exports = {
     // Degree name
     "Correct provided text to a standard degree name. If it is not a degree name say Rejected. Shortest responses only.",
     // Degree field
-    "Correct provided text to a standard field of study. If it is not a field of study say Rejected. Shortest responses only."
+    "Correct provided text to a standard field of study. If it is not a field of study say Rejected. Shortest responses only.",
+    // Job title
+    "Correct provided text to a standard job title. If it is not a job title say Rejected. Shortest responses only."
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
   ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,

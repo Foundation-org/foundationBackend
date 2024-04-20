@@ -28,7 +28,7 @@ const openai = new OpenAI({ apiKey: OPEN_AI_KEY });
 
 const validation = async (req, res) => {
   const callType = req.params.callType;
-  if (callType >= 1 && callType <= 8) {
+  if (callType >= 1 && callType <= 9) {
     await handleRequest(
       req,
       res,
