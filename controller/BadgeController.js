@@ -11,6 +11,8 @@ const AWS = require("aws-sdk");
 const { JWT_SECRET, FRONTEND_URL } = require("../config/env");
 const { error } = require("console");
 const Company = require("../models/Company");
+const JobTitle = require("../models/JobTitle");
+const DegreeAndFieldOfStudy = require("../models/DegreeAndFieldOfStudy");
 
 const update = async (req, res) => {
   try {
@@ -331,16 +333,51 @@ const addBadge = async (req, res) => {
 
 const addCompany = async (req, res) => {
   try {
-    const company = await new Company({
+    const company = new Company({
       name: req.body.name,
       country: req.body.country,
       state_province: req.body.state_province,
+      uuid: req.body.uuid,
     });
 
     const data = await company.save();
     res.status(200).json({ message: "Success", data });
   } catch (err) {
-    res.status(500).json({ message: "Error occured while adding company" });
+    res
+      .status(500)
+      .json({ message: "Error occured while adding company", err });
+  }
+};
+
+const addJobTitle = async (req, res) => {
+  try {
+    const job = new JobTitle({
+      name: req.body.name,
+      uuid: req.body.uuid,
+    });
+
+    const data = await job.save();
+    res.status(200).json({ message: "Success", data });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error occured while adding job title", err });
+  }
+};
+const addDegreesAndFields = async (req, res) => {
+  try {
+    const resp = new DegreeAndFieldOfStudy({
+      name: req.body.name,
+      uuid: req.body.uuid,
+      type: req.body.type,
+    });
+
+    const data = await resp.save();
+    res.status(200).json({ message: "Success", data });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error occured while adding job title", err });
   }
 };
 const addPersonalBadge = async (req, res) => {
@@ -1178,7 +1215,6 @@ const addPasskeyBadge = async (req, res) => {
   }
 };
 
-
 const addFarCasterBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -1353,11 +1389,13 @@ module.exports = {
   addWorkEducationBadge,
   removeAWorkEducationBadge,
   addCompany,
+  addJobTitle,
+  addDegreesAndFields,
   getAWorkAndEducationBadge,
   updateWorkAndEducationBadge,
   addPasskeyBadge,
   removePasskeyBadge,
   getPersonalBadge,
   addFarCasterBadge,
-  removeFarCasterBadge
+  removeFarCasterBadge,
 };

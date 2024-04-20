@@ -7,6 +7,10 @@ const protect = require("../middleware/protect");
 
 router.post("/directMessage/send", DirectMessageController.send);
 
+router.post("/directMessage/draft", DirectMessageController.draft);
+
+router.get("/directMessage/getAllDraft/:uuid", DirectMessageController.getAllDraft);
+
 router.get("/directMessage/getAllSend/:uuid", DirectMessageController.getAllSend);
 
 router.get("/directMessage/getAllReceive/:uuid", DirectMessageController.getAllReceive);
@@ -14,6 +18,12 @@ router.get("/directMessage/getAllReceive/:uuid", DirectMessageController.getAllR
 router.post("/directMessage/view", DirectMessageController.view);
 
 router.delete("/directMessage/delete", DirectMessageController.deleteMessage);
+
+router.post("/directMessage/trash", DirectMessageController.trashMessage);
+
+router.post("/directMessage/restore", DirectMessageController.restoreMessage);
+
+router.get("/directMessage/getAllDeletedMessage/:uuid", DirectMessageController.getAllDeletedMessage);
 
 
 module.exports = router;

@@ -53,6 +53,13 @@ router.post(
 
 router.post("/addBadge/company/add", BadgeController.addCompany);
 
+router.post("/addBadge/jobTitles/add", BadgeController.addJobTitle);
+
+router.post(
+  "/addBadge/degreesAndFields/add",
+  BadgeController.addDegreesAndFields
+);
+
 router.post("/removeBadge", BadgeController.removeBadge);
 
 router.post("/removeContactBadge", BadgeController.removeContactBadge);
@@ -65,7 +72,10 @@ router.post("/addBadge/web3/add", BadgeController.addWeb3Badge);
 
 router.post("/addBadge/passkey/add", BadgeController.addPasskeyBadge);
 
-router.post("/addBadge/addFarCasterBadge/add", BadgeController.addFarCasterBadge);
+router.post(
+  "/addBadge/addFarCasterBadge/add",
+  BadgeController.addFarCasterBadge
+);
 
 router.post("/removePasskey", BadgeController.removePasskeyBadge);
 

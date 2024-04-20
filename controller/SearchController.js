@@ -9,6 +9,8 @@ const UserQuestSetting = require("../models/UserQuestSetting");
 const Cities = require("../models/Cities");
 const Education = require("../models/Education");
 const Company = require("../models/Company");
+const JobTitle = require("../models/JobTitle");
+const DegreeAndFieldOfStudy = require("../models/DegreeAndFieldOfStudy");
 const easySearch = async (req, res) => {
   const searchTerm = req.query.term || "";
   const uuid = req.cookies.uuid;
@@ -31,6 +33,7 @@ const easySearch = async (req, res) => {
         { whichTypeQuestion: { $regex: searchTerm, $options: "i" } },
         { "QuestAnswers.question": { $regex: searchTerm, $options: "i" } },
         { QuestTopic: { $regex: searchTerm, $options: "i" } },
+        { description: { $regex: searchTerm, $options: "i" } },
       ],
       _id: { $nin: hiddenUserSettingIds },
       moderationRatingCount: {
@@ -82,6 +85,7 @@ const searchBookmarks = async (req, res) => {
         { whichTypeQuestion: { $regex: searchTerm, $options: "i" } },
         { "QuestAnswers.question": { $regex: searchTerm, $options: "i" } },
         { QuestTopic: { $regex: searchTerm, $options: "i" } },
+        { description: { $regex: searchTerm, $options: "i" } },
       ],
       _id: { $nin: hiddenUserSettingIds },
       moderationRatingCount: {
@@ -189,20 +193,22 @@ const searchCities = async (req, res) => {
     let data;
 
     // Split the query string using commas and spaces as delimiters
-    const queryTerms = query.split(/[\s,]+/).filter(term => term.trim() !== "");
+    const queryTerms = query
+      .split(/[\s,]+/)
+      .filter((term) => term.trim() !== "");
 
     // Extract city name from the first term
-    const cityName = queryTerms.shift().replace(',', '');
+    const cityName = queryTerms.shift().replace(",", "");
 
     // Construct the database query
     const queryConditions = { name: new RegExp(cityName, "i") };
 
     // Check for additional country/state names
     if (queryTerms.length > 0) {
-      const countryOrStateName = queryTerms.join(' ').replace(',', '');
+      const countryOrStateName = queryTerms.join(" ").replace(",", "");
       queryConditions.$or = [
         { country_name: new RegExp(countryOrStateName, "i") },
-        { state_name: new RegExp(countryOrStateName, "i") }
+        { state_name: new RegExp(countryOrStateName, "i") },
       ];
     }
 
@@ -215,9 +221,9 @@ const searchCities = async (req, res) => {
 
     // Return the response
     res.json(
-      data.map(city => ({
+      data.map((city) => ({
         id: city.id,
-        name: `${city.name}, ${city.state_name}, ${city.country_name}`
+        name: `${city.name}, ${city.state_name}, ${city.country_name}`,
       }))
     );
   } catch (error) {
@@ -225,7 +231,6 @@ const searchCities = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 const searchUniversities = async (req, res) => {
   const uniName = req.query.name;
@@ -268,7 +273,52 @@ const searchCompanies = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const searchJobTitles = async (req, res) => {
+  const job = req.query.name;
 
+  try {
+    const regex = new RegExp(`^${job}`, "i");
+    const data = await JobTitle.find({ name: { $regex: regex } }).limit(20);
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Job Title not found" });
+    }
+
+    res.json(
+      data.map((comp) => ({
+        id: comp.id,
+        name: comp.name,
+      }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+const searchDegreesAndFields = async (req, res) => {
+  const key = req.query.name;
+  const type = req.query.type;
+
+  try {
+    const regex = new RegExp(`^${key}`, "i");
+    const data = await DegreeAndFieldOfStudy.find({
+      name: { $regex: regex },
+      type: type,
+    }).limit(20);
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    res.json(
+      data.map((comp) => ({
+        id: comp.id,
+        name: comp.name,
+      }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 module.exports = {
   easySearch,
   searchBookmarks,
@@ -276,4 +326,6 @@ module.exports = {
   searchCities,
   searchUniversities,
   searchCompanies,
+  searchJobTitles,
+  searchDegreesAndFields,
 };
