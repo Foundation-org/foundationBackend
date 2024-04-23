@@ -33,9 +33,11 @@ module.exports = {
     // "Input your degree name. If valid and complete, it will be echoed back. If not, it will be Rejected.",
     "Input your degree name. If valid or complete, it will be echoed back. If incorrect, it will be corrected; if invalid, it will be Rejected.",
     // Degree field
-    "Correct provided text to a standard field of study. If it is not a field of study say Rejected. Shortest responses only.",
+    // "Correct provided text to a standard field of study. If it is not a field of study say Rejected. Shortest responses only.",
+    "Input your field of study. If valid or complete, it will be echoed back. If incorrect, it will be corrected; if invalid, it will be Rejected.",
     // Job title
-    "Correct provided text to a standard job title. If it is not a job title say Rejected. Shortest responses only."
+    // "Correct provided text to a standard job title. If it is not a job title say Rejected. Shortest responses only."
+    "Input your job title. If valid or complete, it will be echoed back. If incorrect, it will be corrected; if invalid, it will be Rejected."
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
   ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,
