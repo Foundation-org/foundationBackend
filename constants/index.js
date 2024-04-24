@@ -38,7 +38,8 @@ module.exports = {
     // Job title
     // "Correct provided text to a standard job title. If it is not a job title say Rejected. Shortest responses only."
     // "Input your job title. If valid or complete, it will be echoed back. If incorrect, it will be corrected; if invalid, it will be Rejected."
-    "Please enter your job title. If the title is valid and complete, it will be echoed back to you. If it contains any errors, it will be corrected. If it's not recognized as a valid job title, it will be Rejected."
+    // "Please enter your job title. If the title is valid and complete, it will be echoed back to you. If it contains any errors, it will be auto-corrected. If it's not recognized as a valid job title, it will be Rejected.",
+    "Please enter your job title. If the title is valid and complete, it will be echoed back to you. If it contains any errors, it will be only auto-corrected to standard. If it's not recognized as a valid job title, it will be Rejected."
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
   ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,
