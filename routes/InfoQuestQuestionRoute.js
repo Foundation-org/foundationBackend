@@ -59,4 +59,8 @@ router.get(
   InfoQuestQuestionController.getFlickerUrl
 );
 
+
+router.get("/getQuestsAll", InfoQuestQuestionController.getQuestsAll);
+
+
 module.exports = router;
