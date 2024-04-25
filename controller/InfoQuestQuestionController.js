@@ -776,6 +776,7 @@ const getQuestsAll = async (req, res) => {
     participated,
     start,
     end,
+    media
   } = req.query;
   const page = parseInt(_page);
   const pageSize = parseInt(_limit);
@@ -799,10 +800,29 @@ const getQuestsAll = async (req, res) => {
   if (type !== "All") {
     filterObj.whichTypeQuestion = type;
   }
+
+  if (media !== "All") {
+    if (media === "Video") {
+      filterObj.$or = [
+        { url: { $regex: "youtube.com", $options: "i" } },
+        { url: { $regex: "youtu.be", $options: "i" } },
+        { url: { $regex: "youtube-nocookie.com", $options: "i" } },
+      ];
+    }
+
+    if (media === 'Image') {
+      filterObj.url = { $regex: "live.staticflickr.com", $options: "i" } 
+    }
+
+    if (media === 'Music') {
+      filterObj.url = { $regex: "soundcloud.com", $options: "i" } 
+    }
+  }
+
   if (terms) {
     // const regexTerm = terms.map((term) => new RegExp(term, "i"));
     // filterObj.QuestTopic = { $in: regexTerm };
-    const regex = {$regex: terms, $options: "i"};
+    const regex = { $regex: terms, $options: "i" };
 
     filterObj.$or = [
       { Question: regex },
@@ -820,10 +840,7 @@ const getQuestsAll = async (req, res) => {
     //   { description: { $regex: terms, $options: "i" } },
     // ]
 
-
     // filterObj.Question = regex;
-
-
   } else if (blockedTerms && blockedTerms.length > 0) {
     // const regexBlockterms = blockedTerms.map((term) => new RegExp(term, "i"));
     const blockedTermsArray = JSON.parse(blockedTerms);
@@ -994,9 +1011,6 @@ const getQuestsAll = async (req, res) => {
     //   allQuestions = await query.populate("getUserBadge", "badges")
 
     // }
- 
-
-
 
     // allQuestions = await InfoQuestQuestions.find({
     //   _id: { $nin: hiddenUserSettingIds },
