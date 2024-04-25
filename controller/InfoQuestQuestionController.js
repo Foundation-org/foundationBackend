@@ -796,7 +796,7 @@ const getQuestsAll = async (req, res) => {
     }
   }
 
-  if (type) {
+  if (type !== "All") {
     filterObj.whichTypeQuestion = type;
   }
   if (terms) {
