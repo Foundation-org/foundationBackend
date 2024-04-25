@@ -596,8 +596,9 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     // // Use Promise.allSettled to handle errors without stopping execution
     // await Promise.allSettled(mapPromises);
   }
-
+  console.log("Outside Bookmark");
   if (Page === "Bookmark") {
+    console.log("Inside Bookmark");
     const hiddenUserSettings = await UserQuestSetting.find({
       hidden: true,
       uuid,
@@ -622,7 +623,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
       .skip(skip)
       .limit(pageSize);
 
-    console.log(Questions);
+    console.log("Questions Length", Questions.length);
+    console.log("Bookmark filterObj", filterObj);
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -646,6 +648,8 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
         $lte: moderationRatingFilter?.final,
       },
     });
+
+    console.log("allQuestionsBookmark", allQuestions.length);
   } else if (Page === "Hidden") {
     console.log("running");
     filterObj.uuid = uuid;
@@ -724,7 +728,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     });
   }
 
-  console.log("allQuestions", allQuestions);
+  console.log("allQuestionsData", allQuestions.length);
 
   const resultArray = allQuestions.map((item) => getPercentage(item));
   const desiredArray = resultArray.map((item) => ({
@@ -776,7 +780,7 @@ const getQuestsAll = async (req, res) => {
     participated,
     start,
     end,
-    media
+    media,
   } = req.query;
   const page = parseInt(_page);
   const pageSize = parseInt(_limit);
@@ -810,12 +814,12 @@ const getQuestsAll = async (req, res) => {
       ];
     }
 
-    if (media === 'Image') {
-      filterObj.url = { $regex: "live.staticflickr.com", $options: "i" } 
+    if (media === "Image") {
+      filterObj.url = { $regex: "live.staticflickr.com", $options: "i" };
     }
 
-    if (media === 'Music') {
-      filterObj.url = { $regex: "soundcloud.com", $options: "i" } 
+    if (media === "Music") {
+      filterObj.url = { $regex: "soundcloud.com", $options: "i" };
     }
   }
 
@@ -877,7 +881,9 @@ const getQuestsAll = async (req, res) => {
     // await Promise.allSettled(mapPromises);
   }
 
+  console.log("Outside Bookmark");
   if (Page === "Bookmark") {
+    console.log("Inside Bookmark");
     const hiddenUserSettings = await UserQuestSetting.find({
       hidden: true,
       uuid,
@@ -902,7 +908,8 @@ const getQuestsAll = async (req, res) => {
       .skip(skip)
       .limit(pageSize);
 
-    console.log(Questions);
+    console.log("Questions Length", Questions.length);
+    console.log("Bookmark filterObj", filterObj);
 
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
@@ -926,6 +933,8 @@ const getQuestsAll = async (req, res) => {
         $lte: moderationRatingFinal,
       },
     });
+
+    console.log("allQuestionsBookmark", allQuestions.length);
   } else if (Page === "Hidden") {
     console.log("running");
     filterObj.uuid = uuid;
@@ -1005,36 +1014,12 @@ const getQuestsAll = async (req, res) => {
 
     allQuestions = await query.populate("getUserBadge", "badges");
 
-    // if (participated === "All") {
-    //   allQuestions = await query.skip(skip).limit(pageSize).populate("getUserBadge", "badges")
-    // } else {
-    //   allQuestions = await query.populate("getUserBadge", "badges")
-
-    // }
-
-    // allQuestions = await InfoQuestQuestions.find({
-    //   _id: { $nin: hiddenUserSettingIds },
-    //   ...filterObj,
-    // })
-    //   .sort(
-    //     sort === "Newest First"
-    //       ? { createdAt: -1 }
-    //       : sort === "Last Updated"
-    //       ? { lastInteractedAt: -1 }
-    //       : sort === "Most Popular"
-    //       ? { interactingCounter: -1 }
-    //       : "createdAt"
-    //   )
-    //   .skip(skip)
-    //   .limit(pageSize)
-    //   .populate("getUserBadge", "badges");
-
     totalQuestionsCount = await InfoQuestQuestions.countDocuments({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
     });
   }
-  console.log("allQuestions", allQuestions);
+  console.log("allQuestionsData", allQuestions.length);
 
   let resultArray;
   let nextPage;
@@ -1117,6 +1102,22 @@ const getQuestsAll = async (req, res) => {
     console.log("Inside resultArray else");
     nextPage = skip + pageSize < totalQuestionsCount;
     resultArray = allQuestions.map((item) => getPercentage(item));
+  }
+
+  for (let i = 0; i < resultArray.length; i++) {
+    const item = resultArray[i];
+    console.log('item', item)
+    const bookmarkDoc = await BookmarkQuests.findOne({
+      questForeignKey: item._doc._id,
+      uuid,
+    });
+
+    console.log('bookmarkDoc', bookmarkDoc)
+    if (bookmarkDoc) {
+      resultArray[i]._doc.bookmark = true;
+    } else {
+      resultArray[i]._doc.bookmark = false;
+    }
   }
 
   const desiredArray = resultArray.map((item) => ({
