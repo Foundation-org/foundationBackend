@@ -4,11 +4,11 @@ const { Schema } = mongoose;
 
 const UserQuestSetting = mongoose.Schema(
   {
-    Question: { type: String},
+    Question: { type: String },
     uuid: {
       // type: Schema.Types.ObjectId,
       // ref: "user",
-      type: String
+      type: String,
     },
     questForeignKey: {
       // type: Schema.Types.ObjectId,
@@ -17,7 +17,7 @@ const UserQuestSetting = mongoose.Schema(
     },
     link: {
       type: String,
-      default: ""
+      default: "",
       // default: shortLink.generate(8)
     },
     data: {
@@ -26,15 +26,15 @@ const UserQuestSetting = mongoose.Schema(
     linkStatus: {
       type: String,
       enum: ["Enable", "Disable", "Delete", ""],
-      default: ""
+      default: "",
     },
     hidden: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     hiddenMessage: {
       type: String,
-      default: ""
+      default: "",
     },
     questImpression: {
       type: Number,
@@ -44,10 +44,22 @@ const UserQuestSetting = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    hiddenTime: {
+      type: Date, // Setting the field type to Date
+      default: null, // Default value is null (no hidden time)
+    },
     result: {
       type: Array,
       // default: [{ answer: {}, contended: {} }],
       default: undefined,
+    },
+    hiddenTime: {
+      type: Date,
+      default: "",
+    },
+    sharedTime: {
+      type: Date,
+      default: "",
     },
   },
   { timestamps: true }

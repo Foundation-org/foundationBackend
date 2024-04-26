@@ -202,15 +202,37 @@ const create = async (req, res) => {
     //   uuid: payload.uuid,
     //   questForeignKey: payload.questForeignKey,
     // });
+
+    let updateData = {
+      $set: { ...payload }, // Base the update object on the incoming payload
+    };
+
+    // Add 'hiddenTime' conditionally
+    if (payload.hidden === true) {
+      updateData.$set.hiddenTime = new Date(); // Set to the current timestamp
+    }
+    console.log(updateData);
     let userQuestSettingSaved;
     userQuestSettingSaved = await UserQuestSetting.findOneAndUpdate(
       // Query criteria
       { uuid: payload.uuid, questForeignKey: payload.questForeignKey },
       // Update or insert payload
-      { $set: payload },
+      updateData,
       // Options
       { new: true, upsert: true }
     );
+    const userQuestSettingExist = await UserQuestSetting.findOne({
+      uuid: payload.uuid,
+      questForeignKey: payload.questForeignKey,
+    });
+    // To check the record exist
+    if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
+
+    if (userQuestSettingExist && payload.hidden === true) {
+      // Document found, update hiddenTime and save
+      userQuestSettingExist.hiddenTime = new Date();
+      await userQuestSettingExist.save();
+    }
 
     // To check the record exist
     // if (userQuestSettingExist){
@@ -272,25 +294,38 @@ const update = async (req, res) => {
     // To check the record exist
     if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
 
+    if (userQuestSettingExist && payload.hidden === true) {
+      // Document found, update hiddenTime and save
+      userQuestSettingExist.hiddenTime = new Date();
+      await userQuestSettingExist.save();
+    }
+
     // if uniqueLink
     // if(payload.uniqueLink){
     //   await ledgerEntryPostLinkCreated(payload.uuid);
     //   payload.link = shortLink.generate(8);
     // }
+
+    let updateData = {
+      $set: { ...payload }, // Base the update object on the incoming payload
+    };
+
+    // Add 'hiddenTime' conditionally
+    if (payload.hidden === true) {
+      updateData.$set.hiddenTime = new Date(); // Set to the current timestamp
+    }
     // If the record exists, update it
     const updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
       {
         uuid: payload.uuid,
         questForeignKey: payload.questForeignKey,
       },
-      {
-        // Update fields and values here
-        $set: payload,
-      },
+      updateData,
       {
         new: true, // Return the modified document rather than the original
       }
     );
+
     // Get quest owner uuid
     const infoQuestQuestion = await InfoQuestQuestions.findOne({
       _id: payload.questForeignKey,
