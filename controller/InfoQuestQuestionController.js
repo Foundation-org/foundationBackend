@@ -956,7 +956,7 @@ const getQuestsAll = async (req, res) => {
 
     allQuestions = await Promise.all(mapPromises);
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
-  } else if (req.body.Page === "SharedLink") {
+  } else if (Page === "SharedLink") {
     console.log("running");
     filterObj.uuid = uuid;
     filterObj.linkStatus = { $in: ["Enable", "Disable"] };
