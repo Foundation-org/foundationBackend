@@ -19,6 +19,8 @@ router.put("/changePassword",
    * @swagger
    * /changePassword:
    *   put:
+   *     tags:
+   *       - Authentication
    *     summary: Change password
    *     description: Endpoint to change user's password
    *     requestBody:
@@ -43,6 +45,8 @@ router.post("/signUpUser",
    * @swagger
    * /signUpUser:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Sign up user
    *     description: Endpoint to sign up a new user
    *     requestBody:
@@ -67,6 +71,8 @@ router.post("/signUpUser/social",
    * @swagger
    * /signUpUser/social:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Sign up user via social login
    *     description: Endpoint to sign up a new user using social login
    *     requestBody:
@@ -91,6 +97,8 @@ router.post("/signInUser/social",
    * @swagger
    * /signInUser/social:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Sign in user via social login
    *     description: Endpoint to sign in a user using social login
    *     requestBody:
@@ -115,6 +123,8 @@ router.post("/signInUser",
    * @swagger
    * /signInUser:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Sign in user
    *     description: Endpoint to sign in a user
    *     requestBody:
@@ -141,6 +151,8 @@ router.post("/send/email",
    * @swagger
    * /send/email:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Send email
    *     description: Endpoint to send an email
    *     requestBody:
@@ -165,6 +177,8 @@ router.post("/create/guestMode",
    * @swagger
    * /create/guestMode:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Create guest mode
    *     description: Endpoint to create a guest mode
    *     requestBody:
@@ -189,6 +203,8 @@ router.post("/signUp/guestMode",
    * @swagger
    * /signUp/guestMode:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Sign up user in guest mode
    *     description: Endpoint to sign up a new user in guest mode
    *     requestBody:
@@ -213,6 +229,8 @@ router.post("/signUpSocial/guestMode",
    * @swagger
    * /signUpSocial/guestMode:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Sign up user in guest mode via social login
    *     description: Endpoint to sign up a new user in guest mode using social login
    *     requestBody:
@@ -237,6 +255,8 @@ router.post("/userInfo",
    * @swagger
    * /userInfo:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Get user information
    *     description: Endpoint to get information of a user
    *     requestBody:
@@ -261,6 +281,8 @@ router.post("/userInfoById",
    * @swagger
    * /userInfoById:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Get user information by ID
    *     description: Endpoint to get information of a user by their ID
    *     requestBody:
@@ -285,6 +307,8 @@ router.put("/setUserWallet",
    * @swagger
    * /setUserWallet:
    *   put:
+   *     tags:
+   *       - Authentication
    *     summary: Set user wallet
    *     description: Endpoint to set user's wallet information
    *     requestBody:
@@ -309,6 +333,8 @@ router.put("/signedUuid",
    * @swagger
    * /signedUuid:
    *   put:
+   *     tags:
+   *       - Authentication
    *     summary: Sign UUID
    *     description: Endpoint to sign UUID for user authentication
    *     requestBody:
@@ -333,6 +359,8 @@ router.post("/sendVerifyEmail",
    * @swagger
    * /sendVerifyEmail:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Send verification email
    *     description: Endpoint to send a verification email to the user
    *     requestBody:
@@ -357,6 +385,8 @@ router.post("/verify",
    * @swagger
    * /verify:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Verify user
    *     description: Endpoint to verify user
    *     requestBody:
@@ -382,6 +412,8 @@ router.post("/authenticateJWT",
    * @swagger
    * /authenticateJWT:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Authenticate JWT
    *     description: Endpoint to authenticate JSON Web Token (JWT)
    *     requestBody:
@@ -406,6 +438,8 @@ router.post("/referral",
    * @swagger
    * /referral:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Verify referral code
    *     description: Endpoint to verify a referral code
    *     requestBody:
@@ -432,6 +466,8 @@ router.delete("/delete/:uuid",
    * @swagger
    * /delete/{uuid}:
    *   delete:
+   *     tags:
+   *       - Authentication
    *     summary: Delete user by UUID
    *     description: Endpoint to delete a user by UUID
    *     parameters:
@@ -457,6 +493,8 @@ router.post("/logout",
    * @swagger
    * /logout:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Logout user
    *     description: Endpoint to logout a user
    *     responses:
@@ -473,6 +511,8 @@ router.post("/setStates",
    * @swagger
    * /setStates:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Set states
    *     description: Endpoint to set user states
    *     requestBody:
@@ -497,6 +537,8 @@ router.post("/setBookmarkStates",
    * @swagger
    * /setBookmarkStates:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Set bookmark states
    *     description: Endpoint to set bookmark states for a user
    *     requestBody:
@@ -521,6 +563,8 @@ router.delete("/badge/:id/:uuid",
    * @swagger
    * /badge/{id}/{uuid}:
    *   delete:
+   *     tags:
+   *       - Authentication
    *     summary: Delete badge by ID and UUID
    *     description: Endpoint to delete a badge by its ID and user UUID
    *     parameters:
@@ -552,6 +596,8 @@ router.post("/get-insta-token",
    * @swagger
    * /get-insta-token:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Get Instagram token
    *     description: Endpoint to get Instagram token
    *     responses:
@@ -568,6 +614,8 @@ router.post("/getLinkedInUserInfo",
    * @swagger
    * /getLinkedInUserInfo:
    *   post:
+   *     tags:
+   *       - Authentication
    *     summary: Get LinkedIn user information
    *     description: Endpoint to get user information from LinkedIn
    *     responses:

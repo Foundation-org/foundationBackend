@@ -19,6 +19,8 @@ router.post(
    * @swagger
    * /userQuestSetting/createOrUpdate:
    *   post:
+   *     tags:
+   *       - User Quest Setting
    *     summary: Create or update user quest setting
    *     description: Endpoint to create or update user quest setting
    *     requestBody:
@@ -42,6 +44,8 @@ router.post(
    * @swagger
    * /userQuestSetting/create:
    *   post:
+   *     tags:
+   *       - User Quest Setting
    *     summary: Create user quest setting
    *     description: Endpoint to create user quest setting
    *     requestBody:
@@ -65,6 +69,8 @@ router.post(
    * @swagger
    * /userQuestSetting/update:
    *   post:
+   *     tags:
+   *       - User Quest Setting
    *     summary: Update user quest setting
    *     description: Endpoint to update user quest setting
    *     requestBody:
@@ -88,6 +94,8 @@ router.post(
    * @swagger
    * /userQuestSetting/link:
    *   post:
+   *     tags:
+   *       - User Quest Setting
    *     summary: Link user quest setting
    *     description: Endpoint to link user quest setting
    *     requestBody:
@@ -111,6 +119,8 @@ router.post(
    * @swagger
    * /userQuestImpression/{link}:
    *   post:
+   *     tags:
+   *       - User Quest Setting
    *     summary: Record user quest impression
    *     description: Endpoint to record user quest impression
    *     parameters:
@@ -134,6 +144,8 @@ router.post(
    * @swagger
    * /linkStatus/{link}:
    *   post:
+   *     tags:
+   *       - User Quest Setting
    *     summary: Get link status
    *     description: Endpoint to get link status
    *     parameters:

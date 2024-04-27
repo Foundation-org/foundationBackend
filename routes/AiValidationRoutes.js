@@ -21,6 +21,8 @@ router.get(
    * @swagger
    * /ai-validation/{callType}:
    *   get:
+   *     tags:
+   *       - AI Validation
    *     summary: Get AI validation
    *     description: Get AI validation based on call type
    *     parameters:
@@ -46,6 +48,8 @@ router.post(
    * @swagger
    * /ai-validation/moderator:
    *   post:
+   *     tags:
+   *       - AI Validation
    *     summary: Send AI validation to moderator
    *     description: Send AI validation result to moderator for review
    *     responses:

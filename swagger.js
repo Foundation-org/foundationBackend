@@ -16,7 +16,16 @@ const swaggerOptions = {
             },
         ],
     },
-    apis: [path.resolve(__dirname, '../start/routes.js')],
+    components: {
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT',
+            },
+        },
+    },
+    apis: ['./routes/*.js'], // Path to the API routes file(s)
 };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);

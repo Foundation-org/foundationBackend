@@ -18,6 +18,8 @@ router.post("/createBookmarkQuest",
    * @swagger
    * /createBookmarkQuest:
    *   post:
+   *     tags:
+   *       - Bookmark Quest
    *     summary: Create a bookmark for a quest
    *     description: Endpoint to create a bookmark for a quest
    *     requestBody:
@@ -40,6 +42,8 @@ router.post("/deleteBookmarkQuest",
    * @swagger
    * /deleteBookmarkQuest:
    *   post:
+   *     tags:
+   *       - Bookmark Quest
    *     summary: Delete a bookmark for a quest
    *     description: Endpoint to delete a bookmark for a quest
    *     requestBody:
@@ -62,6 +66,8 @@ router.post("/getAllBookmarkQuests",
    * @swagger
    * /getAllBookmarkQuests:
    *   post:
+   *     tags:
+   *       - Bookmark Quest
    *     summary: Get all bookmarked quests
    *     description: Endpoint to get all bookmarked quests
    *     responses:
@@ -78,6 +84,8 @@ router.post("/getAllBookmarkQuestions",
    * @swagger
    * /getAllBookmarkQuestions:
    *   post:
+   *     tags:
+   *       - Bookmark Quest
    *     summary: Get all bookmarked questions
    *     description: Endpoint to get all bookmarked questions
    *     responses:

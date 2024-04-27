@@ -13,7 +13,7 @@ const CLIENT_URL = `${FRONTEND_URL}/profile/verification-badges`;
 /**
  * @swagger
  * tags:
- *   name: Authentication
+ *   name: Pasport
  *   description: Endpoints for authentication using third-party providers
  */
 
@@ -22,6 +22,8 @@ router.get("/login/failed",
    * @swagger
    * /login/failed:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Failed login
    *     description: Endpoint to handle failed login attempts
    *     responses:
@@ -53,6 +55,8 @@ router.get("/github",
    * @swagger
    * /github:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Authenticate with GitHub
    *     description: Endpoint to initiate authentication with GitHub
    *     responses:
@@ -67,6 +71,8 @@ router.get("/github/callback",
    * @swagger
    * /github/callback:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: GitHub authentication callback
    *     description: Endpoint to handle callback after GitHub authentication
    *     responses:
@@ -86,6 +92,8 @@ router.get("/linkedin",
    * @swagger
    * /linkedin:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Authenticate with LinkedIn
    *     description: Endpoint to initiate authentication with LinkedIn
    *     responses:
@@ -100,6 +108,8 @@ router.get("/linkedin/callback",
    * @swagger
    * /linkedin/callback:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: LinkedIn authentication callback
    *     description: Endpoint to handle callback after LinkedIn authentication
    *     responses:
@@ -119,6 +129,8 @@ router.get("/twitter",
    * @swagger
    * /twitter:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Authenticate with Twitter
    *     description: Endpoint to initiate authentication with Twitter
    *     responses:
@@ -133,6 +145,8 @@ router.get("/twitter/callback",
    * @swagger
    * /twitter/callback:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Twitter authentication callback
    *     description: Endpoint to handle callback after Twitter authentication
    *     responses:
@@ -152,6 +166,8 @@ router.get("/instagram",
    * @swagger
    * /instagram:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Authenticate with Instagram
    *     description: Endpoint to initiate authentication with Instagram
    *     responses:
@@ -166,6 +182,8 @@ router.get("/instagram/callback",
    * @swagger
    * /instagram/callback:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Instagram authentication callback
    *     description: Endpoint to handle callback after Instagram authentication
    *     responses:
@@ -185,6 +203,8 @@ router.get("/login/success",
    * @swagger
    * /login/success:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Successful login
    *     description: Endpoint to handle successful login
    *     responses:
@@ -211,6 +231,8 @@ router.get("/google",
    * @swagger
    * /google:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Authenticate with Google
    *     description: Endpoint to initiate authentication with Google
    *     responses:
@@ -225,6 +247,8 @@ router.get("/google/callback",
    * @swagger
    * /google/callback:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Google authentication callback
    *     description: Endpoint to handle callback after Google authentication
    *     responses:
@@ -243,6 +267,8 @@ router.get("/facebook",
    * @swagger
    * /facebook:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Authenticate with Facebook
    *     description: Endpoint to initiate authentication with Facebook
    *     responses:
@@ -257,6 +283,8 @@ router.get("/facebook/callback",
    * @swagger
    * /facebook/callback:
    *   get:
+   *     tags:
+   *       - Pasport
    *     summary: Facebook authentication callback
    *     description: Endpoint to handle callback after Facebook authentication
    *     responses:

@@ -17,6 +17,8 @@ router.post("/directMessage/send",
    * @swagger
    * /directMessage/send:
    *   post:
+   *     tags:
+   *       - Direct Message
    *     summary: Send direct message
    *     description: Endpoint to send a direct message
    *     requestBody:
@@ -39,6 +41,8 @@ router.post("/directMessage/draft",
    * @swagger
    * /directMessage/draft:
    *   post:
+   *     tags:
+   *       - Direct Message
    *     summary: Save draft direct message
    *     description: Endpoint to save a draft direct message
    *     requestBody:
@@ -61,6 +65,8 @@ router.get("/directMessage/getAllDraft/:uuid",
    * @swagger
    * /directMessage/getAllDraft/{uuid}:
    *   get:
+   *     tags:
+   *       - Direct Message
    *     summary: Get all draft messages
    *     description: Endpoint to retrieve all draft direct messages by user UUID
    *     parameters:
@@ -84,6 +90,8 @@ router.get("/directMessage/getAllSend/:uuid",
    * @swagger
    * /directMessage/getAllSend/{uuid}:
    *   get:
+   *     tags:
+   *       - Direct Message
    *     summary: Get all sent messages
    *     description: Endpoint to retrieve all sent direct messages by user UUID
    *     parameters:
@@ -107,6 +115,8 @@ router.get("/directMessage/getAllReceive/:uuid",
    * @swagger
    * /directMessage/getAllReceive/{uuid}:
    *   get:
+   *     tags:
+   *       - Direct Message
    *     summary: Get all received messages
    *     description: Endpoint to retrieve all received direct messages by user UUID
    *     parameters:
@@ -130,6 +140,8 @@ router.post("/directMessage/view",
    * @swagger
    * /directMessage/view:
    *   post:
+   *     tags:
+   *       - Direct Message
    *     summary: View direct message
    *     description: Endpoint to mark a direct message as viewed
    *     requestBody:
@@ -152,6 +164,8 @@ router.delete("/directMessage/delete",
    * @swagger
    * /directMessage/delete:
    *   delete:
+   *     tags:
+   *       - Direct Message
    *     summary: Delete direct message
    *     description: Endpoint to delete a direct message
    *     responses:
@@ -168,6 +182,8 @@ router.post("/directMessage/trash",
    * @swagger
    * /directMessage/trash:
    *   post:
+   *     tags:
+   *       - Direct Message
    *     summary: Move direct message to trash
    *     description: Endpoint to move a direct message to trash
    *     responses:
@@ -184,6 +200,8 @@ router.post("/directMessage/restore",
    * @swagger
    * /directMessage/restore:
    *   post:
+   *     tags:
+   *       - Direct Message
    *     summary: Restore direct message from trash
    *     description: Endpoint to restore a direct message from trash
    *     responses:
@@ -200,6 +218,8 @@ router.get("/directMessage/getAllDeletedMessage/:uuid",
    * @swagger
    * /directMessage/getAllDeletedMessage/{uuid}:
    *   get:
+   *     tags:
+   *       - Direct Message
    *     summary: Get all deleted messages
    *     description: Endpoint to retrieve all deleted messages for a user
    *     parameters:

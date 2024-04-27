@@ -17,6 +17,8 @@ router.post("/createInfoQuestQuest",
    * @swagger
    * /createInfoQuestQuest:
    *   post:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Create info quest question
    *     description: Endpoint to create a new info quest question
    *     requestBody:
@@ -39,6 +41,8 @@ router.get("/constraintForUniqueQuestion",
    * @swagger
    * /constraintForUniqueQuestion:
    *   get:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Check constraint for unique question
    *     description: Endpoint to check constraint for unique question
    *     responses:
@@ -55,6 +59,8 @@ router.post("/getAllQuests",
    * @swagger
    * /getAllQuests:
    *   post:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get all quests
    *     description: Endpoint to retrieve all info quest questions
    *     responses:
@@ -71,6 +77,8 @@ router.post("/getAllQuestsWithOpenInfoQuestStatus",
    * @swagger
    * /getAllQuestsWithOpenInfoQuestStatus:
    *   post:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get all quests with open info quest status
    *     description: Endpoint to retrieve all info quest questions with open status
    *     responses:
@@ -87,6 +95,8 @@ router.post("/getAllQuestsWithAnsweredStatus",
    * @swagger
    * /getAllQuestsWithAnsweredStatus:
    *   post:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get all quests with answered status
    *     description: Endpoint to retrieve all info quest questions with answered status
    *     responses:
@@ -103,6 +113,8 @@ router.post("/getAllQuestsWithDefaultStatus",
    * @swagger
    * /getAllQuestsWithDefaultStatus:
    *   post:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get all quests with default status
    *     description: Endpoint to retrieve all info quest questions with default status
    *     responses:
@@ -119,6 +131,8 @@ router.post("/getAllQuestsWithResult",
    * @swagger
    * /getAllQuestsWithResult:
    *   post:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get all quests with result
    *     description: Endpoint to retrieve all info quest questions with result
    *     responses:
@@ -135,6 +149,8 @@ router.get("/getQuest/:uuid/:id/:page?/:postLink?",
    * @swagger
    * /getQuest/{uuid}/{id}/{page}/{postLink}:
    *   get:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get quest by ID
    *     description: Endpoint to retrieve a specific info quest question by its ID
    *     parameters:
@@ -178,6 +194,8 @@ router.get("/getQuest/:uniqueShareLink",
    * @swagger
    * /getQuest/{uniqueShareLink}:
    *   get:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get quest by unique share link
    *     description: Endpoint to retrieve a specific info quest question by its unique share link
    *     parameters:
@@ -203,6 +221,8 @@ router.post("/getAllQuestsWithCompletedStatus",
    * @swagger
    * /getAllQuestsWithCompletedStatus:
    *   post:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get all quests with completed status
    *     description: Endpoint to retrieve all info quest questions with completed status
    *     responses:
@@ -219,6 +239,8 @@ router.post("/getAllQuestsWithChangeAnsStatus",
    * @swagger
    * /getAllQuestsWithChangeAnsStatus:
    *   post:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get all quests with change answer status
    *     description: Endpoint to retrieve all info quest questions with change answer status
    *     responses:
@@ -235,6 +257,8 @@ router.get("/checkMediaDuplicateUrl/:id",
    * @swagger
    * /checkMediaDuplicateUrl/{id}:
    *   get:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Check media duplicate URL
    *     description: Endpoint to check if the media URL is duplicate
    *     parameters:
@@ -260,6 +284,8 @@ router.get("/getFullSoundcloudUrlFromShortUrl",
    * @swagger
    * /getFullSoundcloudUrlFromShortUrl:
    *   get:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get full Soundcloud URL from short URL
    *     description: Endpoint to retrieve full Soundcloud URL from short URL
    *     responses:
@@ -276,6 +302,8 @@ router.get("/getFlickerUrl",
    * @swagger
    * /getFlickerUrl:
    *   get:
+   *     tags:
+   *       - Info Quest Question
    *     summary: Get Flicker URL
    *     description: Endpoint to retrieve Flicker URL
    *     responses:

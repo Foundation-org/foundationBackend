@@ -17,6 +17,8 @@ router.post("/easySearch",
    * @swagger
    * /easySearch:
    *   post:
+   *     tags:
+   *       - Search
    *     summary: Easy search
    *     description: Endpoint for easy search functionality
    *     requestBody:
@@ -39,6 +41,8 @@ router.post("/searchBookmarks",
    * @swagger
    * /searchBookmarks:
    *   post:
+   *     tags:
+   *       - Search
    *     summary: Search bookmarks
    *     description: Endpoint for searching bookmarks
    *     requestBody:
@@ -61,6 +65,8 @@ router.post("/searchHiddenQuest",
    * @swagger
    * /searchHiddenQuest:
    *   post:
+   *     tags:
+   *       - Search
    *     summary: Search hidden quests
    *     description: Endpoint for searching hidden quests
    *     requestBody:
@@ -83,6 +89,8 @@ router.post("/searchCities",
    * @swagger
    * /searchCities:
    *   post:
+   *     tags:
+   *       - Search
    *     summary: Search cities
    *     description: Endpoint for searching cities
    *     requestBody:
@@ -105,6 +113,8 @@ router.post("/searchUniversities",
    * @swagger
    * /searchUniversities:
    *   post:
+   *     tags:
+   *       - Search
    *     summary: Search universities
    *     description: Endpoint for searching universities
    *     requestBody:
@@ -127,6 +137,8 @@ router.post("/searchCompanies",
    * @swagger
    * /searchCompanies:
    *   post:
+   *     tags:
+   *       - Search
    *     summary: Search companies
    *     description: Endpoint for searching companies
    *     requestBody:
@@ -149,6 +161,8 @@ router.post("/searchJobTitles",
    * @swagger
    * /searchJobTitles:
    *   post:
+   *     tags:
+   *       - Search
    *     summary: Search job titles
    *     description: Endpoint for searching job titles
    *     requestBody:
@@ -171,6 +185,8 @@ router.post("/searchDegreesAndFields",
    * @swagger
    * /searchDegreesAndFields:
    *   post:
+   *     tags:
+   *       - Search
    *     summary: Search degrees and fields
    *     description: Endpoint for searching degrees and fields
    *     requestBody:

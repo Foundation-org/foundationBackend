@@ -11,7 +11,7 @@ const morgan = require("morgan");
 const { BASE_PORT, FRONTEND_URL, FRONTEND_URL_1, rpID } = require("../config/env");
 const passport = require("passport");
 const swaggerUI = require('swagger-ui-express');
-const swaggerSpec = require('./swagger');
+const swaggerSpec = require('../swagger');
 
 const {
   // Authentication
@@ -78,7 +78,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(morgan("common"));
 
-// All Routes
+// // All Routes
 require("../start/routes")(app)
 
 // Serve Swagger documentation

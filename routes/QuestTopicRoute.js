@@ -17,6 +17,8 @@ router.patch("/topic/:topicId/:isAllow",
    * @swagger
    * /topic/{topicId}/{isAllow}:
    *   patch:
+   *     tags:
+   *       - Quest Topic
    *     summary: Update topic
    *     description: Endpoint to update the status of a topic
    *     parameters:
@@ -46,6 +48,8 @@ router.get("/getAllTopic",
    * @swagger
    * /getAllTopic:
    *   get:
+   *     tags:
+   *       - Quest Topic
    *     summary: Get all topics
    *     description: Endpoint to get all topics
    *     responses:
@@ -62,6 +66,8 @@ router.get("/searchTopics",
    * @swagger
    * /searchTopics:
    *   get:
+   *     tags:
+   *       - Quest Topic
    *     summary: Search topics
    *     description: Endpoint to search topics based on criteria
    *     parameters:
@@ -84,6 +90,8 @@ router.get("/getAllQuestByTopic",
    * @swagger
    * /getAllQuestByTopic:
    *   get:
+   *     tags:
+   *       - Quest Topic
    *     summary: Get all quests by topic
    *     description: Endpoint to get all quests associated with a topic
    *     responses:
@@ -100,6 +108,8 @@ router.get("/getAllQuestByTrendingTopic",
    * @swagger
    * /getAllQuestByTrendingTopic:
    *   get:
+   *     tags:
+   *       - Quest Topic
    *     summary: Get all quests by trending topic
    *     description: Endpoint to get all quests associated with trending topics
    *     responses:

@@ -17,6 +17,8 @@ router.post("/sendOtp",
    * @swagger
    * /sendOtp:
    *   post:
+   *     tags:
+   *       - OTP
    *     summary: Send OTP
    *     description: Endpoint to send OTP to the user's phone number or email
    *     requestBody:
@@ -39,6 +41,8 @@ router.post("/verifyOtp",
    * @swagger
    * /verifyOtp:
    *   post:
+   *     tags:
+   *       - OTP
    *     summary: Verify OTP
    *     description: Endpoint to verify OTP entered by the user
    *     requestBody:
@@ -63,6 +67,8 @@ router.post("/resendOtp",
    * @swagger
    * /resendOtp:
    *   post:
+   *     tags:
+   *       - OTP
    *     summary: Resend OTP
    *     description: Endpoint to resend OTP to the user's phone number or email
    *     requestBody:

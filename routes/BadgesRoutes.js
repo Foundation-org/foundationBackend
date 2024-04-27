@@ -18,6 +18,8 @@ router.patch("/updateBadge/:userId/:badgeId",
    * @swagger
    * /updateBadge/{userId}/{badgeId}:
    *   patch:
+   *     tags:
+   *       - Badge
    *     summary: Update user badge
    *     description: Endpoint to update a user badge
    *     parameters:
@@ -49,6 +51,8 @@ router.get("/getBadges/:userId",
    * @swagger
    * /getBadges/{userId}:
    *   get:
+   *     tags:
+   *       - Badge
    *     summary: Get user badges
    *     description: Endpoint to retrieve badges of a user
    *     parameters:
@@ -74,6 +78,8 @@ router.post("/addBadge/social", socialProtect,
    * @swagger
    * /addBadge/social:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add social badge
    *     description: Endpoint to add a social badge for a user
    *     requestBody:
@@ -96,6 +102,8 @@ router.post("/addBadge/contact",
    * @swagger
    * /addBadge/contact:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add contact badge
    *     description: Endpoint to add a contact badge for a user
    *     requestBody:
@@ -118,6 +126,8 @@ router.post("/addBadge/contact/verify",
    * @swagger
    * /addBadge/contact/verify:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Verify contact badge
    *     description: Endpoint to verify a contact badge for a user
    *     requestBody:
@@ -140,6 +150,8 @@ router.post("/addBadge/contact/add",
    * @swagger
    * /addBadge/contact/add:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add contact badge (additional)
    *     description: Endpoint to add an additional contact badge for a user
    *     requestBody:
@@ -162,6 +174,8 @@ router.post("/addBadge",
    * @swagger
    * /addBadge:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add badge
    *     description: Endpoint to add a badge for a user
    *     requestBody:
@@ -184,6 +198,8 @@ router.post("/addBadge/personal/add",
    * @swagger
    * /addBadge/personal/add:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add personal badge (additional)
    *     description: Endpoint to add an additional personal badge for a user
    *     requestBody:
@@ -206,6 +222,8 @@ router.post("/addBadge/personal/addWorkOrEducation",
    * @swagger
    * /addBadge/personal/addWorkOrEducation:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add work or education badge
    *     description: Endpoint to add a work or education badge for a user
    *     requestBody:
@@ -228,6 +246,8 @@ router.post("/addBadge/personal/deleteWorkOrEducation",
    * @swagger
    * /addBadge/personal/deleteWorkOrEducation:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Remove a work or education badge
    *     description: Endpoint to remove a work or education badge for a user
    *     requestBody:
@@ -250,6 +270,8 @@ router.post("/addBadge/personal/getWorkOrEducation",
    * @swagger
    * /addBadge/personal/getWorkOrEducation:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Get a work or education badge
    *     description: Endpoint to retrieve a work or education badge for a user
    *     requestBody:
@@ -274,6 +296,8 @@ router.post("/addBadge/personal/updateWorkOrEducation",
    * @swagger
    * /addBadge/personal/updateWorkOrEducation:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Update a work or education badge
    *     description: Endpoint to update a work or education badge for a user
    *     requestBody:
@@ -296,6 +320,8 @@ router.post("/addBadge/personal/getPersonalBadge",
    * @swagger
    * /addBadge/personal/getPersonalBadge:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Get personal badge
    *     description: Endpoint to retrieve a personal badge for a user
    *     requestBody:
@@ -320,6 +346,8 @@ router.post("/addBadge/personal/updatePersonalBadge",
    * @swagger
    * /addBadge/personal/updatePersonalBadge:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Update personal badge
    *     description: Endpoint to update a personal badge for a user
    *     requestBody:
@@ -342,6 +370,8 @@ router.post("/addBadge/company/add",
    * @swagger
    * /addBadge/company/add:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add company badge
    *     description: Endpoint to add a company badge
    *     requestBody:
@@ -364,6 +394,8 @@ router.post("/addBadge/jobTitles/add",
    * @swagger
    * /addBadge/jobTitles/add:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add job title badge
    *     description: Endpoint to add a job title badge
    *     requestBody:
@@ -386,6 +418,8 @@ router.post("/addBadge/degreesAndFields/add",
    * @swagger
    * /addBadge/degreesAndFields/add:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add degrees and fields badge
    *     description: Endpoint to add a degrees and fields badge
    *     requestBody:
@@ -408,6 +442,8 @@ router.post("/removeBadge",
    * @swagger
    * /removeBadge:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Remove badge
    *     description: Endpoint to remove a badge for a user
    *     requestBody:
@@ -430,6 +466,8 @@ router.post("/removeContactBadge",
    * @swagger
    * /removeContactBadge:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Remove contact badge
    *     description: Endpoint to remove a contact badge for a user
    *     requestBody:
@@ -452,6 +490,8 @@ router.post("/removePersonalBadge",
    * @swagger
    * /removePersonalBadge:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Remove personal badge
    *     description: Endpoint to remove a personal badge for a user
    *     requestBody:
@@ -474,6 +514,8 @@ router.post("/removeWeb3Badge",
    * @swagger
    * /removeWeb3Badge:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Remove web3 badge
    *     description: Endpoint to remove a web3 badge for a user
    *     requestBody:
@@ -496,6 +538,8 @@ router.post("/addBadge/web3/add",
    * @swagger
    * /addBadge/web3/add:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add web3 badge
    *     description: Endpoint to add a web3 badge for a user
    *     requestBody:
@@ -518,6 +562,8 @@ router.post("/addBadge/passkey/add",
    * @swagger
    * /addBadge/passkey/add:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add passkey badge
    *     description: Endpoint to add a passkey badge for a user
    *     requestBody:
@@ -540,6 +586,8 @@ router.post("/addBadge/addFarCasterBadge/add",
    * @swagger
    * /addBadge/addFarCasterBadge/add:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Add FarCaster badge
    *     description: Endpoint to add a FarCaster badge for a user
    *     requestBody:
@@ -562,6 +610,8 @@ router.post("/removePasskey",
    * @swagger
    * /removePasskey:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Remove passkey badge
    *     description: Endpoint to remove a passkey badge for a user
    *     requestBody:
@@ -584,6 +634,8 @@ router.post("/removeFarCasterBadge",
    * @swagger
    * /removeFarCasterBadge:
    *   post:
+   *     tags:
+   *       - Badge
    *     summary: Remove FarCaster badge
    *     description: Endpoint to remove a FarCaster badge for a user
    *     requestBody:

@@ -17,6 +17,8 @@ router.post("/updateViolationCounter",
    * @swagger
    * /updateViolationCounter:
    *   post:
+   *     tags:
+   *       - Start Quest
    *     summary: Update violation counter
    *     description: Endpoint to update violation counter for a quest
    *     requestBody:
@@ -39,6 +41,8 @@ router.post("/createStartQuest",
    * @swagger
    * /createStartQuest:
    *   post:
+   *     tags:
+   *       - Start Quest
    *     summary: Create start quest
    *     description: Endpoint to create a start quest
    *     requestBody:
@@ -61,6 +65,8 @@ router.post("/updateChangeAnsStartQuest",
    * @swagger
    * /updateChangeAnsStartQuest:
    *   post:
+   *     tags:
+   *       - Start Quest
    *     summary: Update change answer start quest
    *     description: Endpoint to update change answer start quest
    *     requestBody:
@@ -83,6 +89,8 @@ router.post("/getRankedQuestPercent",
    * @swagger
    * /getRankedQuestPercent:
    *   post:
+   *     tags:
+   *       - Start Quest
    *     summary: Get ranked quest percentage
    *     description: Endpoint to get the percentage of ranked quests
    *     responses:
@@ -99,6 +107,8 @@ router.post("/getStartQuestPercent",
    * @swagger
    * /getStartQuestPercent:
    *   post:
+   *     tags:
+   *       - Start Quest
    *     summary: Get start quest percentage
    *     description: Endpoint to get the percentage of start quests
    *     responses:
@@ -115,6 +125,8 @@ router.post("/getStartQuestInfo",
    * @swagger
    * /getStartQuestInfo:
    *   post:
+   *     tags:
+   *       - Start Quest
    *     summary: Get start quest information
    *     description: Endpoint to get information about a start quest
    *     requestBody:

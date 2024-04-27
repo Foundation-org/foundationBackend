@@ -1,10 +1,3 @@
-/**
- * @swagger
- * tags:
- *   name: Swagger
- *   description: Routes for Swagger demo
- */
-
 const express = require("express");
 const router = express.Router();
 // controller
@@ -14,37 +7,42 @@ const protect = require("../middleware/protect");
 
 /**
  * @swagger
- * /createLedger:
- *   post:
- *     summary: Create a new ledger entry.
- *     description: Endpoint to create a new ledger entry.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               // Define your request body properties here
- *               // For example:
- *               amount:
- *                 type: number
- *               description:
- *                 type: string
- *     responses:
- *       200:
- *         description: Successfully created a ledger entry.
- *       400:
- *         description: Invalid request body.
- *       500:
- *         description: Internal server error.
+ * tags:
+ *   name: Ledger
+ *   description: Routes for Swagger demo
  */
-router.post("/createLedger", LedgerController.create);
+
+router.post("/createLedger",
+/**
+   * @swagger
+   * /createLedger:
+   *   post:
+   *     tags:
+   *       - Ledger
+   *     summary: Create Ledger.
+   *     description: Endpoint to create a new ledger entry.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/OtpRequest'
+   *     responses:
+   *       200:
+   *         description: Successfully created a ledger entry.
+   *       400:
+   *         description: Invalid request body.
+   *       500:
+   *         description: Internal server error.
+   */
+ LedgerController.create);
 
 /**
  * @swagger
  * /getAllLedger:
  *   get:
+ *     tags:
+ *       - Ledger
  *     summary: Get all ledger entries.
  *     description: Endpoint to get all ledger entries.
  *     responses:
@@ -59,6 +57,8 @@ router.get("/getAllLedger", LedgerController.getAll);
  * @swagger
  * /ledgerById:
  *   get:
+ *     tags:
+ *       - Ledger
  *     summary: Get a ledger entry by ID.
  *     description: Endpoint to get a ledger entry by its ID.
  *     parameters:
@@ -77,29 +77,28 @@ router.get("/getAllLedger", LedgerController.getAll);
  */
 router.get("/ledgerById", LedgerController.getById);
 
+router.post("/searchLedger",
 /**
- * @swagger
- * /searchLedger:
- *   post:
- *     summary: Search ledger entries.
- *     description: Endpoint to search ledger entries based on criteria.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               // Define your search criteria here
- *               // For example:
- *               keyword:
- *                 type: string
- *     responses:
- *       200:
- *         description: Successfully retrieved the search results.
- *       500:
- *         description: Internal server error.
- */
-router.post("/searchLedger", LedgerController.search);
+   * @swagger
+   * /searchLedger:
+   *   post:
+   *     tags:
+   *       - Ledger
+   *     summary: Search Ledger.
+   *     description: Endpoint to search ledger entries based on criteria.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema: Object
+   *     responses:
+   *       200:
+   *         description: Ledger found Successfully.
+   *       400:
+   *         description: Invalid request body.
+   *       500:
+   *         description: Internal server error.
+   */
+ LedgerController.search);
 
 module.exports = router;

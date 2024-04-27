@@ -17,6 +17,8 @@ router.post("/create",
    * @swagger
    * /create:
    *   post:
+   *     tags:
+   *       - Treasury
    *     summary: Create treasury
    *     description: Endpoint to create a new treasury
    *     requestBody:
@@ -39,6 +41,8 @@ router.patch("/update",
    * @swagger
    * /update:
    *   patch:
+   *     tags:
+   *       - Treasury
    *     summary: Update treasury
    *     description: Endpoint to update an existing treasury
    *     requestBody:
@@ -61,6 +65,8 @@ router.get("/get",
    * @swagger
    * /get:
    *   get:
+   *     tags:
+   *       - Treasury
    *     summary: Get treasury
    *     description: Endpoint to get treasury information
    *     responses:
