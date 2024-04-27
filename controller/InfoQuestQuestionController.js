@@ -553,6 +553,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     if (Page === "Bookmark") {
       filterObj.createdBy = uuid;
     } else {
+      console.log('My Post Else')
       filterObj.uuid = uuid;
     }
   }
@@ -793,10 +794,12 @@ const getQuestsAll = async (req, res) => {
   let filterObj = {};
   let totalQuestionsCount;
 
-  if (filter === true) {
+  if (filter === "true") {
+    console.log('filter')
     if (Page === "Bookmark") {
       filterObj.createdBy = uuid;
     } else {
+      console.log('My Post Else')
       filterObj.uuid = uuid;
     }
   }
@@ -989,15 +992,16 @@ const getQuestsAll = async (req, res) => {
       (userSetting) => userSetting.questForeignKey
     );
     console.log(
-      "🚀 ~ getAllQuestsWithDefaultStatus ~ hiddenUserSettingIds:",
+      "🚀 ~ getQuestsAll ~ hiddenUserSettingIds:",
       hiddenUserSettingIds
     );
-    console.log("🚀 ~ getAllQuestsWithDefaultStatus ~ filterObj:", filterObj);
+    console.log("🚀 ~ getQuestsAll ~ filterObj:", filterObj);
 
     let query = InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
     });
+
 
     query = query.sort(
       sort === "Newest First"
@@ -1106,13 +1110,13 @@ const getQuestsAll = async (req, res) => {
 
   for (let i = 0; i < resultArray.length; i++) {
     const item = resultArray[i];
-    console.log('item', item)
+    // console.log('item', item)
     const bookmarkDoc = await BookmarkQuests.findOne({
       questForeignKey: item._doc._id,
       uuid,
     });
 
-    console.log('bookmarkDoc', bookmarkDoc)
+    // console.log('bookmarkDoc', bookmarkDoc)
     if (bookmarkDoc) {
       resultArray[i]._doc.bookmark = true;
     } else {
