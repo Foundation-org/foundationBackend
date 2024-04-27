@@ -10,6 +10,8 @@ const cors = require("cors");
 const morgan = require("morgan");
 const { BASE_PORT, FRONTEND_URL, FRONTEND_URL_1, rpID } = require("../config/env");
 const passport = require("passport");
+const swaggerUI = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 
 const {
   // Authentication
@@ -78,6 +80,9 @@ app.use(morgan("common"));
 
 // All Routes
 require("../start/routes")(app)
+
+// Serve Swagger documentation
+app.use('/foundation-api-documentation-swagger', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 // A unique identifier for your website
 // const rpID = rpID;

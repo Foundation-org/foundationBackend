@@ -5,10 +5,71 @@ const TreasuryController = require("../controller/TreasuryController");
 // middleware
 const protect = require("../middleware/protect");
 
-router.post("/create", TreasuryController.create);
+/**
+ * @swagger
+ * tags:
+ *   name: Treasury
+ *   description: Endpoints for managing treasury
+ */
 
-router.patch("/update", TreasuryController.update);
+router.post("/create",
+  /**
+   * @swagger
+   * /create:
+   *   post:
+   *     summary: Create treasury
+   *     description: Endpoint to create a new treasury
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/TreasuryCreationRequest'
+   *     responses:
+   *       '200':
+   *         description: Treasury created successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  TreasuryController.create
+);
 
-router.get("/get", TreasuryController.get);
+router.patch("/update",
+  /**
+   * @swagger
+   * /update:
+   *   patch:
+   *     summary: Update treasury
+   *     description: Endpoint to update an existing treasury
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/TreasuryUpdateRequest'
+   *     responses:
+   *       '200':
+   *         description: Treasury updated successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  TreasuryController.update
+);
+
+router.get("/get",
+  /**
+   * @swagger
+   * /get:
+   *   get:
+   *     summary: Get treasury
+   *     description: Endpoint to get treasury information
+   *     responses:
+   *       '200':
+   *         description: Successfully retrieved treasury information
+   *       '500':
+   *         description: Internal server error
+   */
+  TreasuryController.get
+);
 
 module.exports = router;
