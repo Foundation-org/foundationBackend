@@ -60,15 +60,19 @@ const userSchema = mongoose.Schema(
       },
       filterByStatus: {
         type: String,
-        default: "",
+        default: "All",
       },
       filterByType: {
         type: String,
-        default: "",
+        default: "All",
       },
       filterByScope: {
         type: String,
-        default: "",
+        default: "All",
+      },
+      filterByMedia: {
+        type: String,
+        default: "All",
       },
       bookmarks: {
         type: Boolean,
