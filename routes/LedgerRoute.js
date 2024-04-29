@@ -15,7 +15,7 @@ const protect = require("../middleware/protect");
 router.post("/createLedger",
 /**
    * @swagger
-   * /createLedger:
+   * /ledger/createLedger:
    *   post:
    *     tags:
    *       - Ledger
@@ -39,7 +39,7 @@ router.post("/createLedger",
 
 /**
  * @swagger
- * /getAllLedger:
+ * /ledger/getAllLedger:
  *   get:
  *     tags:
  *       - Ledger
@@ -55,7 +55,7 @@ router.get("/getAllLedger", LedgerController.getAll);
 
 /**
  * @swagger
- * /ledgerById:
+ * /ledger/ledgerById:
  *   get:
  *     tags:
  *       - Ledger
@@ -80,7 +80,7 @@ router.get("/ledgerById", LedgerController.getById);
 router.post("/searchLedger",
 /**
    * @swagger
-   * /searchLedger:
+   * /ledger/searchLedger:
    *   post:
    *     tags:
    *       - Ledger

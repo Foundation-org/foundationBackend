@@ -17,7 +17,7 @@ const passport = require("passport");
 router.put("/changePassword",
   /**
    * @swagger
-   * /changePassword:
+   * /user/changePassword:
    *   put:
    *     tags:
    *       - Authentication
@@ -43,7 +43,7 @@ router.put("/changePassword",
 router.post("/signUpUser",
   /**
    * @swagger
-   * /signUpUser:
+   * /user/signUpUser:
    *   post:
    *     tags:
    *       - Authentication
@@ -69,7 +69,7 @@ router.post("/signUpUser",
 router.post("/signUpUser/social",
   /**
    * @swagger
-   * /signUpUser/social:
+   * /user/signUpUser/social:
    *   post:
    *     tags:
    *       - Authentication
@@ -95,7 +95,7 @@ router.post("/signUpUser/social",
 router.post("/signInUser/social",
   /**
    * @swagger
-   * /signInUser/social:
+   * /user/signInUser/social:
    *   post:
    *     tags:
    *       - Authentication
@@ -121,7 +121,7 @@ router.post("/signInUser/social",
 router.post("/signInUser",
   /**
    * @swagger
-   * /signInUser:
+   * /user/signInUser:
    *   post:
    *     tags:
    *       - Authentication
@@ -149,7 +149,7 @@ router.post("/signInUser",
 router.post("/send/email",
   /**
    * @swagger
-   * /send/email:
+   * /user/send/email:
    *   post:
    *     tags:
    *       - Authentication
@@ -175,7 +175,7 @@ router.post("/send/email",
 router.post("/create/guestMode",
   /**
    * @swagger
-   * /create/guestMode:
+   * /user/create/guestMode:
    *   post:
    *     tags:
    *       - Authentication
@@ -201,7 +201,7 @@ router.post("/create/guestMode",
 router.post("/signUp/guestMode",
   /**
    * @swagger
-   * /signUp/guestMode:
+   * /user/signUp/guestMode:
    *   post:
    *     tags:
    *       - Authentication
@@ -227,7 +227,7 @@ router.post("/signUp/guestMode",
 router.post("/signUpSocial/guestMode",
   /**
    * @swagger
-   * /signUpSocial/guestMode:
+   * /user/signUpSocial/guestMode:
    *   post:
    *     tags:
    *       - Authentication
@@ -253,7 +253,7 @@ router.post("/signUpSocial/guestMode",
 router.post("/userInfo",
   /**
    * @swagger
-   * /userInfo:
+   * /user/userInfo:
    *   post:
    *     tags:
    *       - Authentication
@@ -279,7 +279,7 @@ router.post("/userInfo",
 router.post("/userInfoById",
   /**
    * @swagger
-   * /userInfoById:
+   * /user/userInfoById:
    *   post:
    *     tags:
    *       - Authentication
@@ -305,7 +305,7 @@ router.post("/userInfoById",
 router.put("/setUserWallet",
   /**
    * @swagger
-   * /setUserWallet:
+   * /user/setUserWallet:
    *   put:
    *     tags:
    *       - Authentication
@@ -331,7 +331,7 @@ router.put("/setUserWallet",
 router.put("/signedUuid",
   /**
    * @swagger
-   * /signedUuid:
+   * /user/signedUuid:
    *   put:
    *     tags:
    *       - Authentication
@@ -357,7 +357,7 @@ router.put("/signedUuid",
 router.post("/sendVerifyEmail",
   /**
    * @swagger
-   * /sendVerifyEmail:
+   * /user/sendVerifyEmail:
    *   post:
    *     tags:
    *       - Authentication
@@ -383,7 +383,7 @@ router.post("/sendVerifyEmail",
 router.post("/verify",
   /**
    * @swagger
-   * /verify:
+   * /user/verify:
    *   post:
    *     tags:
    *       - Authentication
@@ -410,7 +410,7 @@ router.post("/verify",
 router.post("/authenticateJWT",
   /**
    * @swagger
-   * /authenticateJWT:
+   * /user/authenticateJWT:
    *   post:
    *     tags:
    *       - Authentication
@@ -436,7 +436,7 @@ router.post("/authenticateJWT",
 router.post("/referral",
   /**
    * @swagger
-   * /referral:
+   * /user/referral:
    *   post:
    *     tags:
    *       - Authentication
@@ -464,7 +464,7 @@ router.post("/referral",
 router.delete("/delete/:uuid",
   /**
    * @swagger
-   * /delete/{uuid}:
+   * /user/delete/{uuid}:
    *   delete:
    *     tags:
    *       - Authentication
@@ -491,7 +491,7 @@ router.delete("/delete/:uuid",
 router.post("/logout",
   /**
    * @swagger
-   * /logout:
+   * /user/logout:
    *   post:
    *     tags:
    *       - Authentication
@@ -509,7 +509,7 @@ router.post("/logout",
 router.post("/setStates",
   /**
    * @swagger
-   * /setStates:
+   * /user/setStates:
    *   post:
    *     tags:
    *       - Authentication
@@ -535,7 +535,7 @@ router.post("/setStates",
 router.post("/setBookmarkStates",
   /**
    * @swagger
-   * /setBookmarkStates:
+   * /user/setBookmarkStates:
    *   post:
    *     tags:
    *       - Authentication
@@ -561,7 +561,7 @@ router.post("/setBookmarkStates",
 router.delete("/badge/:id/:uuid",
   /**
    * @swagger
-   * /badge/{id}/{uuid}:
+   * /user/badge/{id}/{uuid}:
    *   delete:
    *     tags:
    *       - Authentication
@@ -594,7 +594,7 @@ router.delete("/badge/:id/:uuid",
 router.post("/get-insta-token",
   /**
    * @swagger
-   * /get-insta-token:
+   * /user/get-insta-token:
    *   post:
    *     tags:
    *       - Authentication
@@ -612,7 +612,7 @@ router.post("/get-insta-token",
 router.post("/getLinkedInUserInfo",
   /**
    * @swagger
-   * /getLinkedInUserInfo:
+   * /user/getLinkedInUserInfo:
    *   post:
    *     tags:
    *       - Authentication

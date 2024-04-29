@@ -20,7 +20,7 @@ const CLIENT_URL = `${FRONTEND_URL}/profile/verification-badges`;
 router.get("/login/failed",
   /**
    * @swagger
-   * /login/failed:
+   * /auth/login/failed:
    *   get:
    *     tags:
    *       - Pasport
@@ -53,7 +53,7 @@ router.get("/login/failed",
 router.get("/github",
   /**
    * @swagger
-   * /github:
+   * /auth/github:
    *   get:
    *     tags:
    *       - Pasport
@@ -69,7 +69,7 @@ router.get("/github",
 router.get("/github/callback",
   /**
    * @swagger
-   * /github/callback:
+   * /auth/github/callback:
    *   get:
    *     tags:
    *       - Pasport
@@ -90,7 +90,7 @@ router.get("/github/callback",
 router.get("/linkedin",
   /**
    * @swagger
-   * /linkedin:
+   * /auth/linkedin:
    *   get:
    *     tags:
    *       - Pasport
@@ -106,7 +106,7 @@ router.get("/linkedin",
 router.get("/linkedin/callback",
   /**
    * @swagger
-   * /linkedin/callback:
+   * /auth/linkedin/callback:
    *   get:
    *     tags:
    *       - Pasport
@@ -127,7 +127,7 @@ router.get("/linkedin/callback",
 router.get("/twitter",
   /**
    * @swagger
-   * /twitter:
+   * /auth/twitter:
    *   get:
    *     tags:
    *       - Pasport
@@ -143,7 +143,7 @@ router.get("/twitter",
 router.get("/twitter/callback",
   /**
    * @swagger
-   * /twitter/callback:
+   * /auth/twitter/callback:
    *   get:
    *     tags:
    *       - Pasport
@@ -164,7 +164,7 @@ router.get("/twitter/callback",
 router.get("/instagram",
   /**
    * @swagger
-   * /instagram:
+   * /auth/instagram:
    *   get:
    *     tags:
    *       - Pasport
@@ -180,7 +180,7 @@ router.get("/instagram",
 router.get("/instagram/callback",
   /**
    * @swagger
-   * /instagram/callback:
+   * /auth/instagram/callback:
    *   get:
    *     tags:
    *       - Pasport
@@ -201,7 +201,7 @@ router.get("/instagram/callback",
 router.get("/login/success",
   /**
    * @swagger
-   * /login/success:
+   * /auth/login/success:
    *   get:
    *     tags:
    *       - Pasport
@@ -229,7 +229,7 @@ router.get("/login/success",
 router.get("/google",
   /**
    * @swagger
-   * /google:
+   * /auth/google:
    *   get:
    *     tags:
    *       - Pasport
@@ -245,7 +245,7 @@ router.get("/google",
 router.get("/google/callback",
   /**
    * @swagger
-   * /google/callback:
+   * /auth/google/callback:
    *   get:
    *     tags:
    *       - Pasport
@@ -265,7 +265,7 @@ router.get("/google/callback",
 router.get("/facebook",
   /**
    * @swagger
-   * /facebook:
+   * /auth/facebook:
    *   get:
    *     tags:
    *       - Pasport
@@ -281,7 +281,7 @@ router.get("/facebook",
 router.get("/facebook/callback",
   /**
    * @swagger
-   * /facebook/callback:
+   * /auth/facebook/callback:
    *   get:
    *     tags:
    *       - Pasport

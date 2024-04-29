@@ -16,7 +16,7 @@ const cache = require("../middleware/cache");
 router.post("/createBookmarkQuest",
   /**
    * @swagger
-   * /createBookmarkQuest:
+   * /bookmarkQuest/createBookmarkQuest:
    *   post:
    *     tags:
    *       - Bookmark Quest
@@ -40,7 +40,7 @@ router.post("/createBookmarkQuest",
 router.post("/deleteBookmarkQuest",
   /**
    * @swagger
-   * /deleteBookmarkQuest:
+   * /bookmarkQuest/deleteBookmarkQuest:
    *   post:
    *     tags:
    *       - Bookmark Quest
@@ -64,7 +64,7 @@ router.post("/deleteBookmarkQuest",
 router.post("/getAllBookmarkQuests",
   /**
    * @swagger
-   * /getAllBookmarkQuests:
+   * /bookmarkQuest/getAllBookmarkQuests:
    *   post:
    *     tags:
    *       - Bookmark Quest
@@ -82,7 +82,7 @@ router.post("/getAllBookmarkQuests",
 router.post("/getAllBookmarkQuestions",
   /**
    * @swagger
-   * /getAllBookmarkQuestions:
+   * /bookmarkQuest/getAllBookmarkQuestions:
    *   post:
    *     tags:
    *       - Bookmark Quest

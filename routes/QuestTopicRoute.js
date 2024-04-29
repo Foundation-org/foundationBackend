@@ -15,7 +15,7 @@ const protect = require("../middleware/protect");
 router.patch("/topic/:topicId/:isAllow",
   /**
    * @swagger
-   * /topic/{topicId}/{isAllow}:
+   * /preferences/topic/{topicId}/{isAllow}:
    *   patch:
    *     tags:
    *       - Quest Topic
@@ -46,7 +46,7 @@ router.patch("/topic/:topicId/:isAllow",
 router.get("/getAllTopic",
   /**
    * @swagger
-   * /getAllTopic:
+   * /preferences/getAllTopic:
    *   get:
    *     tags:
    *       - Quest Topic
@@ -64,7 +64,7 @@ router.get("/getAllTopic",
 router.get("/searchTopics",
   /**
    * @swagger
-   * /searchTopics:
+   * /preferences/searchTopics:
    *   get:
    *     tags:
    *       - Quest Topic
@@ -88,7 +88,7 @@ router.get("/searchTopics",
 router.get("/getAllQuestByTopic",
   /**
    * @swagger
-   * /getAllQuestByTopic:
+   * /preferences/getAllQuestByTopic:
    *   get:
    *     tags:
    *       - Quest Topic
@@ -106,7 +106,7 @@ router.get("/getAllQuestByTopic",
 router.get("/getAllQuestByTrendingTopic",
   /**
    * @swagger
-   * /getAllQuestByTrendingTopic:
+   * /preferences/getAllQuestByTrendingTopic:
    *   get:
    *     tags:
    *       - Quest Topic

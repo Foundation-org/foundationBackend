@@ -15,7 +15,7 @@ const protect = require("../middleware/protect");
 router.post("/createInfoQuestQuest",
   /**
    * @swagger
-   * /createInfoQuestQuest:
+   * /infoquestions/createInfoQuestQuest:
    *   post:
    *     tags:
    *       - Info Quest Question
@@ -39,7 +39,7 @@ router.post("/createInfoQuestQuest",
 router.get("/constraintForUniqueQuestion",
   /**
    * @swagger
-   * /constraintForUniqueQuestion:
+   * /infoquestions/constraintForUniqueQuestion:
    *   get:
    *     tags:
    *       - Info Quest Question
@@ -57,7 +57,7 @@ router.get("/constraintForUniqueQuestion",
 router.post("/getAllQuests",
   /**
    * @swagger
-   * /getAllQuests:
+   * /infoquestions/getAllQuests:
    *   post:
    *     tags:
    *       - Info Quest Question
@@ -75,7 +75,7 @@ router.post("/getAllQuests",
 router.post("/getAllQuestsWithOpenInfoQuestStatus",
   /**
    * @swagger
-   * /getAllQuestsWithOpenInfoQuestStatus:
+   * /infoquestions/getAllQuestsWithOpenInfoQuestStatus:
    *   post:
    *     tags:
    *       - Info Quest Question
@@ -93,7 +93,7 @@ router.post("/getAllQuestsWithOpenInfoQuestStatus",
 router.post("/getAllQuestsWithAnsweredStatus",
   /**
    * @swagger
-   * /getAllQuestsWithAnsweredStatus:
+   * /infoquestions/getAllQuestsWithAnsweredStatus:
    *   post:
    *     tags:
    *       - Info Quest Question
@@ -111,7 +111,7 @@ router.post("/getAllQuestsWithAnsweredStatus",
 router.post("/getAllQuestsWithDefaultStatus",
   /**
    * @swagger
-   * /getAllQuestsWithDefaultStatus:
+   * /infoquestions/getAllQuestsWithDefaultStatus:
    *   post:
    *     tags:
    *       - Info Quest Question
@@ -129,7 +129,7 @@ router.post("/getAllQuestsWithDefaultStatus",
 router.post("/getAllQuestsWithResult",
   /**
    * @swagger
-   * /getAllQuestsWithResult:
+   * /infoquestions/getAllQuestsWithResult:
    *   post:
    *     tags:
    *       - Info Quest Question
@@ -147,7 +147,7 @@ router.post("/getAllQuestsWithResult",
 router.get("/getQuest/:uuid/:id/:page?/:postLink?",
   /**
    * @swagger
-   * /getQuest/{uuid}/{id}/{page}/{postLink}:
+   * /infoquestions/getQuest/{uuid}/{id}/{page}/{postLink}:
    *   get:
    *     tags:
    *       - Info Quest Question
@@ -192,7 +192,7 @@ router.get("/getQuest/:uuid/:id/:page?/:postLink?",
 router.get("/getQuest/:uniqueShareLink",
   /**
    * @swagger
-   * /getQuest/{uniqueShareLink}:
+   * /infoquestions/getQuest/{uniqueShareLink}:
    *   get:
    *     tags:
    *       - Info Quest Question
@@ -219,7 +219,7 @@ router.get("/getQuest/:uniqueShareLink",
 router.post("/getAllQuestsWithCompletedStatus",
   /**
    * @swagger
-   * /getAllQuestsWithCompletedStatus:
+   * /infoquestions/getAllQuestsWithCompletedStatus:
    *   post:
    *     tags:
    *       - Info Quest Question
@@ -237,7 +237,7 @@ router.post("/getAllQuestsWithCompletedStatus",
 router.post("/getAllQuestsWithChangeAnsStatus",
   /**
    * @swagger
-   * /getAllQuestsWithChangeAnsStatus:
+   * /infoquestions/getAllQuestsWithChangeAnsStatus:
    *   post:
    *     tags:
    *       - Info Quest Question
@@ -255,7 +255,7 @@ router.post("/getAllQuestsWithChangeAnsStatus",
 router.get("/checkMediaDuplicateUrl/:id",
   /**
    * @swagger
-   * /checkMediaDuplicateUrl/{id}:
+   * /infoquestions/checkMediaDuplicateUrl/{id}:
    *   get:
    *     tags:
    *       - Info Quest Question
@@ -282,7 +282,7 @@ router.get("/checkMediaDuplicateUrl/:id",
 router.get("/getFullSoundcloudUrlFromShortUrl",
   /**
    * @swagger
-   * /getFullSoundcloudUrlFromShortUrl:
+   * /infoquestions/getFullSoundcloudUrlFromShortUrl:
    *   get:
    *     tags:
    *       - Info Quest Question
@@ -300,7 +300,7 @@ router.get("/getFullSoundcloudUrlFromShortUrl",
 router.get("/getFlickerUrl",
   /**
    * @swagger
-   * /getFlickerUrl:
+   * /infoquestions/getFlickerUrl:
    *   get:
    *     tags:
    *       - Info Quest Question

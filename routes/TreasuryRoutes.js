@@ -15,7 +15,7 @@ const protect = require("../middleware/protect");
 router.post("/create",
   /**
    * @swagger
-   * /create:
+   * /treasury/create:
    *   post:
    *     tags:
    *       - Treasury
@@ -39,7 +39,7 @@ router.post("/create",
 router.patch("/update",
   /**
    * @swagger
-   * /update:
+   * /treasury/update:
    *   patch:
    *     tags:
    *       - Treasury
@@ -63,7 +63,7 @@ router.patch("/update",
 router.get("/get",
   /**
    * @swagger
-   * /get:
+   * /treasury/get:
    *   get:
    *     tags:
    *       - Treasury

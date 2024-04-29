@@ -15,7 +15,7 @@ const protect = require("../middleware/protect");
 router.post("/updateViolationCounter",
   /**
    * @swagger
-   * /updateViolationCounter:
+   * /startQuest/updateViolationCounter:
    *   post:
    *     tags:
    *       - Start Quest
@@ -39,7 +39,7 @@ router.post("/updateViolationCounter",
 router.post("/createStartQuest",
   /**
    * @swagger
-   * /createStartQuest:
+   * /startQuest/createStartQuest:
    *   post:
    *     tags:
    *       - Start Quest
@@ -63,7 +63,7 @@ router.post("/createStartQuest",
 router.post("/updateChangeAnsStartQuest",
   /**
    * @swagger
-   * /updateChangeAnsStartQuest:
+   * /startQuest/updateChangeAnsStartQuest:
    *   post:
    *     tags:
    *       - Start Quest
@@ -87,7 +87,7 @@ router.post("/updateChangeAnsStartQuest",
 router.post("/getRankedQuestPercent",
   /**
    * @swagger
-   * /getRankedQuestPercent:
+   * /startQuest/getRankedQuestPercent:
    *   post:
    *     tags:
    *       - Start Quest
@@ -105,7 +105,7 @@ router.post("/getRankedQuestPercent",
 router.post("/getStartQuestPercent",
   /**
    * @swagger
-   * /getStartQuestPercent:
+   * /startQuest/getStartQuestPercent:
    *   post:
    *     tags:
    *       - Start Quest
@@ -123,7 +123,7 @@ router.post("/getStartQuestPercent",
 router.post("/getStartQuestInfo",
   /**
    * @swagger
-   * /getStartQuestInfo:
+   * /startQuest/getStartQuestInfo:
    *   post:
    *     tags:
    *       - Start Quest

@@ -15,7 +15,7 @@ const protect = require("../middleware/protect");
 router.post("/easySearch",
   /**
    * @swagger
-   * /easySearch:
+   * /search/easySearch:
    *   post:
    *     tags:
    *       - Search
@@ -39,7 +39,7 @@ router.post("/easySearch",
 router.post("/searchBookmarks",
   /**
    * @swagger
-   * /searchBookmarks:
+   * /search/searchBookmarks:
    *   post:
    *     tags:
    *       - Search
@@ -63,7 +63,7 @@ router.post("/searchBookmarks",
 router.post("/searchHiddenQuest",
   /**
    * @swagger
-   * /searchHiddenQuest:
+   * /search/searchHiddenQuest:
    *   post:
    *     tags:
    *       - Search
@@ -87,7 +87,7 @@ router.post("/searchHiddenQuest",
 router.post("/searchCities",
   /**
    * @swagger
-   * /searchCities:
+   * /search/searchCities:
    *   post:
    *     tags:
    *       - Search
@@ -111,7 +111,7 @@ router.post("/searchCities",
 router.post("/searchUniversities",
   /**
    * @swagger
-   * /searchUniversities:
+   * /search/searchUniversities:
    *   post:
    *     tags:
    *       - Search
@@ -135,7 +135,7 @@ router.post("/searchUniversities",
 router.post("/searchCompanies",
   /**
    * @swagger
-   * /searchCompanies:
+   * /search/searchCompanies:
    *   post:
    *     tags:
    *       - Search
@@ -159,7 +159,7 @@ router.post("/searchCompanies",
 router.post("/searchJobTitles",
   /**
    * @swagger
-   * /searchJobTitles:
+   * /search/searchJobTitles:
    *   post:
    *     tags:
    *       - Search
@@ -183,7 +183,7 @@ router.post("/searchJobTitles",
 router.post("/searchDegreesAndFields",
   /**
    * @swagger
-   * /searchDegreesAndFields:
+   * /search/searchDegreesAndFields:
    *   post:
    *     tags:
    *       - Search
