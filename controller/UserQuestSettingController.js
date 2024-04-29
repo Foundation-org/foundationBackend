@@ -530,6 +530,8 @@ const s3ImageUploadToFrames = async (req, res) => {
 
       if(!s3UploadData) throw new Error("File not uploaded");
 
+      console.log('s3UploadData', s3UploadData)
+
       const { imageName, s3Url } = s3UploadData;
 
       //Delete File from Server After Uploading to S3
