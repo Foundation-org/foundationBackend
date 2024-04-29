@@ -5,6 +5,7 @@ const UserQuestSettingController = require("../controller/UserQuestSettingContro
 // middleware
 const protect = require("../middleware/protect");
 const socialProtect = require("../middleware/socialProtect");
+const { uploadSingle } = require("../middleware/uploadSingle");
 
 /**
  * @swagger
@@ -161,6 +162,40 @@ router.post(
    *         description: Internal server error
    */
   UserQuestSettingController.status
+);
+
+/**
+ * @swagger
+ * /aws/s3ImageUploadToFrames:
+ *   post:
+ *     tags:
+ *       - User Quest Setting
+ *     summary: Upload image to S3 for Frames
+ *     description: Endpoint to upload an image to S3 for Frames
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *               link:
+ *                 type: string
+ *     responses:
+ *       '200':
+ *         description: Image uploaded successfully
+ *       '400':
+ *         description: Bad request - no file uploaded or uploaded file is not an image
+ *       '500':
+ *         description: Internal server error
+ */
+router.post(
+  "/aws/s3ImageUploadToFrames",
+  uploadSingle,
+  UserQuestSettingController.s3ImageUploadToFrames
 );
 
 module.exports = router;

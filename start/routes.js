@@ -13,7 +13,6 @@ const PassportRoutes = require("../routes/PassportRoutes");
 const RedeemRoute = require("../routes/RedeemRoute");
 const OtpRoutes = require("../routes/OtpRoutes");
 const DirectMessageRoutes = require("../routes/DirectMessageRoutes");
-const AwsRoute = require("../routes/AwsRoute");
 const isUnderMaintenance = require("../middleware/maintenance");
 
 module.exports = function (app) {
@@ -33,6 +32,5 @@ module.exports = function (app) {
     app.use("/ledger",isUnderMaintenance,LedgerRoute)
     app.use("/treasury",isUnderMaintenance,TreasuryRoutes)
     app.use("/auth",isUnderMaintenance,PassportRoutes)
-    app.use("/aws", isUnderMaintenance, AwsRoute )
     // app.use(error);
   };

@@ -23,18 +23,26 @@ const s3Client = new AWS.S3({
 });
 
 const s3ImageUpload = async ({ fileBuffer, fileName }) => {
+
+  // Specify the folder name within the S3 bucket
+  const folderName = 'dynamicImages';
+
+  // Construct the key with the folder name
+  const key = `${folderName}/${fileName}`;
+
   // Configure parameters for uploading to S3
   const params = {
     Bucket: bucketName,
-    Key: fileName, // File name in S3
+    Key: key, // File name in S3
     Body: fileBuffer, // File data in S3 Object
   };
 
   try {
     const data = await s3Client.upload(params).promise(); // Use promise-based API
-
-    console.log('File uploaded successfully:', data.Location);
-    return `https://${bucketName}.s3.amazonaws.com/${filePath}`;
+    return {
+      imageName: fileName,
+      s3Url: `https://${bucketName}.s3.amazonaws.com/${folderName}/${fileName}`
+    };
   } catch (error) {
     console.error('Error uploading file to S3:', error);
     throw error; // Re-throw the error for handling in the calling function

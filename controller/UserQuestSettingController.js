@@ -6,6 +6,9 @@ const UserModel = require("../models/UserModel");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const AWS = require("aws-sdk");
 const { uploadS3Bucket } = require("../utils/uploadS3Bucket");
+const path = require("path");
+const { s3ImageUpload } = require("../utils/uploadS3Bucket");
+const fs = require('fs');
 
 const createOrUpdate = async (req, res) => {
   try {
@@ -503,6 +506,71 @@ const ledgerEntryRemoved = async (uuid, questOwnerUuid) => {
 //   }
 // };
 
+const s3ImageUploadToFrames = async (req, res) => {
+  try {
+      // Check if a file was uploaded
+      if (!req.file) {
+          return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      // Check if the uploaded file is an image
+      if (!req.file.mimetype.startsWith('image/')) {
+          return res.status(400).json({ message: 'Uploaded file is not an image' });
+      }
+
+      // Pass the file information to the next layer for processing
+      const filePath = req.file.path;
+      const fileName = path.basename(filePath);
+      const fileBuffer = fs.readFileSync(filePath);
+
+      const s3UploadData = await s3ImageUpload({
+          fileBuffer,
+          fileName,
+      })
+
+      if(!s3UploadData) throw new Error("File not uploaded");
+
+      const { imageName, s3Url } = s3UploadData;
+
+      //Delete File from Server After Uploading to S3
+      // Construct the local file location relative to the 'foundationBackend' directory
+      const localFileLocation = path.join(__dirname, '..', 'assets', 'uploads', 'images', fileName);
+
+      // Delete the file
+      fs.unlink(localFileLocation, (err) => {
+          if (err) {
+              console.error('Error deleting file:', err);
+              return;
+          }
+          console.log('File deleted successfully');
+      });
+
+      console.log(imageName);
+      
+      const userQuestSettingUpdate = await UserQuestSetting.findOneAndUpdate(
+        { link: req.body.link }, // Filter criteria: link matches req.body.link
+        { image: imageName }, // Update: set imageName to imageName
+        { new: true } // Options: return the updated document
+      );      
+
+      // To check the record exist
+      if (!userQuestSettingUpdate) throw new Error("userQuestSetting not updated");
+
+      // Return success response
+      return res.status(200).json({
+          message: 'Success',
+          imageName: imageName,
+          s3Url: s3Url,
+          userQuestSetting: userQuestSettingUpdate
+      });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+          message: `An error occurred while uploading image: ${error.message}`,
+      });
+  }
+};
+
 module.exports = {
   create,
   createOrUpdate,
@@ -510,5 +578,6 @@ module.exports = {
   link,
   impression,
   status,
+  s3ImageUploadToFrames,
   // get,
 };
