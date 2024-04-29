@@ -553,7 +553,7 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     if (Page === "Bookmark") {
       filterObj.createdBy = uuid;
     } else {
-      console.log('My Post Else')
+      console.log("My Post Else");
       filterObj.uuid = uuid;
     }
   }
@@ -795,11 +795,11 @@ const getQuestsAll = async (req, res) => {
   let totalQuestionsCount;
 
   if (filter === "true") {
-    console.log('filter')
+    console.log("filter");
     if (Page === "Bookmark") {
       filterObj.createdBy = uuid;
     } else {
-      console.log('My Post Else')
+      console.log("My Post Else");
       filterObj.uuid = uuid;
     }
   }
@@ -1001,7 +1001,6 @@ const getQuestsAll = async (req, res) => {
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
     });
-
 
     query = query.sort(
       sort === "Newest First"
@@ -1552,6 +1551,32 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
     res.status(500).send(err);
   }
 };
+const suppressPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const supression = await InfoQuestQuestions.findOneAndUpdate(
+      { _id: id },
+      { url: "" }
+    );
+
+    if (supression) {
+      return res.status(200).json({
+        message: "Suppressed successfully",
+        data: supression,
+      });
+    } else {
+      return res.status(404).json({
+        message: "Post not found",
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      message: `An error occurred while suppressing: ${err.message}`,
+    });
+  }
+};
+
 const getAllQuestsWithChangeAnsStatus = async (req, res) => {
   try {
     let allQuestions;
@@ -1899,4 +1924,5 @@ module.exports = {
   getFullSoundcloudUrlFromShortUrl,
   getFlickerUrl,
   getQuestsAll,
+  suppressPost,
 };

@@ -12,7 +12,8 @@ const protect = require("../middleware/protect");
  *   description: Endpoints for managing info quest questions
  */
 
-router.post("/createInfoQuestQuest",
+router.post(
+  "/createInfoQuestQuest",
   /**
    * @swagger
    * /infoquestions/createInfoQuestQuest:
@@ -35,8 +36,33 @@ router.post("/createInfoQuestQuest",
    */
   InfoQuestQuestionController.createInfoQuestQuest
 );
+router.post(
+  "/supressPost/:id",
+  /**
+   * @swagger
+   * /userQuestImpression/{link}:
+   *   post:
+   *     tags:
+   *       - User Quest Setting
+   *     summary: Record user quest impression
+   *     description: Endpoint to record user quest impression
+   *     parameters:
+   *       - in: path
+   *         name: link
+   *         required: true
+   *         schema:
+   *           type: string
+   *     responses:
+   *       '200':
+   *         description: User quest impression recorded successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  InfoQuestQuestionController.suppressPost
+);
 
-router.get("/constraintForUniqueQuestion",
+router.get(
+  "/constraintForUniqueQuestion",
   /**
    * @swagger
    * /infoquestions/constraintForUniqueQuestion:
@@ -54,7 +80,8 @@ router.get("/constraintForUniqueQuestion",
   InfoQuestQuestionController.constraintForUniqueQuestion
 );
 
-router.post("/getAllQuests",
+router.post(
+  "/getAllQuests",
   /**
    * @swagger
    * /infoquestions/getAllQuests:
@@ -72,7 +99,8 @@ router.post("/getAllQuests",
   InfoQuestQuestionController.getAllQuests
 );
 
-router.post("/getAllQuestsWithOpenInfoQuestStatus",
+router.post(
+  "/getAllQuestsWithOpenInfoQuestStatus",
   /**
    * @swagger
    * /infoquestions/getAllQuestsWithOpenInfoQuestStatus:
@@ -90,7 +118,8 @@ router.post("/getAllQuestsWithOpenInfoQuestStatus",
   InfoQuestQuestionController.getAllQuestsWithOpenInfoQuestStatus
 );
 
-router.post("/getAllQuestsWithAnsweredStatus",
+router.post(
+  "/getAllQuestsWithAnsweredStatus",
   /**
    * @swagger
    * /infoquestions/getAllQuestsWithAnsweredStatus:
@@ -108,7 +137,8 @@ router.post("/getAllQuestsWithAnsweredStatus",
   InfoQuestQuestionController.getAllQuestsWithAnsweredStatus
 );
 
-router.post("/getAllQuestsWithDefaultStatus",
+router.post(
+  "/getAllQuestsWithDefaultStatus",
   /**
    * @swagger
    * /infoquestions/getAllQuestsWithDefaultStatus:
@@ -126,7 +156,8 @@ router.post("/getAllQuestsWithDefaultStatus",
   InfoQuestQuestionController.getAllQuestsWithDefaultStatus
 );
 
-router.post("/getAllQuestsWithResult",
+router.post(
+  "/getAllQuestsWithResult",
   /**
    * @swagger
    * /infoquestions/getAllQuestsWithResult:
@@ -144,7 +175,8 @@ router.post("/getAllQuestsWithResult",
   InfoQuestQuestionController.getAllQuestsWithResult
 );
 
-router.get("/getQuest/:uuid/:id/:page?/:postLink?",
+router.get(
+  "/getQuest/:uuid/:id/:page?/:postLink?",
   /**
    * @swagger
    * /infoquestions/getQuest/{uuid}/{id}/{page}/{postLink}:
@@ -189,7 +221,8 @@ router.get("/getQuest/:uuid/:id/:page?/:postLink?",
   InfoQuestQuestionController.getQuestById
 );
 
-router.get("/getQuest/:uniqueShareLink",
+router.get(
+  "/getQuest/:uniqueShareLink",
   /**
    * @swagger
    * /infoquestions/getQuest/{uniqueShareLink}:
@@ -216,7 +249,8 @@ router.get("/getQuest/:uniqueShareLink",
   InfoQuestQuestionController.getQuestByUniqueShareLink
 );
 
-router.post("/getAllQuestsWithCompletedStatus",
+router.post(
+  "/getAllQuestsWithCompletedStatus",
   /**
    * @swagger
    * /infoquestions/getAllQuestsWithCompletedStatus:
@@ -234,7 +268,8 @@ router.post("/getAllQuestsWithCompletedStatus",
   InfoQuestQuestionController.getAllQuestsWithCompletedStatus
 );
 
-router.post("/getAllQuestsWithChangeAnsStatus",
+router.post(
+  "/getAllQuestsWithChangeAnsStatus",
   /**
    * @swagger
    * /infoquestions/getAllQuestsWithChangeAnsStatus:
@@ -252,7 +287,8 @@ router.post("/getAllQuestsWithChangeAnsStatus",
   InfoQuestQuestionController.getAllQuestsWithChangeAnsStatus
 );
 
-router.get("/checkMediaDuplicateUrl/:id",
+router.get(
+  "/checkMediaDuplicateUrl/:id",
   /**
    * @swagger
    * /infoquestions/checkMediaDuplicateUrl/{id}:
@@ -279,7 +315,8 @@ router.get("/checkMediaDuplicateUrl/:id",
   InfoQuestQuestionController.checkMediaDuplicateUrl
 );
 
-router.get("/getFullSoundcloudUrlFromShortUrl",
+router.get(
+  "/getFullSoundcloudUrlFromShortUrl",
   /**
    * @swagger
    * /infoquestions/getFullSoundcloudUrlFromShortUrl:
@@ -297,7 +334,8 @@ router.get("/getFullSoundcloudUrlFromShortUrl",
   InfoQuestQuestionController.getFullSoundcloudUrlFromShortUrl
 );
 
-router.get("/getFlickerUrl",
+router.get(
+  "/getFlickerUrl",
   /**
    * @swagger
    * /infoquestions/getFlickerUrl:
@@ -315,8 +353,6 @@ router.get("/getFlickerUrl",
   InfoQuestQuestionController.getFlickerUrl
 );
 
-
 router.get("/getQuestsAll", InfoQuestQuestionController.getQuestsAll);
-
 
 module.exports = router;
