@@ -114,7 +114,7 @@ const createInfoQuestQuest = async (req, res) => {
 
 const deleteInfoQuestQuest = async (req, res) => {
   try {
-    const infoQuest = await InfoQuestQuestions.findOne({ uuid: req.params.questUuid });
+    const infoQuest = await InfoQuestQuestions.findOne({ _id: req.params.questId, uuid: req.params.userUuid});
 
     if(!infoQuest) return res.status(404).send("Info Quest not found");
 

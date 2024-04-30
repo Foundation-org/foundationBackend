@@ -38,10 +38,10 @@ router.post(
 );
 
 router.delete(
-  "/deleteInfoQuestQuest/:questUuid/:userUuid",
+  "/deleteInfoQuest/:questId/:userUuid",
 /**
  * @swagger
- * /infoquestions/deleteInfoQuestQuest/{questUuid}/{userUuid}:
+ * /infoquestions/deleteInfoQuest/{questId}/{userUuid}:
  *   delete:
  *     tags:
  *       - Info Quest Question
@@ -49,9 +49,9 @@ router.delete(
  *     description: Endpoint to delete an info quest question by quest UUID and user UUID
  *     parameters:
  *       - in: path
- *         name: questUuid
+ *         name: questId
  *         required: true
- *         description: UUID of the info quest question to delete
+ *         description: Id of the info quest question to delete
  *         schema:
  *           type: string
  *       - in: path
