@@ -54,14 +54,12 @@ router.delete(
  *         description: UUID of the info quest question to delete
  *         schema:
  *           type: string
- *           format: uuid
  *       - in: path
  *         name: userUuid
  *         required: true
  *         description: UUID of the user who created the info quest question
  *         schema:
  *           type: string
- *           format: uuid
  *     responses:
  *       '200':
  *         description: Info quest question deleted successfully

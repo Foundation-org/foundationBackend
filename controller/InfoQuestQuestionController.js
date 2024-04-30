@@ -125,7 +125,7 @@ const deleteInfoQuestQuest = async (req, res) => {
     await infoQuest.save();
 
     // Set Up User's Details
-    const user = await User.findOne({ uuid: req.body.userUuid });
+    const user = await User.findOne({ uuid: req.params.userUuid });
 
     // Decrement the questsCreated field by one
     user.questsCreated -= 1;
