@@ -353,6 +353,119 @@ router.get(
   InfoQuestQuestionController.getFlickerUrl
 );
 
-router.get("/getQuestsAll", InfoQuestQuestionController.getQuestsAll);
+router.get("/getQuestsAll",
+  /**
+   * @swagger
+   * /infoquestions/getQuestsAll:
+   *   get:
+   *     tags:
+   *       - Info Quest Question
+   *     summary: Get All Quests
+   *     description: Retrieve all quests with optional filtering and pagination.
+   *     parameters:
+   *       - in: query
+   *         name: uuid
+   *         schema:
+   *           type: string
+   *         description: UUID of the user.
+   *       - in: query
+   *         name: _page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         description: Page number for pagination.
+   *       - in: query
+   *         name: _limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         description: Maximum number of quests per page.
+   *       - in: query
+   *         name: filter
+   *         schema:
+   *           type: boolean
+   *         description: Filter criteria for quests.
+   *       - in: query
+   *         name: sort
+   *         schema:
+   *           type: string
+   *           enum: [Newest First, Last Updated, Most Popular]
+   *         description: Sort criteria for quests.
+   *       - in: query
+   *         name: type
+   *         schema:
+   *           type: string
+   *         description: Type of quests.
+   *       - in: query
+   *         name: Page
+   *         schema:
+   *           type: string
+   *           enum: [Bookmark, Hidden, SharedLink]
+   *         description: Page criteria for quests.
+   *       - in: query
+   *         name: terms
+   *         schema:
+   *           type: string
+   *         description: Terms for quests.
+   *       - in: query
+   *         name: blockedTerms
+   *         schema:
+   *           type: string
+   *         description: Blocked terms for quests.
+   *       - in: query
+   *         name: moderationRatingInitial
+   *         schema:
+   *           type: integer
+   *           minimum: 0
+   *           maximum: 5
+   *         description: Initial moderation rating for quests.
+   *       - in: query
+   *         name: moderationRatingFinal
+   *         schema:
+   *           type: integer
+   *           minimum: 0
+   *           maximum: 5
+   *         description: Final moderation rating for quests.
+   *       - in: query
+   *         name: participated
+   *         schema:
+   *           type: string
+   *           enum: [Yes, No, All]
+   *         description: Whether user has participated in quests. Accepted values are "Yes", "No", or "All".
+   *       - in: query
+   *         name: start
+   *         schema:
+   *           type: integer
+   *           minimum: 0
+   *           maximum: 5
+   *         description: Start date for quests.
+   *       - in: query
+   *         name: end
+   *         schema:
+   *           type: integer
+   *           minimum: 0
+   *           maximum: 5
+   *         description: End date for quests.
+   *       - in: query
+   *         name: media
+   *         schema:
+   *           type: string
+   *           enum: [All, Video, Music, Image]
+   *         description: Media type for quests.
+   *     responses:
+   *       '200':
+   *         description: A list of quests.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Quest'
+   *       '400':
+   *         description: Bad request. Invalid parameters provided.
+   *       '500':
+   *         description: Internal server error. Failed to retrieve quests.
+   */
+  InfoQuestQuestionController.getQuestsAll);
 
 module.exports = router;
