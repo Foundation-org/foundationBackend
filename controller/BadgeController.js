@@ -13,6 +13,8 @@ const { error } = require("console");
 const Company = require("../models/Company");
 const JobTitle = require("../models/JobTitle");
 const DegreeAndFieldOfStudy = require("../models/DegreeAndFieldOfStudy");
+const mongoose = require('mongoose');
+
 
 const update = async (req, res) => {
   try {
@@ -828,10 +830,37 @@ const updatePersonalBadge = async (req, res) => {
 
 const updateSecurityQuestionBadge = async (req, res) => {
   try {
-    res.status(200).json({ message: "Successful" });
+    const user = await UserModel.findOne({ uuid: req.params.userUuid });
+    if (!user) return res.status(404).json({ message: "User Not Found" });
+
+    if (!user.badges || user.badges.length === 0) {
+      return res.status(404).json({ message: "No badges found for the user" });
+    }
+
+    let badgeToUpdate;
+    for (const badge of user.badges) {
+      if (badge && badge._id.equals(new mongoose.Types.ObjectId(req.params.badgeId))) {
+        badgeToUpdate = badge;
+        break;
+      }
+    }
+
+    console.log(badgeToUpdate);
+
+    if (!badgeToUpdate) {
+      return res.status(404).json({ message: "Badge Not Found" });
+    }
+
+    // Update the personal field of the badge
+    badgeToUpdate.personal = req.body.securityQuestion['security-question'];
+
+    // Save the updated user object
+    await user.save();
+
+    res.status(200).json({ message: "Security question badge updated successfully" });
   } catch (error) {
     res.status(500).json({
-      message: `An error occurred while updatePersonalBadge: ${error.message}`,
+      message: `An error occurred while updating the security question badge: ${error.message}`,
     });
   }
 };
