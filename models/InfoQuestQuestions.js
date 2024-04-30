@@ -83,6 +83,9 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
       type: String,
       default: "",
     },
+    isActive: {
+      type: Boolean,
+    },
   },
   { timestamps: true }
 );

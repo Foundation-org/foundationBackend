@@ -826,6 +826,16 @@ const updatePersonalBadge = async (req, res) => {
   }
 };
 
+const updateSecurityQuestionBadge = async (req, res) => {
+  try {
+    res.status(200).json({ message: "Successful" });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while updatePersonalBadge: ${error.message}`,
+    });
+  }
+};
+
 const removeBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
@@ -1398,4 +1408,5 @@ module.exports = {
   getPersonalBadge,
   addFarCasterBadge,
   removeFarCasterBadge,
+  updateSecurityQuestionBadge
 };

@@ -5,12 +5,13 @@ const connectDB = async () => {
   if (DocumentDB === "DocumentDB") {
     try {
       const conn = await mongoose.connect(
-        "mongodb://" +
-          process.env.DOCS_DB_USER +
-          ":" +
-          process.env.DOCS_DB_PASSWORD +
-          "@foundation.cluster-chkicsa8wkr6.us-east-2.docdb.amazonaws.com:27017/" + process.env.DOCS_DB_NAME +"?tls=true&tlsCAFile=global-bundle.pem" +
-          "&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
+        // "mongodb://" +
+        //   process.env.DOCS_DB_USER +
+        //   ":" +
+        //   process.env.DOCS_DB_PASSWORD +
+        //   "@foundation.cluster-chkicsa8wkr6.us-east-2.docdb.amazonaws.com:27017/" + process.env.DOCS_DB_NAME +"?tls=true&tlsCAFile=global-bundle.pem" +
+        //   "&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
+        procss.env.MONGO_URI
       );
       console.log(
         `DocumentDB Connected! Database Name: ${conn.connection.db.databaseName} -  Host: ${conn.connection.host}`.cyan.underline.bold

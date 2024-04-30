@@ -35,6 +35,12 @@ router.patch("/updateBadge/:userId/:badgeId",
    *         schema:
    *           type: string
    *         description: The ID of the badge
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/SocialBadgeRequest'
    *     responses:
    *       '200':
    *         description: User badge updated successfully
@@ -44,6 +50,44 @@ router.patch("/updateBadge/:userId/:badgeId",
    *         description: Internal server error
    */
   BadgeController.update
+);
+
+router.patch("/updateSecurityQuestionBadge/:userId/:badgeId",
+  /**
+   * @swagger
+   * /updateSecurityQuestionBadge/{userId}/{badgeId}:
+   *   patch:
+   *     tags:
+   *       - Badge
+   *     summary: Update User's Security Question Badge
+   *     description: Endpoint to update a user badge
+   *     parameters:
+   *       - in: path
+   *         name: userId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The ID of the user
+   *       - in: path
+   *         name: badgeId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The ID of the badge
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema: Object
+   *     responses:
+   *       '200':
+   *         description: User's security question badge updated successfully
+   *       '404':
+   *         description: User's security question badge
+   *       '500':
+   *         description: Internal server error
+   */
+  BadgeController.updateSecurityQuestionBadge
 );
 
 router.get("/getBadges/:userId",
@@ -194,6 +238,30 @@ router.post("/addBadge",
 );
 
 router.post("/addBadge/personal/add",
+  /**
+   * @swagger
+   * /addBadge/personal/add:
+   *   post:
+   *     tags:
+   *       - Badge
+   *     summary: Add personal badge (additional)
+   *     description: Endpoint to add an additional personal badge for a user
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/AdditionalPersonalBadgeRequest'
+   *     responses:
+   *       '200':
+   *         description: Additional personal badge added successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  BadgeController.addPersonalBadge
+);
+
+router.put("/addBadge/personal/add",
   /**
    * @swagger
    * /addBadge/personal/add:
