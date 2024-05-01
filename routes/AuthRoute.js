@@ -250,18 +250,26 @@ router.post("/signUpSocial/guestMode",
   AuthController.signUpSocialGuestMode
 );
 
-router.get("/userInfo",
+router.post("/userInfo",
   /**
    * @swagger
    * /user/userInfo:
-   *   get:
+   *   post:
    *     tags:
    *       - Authentication
    *     summary: Get user information
    *     description: Endpoint to get information of a user
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/UserInfoRequest'
    *     responses:
    *       '200':
    *         description: User information retrieved successfully
+   *       '400':
+   *         description: Invalid request body
    *       '500':
    *         description: Internal server error
    */
