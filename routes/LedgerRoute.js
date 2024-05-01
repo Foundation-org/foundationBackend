@@ -108,8 +108,8 @@ router.post("/searchLedger",
  *   get:
  *     tags:
  *       - Ledger
- *     summary: Get a Last User Action entry by UUID.
- *     description: Endpoint to get a Last User Action entry by its Ledger UUID.
+ *     summary: Get all users Last User Action entry by UUID.
+ *     description: Endpoint to get a all users Last User Action by its Ledger UUID + plus added emails + remove records if acc is guest + if email is empty.
  *     parameters:
  *       - in: query
  *         name: id
@@ -124,8 +124,6 @@ router.post("/searchLedger",
  *       500:
  *         description: Internal server error.
  */
-router.get("/getLastUserActionTime", LedgerController.getLastUserActionTime);
-router.get("/getLastActiveTimesForAllUsers", LedgerController.getLastActiveTimesForAllUsers);
 // added emails after each obj, remove all guest accounts, remove all accounts in which email not found
 router.get("/getLstActAndEmailForAllUsers", LedgerController.getLstActAndEmailForAllUsers);
 
