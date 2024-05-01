@@ -1062,6 +1062,7 @@ const getQuestsAll = async (req, res) => {
     let query = InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
+      isActive: true
     });
 
     query = query.sort(
