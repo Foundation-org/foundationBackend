@@ -138,8 +138,9 @@ const remove = async (req, res) => {
   }
 };
 
-const getLstActAndEmailForAllUsers = async (req, res) => {
+const getLstActAndEmailForAllUsers = async () => {
     try {
+      console.log("getLstActAndEmailForAllUsers trigger")
         // Calculate the date 7 days ago
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -177,15 +178,14 @@ const getLstActAndEmailForAllUsers = async (req, res) => {
 
         if (finalFilteredUUIDs.length > 0) {
             // If records are found, send them as a response
-            res.json({ lastActiveTimes: finalFilteredUUIDs });
+            console.log({ lastActiveTimes: finalFilteredUUIDs });
         } else {
             // If no records are found, send an appropriate message
-            res.status(404).json({ message: 'No records found where 7 days have passed since last activity' });
+            console.log({ message: 'No records found where 7 days have passed since last activity' });
         }
     } catch (error) {
         // If an error occurs during the database query, send an error response
         console.error('Error occurred while fetching last active times for all users:', error);
-        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
