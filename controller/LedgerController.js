@@ -1,4 +1,5 @@
 const Ledgers = require("../models/Ledgers");
+const Users = require("../models/UserModel");
 
 const create = async (req, res) => {
   try {
@@ -158,6 +159,103 @@ const getLastUserActionTime = async (req, res) => {
   }
 };
 
+const getLastActiveTimesForAllUsers = async (req, res) => {
+  try {
+      // Fetch all records
+      const allRecords = await Ledgers.find({}, { uuid: 1, updatedAt: 1 }).sort({ updatedAt: -1 });
+
+      // Create a map to store the latest activity time for each UUID
+      const latestActivityMap = new Map();
+
+      // Iterate through all records to find the latest activity time for each UUID
+      allRecords.forEach(record => {
+          const { uuid, updatedAt } = record;
+          if (!latestActivityMap.has(uuid) || updatedAt > latestActivityMap.get(uuid)) {
+              latestActivityMap.set(uuid, updatedAt);
+          }
+      });
+
+      // Calculate the date 7 days ago
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      // Filter UUIDs where the latest activity is more than 7 days ago
+      const filteredUUIDs = Array.from(latestActivityMap.entries())
+          .filter(([uuid, updatedAt]) => updatedAt <= sevenDaysAgo)
+          .map(([uuid, updatedAt]) => ({ uuid, lastActiveTime: updatedAt }));
+
+      if (filteredUUIDs.length > 0) {
+          // If records are found, send them as a response
+          res.json({ lastActiveTimes: filteredUUIDs });
+      } else {
+          // If no records are found, send an appropriate message
+          res.status(404).json({ message: 'No records found where 7 days have passed since last activity' });
+      }
+  } catch (error) {
+      // If an error occurs during the database query, send an error response
+      console.error('Error occurred while fetching last active times for all users:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const getLstActAndEmailForAllUsers = async (req, res) => {
+    try {
+        // Fetch all records
+        const allRecords = await Ledgers.find({}, { uuid: 1, updatedAt: 1 }).sort({ updatedAt: -1 });
+
+        // Create a map to store the latest activity time for each UUID
+        const latestActivityMap = new Map();
+
+        // Iterate through all records to find the latest activity time for each UUID
+        allRecords.forEach(record => {
+            const { uuid, updatedAt } = record;
+            if (!latestActivityMap.has(uuid) || updatedAt > latestActivityMap.get(uuid)) {
+                latestActivityMap.set(uuid, updatedAt);
+            }
+        });
+
+        // Calculate the date 7 days ago
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        // Filter UUIDs where the latest activity is more than 7 days ago
+        let filteredUUIDs = Array.from(latestActivityMap.entries())
+            .filter(([uuid, updatedAt]) => updatedAt <= sevenDaysAgo)
+            .map(([uuid, updatedAt]) => ({ uuid, lastActiveTime: updatedAt }));
+
+        // Fetch user emails from the users table
+        const usersWithEmails = await Users.find({ uuid: { $in: filteredUUIDs.map(item => item.uuid) } }, { uuid: 1, email: 1 });
+
+        // Create a map to store email for each UUID
+        const uuidToEmailMap = new Map(usersWithEmails.map(user => [user.uuid, user.email]));
+
+        // Filter out objects where email is not found or contains '@guest.com'
+        filteredUUIDs = filteredUUIDs.filter(item => {
+            const email = uuidToEmailMap.get(item.uuid);
+            return email && !email.includes('@guest.com');
+        });
+
+        if (filteredUUIDs.length > 0) {
+            // If records are found, append emails and send them as a response
+            filteredUUIDs.forEach(item => {
+                item.email = uuidToEmailMap.get(item.uuid);
+            });
+            res.json({ lastActiveTimes: filteredUUIDs });
+        } else {
+            // If no records are found, send an appropriate message
+            res.status(404).json({ message: 'No records found where 7 days have passed since last activity' });
+        }
+    } catch (error) {
+        // If an error occurs during the database query, send an error response
+        console.error('Error occurred while fetching last active times for all users:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+
+
+
 
 module.exports = {
   create,
@@ -165,5 +263,7 @@ module.exports = {
   getAll,
   search,
   remove,
-  getLastUserActionTime
+  getLastUserActionTime,
+  getLastActiveTimesForAllUsers,
+  getLstActAndEmailForAllUsers
 };

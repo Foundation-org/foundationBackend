@@ -125,5 +125,8 @@ router.post("/searchLedger",
  *         description: Internal server error.
  */
 router.get("/getLastUserActionTime", LedgerController.getLastUserActionTime);
+router.get("/getLastActiveTimesForAllUsers", LedgerController.getLastActiveTimesForAllUsers);
+// added emails after each obj, remove all guest accounts, remove all accounts in which email not found
+router.get("/getLstActAndEmailForAllUsers", LedgerController.getLstActAndEmailForAllUsers);
 
 module.exports = router;
