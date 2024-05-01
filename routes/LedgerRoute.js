@@ -101,4 +101,29 @@ router.post("/searchLedger",
    */
  LedgerController.search);
 
+
+/**
+ * @swagger
+ * /ledger/getLastUserActionTime:
+ *   get:
+ *     tags:
+ *       - Ledger
+ *     summary: Get a Last User Action entry by UUID.
+ *     description: Endpoint to get a Last User Action entry by its Ledger UUID.
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the ledger entry.
+ *       404:
+ *         description: Ledger entry not found.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get("/getLastUserActionTime", LedgerController.getLastUserActionTime);
+
 module.exports = router;

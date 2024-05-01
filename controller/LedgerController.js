@@ -137,10 +137,33 @@ const remove = async (req, res) => {
   }
 };
 
+const getLastUserActionTime = async (req, res) => {
+  const userUUID = req.query.uuid; // Assuming user UUID is passed as a route parameter
+
+  try {
+      // Query the ledger collection to find the last record for the given user UUID
+      const lastRecord = await Ledgers.findOne({ uuid: userUUID }, { updatedAt: 1, _id: 0 }).sort({ updatedAt: -1 }).exec();
+
+      if (lastRecord) {
+          // If a record is found, send it as a response
+          res.json({ lastUserActionTime: lastRecord.updatedAt });
+      } else {
+          // If no record is found for the provided UUID, send an appropriate message
+          res.status(404).json({ message: 'No record found for the provided user UUID' });
+      }
+  } catch (error) {
+      // If an error occurs during the database query, send an error response
+      console.error('Error occurred while fetching last user action:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
 module.exports = {
   create,
   getById,
   getAll,
   search,
   remove,
+  getLastUserActionTime
 };
