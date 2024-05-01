@@ -549,7 +549,7 @@ const signInUserBySocialLogin = async (req, res) => {
 const userInfo = async (req, res) => {
   try {
     const user = await User.findOne({
-      uuid: req.cookies.uuid || req.body.uuid,
+      uuid: req.params.uuid,
     });
     res.status(200).json(user);
   } catch (error) {
