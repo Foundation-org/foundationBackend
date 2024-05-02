@@ -112,66 +112,6 @@ const createInfoQuestQuest = async (req, res) => {
   }
 };
 
-const deleteInfoQuestQuest = async (req, res) => {
-  try {
-    const infoQuest = await InfoQuestQuestions.findOne({ _id: req.params.questId, uuid: req.params.userUuid});
-
-    if(!infoQuest) return res.status(404).send("Info Quest not found");
-
-    // if(infoQuest.usersAddTheirAns) return res.status(404).send("Quest cannot be deleted"); // Not neccessry if we add the check at FE to remove the delete icon from those who have { usersAddTheirAns: true }
-
-    // Delete and Save Info Quest
-    infoQuest.isActive = false;
-    await infoQuest.save();
-
-    // Set Up User's Details
-    const user = await User.findOne({ uuid: req.params.userUuid });
-
-    // Decrement the questsCreated field by one
-    user.questsCreated -= 1;
-    await user.save();
-
-
-    // Create Ledger
-    await createLedger({
-      uuid: user.uuid,
-      txUserAction: "postDeleted",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "User",
-      txFrom: "dao",
-      txTo: user.uuid,
-      txAmount: QUEST_CREATED_AMOUNT,
-      txData: infoQuest._id,
-      // txDescription : "User creates a new quest"
-    });
-    // Create Ledger
-    await createLedger({
-      uuid: user.uuid,
-      txUserAction: "postDeleted",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "DAO",
-      txFrom: "DAO Treasury",
-      txTo: user.uuid,
-      txAmount: "0",
-      // txData : createdQuestion._id,
-      // txDescription : "Incentive for creating a quest"
-    });
-    // Increment the Treasury
-    await updateTreasury({ amount: QUEST_CREATED_AMOUNT, dec: true });
-    // Decrement the UserBalance
-    await updateUserBalance({
-      uuid: req.body.uuid,
-      amount: QUEST_CREATED_AMOUNT,
-      inc: true,
-    });
-
-    res.status(200).json({ message: "Info quest question deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: `An error occurred: ${error.message}` });
-  }
-}
-
-
 const constraintForUniqueQuestion = async (req, res) => {
   try {
     // Get the question from the query parameters and convert it to lowercase
@@ -1988,5 +1928,4 @@ module.exports = {
   getFlickerUrl,
   getQuestsAll,
   suppressPost,
-  deleteInfoQuestQuest
 };
