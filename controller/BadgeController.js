@@ -1400,5 +1400,4 @@ module.exports = {
   getPersonalBadge,
   addFarCasterBadge,
   removeFarCasterBadge,
-  updateSecurityQuestionBadge
 };
