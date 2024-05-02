@@ -13,6 +13,8 @@ const { error } = require("console");
 const Company = require("../models/Company");
 const JobTitle = require("../models/JobTitle");
 const DegreeAndFieldOfStudy = require("../models/DegreeAndFieldOfStudy");
+const mongoose = require('mongoose');
+
 
 const update = async (req, res) => {
   try {
