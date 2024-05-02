@@ -9,6 +9,9 @@ const { uploadS3Bucket } = require("../utils/uploadS3Bucket");
 const path = require("path");
 const { s3ImageUpload } = require("../utils/uploadS3Bucket");
 const fs = require('fs');
+const { updateUserBalance } = require("../utils/userServices");
+const { updateTreasury } = require("../utils/treasuryService");
+const { USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT } = require('../constants/index');
 
 const createOrUpdate = async (req, res) => {
   try {
@@ -63,15 +66,14 @@ const link = async (req, res) => {
       await ledgerEntryPostLinkCreated(payload.uuid);
       payload.link = shortLink.generate(8);
     } else {
+      // As payload.isGenerateLink == false which means we got Customized link
 
-      const userQuestSettingExist = await UserQuestSetting.find({
-        link: payload.link,
-      });
-
+      // Check if link already exist
+      const userQuestSettingExist = await UserQuestSetting.find({ link: payload.link});
       if(userQuestSettingExist) return res.status(409).json({ message: `This link cannot be used, Try something unique like ${shortLink.generate(8)}` });
 
-
-      
+      // As link is unique Create Ledger and Proceed Normally like before with custom link.
+      await ledgerDeductionPostLinkCustomized(payload.uuid)
     }
 
     // To check the Question Description
@@ -442,20 +444,40 @@ const ledgerEntryPostLinkCreated = async (uuid) => {
   }
 };
 
-const ledgerDeductionPostLinkCustomized = async (uuid) => {
+const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
   try {
-    // User
-    await createLedger({
-      uuid: uuid,
-      txUserAction: "postLinkCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "User",
-      txFrom: uuid,
-      txTo: "dao",
-      txAmount: "0",
-      txData: uuid,
-      // txDescription : "User creates a new account"
-    });
+        // Create Ledger
+        await createLedger({
+          uuid: uuid,
+          txUserAction: "linkCustomized",
+          txID: crypto.randomBytes(11).toString("hex"),
+          txAuth: "User",
+          txFrom: uuid,
+          txTo: "dao",
+          txAmount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+          txData: userQuestSetting_id,
+          // txDescription : "User creates a new quest"
+        });
+        // Create Ledger
+        await createLedger({
+          uuid: uuid,
+          txUserAction: "linkCustomized",
+          txID: crypto.randomBytes(11).toString("hex"),
+          txAuth: "DAO",
+          txFrom: uuid,
+          txTo: "DAO Treasury",
+          txAmount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+          // txData : createdQuestion._id,
+          // txDescription : "Incentive for creating a quest"
+        });
+        // Increment the Treasury
+        await updateTreasury({ amount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT, inc: true });
+        // Decrement the UserBalance
+        await updateUserBalance({
+          uuid: uuid,
+          amount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+          dec: true,
+        });
   } catch (error) {
     console.error(error);
   }
@@ -610,5 +632,6 @@ module.exports = {
   impression,
   status,
   s3ImageUploadToFrames,
+  ledgerDeductionPostLinkCustomized
   // get,
 };
