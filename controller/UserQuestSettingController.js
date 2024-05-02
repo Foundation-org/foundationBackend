@@ -62,6 +62,16 @@ const link = async (req, res) => {
     if (payload.isGenerateLink) {
       await ledgerEntryPostLinkCreated(payload.uuid);
       payload.link = shortLink.generate(8);
+    } else {
+
+      const userQuestSettingExist = await UserQuestSetting.find({
+        link: payload.link,
+      });
+
+      if(userQuestSettingExist) return res.status(409).json({ message: `This link cannot be used, Try something unique like ${shortLink.generate(8)}` });
+
+
+      
     }
 
     // To check the Question Description
@@ -414,6 +424,25 @@ const hiddenPostCount = async (uuid, hidden) => {
 };
 
 const ledgerEntryPostLinkCreated = async (uuid) => {
+  try {
+    // User
+    await createLedger({
+      uuid: uuid,
+      txUserAction: "postLinkCreated",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: uuid,
+      // txDescription : "User creates a new account"
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const ledgerDeductionPostLinkCustomized = async (uuid) => {
   try {
     // User
     await createLedger({
