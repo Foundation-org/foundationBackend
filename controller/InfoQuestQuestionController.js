@@ -1040,6 +1040,19 @@ const getQuestsAll = async (req, res) => {
 
     allQuestions = await Promise.all(mapPromises);
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
+  } else if (Page === "Suppression") {
+    allQuestions = await InfoQuestQuestions.find({
+      uuid: uuid,
+      suppressed: true,
+    })
+      .populate("getUserBadge", "badges")
+      .sort({ createdAt: -1 })
+      .limit(pageSize)
+      .skip(skip);
+    totalQuestionsCount = await UserQuestSetting.countDocuments({
+      uuid: uuid,
+      suppressed: true,
+    });
   } else {
     // moderation filter
     filterObj.moderationRatingCount = {
@@ -1623,7 +1636,7 @@ const suppressPost = async (req, res) => {
 
     const supression = await InfoQuestQuestions.findOneAndUpdate(
       { _id: id },
-      { url: "" }
+      { suppressed: true, suppressedReason: "Invalid Media" }
     );
 
     if (supression) {
