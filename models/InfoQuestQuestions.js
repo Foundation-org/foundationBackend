@@ -85,7 +85,7 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     },
     url: {
       type: [String],
-      default: "",
+      default: [],
     },
     description: {
       type: String,
