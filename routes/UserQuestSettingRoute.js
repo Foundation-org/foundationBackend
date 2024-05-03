@@ -193,9 +193,9 @@ router.post(
  *         description: Internal server error
  */
 router.post(
-  "/aws/s3ImageUploadToFrames",
+  "/userQuestSetting/sharedLinkDynamicImage",
   uploadSingle,
-  UserQuestSettingController.s3ImageUploadToFrames
+  UserQuestSettingController.sharedLinkDynamicImage
 );
 
 module.exports = router;
