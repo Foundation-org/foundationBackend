@@ -138,11 +138,12 @@ const deleteInfoQuestQuest = async (req, res) => {
       txUserAction: "postDeleted",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
-      txFrom: "dao",
-      txTo: user.uuid,
-      txAmount: QUEST_CREATED_AMOUNT,
-      txData: infoQuest._id,
-      // txDescription : "User creates a new quest"
+      txFrom: user.uuid,
+      txTo: "DAO",
+      txAmount: 0,
+      txData: user.uuid,
+      txDate: Date.now(),
+      txDescription : "User deleted a Post"
     });
     // Create Ledger
     await createLedger({
@@ -152,7 +153,9 @@ const deleteInfoQuestQuest = async (req, res) => {
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: user.uuid,
-      txAmount: "0",
+      txAmount: QUEST_CREATED_AMOUNT,
+      txDate: Date.now(),
+      txDescription : "User deleted a Post"
       // txData : createdQuestion._id,
       // txDescription : "Incentive for creating a quest"
     });
