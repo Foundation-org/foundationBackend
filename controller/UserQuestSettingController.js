@@ -12,6 +12,9 @@ const fs = require('fs');
 const { updateUserBalance } = require("../utils/userServices");
 const { updateTreasury } = require("../utils/treasuryService");
 const { USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT } = require('../constants/index');
+const fs = require("fs");
+const nodeHtmlToImage = require("node-html-to-image");
+const { sharedLinkDynamicImageHTML } = require("../templates/sharedLinkDynamicImageHTML");
 
 const createOrUpdate = async (req, res) => {
   try {
@@ -281,6 +284,57 @@ const create = async (req, res) => {
     if (payload.hidden) {
       await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
+
+      const suppression = await UserQuestSetting.aggregate([
+        {
+          $match: {
+            hidden: true,
+            questForeignKey: payload.questForeignKey,
+          },
+        },
+        {
+          $group: {
+            _id: "$hiddenMessage",
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            count: 1,
+            exceedsLimit: { $gte: ["$count", 5] },
+          },
+        },
+        {
+          $match: {
+            exceedsLimit: true,
+          },
+        },
+      ]);
+
+      // Checking if suppression array has any elements to avoid errors
+      const suppressionExists = suppression.length > 0;
+
+      // Get the first suppression if it exists (assumes only one result)
+      const firstSuppression = suppressionExists ? suppression[0] : null;
+
+      // The suppressed status depends on whether we have a suppression and if it meets the limit
+      const suppressed = suppressionExists;
+      const suppressedReason = firstSuppression ? firstSuppression._id : "";
+
+      // Properly setting the fields to update with $set
+      const resp = await InfoQuestQuestions.findOneAndUpdate(
+        { _id: payload.questForeignKey },
+        {
+          $set: {
+            suppressed,
+            suppressedReason,
+          },
+        },
+        { new: true } // Optionally return the updated document
+      );
+
+      console.log("Suppression Response", resp);
     } else if (payload.hidden === false) {
       await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
@@ -353,6 +407,59 @@ const update = async (req, res) => {
       await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
+
+    //QUERY TO CHECK SUPPRESSION OF post
+    const suppression = await UserQuestSetting.aggregate([
+      {
+        $match: {
+          hidden: true,
+          questForeignKey: payload.questForeignKey,
+        },
+      },
+      {
+        $group: {
+          _id: "$hiddenMessage",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          count: 1,
+          exceedsLimit: { $gte: ["$count", 5] },
+        },
+      },
+      {
+        $match: {
+          exceedsLimit: true,
+        },
+      },
+    ]);
+
+    // Checking if suppression array has any elements to avoid errors
+    const suppressionExists = suppression.length > 0;
+
+    // Get the first suppression if it exists (assumes only one result)
+    const firstSuppression = suppressionExists ? suppression[0] : null;
+
+    // The suppressed status depends on whether we have a suppression and if it meets the limit
+    const suppressed = suppressionExists;
+    const suppressedReason = firstSuppression ? firstSuppression._id : "";
+
+    // Properly setting the fields to update with $set
+    const resp = await InfoQuestQuestions.findOneAndUpdate(
+      { _id: payload.questForeignKey },
+      {
+        $set: {
+          suppressed,
+          suppressedReason,
+        },
+      },
+      { new: true } // Optionally return the updated document
+    );
+
+    console.log("Suppression Response", resp);
+
     return res.status(201).json({
       message: "UserQuestSetting Updated Successfully!",
       data: updatedUserQuestSetting,
@@ -559,70 +666,75 @@ const ledgerEntryRemoved = async (uuid, questOwnerUuid) => {
 //   }
 // };
 
-const s3ImageUploadToFrames = async (req, res) => {
+const sharedLinkDynamicImage = async (req, res) => {
   try {
-      // Check if a file was uploaded
-      if (!req.file) {
-          return res.status(400).json({ message: 'No file uploaded' });
-      }
+    console.log("Req body", req.body);
+    const { questStartData, link } = req.body;
 
-      // Check if the uploaded file is an image
-      if (!req.file.mimetype.startsWith('image/')) {
-          return res.status(400).json({ message: 'Uploaded file is not an image' });
-      }
+    // Generate a image name for the image file
+    const imgName = link + ".png";
 
-      // Pass the file information to the next layer for processing
-      const filePath = req.file.path;
-      const fileName = path.basename(filePath);
-      const fileBuffer = fs.readFileSync(filePath);
+    nodeHtmlToImage({
+      output: `./assets/uploads/images/${imgName}`,
+      html: sharedLinkDynamicImageHTML(questStartData),
+    })
+      .then(async () => {
+        console.log("The image was created successfully!");
 
-      const s3UploadData = await s3ImageUpload({
+        // Read the image file from the backend directory
+        const filePath = `./assets/uploads/images/${imgName}`;
+        const fileBuffer = fs.readFileSync(filePath);
+
+        // Upload the file to S3 bucket
+        const s3UploadData = await s3ImageUpload({
           fileBuffer,
-          fileName,
-      })
+          fileName: imgName,
+        });
 
-      if(!s3UploadData) throw new Error("File not uploaded");
+        if (!s3UploadData) throw new Error("File not uploaded");
 
-      console.log('s3UploadData', s3UploadData)
+        console.log("s3UploadData", s3UploadData);
 
-      const { imageName, s3Url } = s3UploadData;
+        const { imageName, s3Url } = s3UploadData;
 
-      //Delete File from Server After Uploading to S3
-      // Construct the local file location relative to the 'foundationBackend' directory
-      const localFileLocation = path.join(__dirname, '..', 'assets', 'uploads', 'images', fileName);
-
-      // Delete the file
-      fs.unlink(localFileLocation, (err) => {
+        // Delete the file from the backend directory after uploading to S3
+        fs.unlink(filePath, (err) => {
           if (err) {
-              console.error('Error deleting file:', err);
-              return;
+            console.error("Error deleting file:", err);
+            return;
           }
-          console.log('File deleted successfully');
-      });
+          console.log("File deleted successfully");
+        });
 
-      console.log(imageName);
-      
-      const userQuestSettingUpdate = await UserQuestSetting.findOneAndUpdate(
-        { link: req.body.link }, // Filter criteria: link matches req.body.link
-        { image: imageName }, // Update: set imageName to imageName
-        { new: true } // Options: return the updated document
-      );      
+        console.log(imageName);
 
-      // To check the record exist
-      if (!userQuestSettingUpdate) throw new Error("userQuestSetting not updated");
+        const userQuestSettingUpdate = await UserQuestSetting.findOneAndUpdate(
+          { link: req.body.link },
+          { image: s3Url },
+          { new: true }
+        );
 
-      // Return success response
-      return res.status(200).json({
-          message: 'Success',
+        if (!userQuestSettingUpdate)
+          throw new Error("userQuestSetting not updated");
+
+        return res.status(200).json({
+          success: true,
           imageName: imageName,
           s3Url: s3Url,
-          userQuestSetting: userQuestSettingUpdate
+          userQuestSetting: userQuestSettingUpdate,
+        });
+      })
+      .catch((error) => {
+        console.error("Error generating image:", error);
+        return res.status(500).json({
+          message: `An error occurred while generating image: ${error.message}`,
+        });
       });
   } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-          message: `An error occurred while uploading image: ${error.message}`,
-      });
+    console.error(error);
+    return res.status(500).json({
+      message: `An error occurred on shaedLinkDynamicImage: ${error.message}`,
+    });
   }
 };
 
