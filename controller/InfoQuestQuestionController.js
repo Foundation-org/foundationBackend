@@ -118,7 +118,7 @@ const deleteInfoQuestQuest = async (req, res) => {
 
     if(!infoQuest) return res.status(404).send("Info Quest not found");
 
-    if(infoQuest.interactingCounter >= 1) return res.status(404).send("Quest cannot be deleted"); // Not neccessry if we add the check at FE to remove the delete icon from those who have { usersAddTheirAns: true }
+    if(infoQuest.interactingCounter < 1) return res.status(404).send("Quest cannot be deleted"); // Not neccessry if we add the check at FE to remove the delete icon from those who have { usersAddTheirAns: true }
 
     // Delete and Save Info Quest
     infoQuest.isActive = false;
