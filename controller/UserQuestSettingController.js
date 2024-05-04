@@ -456,7 +456,8 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
           txTo: "dao",
           txAmount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
           txData: userQuestSetting_id,
-          // txDescription : "User creates a new quest"
+          txDate: Date.now(),
+          txDescription : "Quest Link Customized"
         });
         // Create Ledger
         await createLedger({
@@ -466,9 +467,10 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
           txAuth: "DAO",
           txFrom: uuid,
           txTo: "DAO Treasury",
-          txAmount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
-          // txData : createdQuestion._id,
-          // txDescription : "Incentive for creating a quest"
+          txAmount: 0,
+          txData: userQuestSetting_id,
+          txDate: Date.now(),
+          txDescription : "Quest Link Customized"
         });
         // Increment the Treasury
         await updateTreasury({ amount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT, inc: true });
