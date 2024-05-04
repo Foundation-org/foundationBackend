@@ -12,7 +12,6 @@ const fs = require('fs');
 const { updateUserBalance } = require("../utils/userServices");
 const { updateTreasury } = require("../utils/treasuryService");
 const { USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT } = require('../constants/index');
-const fs = require("fs");
 const nodeHtmlToImage = require("node-html-to-image");
 const { sharedLinkDynamicImageHTML } = require("../templates/sharedLinkDynamicImageHTML");
 
@@ -745,7 +744,7 @@ module.exports = {
   link,
   impression,
   status,
-  s3ImageUploadToFrames,
-  ledgerDeductionPostLinkCustomized
+  ledgerDeductionPostLinkCustomized,
+  sharedLinkDynamicImage
   // get,
 };
