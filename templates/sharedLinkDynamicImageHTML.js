@@ -1,9 +1,5 @@
-const sharedLinkDynamicImageHTML = async (questStartData) => {
-    try {
-        return
-        `
-        
-  
+const sharedLinkDynamicImageHTML = (questStartData) => {
+  const html = `
   <!DOCTYPE html>
   <html>
     <head>
@@ -147,7 +143,7 @@ const sharedLinkDynamicImageHTML = async (questStartData) => {
           <div class="flex items-center gap-[14.36px]">
           <!-- <img src="./post-e.svg" alt="post-e" class="w-full h-[23px]" /> -->
         ${questStartData?.moderationRatingCount === 0 ? (
-                `<svg
+      `<svg
               width="23"
               height="23"
               viewBox="0 0 23 23"
@@ -169,8 +165,8 @@ const sharedLinkDynamicImageHTML = async (questStartData) => {
                 fill="white"
               />
             </svg>`
-            ) : (
-                `<svg
+    ) : (
+      `<svg
               width="36"
               height="35"
               viewBox="0 0 36 35"
@@ -192,8 +188,8 @@ const sharedLinkDynamicImageHTML = async (questStartData) => {
                 fill="white"
               />
             </svg>`
-            )
-            }
+    )
+    }
           
             <h1
               class="relative font-medium text-[#9A9A9A] text-[1.2rem] leading-[1.2rem]"
@@ -223,15 +219,11 @@ const sharedLinkDynamicImageHTML = async (questStartData) => {
       </div>
     </body>
   </html>
-  `
+  `;
 
-    } catch (error) {
-        return res.status(500).json({
-            message: `An error occurred on shaedLinkDynamicImage: ${error.message}`,
-        });
-    }
+  return html;
 };
 
 module.exports = {
-    sharedLinkDynamicImageHTML
+  sharedLinkDynamicImageHTML
 };

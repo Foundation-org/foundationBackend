@@ -10,7 +10,7 @@ const path = require("path");
 const { s3ImageUpload } = require("../utils/uploadS3Bucket");
 const fs = require("fs");
 const nodeHtmlToImage = require("node-html-to-image");
-const sharedLinkDynamicImageHTML = require("../templates/sharedLinkDynamicImageHTML");
+const { sharedLinkDynamicImageHTML } = require("../templates/sharedLinkDynamicImageHTML");
 
 const createOrUpdate = async (req, res) => {
   try {
