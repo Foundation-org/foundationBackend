@@ -453,7 +453,7 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
           txID: crypto.randomBytes(11).toString("hex"),
           txAuth: "User",
           txFrom: uuid,
-          txTo: "dao",
+          txTo: "DAO Treasury",
           txAmount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
           txData: userQuestSetting_id,
           txDate: Date.now(),
