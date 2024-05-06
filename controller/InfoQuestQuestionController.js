@@ -1231,7 +1231,6 @@ const getQuestsAll = async (req, res) => {
   // Check if it's not the "Hidden" or "SharedLink" page and if it's the first page
   if ((Page !== "Hidden" && Page !== "SharedLink") && page === 1) {
     // Calculate the index to insert the notification
-    const notificationIndex = Math.min(result1.length, 4);
 
     // Create a notification object
     const notification = {
@@ -1244,13 +1243,24 @@ const getQuestsAll = async (req, res) => {
       "heading": "Lorem Ipsum",
       "content": "Did you know? Lorem Ipsum is simply dummy text of...",
       "details": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      "url": "https://youtube.com/",
-      "timestamp": new Date().toISOString()
+      "buttons": [
+        {
+          "youtube": "https://www.youtube.com/",
+        },
+        {
+          "foundation": "https://development.on.foundation/",
+        },
+        {
+          "linkedin": "linkedin.com",
+        },
+      ],
+      "timestamp": new Date().toISOString(),
+      "priority": Math.floor(Math.random() * 5) // Generate random priority from 0 to 4
     };
-
-    // Insert the notification object at the calculated index
-    result1.splice(notificationIndex, 0, notification);
-  }
+  
+    // Insert the notification object at the calculated index based on priority
+    result1.splice(notification.priority, 0, notification);
+  }  
   
   res.status(200).json({
     data: result1,
