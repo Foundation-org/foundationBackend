@@ -174,7 +174,6 @@ const deleteInfoQuestQuest = async (req, res) => {
   }
 }
 
-
 const constraintForUniqueQuestion = async (req, res) => {
   try {
     // Get the question from the query parameters and convert it to lowercase
@@ -2004,5 +2003,4 @@ module.exports = {
   getFlickerUrl,
   getQuestsAll,
   suppressPost,
-  deleteInfoQuestQuest
 };
