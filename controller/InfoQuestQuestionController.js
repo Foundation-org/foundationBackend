@@ -1158,7 +1158,7 @@ const getQuestsAll = async (req, res) => {
 
   // Create a notification object
   const notification = {
-    "id": "notification_1",
+    "id": "system_notification",
     "author": {
       "id": "system_notification",
       "name": "System Notification",
