@@ -1314,7 +1314,7 @@ const getQuestsAll = async (req, res) => {
         },
       ],
       "timestamp": new Date().toISOString(),
-      "priority": Math.floor(Math.random() * 5) // Generate random priority from 0 to 4
+      "priority": Math.floor(Math.random() * 4) + 1 // Generate random priority from 1 to 4
     };
   
     // Insert the notification object at the calculated index based on priority
