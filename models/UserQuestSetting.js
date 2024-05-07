@@ -21,6 +21,10 @@ const UserQuestSetting = mongoose.Schema(
       default: "",
       // default: shortLink.generate(8)
     },
+    linkCustomized: {
+      type: Boolean,
+      default: false
+    },
     data: {
       type: Array,
     },
