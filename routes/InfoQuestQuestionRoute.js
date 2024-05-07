@@ -354,7 +354,8 @@ router.get(
   InfoQuestQuestionController.getFlickerUrl
 );
 
-router.get("/getQuestsAll",
+router.get(
+  "/getQuestsAll",
   /**
    * @swagger
    * /infoquestions/getQuestsAll:
@@ -401,7 +402,7 @@ router.get("/getQuestsAll",
    *         name: Page
    *         schema:
    *           type: string
-   *           enum: [Bookmark, Hidden, SharedLink]
+   *           enum: [Bookmark, Hidden, SharedLink,Feedback]
    *         description: Page criteria for quests.
    *       - in: query
    *         name: terms
@@ -467,6 +468,7 @@ router.get("/getQuestsAll",
    *       '500':
    *         description: Internal server error. Failed to retrieve quests.
    */
-  InfoQuestQuestionController.getQuestsAll);
+  InfoQuestQuestionController.getQuestsAll
+);
 
 module.exports = router;
