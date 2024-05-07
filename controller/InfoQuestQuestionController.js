@@ -1298,28 +1298,16 @@ const getQuestsAll = async (req, res) => {
     // Create a notification object
     const notification = {
       id: "system_notification",
-      author: {
-        id: "system_notification",
-        name: "System Notification",
-        profile_picture: "",
-      },
-      heading: "Lorem Ipsum",
-      content: "Did you know? Lorem Ipsum is simply dummy text of...",
-      details:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      buttons: [
-        {
-          youtube: "https://www.youtube.com/",
-        },
-        {
-          foundation: "https://development.on.foundation/",
-        },
-        {
-          linkedin: "linkedin.com",
-        },
-      ],
+      icon: "",
+      header: "Did you know? Lorem Ipsum is simply dummy text of...",
+      text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      buttonText: "Youtube",
+      buttonUrl: "https://www.youtube.com/",
+      category: "Home",
+      position: "Feed",
+      priority: Math.floor(Math.random() * 4) + 1, // Generate random priority from 1 to 4
+      mode: "User",
       timestamp: new Date().toISOString(),
-      priority: Math.floor(Math.random() * 5), // Generate random priority from 0 to 4
     };
 
     // Insert the notification object at the calculated index based on priority
