@@ -1220,49 +1220,48 @@ const getQuestsAll = async (req, res) => {
     } else {
       resultArray[i]._doc.bookmark = false;
     }
-    console.log("item id", i, item._doc._id);
 
-    // if (Page === "Feedback") {
-    const suppression = await UserQuestSetting.aggregate([
-      {
-        $match: {
-          hidden: true,
-          questForeignKey: item._doc._id.toString(),
+    if (Page === "Feedback") {
+      const suppression = await UserQuestSetting.aggregate([
+        {
+          $match: {
+            hidden: true,
+            questForeignKey: item._doc._id.toString(),
+          },
         },
-      },
-      {
-        $group: {
-          _id: "$hiddenMessage",
-          count: { $sum: 1 },
+        {
+          $group: {
+            _id: "$hiddenMessage",
+            count: { $sum: 1 },
+          },
         },
-      },
-    ]);
-    let feedback = [];
-    if (suppression) {
-      suppression.map((item) => {
-        suppressConditions.forEach((condition) => {
-          if (item._id === condition.id && item.count > condition.minCount) {
-            feedback.push({
-              id: item._id,
-              count: item.count,
-              violated: true,
-            });
-          } else if (item._id === condition.id) {
-            feedback.push({
-              id: item._id,
-              count: item.count,
-              violated: false,
-            });
-          }
+      ]);
+      let feedback = [];
+      if (suppression) {
+        suppression.map((item) => {
+          suppressConditions.forEach((condition) => {
+            if (item._id === condition.id && item.count > condition.minCount) {
+              feedback.push({
+                id: item._id,
+                count: item.count,
+                violated: true,
+              });
+            } else if (item._id === condition.id) {
+              feedback.push({
+                id: item._id,
+                count: item.count,
+                violated: false,
+              });
+            }
+          });
         });
+      }
+      resultArray[i]._doc.feedback = feedback;
+      resultArray[i]._doc.hiddenCount = await UserQuestSetting.countDocuments({
+        hidden: true,
+        questForeignKey: item._doc._id,
       });
     }
-    resultArray[i]._doc.feedback = feedback;
-    resultArray[i]._doc.hiddenCount = await UserQuestSetting.countDocuments({
-      hidden: true,
-      questForeignKey: item._doc._id,
-    });
-    // }
   }
 
   const desiredArray = resultArray.map((item) => ({
