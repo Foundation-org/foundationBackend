@@ -214,8 +214,8 @@ app.get('/api/test/img', async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'image/png' });
     res.end(image, 'binary');
   } catch (error) {
-    console.error('Error generating image:', error);
-    res.status(500).send('Internal Server Error');
+    console.error('Error generating get image:', error);
+    res.status(500).send(`Internal Server Error: ${error.message}`);
   }
 });
 
