@@ -869,7 +869,7 @@ const getQuestsAll = async (req, res) => {
   let allQuestions = [];
   let filterObj = {};
   let totalQuestionsCount;
-  filterObj.suppressed = true;
+  filterObj.suppressed = false;
 
   if (filter === "true") {
     console.log("filter");
@@ -1254,7 +1254,7 @@ const getQuestsAll = async (req, res) => {
         });
       }
       resultArray[i]._doc.feedback = feedback;
-      resultArray[i]._doc.hiddenCount = await userQuestSetting.countDocuments({
+      resultArray[i]._doc.hiddenCount = await UserQuestSetting.countDocuments({
         hidden: true,
         questForeignKey: item._doc._id,
       });
@@ -1289,8 +1289,12 @@ const getQuestsAll = async (req, res) => {
   const result1 = await getQuestionsWithUserSettings(result, uuid);
 
   // Check if it's not the "Hidden" or "SharedLink" page and if it's the first page
-  if (Page !== "Hidden" && Page !== "SharedLink" && page === 1) {
-
+  if (
+    Page !== "Hidden" &&
+    Page !== "SharedLink" &&
+    Page !== "Feedback" &&
+    page === 1
+  ) {
     // Create a notification object
     const notification = {
       id: "system_notification",
@@ -1305,11 +1309,11 @@ const getQuestsAll = async (req, res) => {
       mode: "User",
       timestamp: new Date().toISOString(),
     };
-  
+
     // Insert the notification object at the calculated index based on priority
     result1.splice(notification.priority, 0, notification);
-  }  
-  
+  }
+
   res.status(200).json({
     data: result1,
     hasNextPage: nextPage,
