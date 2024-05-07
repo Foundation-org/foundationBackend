@@ -235,6 +235,26 @@ const userSchema = mongoose.Schema(
       enum: ["guest", "user"],
       default: "guest",
     },
+    userSettings: {
+      darkMode: {
+        type: Boolean,
+        default: false,
+      },
+      defaultSort: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    notificationSettings: {
+      emailNotifications: {
+        type: Boolean,
+        default: false,
+      },
+      systemNotifications: {
+        type: Boolean,
+        default: true,
+      },
+    }
   },
   { timestamps: true }
 );
