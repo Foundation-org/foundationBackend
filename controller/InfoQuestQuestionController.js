@@ -869,7 +869,7 @@ const getQuestsAll = async (req, res) => {
   let allQuestions = [];
   let filterObj = {};
   let totalQuestionsCount;
-  filterObj.suppressed = true;
+  filterObj.suppressed = false;
 
   if (filter === "true") {
     console.log("filter");
