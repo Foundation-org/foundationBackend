@@ -133,6 +133,14 @@ const customLink = async (req, res) => {
     const userQuestSettingAlreadyExist = await UserQuestSetting.findOne({ link: payload.link });
     if (userQuestSettingAlreadyExist) return res.status(409).json({ message: `This link cannot be used, Try something unique like ${shortLink.generate(8)}` });
 
+    // Check if link already customized
+    const linkCustomized = await UserQuestSetting.findOne({
+      uuid: payload.uuid,
+      questForeignKey: payload.questForeignKey,
+      linkCustomized: true
+    });
+    if (linkCustomized) return res.status(409).json({ message: `Link is already Customized.` });
+
     // As link is unique Create Ledger and Proceed Normally like before with custom link.
     await ledgerDeductionPostLinkCustomized(payload.uuid)
 
@@ -151,7 +159,8 @@ const customLink = async (req, res) => {
         },
         {
           $set: {
-            link: payload.link
+            link: payload.link,
+            linkCustomized: true
           }
         },
         {
@@ -596,7 +605,7 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
     // Create Ledger
     await createLedger({
       uuid: uuid,
-      txUserAction: "linkCreated",
+      txUserAction: "postLinkCreatedCustom",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: uuid,
@@ -609,7 +618,7 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
     // Create Ledger
     await createLedger({
       uuid: uuid,
-      txUserAction: "linkCreated",
+      txUserAction: "postLinkCreatedCustom",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: "DAO Treasury",
