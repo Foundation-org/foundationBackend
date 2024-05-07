@@ -1289,7 +1289,12 @@ const getQuestsAll = async (req, res) => {
   const result1 = await getQuestionsWithUserSettings(result, uuid);
 
   // Check if it's not the "Hidden" or "SharedLink" page and if it's the first page
-  if (Page !== "Hidden" && Page !== "SharedLink" && page === 1) {
+  if (
+    Page !== "Hidden" &&
+    Page !== "SharedLink" &&
+    Page !== "Feedback" &&
+    page === 1
+  ) {
     // Create a notification object
     const notification = {
       id: "system_notification",
