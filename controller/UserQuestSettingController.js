@@ -142,6 +142,13 @@ const customLink = async (req, res) => {
         )}`,
       });
 
+    const user = await UserModel.findOne({ uuid: req.body.uuid });
+    if (user.balance < 2.5) {
+      return res.status(409).json({
+        message: `Insufficient balance`,
+      });
+    }
+
     // As link is unique Create Ledger and Proceed Normally like before with custom link.
     await ledgerDeductionPostLinkCustomized(payload.uuid);
 
