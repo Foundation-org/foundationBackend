@@ -8,10 +8,12 @@ const AWS = require("aws-sdk");
 const { uploadS3Bucket } = require("../utils/uploadS3Bucket");
 const path = require("path");
 const { s3ImageUpload } = require("../utils/uploadS3Bucket");
-const fs = require('fs');
+const fs = require("fs");
 const { updateUserBalance } = require("../utils/userServices");
 const { updateTreasury } = require("../utils/treasuryService");
-const { USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT } = require('../constants/index');
+const {
+  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+} = require("../constants/index");
 const nodeHtmlToImage = require("node-html-to-image");
 const {
   sharedLinkDynamicImageHTML,
@@ -130,8 +132,22 @@ const customLink = async (req, res) => {
     const payload = req.body;
 
     // Check if link already exist
-    const userQuestSettingAlreadyExist = await UserQuestSetting.findOne({ link: payload.link });
-    if (userQuestSettingAlreadyExist) return res.status(409).json({ message: `This link cannot be used, Try something unique like ${shortLink.generate(8)}` });
+    const userQuestSettingAlreadyExist = await UserQuestSetting.findOne({
+      link: payload.link,
+    });
+    if (userQuestSettingAlreadyExist)
+      return res.status(409).json({
+        message: `This link cannot be used, Try something unique like ${shortLink.generate(
+          8
+        )}`,
+      });
+
+    const user = await UserModel.findOne({ uuid: req.body.uuid });
+    if (user.balance < 2.5) {
+      return res.status(409).json({
+        message: `Insufficient balance`,
+      });
+    }
 
     // Check if link already customized
     const linkCustomized = await UserQuestSetting.findOne({
@@ -142,7 +158,7 @@ const customLink = async (req, res) => {
     if (linkCustomized) return res.status(409).json({ message: `Link is already Customized.` });
 
     // As link is unique Create Ledger and Proceed Normally like before with custom link.
-    await ledgerDeductionPostLinkCustomized(payload.uuid)
+    await ledgerDeductionPostLinkCustomized(payload.uuid);
 
     const userQuestSettingExist = await UserQuestSetting.findOne({
       uuid: payload.uuid,
@@ -251,12 +267,13 @@ const status = async (req, res) => {
       return res.status(404).json({ message: "Share link not found" });
     }
     return res.status(200).json({
-      message: `Share link ${status === "Disable"
-        ? "Disabled"
-        : status === "Delete"
+      message: `Share link ${
+        status === "Disable"
+          ? "Disabled"
+          : status === "Delete"
           ? "Deleted"
           : "Enabled"
-        } Successfully`,
+      } Successfully`,
       data: updatedUserQuestSetting,
     });
   } catch (error) {
@@ -370,10 +387,17 @@ const create = async (req, res) => {
       let suppressedReason = "";
 
       if (suppression) {
-        suppressConditions.forEach((condition) => {
-          if (item._id === condition.id && item.count > condition.minCount) {
-            isSuppressed = true; // Set suppressed flag to true
-            suppressedReason.push(condition.id);
+        suppression.map((item) => {
+          if (suppression) {
+            suppressConditions.forEach((condition) => {
+              if (
+                item._id === condition.id &&
+                item.count > condition.minCount
+              ) {
+                isSuppressed = true;
+                suppressedReason.push(condition.id);
+              }
+            });
           }
         });
       }
@@ -613,7 +637,7 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
       txAmount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
       txData: userQuestSetting_id,
       txDate: Date.now(),
-      txDescription: "Quest Link Customized"
+      txDescription: "Quest Link Customized",
     });
     // Create Ledger
     await createLedger({
@@ -626,10 +650,13 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
       txAmount: 0,
       txData: userQuestSetting_id,
       txDate: Date.now(),
-      txDescription: "Quest Link Customized"
+      txDescription: "Quest Link Customized",
     });
     // Increment the Treasury
-    await updateTreasury({ amount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT, inc: true });
+    await updateTreasury({
+      amount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+      inc: true,
+    });
     // Decrement the UserBalance
     await updateUserBalance({
       uuid: uuid,
@@ -796,6 +823,6 @@ module.exports = {
   status,
   ledgerDeductionPostLinkCustomized,
   sharedLinkDynamicImage,
-  customLink
+  customLink,
   // get,
 };

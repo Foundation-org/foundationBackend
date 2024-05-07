@@ -735,7 +735,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
@@ -755,7 +754,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
@@ -782,7 +780,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     allQuestions = await InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
-      suppressed: false,
     })
       // .sort({ createdAt: -1 })
       .sort(
@@ -800,7 +797,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     totalQuestionsCount = await InfoQuestQuestions.countDocuments({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
-      suppressed: false,
     });
   }
 
@@ -998,7 +994,7 @@ const getQuestsAll = async (req, res) => {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
         ...filterObj,
-        suppressed: false,
+
         moderationRatingCount: {
           $gte: moderationRatingInitial,
           $lte: moderationRatingFinal,
@@ -1032,7 +1028,6 @@ const getQuestsAll = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
@@ -1052,7 +1047,6 @@ const getQuestsAll = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
@@ -1097,7 +1091,6 @@ const getQuestsAll = async (req, res) => {
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
       isActive: true,
-      suppressed: false,
     });
 
     query = query.sort(
@@ -1118,7 +1111,6 @@ const getQuestsAll = async (req, res) => {
     totalQuestionsCount = await InfoQuestQuestions.countDocuments({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
-      suppressed: false,
     });
   }
   console.log("allQuestionsData", allQuestions.length);
@@ -1208,7 +1200,7 @@ const getQuestsAll = async (req, res) => {
 
   for (let i = 0; i < resultArray.length; i++) {
     const item = resultArray[i];
-    // console.log('item', item)
+    console.log("item", item);
     const bookmarkDoc = await BookmarkQuests.findOne({
       questForeignKey: item._doc._id,
       uuid,
@@ -1226,7 +1218,7 @@ const getQuestsAll = async (req, res) => {
         {
           $match: {
             hidden: true,
-            questForeignKey: item._doc._id,
+            questForeignKey: item._doc._id.toString(),
           },
         },
         {
@@ -1237,29 +1229,23 @@ const getQuestsAll = async (req, res) => {
         },
       ]);
       let feedback = [];
-
       if (suppression) {
         suppression.map((item) => {
-          if (suppression) {
-            suppressConditions.forEach((condition) => {
-              if (
-                item._id === condition.id &&
-                item.count > condition.minCount
-              ) {
-                feedback.push({
-                  id: item._id,
-                  count: item.count,
-                  violated: true,
-                });
-              } else {
-                feedback.push({
-                  id: item._id,
-                  count: item.count,
-                  violated: false,
-                });
-              }
-            });
-          }
+          suppressConditions.forEach((condition) => {
+            if (item._id === condition.id && item.count > condition.minCount) {
+              feedback.push({
+                id: item._id,
+                count: item.count,
+                violated: true,
+              });
+            } else if (item._id === condition.id) {
+              feedback.push({
+                id: item._id,
+                count: item.count,
+                violated: false,
+              });
+            }
+          });
         });
       }
       resultArray[i]._doc.feedback = feedback;
@@ -1382,7 +1368,6 @@ const getAllQuestsWithResult = async (req, res) => {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
         ...filterObj,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
