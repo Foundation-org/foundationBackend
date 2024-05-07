@@ -735,7 +735,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
@@ -755,7 +754,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
@@ -782,7 +780,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     allQuestions = await InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
-      suppressed: false,
     })
       // .sort({ createdAt: -1 })
       .sort(
@@ -800,7 +797,6 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     totalQuestionsCount = await InfoQuestQuestions.countDocuments({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
-      suppressed: false,
     });
   }
 
@@ -998,7 +994,7 @@ const getQuestsAll = async (req, res) => {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
         ...filterObj,
-        suppressed: false,
+
         moderationRatingCount: {
           $gte: moderationRatingInitial,
           $lte: moderationRatingFinal,
@@ -1032,7 +1028,6 @@ const getQuestsAll = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
@@ -1052,7 +1047,6 @@ const getQuestsAll = async (req, res) => {
     const mapPromises = Questions.map(async function (record) {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
@@ -1097,7 +1091,6 @@ const getQuestsAll = async (req, res) => {
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
       isActive: true,
-      suppressed: false,
     });
 
     query = query.sort(
@@ -1118,7 +1111,6 @@ const getQuestsAll = async (req, res) => {
     totalQuestionsCount = await InfoQuestQuestions.countDocuments({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
-      suppressed: false,
     });
   }
   console.log("allQuestionsData", allQuestions.length);
@@ -1376,7 +1368,6 @@ const getAllQuestsWithResult = async (req, res) => {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
         ...filterObj,
-        suppressed: false,
       }).populate("getUserBadge", "badges");
     });
 
