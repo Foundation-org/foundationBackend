@@ -1240,26 +1240,21 @@ const getQuestsAll = async (req, res) => {
 
       if (suppression) {
         suppression.map((item) => {
-          if (suppression) {
-            suppressConditions.forEach((condition) => {
-              if (
-                item._id === condition.id &&
-                item.count > condition.minCount
-              ) {
-                feedback.push({
-                  id: item._id,
-                  count: item.count,
-                  violated: true,
-                });
-              } else {
-                feedback.push({
-                  id: item._id,
-                  count: item.count,
-                  violated: false,
-                });
-              }
-            });
-          }
+          suppressConditions.forEach((condition) => {
+            if (item._id === condition.id && item.count > condition.minCount) {
+              feedback.push({
+                id: item._id,
+                count: item.count,
+                violated: true,
+              });
+            } else {
+              feedback.push({
+                id: item._id,
+                count: item.count,
+                violated: false,
+              });
+            }
+          });
         });
       }
       resultArray[i]._doc.feedback = feedback;
