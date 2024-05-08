@@ -559,6 +559,8 @@ const updateUserSettings = async (req, res) => {
     // Update user settings
     user.userSettings.darkMode = req.body.darkMode;
     user.userSettings.defaultSort = req.body.defaultSort;
+    user.notificationSettings.systemNotifications = req.body.systemNotifications;
+    user.notificationSettings.emailNotifications = req.body.emailNotifications;
     await user.save();
 
     // Respond with updated user settings
