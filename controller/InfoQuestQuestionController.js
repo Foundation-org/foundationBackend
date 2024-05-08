@@ -1055,6 +1055,8 @@ const getQuestsAll = async (req, res) => {
   } else if (Page === "Feedback") {
     allQuestions = await InfoQuestQuestions.find({
       uuid: uuid,
+      ...filterObj,
+      isActive: true,
     })
       .populate("getUserBadge", "badges")
       .sort({ createdAt: -1 })
