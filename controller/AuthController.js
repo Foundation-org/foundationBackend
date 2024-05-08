@@ -1149,7 +1149,11 @@ const getInstaToken = async (req, res) => {
       }
     );
 
-    console.log("Instagram API Response:", response.data);
+    const data = await axios.get(
+      `https://graph.instagram.com/me?fields=id,username&access_token=${response.data.accessToken}`
+    );
+
+    console.log("Instagram API Response:", data);
     res.json(response.data);
   } catch (error) {
     console.error("Error:", error.message);

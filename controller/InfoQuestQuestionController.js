@@ -1062,9 +1062,10 @@ const getQuestsAll = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(pageSize)
       .skip(skip);
-    totalQuestionsCount = await UserQuestSetting.countDocuments({
+    totalQuestionsCount = await InfoQuestQuestions.countDocuments({
       uuid: uuid,
-      suppressed: true,
+      ...filterObj,
+      isActive: true,
     });
   } else {
     // moderation filter
@@ -1250,11 +1251,15 @@ const getQuestsAll = async (req, res) => {
           });
         });
       }
-      resultArray[i]._doc.feedback = feedback;
-      resultArray[i]._doc.hiddenCount = await UserQuestSetting.countDocuments({
-        hidden: true,
-        questForeignKey: item._doc._id,
-      });
+      if (feedback.length > 0) {
+        resultArray[i]._doc.feedback = feedback;
+        resultArray[i]._doc.hiddenCount = await UserQuestSetting.countDocuments(
+          {
+            hidden: true,
+            questForeignKey: item._doc._id,
+          }
+        );
+      }
     }
   }
 
