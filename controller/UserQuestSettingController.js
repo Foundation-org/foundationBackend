@@ -15,6 +15,7 @@ const {
   USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
 } = require("../constants/index");
 const nodeHtmlToImage = require("node-html-to-image");
+const puppeteer = require('puppeteer');
 const {
   sharedLinkDynamicImageHTML,
 } = require("../templates/sharedLinkDynamicImageHTML");
@@ -750,9 +751,16 @@ const sharedLinkDynamicImage = async (req, res) => {
     // Generate a image name for the image file
     const imgName = link + ".png";
 
+    // Set Puppeteer options with --no-sandbox flag
+    const puppeteerOptions = {
+      args: ['--no-sandbox'],
+    };
+
+
     nodeHtmlToImage({
       output: `./assets/uploads/images/${imgName}`,
       html: sharedLinkDynamicImageHTML(questStartData),
+      puppeteerArgs: puppeteerOptions,
     })
       .then(async () => {
         console.log("The image was created successfully!");
