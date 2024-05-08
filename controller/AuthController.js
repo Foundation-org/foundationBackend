@@ -1148,7 +1148,7 @@ const getInstaToken = async (req, res) => {
     );
 
     const data = await axios.get(
-      `https://graph.instagram.com/me?fields=id,username&access_token=${response.data.accessToken}`
+      `https://graph.instagram.com/me?fields=id,username&access_token=${response.data.access_token}`
     );
 
     console.log("Instagram API Response:", data);
