@@ -571,6 +571,31 @@ const updateUserSettings = async (req, res) => {
   }
 };
 
+const updateSystemNotificationSettings = async (req, res) => {
+  try {
+    // Find the user by uuid
+    let user = await User.findOne({ uuid: req.body.uuid });
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update user settings
+    user.notificationSettings.systemNotifications = req.body.systemNotifications;
+    user.notificationSettings.emailNotifications = req.body.emailNotifications;
+    await user.save();
+
+    // Respond with updated system notification settings
+    res.status(200).json(user.notificationSettings);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while updating system notification settings: ${error.message}`,
+    });
+  }
+};
+
 const userInfo = async (req, res) => {
   try {
     const user = await User.findOne({
@@ -1263,4 +1288,5 @@ module.exports = {
   getInstaToken,
   getLinkedInUserInfo,
   updateUserSettings,
+  updateSystemNotificationSettings
 };
