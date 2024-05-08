@@ -14,7 +14,8 @@ const passport = require("passport");
  *   description: Endpoints for user authentication
  */
 
-router.put("/changePassword",
+router.put(
+  "/changePassword",
   /**
    * @swagger
    * /user/changePassword:
@@ -40,7 +41,8 @@ router.put("/changePassword",
   AuthController.changePassword
 );
 
-router.post("/signUpUser",
+router.post(
+  "/signUpUser",
   /**
    * @swagger
    * /user/signUpUser:
@@ -66,7 +68,8 @@ router.post("/signUpUser",
   AuthController.signUpUser
 );
 
-router.post("/signUpUser/social",
+router.post(
+  "/signUpUser/social",
   /**
    * @swagger
    * /user/signUpUser/social:
@@ -92,7 +95,8 @@ router.post("/signUpUser/social",
   AuthController.signUpUserBySocialLogin
 );
 
-router.post("/signInUser/social",
+router.post(
+  "/signInUser/social",
   /**
    * @swagger
    * /user/signInUser/social:
@@ -118,7 +122,8 @@ router.post("/signInUser/social",
   AuthController.signInUserBySocialLogin
 );
 
-router.post("/signInUser",
+router.post(
+  "/signInUser",
   /**
    * @swagger
    * /user/signInUser:
@@ -146,7 +151,8 @@ router.post("/signInUser",
   AuthController.signInUser
 );
 
-router.post("/send/email",
+router.post(
+  "/send/email",
   /**
    * @swagger
    * /user/send/email:
@@ -172,7 +178,8 @@ router.post("/send/email",
   AuthController.sendEmail
 );
 
-router.post("/create/guestMode",
+router.post(
+  "/create/guestMode",
   /**
    * @swagger
    * /user/create/guestMode:
@@ -198,7 +205,8 @@ router.post("/create/guestMode",
   AuthController.createGuestMode
 );
 
-router.post("/signUp/guestMode",
+router.post(
+  "/signUp/guestMode",
   /**
    * @swagger
    * /user/signUp/guestMode:
@@ -224,7 +232,8 @@ router.post("/signUp/guestMode",
   AuthController.signUpGuestMode
 );
 
-router.post("/signUpSocial/guestMode",
+router.post(
+  "/signUpSocial/guestMode",
   /**
    * @swagger
    * /user/signUpSocial/guestMode:
@@ -250,7 +259,10 @@ router.post("/signUpSocial/guestMode",
   AuthController.signUpSocialGuestMode
 );
 
-router.post("/userInfo",
+router.post("/updateUserSettings", AuthController.updateUserSettings);
+
+router.post(
+  "/userInfo",
   /**
    * @swagger
    * /user/userInfo:
@@ -276,7 +288,8 @@ router.post("/userInfo",
   AuthController.userInfo
 );
 
-router.post("/userInfoById",
+router.post(
+  "/userInfoById",
   /**
    * @swagger
    * /user/userInfoById:
@@ -302,7 +315,8 @@ router.post("/userInfoById",
   AuthController.userInfoById
 );
 
-router.put("/setUserWallet",
+router.put(
+  "/setUserWallet",
   /**
    * @swagger
    * /user/setUserWallet:
@@ -328,7 +342,8 @@ router.put("/setUserWallet",
   AuthController.setUserWallet
 );
 
-router.put("/signedUuid",
+router.put(
+  "/signedUuid",
   /**
    * @swagger
    * /user/signedUuid:
@@ -354,7 +369,8 @@ router.put("/signedUuid",
   AuthController.signedUuid
 );
 
-router.post("/sendVerifyEmail",
+router.post(
+  "/sendVerifyEmail",
   /**
    * @swagger
    * /user/sendVerifyEmail:
@@ -380,7 +396,8 @@ router.post("/sendVerifyEmail",
   AuthController.sendVerifyEmail
 );
 
-router.post("/verify",
+router.post(
+  "/verify",
   /**
    * @swagger
    * /user/verify:
@@ -407,7 +424,8 @@ router.post("/verify",
   AuthController.verify
 );
 
-router.post("/authenticateJWT",
+router.post(
+  "/authenticateJWT",
   /**
    * @swagger
    * /user/authenticateJWT:
@@ -433,7 +451,8 @@ router.post("/authenticateJWT",
   AuthController.AuthenticateJWT
 );
 
-router.post("/referral",
+router.post(
+  "/referral",
   /**
    * @swagger
    * /user/referral:
@@ -461,7 +480,8 @@ router.post("/referral",
   AuthController.verifyReferralCode
 );
 
-router.delete("/delete/:uuid",
+router.delete(
+  "/delete/:uuid",
   /**
    * @swagger
    * /user/delete/{uuid}:
@@ -488,7 +508,8 @@ router.delete("/delete/:uuid",
   AuthController.deleteByUUID
 );
 
-router.post("/logout",
+router.post(
+  "/logout",
   /**
    * @swagger
    * /user/logout:
@@ -506,7 +527,8 @@ router.post("/logout",
   AuthController.logout
 );
 
-router.post("/setStates",
+router.post(
+  "/setStates",
   /**
    * @swagger
    * /user/setStates:
@@ -532,7 +554,8 @@ router.post("/setStates",
   AuthController.setStates
 );
 
-router.post("/setBookmarkStates",
+router.post(
+  "/setBookmarkStates",
   /**
    * @swagger
    * /user/setBookmarkStates:
@@ -558,7 +581,8 @@ router.post("/setBookmarkStates",
   AuthController.setBookmarkStates
 );
 
-router.delete("/badge/:id/:uuid",
+router.delete(
+  "/badge/:id/:uuid",
   /**
    * @swagger
    * /user/badge/{id}/{uuid}:
@@ -591,7 +615,8 @@ router.delete("/badge/:id/:uuid",
   AuthController.deleteBadgeById
 );
 
-router.post("/get-insta-token",
+router.post(
+  "/get-insta-token",
   /**
    * @swagger
    * /user/get-insta-token:
@@ -609,7 +634,8 @@ router.post("/get-insta-token",
   AuthController.getInstaToken
 );
 
-router.post("/getLinkedInUserInfo",
+router.post(
+  "/getLinkedInUserInfo",
   /**
    * @swagger
    * /user/getLinkedInUserInfo:
