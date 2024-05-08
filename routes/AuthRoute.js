@@ -261,8 +261,6 @@ router.post(
 
 router.post("/updateUserSettings", AuthController.updateUserSettings);
 
-router.post("/updateSystemNotificationSettings", AuthController.updateSystemNotificationSettings);
-
 router.post(
   "/userInfo",
   /**
