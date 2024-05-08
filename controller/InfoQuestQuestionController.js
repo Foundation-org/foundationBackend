@@ -1251,7 +1251,7 @@ const getQuestsAll = async (req, res) => {
           });
         });
       }
-      if (feedback) {
+      if (feedback.lenth > 0) {
         resultArray[i]._doc.feedback = feedback;
         resultArray[i]._doc.hiddenCount = await UserQuestSetting.countDocuments(
           {
