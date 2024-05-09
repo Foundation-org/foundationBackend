@@ -39,6 +39,14 @@ const createStartQuest = async (req, res) => {
   try {
     const currentDate = new Date();
     const { postLink } = req.body;
+    const checkSuppression = await InfoQuestQuestions.findOne({
+      _id: req.body.questForeignKey,
+    });
+    if (checkSuppression.suppressed) {
+      throw new Error(
+        "Sorry, this content has been suppressed and is not available at the moment. Please try again later or contact support for further assistance."
+      );
+    }
     // Update InfoQuestQuestions and get the data
     const getInfoQuestQuestion = await InfoQuestQuestions.findByIdAndUpdate(
       { _id: req.body.questForeignKey },
@@ -476,6 +484,16 @@ const createStartQuest = async (req, res) => {
 };
 const updateChangeAnsStartQuest = async (req, res) => {
   try {
+    const checkSuppression = await InfoQuestQuestions.findOne({
+      _id: req.body.questId,
+    });
+    if (checkSuppression.suppressed) {
+      if (checkSuppression.suppressed) {
+        throw new Error(
+          "Sorry, this content has been suppressed and is not available at the moment. Please try again later or contact support for further assistance."
+        );
+      }
+    }
     const startQuestQuestion = await StartQuests.findOne({
       questForeignKey: req.body.questId,
       uuid: req.body.uuid,
