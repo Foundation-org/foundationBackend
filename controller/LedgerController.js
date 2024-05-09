@@ -1,5 +1,6 @@
 const Ledgers = require("../models/Ledgers");
 const Users = require("../models/UserModel");
+const AWS = require("aws-sdk");
 
 const create = async (req, res) => {
   try {
@@ -140,6 +141,8 @@ const remove = async (req, res) => {
 
 const getLstActAndEmailForAllUsers = async () => {
   try {
+    console.log("getLstActAndEmailForAllUsers")
+    
     // Calculate the date 7 days ago
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -194,7 +197,7 @@ const getLstActAndEmailForAllUsers = async () => {
           Source: process.env.AWS_SES_SENDER,
           Destination: {
             // ToAddresses: [item.email],
-            ToAddresses: ['abdullahyaqoob38@gmail.com'],
+            ToAddresses: ['sameer192.official@gmail.com'],
           },
           Message: {
             Body: {
@@ -229,6 +232,8 @@ const getLstActAndEmailForAllUsers = async () => {
       // res.status(404).json({ message: 'No records found where 7 days have passed since last activity' });
       console.log({ message: 'No records found where 7 days have passed since last activity' });
     }
+
+    console.log('Completed==============')
   } catch (error) {
     // If an error occurs during the database query, send an error response
     console.error('Error occurred while fetching last active times for all users:', error);
