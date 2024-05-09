@@ -1308,7 +1308,7 @@ const getQuestsAll = async (req, res) => {
         // Define common notification properties
         notification = {
           id: "system_notification",
-          icon: videoURL !== "" ? null : "https://www.flickr.com/photos/160246067@N08/39735543880/",
+          icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
           header: "Ready to start growing your FDX balance?",
           text: "The more FDX you have, the more opportunity you have in the future to monetize from it. Invest your time by engaging now, to cash out later!",
           buttonText: "Join Foundation",
@@ -1323,7 +1323,7 @@ const getQuestsAll = async (req, res) => {
           // Define common notification properties
           notification = {
             id: "system_notification",
-            icon: videoURL !== "" ? null : "https://www.flickr.com/photos/160246067@N08/39735543880/",
+            icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
             header: "What is Foundation?",
             text: "You know you have personal data - it's all over the internet - but did you know you can sell it and monetize from it? Foundation is a platform where data gate-keeping is no more. It puts the ownership of your data back in your control.",
             buttonText: "Learn More",
@@ -1340,7 +1340,7 @@ const getQuestsAll = async (req, res) => {
         // Define common notification properties
         notification = {
           id: "system_notification",
-          icon: videoURL !== "" ? null : "https://www.flickr.com/photos/160246067@N08/39735543880/",
+          icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
           header: "Get verified, start growing your FDX balance",
           text: "Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!",
           buttonText: "Add verification badge!",
@@ -1355,7 +1355,7 @@ const getQuestsAll = async (req, res) => {
           // Define common notification properties
           notification = {
             id: "system_notification",
-            icon: videoURL !== "" ? null : "https://www.flickr.com/photos/160246067@N08/39735543880/",
+            icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
             header: "Not sure what to post?",
             text: "You can post whatever your heart desires - but keep in mind not everyone may engage with it. The more people engage with your posts, the more FDX you earn!",
             buttonText: "Create a post",
