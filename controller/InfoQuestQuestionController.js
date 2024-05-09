@@ -1294,8 +1294,6 @@ const getQuestsAll = async (req, res) => {
   ) {
 
     let priority = Math.floor(Math.random() * 2) + 1 // Generate random priority from 1 to 2
-    let urlArray = ["https://www.youtube.com/watch?v=c48lOEwtfQw", ""];
-    let videoURL = urlArray[Math.floor(Math.random() * urlArray.length)];
 
     const user = await UserModel.findOne({
       uuid: uuid
@@ -1312,8 +1310,8 @@ const getQuestsAll = async (req, res) => {
           icon: videoURL !== "" ? null : "https://www.flickr.com/photos/160246067@N08/39735543880/",
           header: "Ready to start growing your FDX balance?",
           text: "The more FDX you have, the more opportunity you have in the future to monetize from it. Invest your time by engaging now, to cash out later!",
-          buttonText: videoURL !== "" ? "Join Foundation" : null,
-          buttonUrl: videoURL !== "" ? videoURL : null,
+          buttonText: "Join Foundation",
+          buttonUrl: "/guest-signup",
           category: "Home",
           position: "Feed",
           priority: priority,
@@ -1327,8 +1325,8 @@ const getQuestsAll = async (req, res) => {
             icon: videoURL !== "" ? null : "https://www.flickr.com/photos/160246067@N08/39735543880/",
             header: "What is Foundation?",
             text: "You know you have personal data - it's all over the internet - but did you know you can sell it and monetize from it? Foundation is a platform where data gate-keeping is no more. It puts the ownership of your data back in your control.",
-            buttonText: videoURL !== "" ? "Learn More" : null,
-            buttonUrl: videoURL !== "" ? videoURL : null,
+            buttonText: "Learn More",
+            buttonUrl: "/welcome",
             category: "Home",
             position: "Feed",
             priority: priority,
@@ -1344,8 +1342,8 @@ const getQuestsAll = async (req, res) => {
           icon: videoURL !== "" ? null : "https://www.flickr.com/photos/160246067@N08/39735543880/",
           header: "Get verified, start growing your FDX balance",
           text: "Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!",
-          buttonText: videoURL !== "" ? "Add verification badge!" : null,
-          buttonUrl: videoURL !== "" ? videoURL : null,
+          buttonText: "Add verification badge!",
+          buttonUrl: "/dashboard/profile",
           category: "Home",
           position: "Feed",
           priority: priority,
@@ -1359,8 +1357,8 @@ const getQuestsAll = async (req, res) => {
             icon: videoURL !== "" ? null : "https://www.flickr.com/photos/160246067@N08/39735543880/",
             header: "Not sure what to post?",
             text: "You can post whatever your heart desires - but keep in mind not everyone may engage with it. The more people engage with your posts, the more FDX you earn!",
-            buttonText: videoURL !== "" ? "Create a post" : null,
-            buttonUrl: videoURL !== "" ? videoURL : null,
+            buttonText: "Create a post",
+            buttonUrl: "/dashboard/quest",
             category: "Home",
             position: "Feed",
             priority: priority,
