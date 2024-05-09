@@ -37,25 +37,32 @@ router.post(
   InfoQuestQuestionController.createInfoQuestQuest
 );
 
-router.post(
-  "/infoquestions/deleteInfoQuest/:questId/:userUuid",
+router.delete(
+  "/deleteInfoQuest/:questId/:userUuid",
   /**
    * @swagger
-   * /infoquestions/deleteInfoQuest:
-   *   post:
+   * /infoquestions/deleteInfoQuest/{questId}/{userUuid}:
+   *   delete:
    *     tags:
    *       - Info Quest Question
    *     summary: Delete info quest question
    *     description: Endpoint to delete a new info quest question
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/deleteInfoQuestQuest'
+   *     parameters:
+   *       - in: path
+   *         name: questId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The ID of the info quest question to delete
+   *       - in: path
+   *         name: userUuid
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The UUID of the user associated with the info quest question
    *     responses:
    *       '200':
-   *         description: Info quest question created successfully
+   *         description: Info quest question deleted successfully
    *       '500':
    *         description: Internal server error
    */
