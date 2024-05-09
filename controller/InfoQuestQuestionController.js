@@ -1323,12 +1323,11 @@ const getQuestsAll = async (req, res) => {
       });
       if (!user) throw new Error(`No user found against ${uuid}`);
       let mode = user.isGuestMode;
-      let notification;
+      let notification1, notification2;
 
       if (mode) {
-        if (priority === 1) {
-          // Define common notification properties
-          notification = {
+          // Define Guest's notification1 properties
+          notification1 = {
             id: "system_notification",
             icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
             header: "Ready to start growing your FDX balance?",
@@ -1341,9 +1340,8 @@ const getQuestsAll = async (req, res) => {
             mode: "Guest",
             timestamp: new Date().toISOString(),
           };
-        } else {
-          // Define common notification properties
-          notification = {
+          // Define Guest's notification2 properties
+          notification2 = {
             id: "system_notification",
             icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
             header: "What is Foundation?",
@@ -1356,11 +1354,9 @@ const getQuestsAll = async (req, res) => {
             mode: "Guest",
             timestamp: new Date().toISOString(),
           };
-        }
       } else {
-        if (priority === 1) {
-          // Define common notification properties
-          notification = {
+          // Define User's notification1 properties
+          notification1 = {
             id: "system_notification",
             icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
             header: "Get verified, start growing your FDX balance",
@@ -1373,9 +1369,8 @@ const getQuestsAll = async (req, res) => {
             mode: "User",
             timestamp: new Date().toISOString(),
           };
-        } else {
-          // Define common notification properties
-          notification = {
+          // Define User's notification2 properties
+          notification2 = {
             id: "system_notification",
             icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
             header: "Not sure what to post?",
@@ -1388,11 +1383,18 @@ const getQuestsAll = async (req, res) => {
             mode: "User",
             timestamp: new Date().toISOString(),
           };
-        }
       }
 
-      // Insert the notification object at the calculated index based on priority
-      result1.splice(notification.priority, 0, notification);
+      // Check if result1 is empty
+      if (result1.length === 0) {
+        // If result1 is empty, insert notifications directly into result1
+        result1.push(notification1);
+        result1.push(notification2);
+      } else {
+        // Insert notification1 at index 0 and notification2 at index 3 of result1
+        result1.splice(0, 0, notification1);
+        result1.splice(2, 0, notification2);
+      }
     }
   }
 
