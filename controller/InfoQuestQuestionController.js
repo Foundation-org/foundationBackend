@@ -1308,7 +1308,7 @@ const getQuestsAll = async (req, res) => {
     uuid: uuid,
   });
   
-  if(!terms) {
+  if(!terms || result1.length !== 0) {
     if (user?.notificationSettings?.systemNotifications) {
       // Check if it's not the "Hidden" or "SharedLink" page and if it's the first page
       if (
