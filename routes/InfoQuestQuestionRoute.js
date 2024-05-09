@@ -38,6 +38,31 @@ router.post(
 );
 
 router.post(
+  "/deleteInfoQuest",
+  /**
+   * @swagger
+   * /infoquestions/deleteInfoQuest:
+   *   post:
+   *     tags:
+   *       - Info Quest Question
+   *     summary: Delete info quest question
+   *     description: Endpoint to delete a new info quest question
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/deleteInfoQuestQuest'
+   *     responses:
+   *       '200':
+   *         description: Info quest question created successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  InfoQuestQuestionController.deleteInfoQuestQuest
+);
+
+router.post(
   "/supressPost/:id",
   /**
    * @swagger

@@ -2156,6 +2156,7 @@ const getFlickerUrl = async (req, res) => {
 
 module.exports = {
   createInfoQuestQuest,
+  deleteInfoQuestQuest,
   constraintForUniqueQuestion,
   getAllQuests,
   getAllQuestsWithOpenInfoQuestStatus,
@@ -2173,5 +2174,4 @@ module.exports = {
   getFlickerUrl,
   getQuestsAll,
   suppressPost,
-  deleteInfoQuestQuest,
 };
