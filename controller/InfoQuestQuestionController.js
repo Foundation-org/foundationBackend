@@ -1,5 +1,6 @@
 const { QUEST_CREATED_AMOUNT } = require("../constants");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
+const UserModel = require("../models/UserModel");
 const StartQuests = require("../models/StartQuests");
 const User = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
