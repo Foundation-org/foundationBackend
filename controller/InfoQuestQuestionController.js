@@ -342,10 +342,10 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -524,10 +524,10 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -787,10 +787,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : sort === "Most Popular"
+              ? { interactingCounter: -1 }
+              : "createdAt"
       )
       .skip(skip)
       .limit(pageSize)
@@ -808,21 +808,21 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.selectedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.selectedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
     contendedPercentage: item?.contendedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.contendedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.contendedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
   }));
   // Query the database with skip and limit options to get questions for the requested page
@@ -1101,10 +1101,10 @@ const getQuestsAll = async (req, res) => {
       sort === "Newest First"
         ? { createdAt: -1 }
         : sort === "Last Updated"
-        ? { lastInteractedAt: -1 }
-        : sort === "Most Popular"
-        ? { interactingCounter: -1 }
-        : { createdAt: -1 } // Default sort
+          ? { lastInteractedAt: -1 }
+          : sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : { createdAt: -1 } // Default sort
     );
     if (participated === "All") {
       query = query.skip(skip).limit(pageSize);
@@ -1267,21 +1267,21 @@ const getQuestsAll = async (req, res) => {
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.selectedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.selectedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
     contendedPercentage: item?.contendedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.contendedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.contendedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
   }));
   // Query the database with skip and limit options to get questions for the requested page
@@ -1290,40 +1290,45 @@ const getQuestsAll = async (req, res) => {
   // getQuestionsWithUserSettings
   const result1 = await getQuestionsWithUserSettings(result, uuid);
 
-  // Check if it's not the "Hidden" or "SharedLink" page and if it's the first page
-  if (
-    Page !== "Hidden" &&
-    Page !== "SharedLink" &&
-    Page !== "Feedback" &&
-    page === 1
-  ) {
+  const user = await UserModel.findOne({
+    uuid: uuid
+  })
 
-    let priority = Math.floor(Math.random() * 2) + 1 // Generate random priority from 1 to 2
+  if (user.notificationSettings.systemNotifications) {
+    // Check if it's not the "Hidden" or "SharedLink" page and if it's the first page
+    if (
+      Page !== "Hidden" &&
+      Page !== "SharedLink" &&
+      Page !== "Feedback" &&
+      page === 1
+    ) {
 
-    const user = await UserModel.findOne({
-      uuid: uuid
-    })
-    if(!user) throw new Error(`No user found against ${uuid}`);
-    let mode = user.isGuestMode;
-    let notification;
+      let priority = Math.floor(Math.random() * 2) + 1 // Generate random priority from 1 to 2
 
-    if(mode) {
-      if(priority === 1){
-        // Define common notification properties
-        notification = {
-          id: "system_notification",
-          icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
-          header: "Ready to start growing your FDX balance?",
-          text: "The more FDX you have, the more opportunity you have in the future to monetize from it. Invest your time by engaging now, to cash out later!",
-          buttonText: "Join Foundation",
-          buttonUrl: "/guest-signup",
-          category: "Home",
-          position: "Feed",
-          priority: priority,
-          mode: "Guest",
-          timestamp: new Date().toISOString(),
-        };
-      } else {
+      const user = await UserModel.findOne({
+        uuid: uuid
+      })
+      if (!user) throw new Error(`No user found against ${uuid}`);
+      let mode = user.isGuestMode;
+      let notification;
+
+      if (mode) {
+        if (priority === 1) {
+          // Define common notification properties
+          notification = {
+            id: "system_notification",
+            icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
+            header: "Ready to start growing your FDX balance?",
+            text: "The more FDX you have, the more opportunity you have in the future to monetize from it. Invest your time by engaging now, to cash out later!",
+            buttonText: "Join Foundation",
+            buttonUrl: "/guest-signup",
+            category: "Home",
+            position: "Feed",
+            priority: priority,
+            mode: "Guest",
+            timestamp: new Date().toISOString(),
+          };
+        } else {
           // Define common notification properties
           notification = {
             id: "system_notification",
@@ -1338,24 +1343,24 @@ const getQuestsAll = async (req, res) => {
             mode: "Guest",
             timestamp: new Date().toISOString(),
           };
-      }
-    } else {
-      if(priority === 1){
-        // Define common notification properties
-        notification = {
-          id: "system_notification",
-          icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
-          header: "Get verified, start growing your FDX balance",
-          text: "Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!",
-          buttonText: "Add verification badge!",
-          buttonUrl: "/dashboard/profile",
-          category: "Home",
-          position: "Feed",
-          priority: priority,
-          mode: "User",
-          timestamp: new Date().toISOString(),
-        };
+        }
       } else {
+        if (priority === 1) {
+          // Define common notification properties
+          notification = {
+            id: "system_notification",
+            icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
+            header: "Get verified, start growing your FDX balance",
+            text: "Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!",
+            buttonText: "Add verification badge!",
+            buttonUrl: "/dashboard/profile",
+            category: "Home",
+            position: "Feed",
+            priority: priority,
+            mode: "User",
+            timestamp: new Date().toISOString(),
+          };
+        } else {
           // Define common notification properties
           notification = {
             id: "system_notification",
@@ -1370,11 +1375,12 @@ const getQuestsAll = async (req, res) => {
             mode: "User",
             timestamp: new Date().toISOString(),
           };
+        }
       }
-    }
 
-    // Insert the notification object at the calculated index based on priority
-    result1.splice(notification.priority, 0, notification);
+      // Insert the notification object at the calculated index based on priority
+      result1.splice(notification.priority, 0, notification);
+    }
   }
 
   res.status(200).json({
@@ -1500,10 +1506,10 @@ const getAllQuestsWithResult = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : sort === "Most Popular"
+              ? { interactingCounter: -1 }
+              : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
       .limit(pageSize);
@@ -1727,10 +1733,10 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -1911,10 +1917,10 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
