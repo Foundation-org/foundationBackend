@@ -565,7 +565,14 @@ const updateUserSettings = async (req, res) => {
     await user.save();
 
     // Respond with updated user settings
-    res.status(200).json(user.userSettings);
+    res.status(200).json(
+      {
+        message: {
+          userSettings:  user.userSettings,
+          notificationSettings: user.notificationSettings
+        }
+      }
+    );
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
