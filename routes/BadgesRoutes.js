@@ -52,53 +52,6 @@ router.patch("/updateBadge/:userId/:badgeId",
   BadgeController.update
 );
 
-router.patch(
-  "/updateSecurityQuestionBadge/:userUuid/:badgeId",
-/**
- * @swagger
- * /updateSecurityQuestionBadge/{userUuid}/{badgeId}:
- *   patch:
- *     tags:
- *       - Badge
- *     summary: Update security question badge
- *     description: Endpoint to update a user's security question badge by user UUID and badge ID
- *     parameters:
- *       - in: path
- *         name: userUuid
- *         required: true
- *         description: UUID of the user to update the security question badge
- *         schema:
- *           type: string
- *       - in: path
- *         name: badgeId
- *         required: true
- *         description: ID of the badge to be updated
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               personal:
- *                 type: null
- *           example:
- *             personal: null
- *     responses:
- *       '200':
- *         description: Security question badge updated successfully
- *       '400':
- *         description: Invalid request body
- *       '404':
- *         description: User or badge not found
- *       '500':
- *         description: Internal server error
- */
-  BadgeController.updateSecurityQuestionBadge
-);
-
 router.get("/getBadges/:userId",
   /**
    * @swagger

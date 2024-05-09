@@ -115,6 +115,31 @@ router.post(
 );
 
 router.post(
+  "/userQuestSetting/customLink",
+  /**
+   * @swagger
+   * /userQuestSetting/customLink:
+   *   post:
+   *     tags:
+   *       - User Quest Setting
+   *     summary: Custom Link user quest setting
+   *     description: Endpoint to link user quest setting
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/UserQuestSettingLinkRequest'
+   *     responses:
+   *       '200':
+   *         description: User quest setting linked successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  UserQuestSettingController.customLink
+);
+
+router.post(
   "/userQuestImpression/:link",
   /**
    * @swagger
@@ -164,38 +189,30 @@ router.post(
   UserQuestSettingController.status
 );
 
-/**
- * @swagger
- * /aws/s3ImageUploadToFrames:
- *   post:
- *     tags:
- *       - User Quest Setting
- *     summary: Upload image to S3 for Frames
- *     description: Endpoint to upload an image to S3 for Frames
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               file:
- *                 type: string
- *                 format: binary
- *               link:
- *                 type: string
- *     responses:
- *       '200':
- *         description: Image uploaded successfully
- *       '400':
- *         description: Bad request - no file uploaded or uploaded file is not an image
- *       '500':
- *         description: Internal server error
- */
 router.post(
-  "/aws/s3ImageUploadToFrames",
+  "/userQuestSetting/sharedLinkDynamicImage",
+  /**
+   * @swagger
+   * /userQuestSetting/sharedLinkDynamicImage:
+   *   post:
+   *     tags:
+   *       - User Quest Setting
+   *     summary: Dynamic Image Share Link
+   *     description: Endpoint for Dynamic Image Share Link
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/UserQuestSettingLinkRequest'
+   *     responses:
+   *       '200':
+   *         description: User quest setting linked successfully
+   *       '500':
+   *         description: Internal server error
+   */
   uploadSingle,
-  UserQuestSettingController.s3ImageUploadToFrames
+  UserQuestSettingController.sharedLinkDynamicImage
 );
 
 module.exports = router;

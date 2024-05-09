@@ -37,40 +37,6 @@ router.post(
   InfoQuestQuestionController.createInfoQuestQuest
 );
 
-router.delete(
-  "/deleteInfoQuest/:questId/:userUuid",
-/**
- * @swagger
- * /infoquestions/deleteInfoQuest/{questId}/{userUuid}:
- *   delete:
- *     tags:
- *       - Info Quest Question
- *     summary: Delete info quest question
- *     description: Endpoint to delete an info quest question by quest UUID and user UUID
- *     parameters:
- *       - in: path
- *         name: questId
- *         required: true
- *         description: Id of the info quest question to delete
- *         schema:
- *           type: string
- *       - in: path
- *         name: userUuid
- *         required: true
- *         description: UUID of the user who created the info quest question
- *         schema:
- *           type: string
- *     responses:
- *       '200':
- *         description: Info quest question deleted successfully
- *       '404':
- *         description: Info quest question not found
- *       '500':
- *         description: Internal server error
- */
-  InfoQuestQuestionController.deleteInfoQuestQuest
-)
-
 router.post(
   "/supressPost/:id",
   /**
@@ -388,7 +354,8 @@ router.get(
   InfoQuestQuestionController.getFlickerUrl
 );
 
-router.get("/getQuestsAll",
+router.get(
+  "/getQuestsAll",
   /**
    * @swagger
    * /infoquestions/getQuestsAll:
@@ -435,7 +402,7 @@ router.get("/getQuestsAll",
    *         name: Page
    *         schema:
    *           type: string
-   *           enum: [Bookmark, Hidden, SharedLink]
+   *           enum: [Bookmark, Hidden, SharedLink,Feedback]
    *         description: Page criteria for quests.
    *       - in: query
    *         name: terms
@@ -501,6 +468,7 @@ router.get("/getQuestsAll",
    *       '500':
    *         description: Internal server error. Failed to retrieve quests.
    */
-  InfoQuestQuestionController.getQuestsAll);
+  InfoQuestQuestionController.getQuestsAll
+);
 
 module.exports = router;

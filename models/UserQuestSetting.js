@@ -9,6 +9,7 @@ const UserQuestSetting = mongoose.Schema(
       // type: Schema.Types.ObjectId,
       // ref: "user",
       type: String,
+      default: ""
     },
     questForeignKey: {
       // type: Schema.Types.ObjectId,
@@ -19,6 +20,10 @@ const UserQuestSetting = mongoose.Schema(
       type: String,
       default: "",
       // default: shortLink.generate(8)
+    },
+    linkCustomized: {
+      type: Boolean,
+      default: false
     },
     data: {
       type: Array,

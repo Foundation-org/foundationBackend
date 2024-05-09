@@ -1,5 +1,6 @@
 const { QUEST_CREATED_AMOUNT } = require("../constants");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
+const UserModel = require("../models/UserModel");
 const StartQuests = require("../models/StartQuests");
 const User = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
@@ -114,11 +115,17 @@ const createInfoQuestQuest = async (req, res) => {
 
 const deleteInfoQuestQuest = async (req, res) => {
   try {
-    const infoQuest = await InfoQuestQuestions.findOne({ _id: req.params.questId, uuid: req.params.userUuid});
+    const infoQuest = await InfoQuestQuestions.findOne({
+      _id: req.params.questId,
+      uuid: req.params.userUuid,
+    });
 
-    if(!infoQuest) return res.status(404).send("Info Quest not found");
+    if (!infoQuest) return res.status(404).send("Info Quest not found");
 
-    // if(infoQuest.usersAddTheirAns) return res.status(404).send("Quest cannot be deleted"); // Not neccessry if we add the check at FE to remove the delete icon from those who have { usersAddTheirAns: true }
+    if (infoQuest.interactingCounter >= 1)
+      return res.status(403).json({
+        message: "Quest is involved in Discussion, Quest can't be deleted.",
+      }); // Not neccessry if we add the check at FE to remove the delete icon from those who have { usersAddTheirAns: true }
 
     // Delete and Save Info Quest
     infoQuest.isActive = false;
@@ -131,18 +138,18 @@ const deleteInfoQuestQuest = async (req, res) => {
     user.questsCreated -= 1;
     await user.save();
 
-
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
       txUserAction: "postDeleted",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
-      txFrom: "dao",
-      txTo: user.uuid,
-      txAmount: QUEST_CREATED_AMOUNT,
-      txData: infoQuest._id,
-      // txDescription : "User creates a new quest"
+      txFrom: user.uuid,
+      txTo: "DAO",
+      txAmount: 0,
+      txData: user.uuid,
+      txDate: Date.now(),
+      txDescription: "User deleted a Post",
     });
     // Create Ledger
     await createLedger({
@@ -152,7 +159,9 @@ const deleteInfoQuestQuest = async (req, res) => {
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: user.uuid,
-      txAmount: "0",
+      txAmount: QUEST_CREATED_AMOUNT,
+      txDate: Date.now(),
+      txDescription: "User deleted a Post",
       // txData : createdQuestion._id,
       // txDescription : "Incentive for creating a quest"
     });
@@ -165,12 +174,13 @@ const deleteInfoQuestQuest = async (req, res) => {
       inc: true,
     });
 
-    res.status(200).json({ message: "Info quest question deleted successfully" });
+    res
+      .status(200)
+      .json({ message: "Info quest question deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: `An error occurred: ${error.message}` });
   }
-}
-
+};
 
 const constraintForUniqueQuestion = async (req, res) => {
   try {
@@ -826,7 +836,14 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     hasNextPage: skip + pageSize < totalQuestionsCount,
   });
 };
-
+const suppressConditions = [
+  { id: "Has Mistakes or Errors", minCount: 2 },
+  { id: "Needs More Options", minCount: 2 },
+  { id: "Unclear / Doesn’t make Sense", minCount: 2 },
+  { id: "Duplicate / Similar Post", minCount: 2 },
+  { id: "Not interested", minCount: Number.POSITIVE_INFINITY },
+  { id: "Does not apply to me", minCount: Number.POSITIVE_INFINITY },
+];
 const getQuestsAll = async (req, res) => {
   const {
     uuid,
@@ -980,6 +997,7 @@ const getQuestsAll = async (req, res) => {
       return await InfoQuestQuestions.findOne({
         _id: record.questForeignKey,
         ...filterObj,
+
         moderationRatingCount: {
           $gte: moderationRatingInitial,
           $lte: moderationRatingFinal,
@@ -1037,12 +1055,28 @@ const getQuestsAll = async (req, res) => {
 
     allQuestions = await Promise.all(mapPromises);
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
+  } else if (Page === "Feedback") {
+    allQuestions = await InfoQuestQuestions.find({
+      uuid: uuid,
+      ...filterObj,
+      isActive: true,
+    })
+      .populate("getUserBadge", "badges")
+      .sort({ createdAt: -1 })
+      .limit(pageSize)
+      .skip(skip);
+    totalQuestionsCount = await InfoQuestQuestions.countDocuments({
+      uuid: uuid,
+      ...filterObj,
+      isActive: true,
+    });
   } else {
     // moderation filter
     filterObj.moderationRatingCount = {
       $gte: moderationRatingInitial,
       $lte: moderationRatingFinal,
     };
+
     // First, find UserQuestSettings with hidden: false
     const hiddenUserSettings = await UserQuestSetting.find({
       hidden: true,
@@ -1062,6 +1096,7 @@ const getQuestsAll = async (req, res) => {
     let query = InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
+      isActive: true,
     });
 
     query = query.sort(
@@ -1078,6 +1113,15 @@ const getQuestsAll = async (req, res) => {
     }
 
     allQuestions = await query.populate("getUserBadge", "badges");
+
+    // Filter out suppressed questions if req.query.uuid does not match uuid
+    if (req.query.uuid) {
+      allQuestions = allQuestions.filter(question => {
+        return !question.suppressed || question.uuid === req.query.uuid;
+      });
+    } else {
+      allQuestions = allQuestions.filter(question => !question.suppressed);
+    }
 
     totalQuestionsCount = await InfoQuestQuestions.countDocuments({
       _id: { $nin: hiddenUserSettingIds },
@@ -1171,7 +1215,6 @@ const getQuestsAll = async (req, res) => {
 
   for (let i = 0; i < resultArray.length; i++) {
     const item = resultArray[i];
-    // console.log('item', item)
     const bookmarkDoc = await BookmarkQuests.findOne({
       questForeignKey: item._doc._id,
       uuid,
@@ -1182,6 +1225,55 @@ const getQuestsAll = async (req, res) => {
       resultArray[i]._doc.bookmark = true;
     } else {
       resultArray[i]._doc.bookmark = false;
+    }
+
+    if (Page === "Feedback") {
+      // Get the count of hidden items grouped by hidden message
+      const suppression = await UserQuestSetting.aggregate([
+        {
+          $match: {
+            hidden: true,
+            questForeignKey: item._doc._id.toString(),
+          },
+        },
+        {
+          $group: {
+            _id: "$hiddenMessage",
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      let feedback = [];
+
+      if (suppression) {
+        // For each suppression item, check against suppressConditions
+        suppression.forEach((suppressItem) => {
+          suppressConditions.forEach((condition) => {
+            if (suppressItem._id === condition.id) {
+              const violated =
+                suppressItem.count > condition.minCount &&
+                condition.id !== "Does not apply to me" &&
+                condition.id !== "Not interested";
+              feedback.push({
+                id: suppressItem._id,
+                count: suppressItem.count,
+                violated: violated,
+              });
+            }
+          });
+        });
+      }
+
+      resultArray[i]._doc.feedback = feedback;
+      resultArray[i]._doc.hiddenCount = await UserQuestSetting.countDocuments({
+        hidden: true,
+        questForeignKey: item._doc._id,
+      });
+      if (resultArray[i]._doc.hiddenCount === 0) {
+        resultArray.splice(i, 1);
+        i--;
+      }
     }
   }
 
@@ -1211,6 +1303,98 @@ const getQuestsAll = async (req, res) => {
 
   // getQuestionsWithUserSettings
   const result1 = await getQuestionsWithUserSettings(result, uuid);
+
+  const user = await UserModel.findOne({
+    uuid: uuid,
+  });
+
+  if (user.notificationSettings.systemNotifications) {
+    // Check if it's not the "Hidden" or "SharedLink" page and if it's the first page
+    if (
+      Page !== "Hidden" &&
+      Page !== "SharedLink" &&
+      Page !== "Feedback" &&
+      page === 1
+    ) {
+      let priority = Math.floor(Math.random() * 2) + 1; // Generate random priority from 1 to 2
+
+      const user = await UserModel.findOne({
+        uuid: uuid,
+      });
+      if (!user) throw new Error(`No user found against ${uuid}`);
+      let mode = user.isGuestMode;
+      let notification;
+
+      if (mode) {
+        if (priority === 1) {
+          // Define common notification properties
+          notification = {
+            id: "system_notification",
+            icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
+            header: "Ready to start growing your FDX balance?",
+            text: "The more FDX you have, the more opportunity you have in the future to monetize from it. Invest your time by engaging now, to cash out later!",
+            buttonText: "Join Foundation",
+            buttonUrl: "/guest-signup",
+            category: "Home",
+            position: "Feed",
+            priority: priority,
+            mode: "Guest",
+            timestamp: new Date().toISOString(),
+          };
+        } else {
+          // Define common notification properties
+          notification = {
+            id: "system_notification",
+            icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
+            header: "What is Foundation?",
+            text: "You know you have personal data - it's all over the internet - but did you know you can sell it and monetize from it? Foundation is a platform where data gate-keeping is no more. It puts the ownership of your data back in your control.",
+            buttonText: "Learn More",
+            buttonUrl: "/welcome",
+            category: "Home",
+            position: "Feed",
+            priority: priority,
+            mode: "Guest",
+            timestamp: new Date().toISOString(),
+          };
+        }
+      } else {
+        if (priority === 1) {
+          // Define common notification properties
+          notification = {
+            id: "system_notification",
+            icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
+            header: "Get verified, start growing your FDX balance",
+            text: "Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!",
+            buttonText: "Add verification badge!",
+            buttonUrl: "/dashboard/profile",
+            category: "Home",
+            position: "Feed",
+            priority: priority,
+            mode: "User",
+            timestamp: new Date().toISOString(),
+          };
+        } else {
+          // Define common notification properties
+          notification = {
+            id: "system_notification",
+            icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
+            header: "Not sure what to post?",
+            text: "You can post whatever your heart desires - but keep in mind not everyone may engage with it. The more people engage with your posts, the more FDX you earn!",
+            buttonText: "Create a post",
+            buttonUrl: "/dashboard/quest",
+            category: "Home",
+            position: "Feed",
+            priority: priority,
+            mode: "User",
+            timestamp: new Date().toISOString(),
+          };
+        }
+      }
+
+      // Insert the notification object at the calculated index based on priority
+      result1.splice(notification.priority, 0, notification);
+    }
+  }
 
   res.status(200).json({
     data: result1,
@@ -1619,7 +1803,7 @@ const suppressPost = async (req, res) => {
 
     const supression = await InfoQuestQuestions.findOneAndUpdate(
       { _id: id },
-      { url: "" }
+      { suppressed: true, suppressedReason: "Invalid Media" }
     );
 
     if (supression) {
@@ -1987,5 +2171,5 @@ module.exports = {
   getFlickerUrl,
   getQuestsAll,
   suppressPost,
-  deleteInfoQuestQuest
+  deleteInfoQuestQuest,
 };
