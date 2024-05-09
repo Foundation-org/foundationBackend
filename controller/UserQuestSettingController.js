@@ -15,7 +15,7 @@ const {
   USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
 } = require("../constants/index");
 const nodeHtmlToImage = require("node-html-to-image");
-const puppeteer = require('puppeteer');
+const puppeteer = require("puppeteer");
 const {
   sharedLinkDynamicImageHTML,
 } = require("../templates/sharedLinkDynamicImageHTML");
@@ -154,9 +154,10 @@ const customLink = async (req, res) => {
     const linkCustomized = await UserQuestSetting.findOne({
       uuid: payload.uuid,
       questForeignKey: payload.questForeignKey,
-      linkCustomized: true
+      linkCustomized: true,
     });
-    if (linkCustomized) return res.status(409).json({ message: `Link is already Customized.` });
+    if (linkCustomized)
+      return res.status(409).json({ message: `Link is already Customized.` });
 
     // As link is unique Create Ledger and Proceed Normally like before with custom link.
     await ledgerDeductionPostLinkCustomized(payload.uuid);
@@ -177,8 +178,8 @@ const customLink = async (req, res) => {
         {
           $set: {
             link: payload.link,
-            linkCustomized: true
-          }
+            linkCustomized: true,
+          },
         },
         {
           new: true, // Return the modified document rather than the original
@@ -385,7 +386,6 @@ const create = async (req, res) => {
         },
       ]);
       let isSuppressed = false;
-      let suppressedReason = "";
 
       if (suppression) {
         suppression.map((item) => {
@@ -393,10 +393,9 @@ const create = async (req, res) => {
             suppressConditions.forEach((condition) => {
               if (
                 item._id === condition.id &&
-                item.count > condition.minCount
+                item.count >= condition.minCount
               ) {
                 isSuppressed = true;
-                suppressedReason.push(condition.id);
               }
             });
           }
@@ -409,13 +408,10 @@ const create = async (req, res) => {
         {
           $set: {
             suppressed: isSuppressed,
-            suppressedReason,
           },
         },
         { new: true }
       );
-
-      console.log("Suppression Response", resp);
     } else if (payload.hidden === false) {
       await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
@@ -505,7 +501,6 @@ const update = async (req, res) => {
       },
     ]);
     let isSuppressed = false;
-    let suppressedReason = "";
 
     if (suppression) {
       suppression.map((item) => {
@@ -513,7 +508,6 @@ const update = async (req, res) => {
           suppressConditions.forEach((condition) => {
             if (item._id === condition.id && item.count > condition.minCount) {
               isSuppressed = true;
-              suppressedReason.push(condition.id);
             }
           });
         }
@@ -526,13 +520,10 @@ const update = async (req, res) => {
       {
         $set: {
           suppressed: isSuppressed,
-          suppressedReason,
         },
       },
       { new: true }
     );
-
-    console.log("Suppression Response", resp);
 
     return res.status(201).json({
       message: "UserQuestSetting Updated Successfully!",
@@ -753,9 +744,8 @@ const sharedLinkDynamicImage = async (req, res) => {
 
     // Set Puppeteer options with --no-sandbox flag
     const puppeteerOptions = {
-      args: ['--no-sandbox'],
+      args: ["--no-sandbox"],
     };
-
 
     nodeHtmlToImage({
       output: `./assets/uploads/images/${imgName}`,
