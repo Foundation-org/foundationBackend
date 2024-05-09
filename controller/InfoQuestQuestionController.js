@@ -1116,11 +1116,11 @@ const getQuestsAll = async (req, res) => {
 
     // Filter out suppressed questions if req.query.uuid does not match uuid
     if (req.query.uuid) {
-      allQuestions = allQuestions.filter(question => {
+      allQuestions = allQuestions.filter((question) => {
         return !question.suppressed || question.uuid === req.query.uuid;
       });
     } else {
-      allQuestions = allQuestions.filter(question => !question.suppressed);
+      allQuestions = allQuestions.filter((question) => !question.suppressed);
     }
 
     totalQuestionsCount = await InfoQuestQuestions.countDocuments({
@@ -1308,7 +1308,7 @@ const getQuestsAll = async (req, res) => {
     uuid: uuid,
   });
 
-  if (user.notificationSettings.systemNotifications) {
+  if (user?.notificationSettings?.systemNotifications) {
     // Check if it's not the "Hidden" or "SharedLink" page and if it's the first page
     if (
       Page !== "Hidden" &&
