@@ -38,7 +38,7 @@ router.post(
 );
 
 router.post(
-  "/deleteInfoQuest",
+  "/infoquestions/deleteInfoQuest/:questId/:userUuid",
   /**
    * @swagger
    * /infoquestions/deleteInfoQuest:
