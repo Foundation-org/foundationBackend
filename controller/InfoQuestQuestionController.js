@@ -1078,7 +1078,7 @@ const getQuestsAll = async (req, res) => {
     // First, find UserQuestSettings with hidden: false
     const hiddenUserSettings = await UserQuestSetting.find({
       hidden: true,
-      // uuid,
+      uuid,
     });
 
     // Extract userSettingIds from hiddenUserSettings
