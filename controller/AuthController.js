@@ -559,7 +559,8 @@ const updateUserSettings = async (req, res) => {
     // Update user settings
     user.userSettings.darkMode = req.body.darkMode;
     user.userSettings.defaultSort = req.body.defaultSort;
-    user.notificationSettings.systemNotifications = req.body.systemNotifications;
+    user.notificationSettings.systemNotifications =
+      req.body.systemNotifications;
     user.notificationSettings.emailNotifications = req.body.emailNotifications;
     await user.save();
 
@@ -1148,12 +1149,14 @@ const getInstaToken = async (req, res) => {
         },
       }
     );
+    // console.log("token", response.data.access_token, response.data.user_id);
 
-    const data = await axios.get(
-      `https://graph.instagram.com/me?fields=id,username&access_token=${response.data.access_token}`
-    );
+    // const data = await axios.get(
+    //   `https://graph.facebook.com/v3.2/${response.data.user_id}?fields=business_discovery.username(bluebottle){followers_count,media_count}&access_token=${response.data.access_token}`
+    // );
 
-    console.log("Instagram API Response:", data);
+    // console.log("Instagram API Response 2:", data);
+    // console.log("Instagram API Response 1:", response.data);
     res.json(response.data);
   } catch (error) {
     console.error("Error:", error.message);
