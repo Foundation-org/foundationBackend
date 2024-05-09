@@ -1063,9 +1063,10 @@ const getQuestsAll = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(pageSize)
       .skip(skip);
-    totalQuestionsCount = await UserQuestSetting.countDocuments({
+    totalQuestionsCount = await InfoQuestQuestions.countDocuments({
       uuid: uuid,
-      suppressed: true,
+      ...filterObj,
+      isActive: true,
     });
   } else {
     // moderation filter
@@ -1203,7 +1204,6 @@ const getQuestsAll = async (req, res) => {
 
   for (let i = 0; i < resultArray.length; i++) {
     const item = resultArray[i];
-    console.log("item", item);
     const bookmarkDoc = await BookmarkQuests.findOne({
       questForeignKey: item._doc._id,
       uuid,
@@ -1217,6 +1217,7 @@ const getQuestsAll = async (req, res) => {
     }
 
     if (Page === "Feedback") {
+      // Get the count of hidden items grouped by hidden message
       const suppression = await UserQuestSetting.aggregate([
         {
           $match: {
@@ -1231,31 +1232,34 @@ const getQuestsAll = async (req, res) => {
           },
         },
       ]);
+
       let feedback = [];
+
       if (suppression) {
-        suppression.map((item) => {
+        // For each suppression item, check against suppressConditions
+        suppression.forEach((suppressItem) => {
           suppressConditions.forEach((condition) => {
-            if (item._id === condition.id && item.count > condition.minCount) {
+            if (suppressItem._id === condition.id) {
+              const violated = suppressItem.count > condition.minCount;
               feedback.push({
-                id: item._id,
-                count: item.count,
-                violated: true,
-              });
-            } else if (item._id === condition.id) {
-              feedback.push({
-                id: item._id,
-                count: item.count,
-                violated: false,
+                id: suppressItem._id,
+                count: suppressItem.count,
+                violated: violated,
               });
             }
           });
         });
       }
+
       resultArray[i]._doc.feedback = feedback;
       resultArray[i]._doc.hiddenCount = await UserQuestSetting.countDocuments({
         hidden: true,
         questForeignKey: item._doc._id,
       });
+      if (resultArray[i]._doc.hiddenCount === 0) {
+        resultArray.splice(i, 1);
+        i--;
+      }
     }
   }
 

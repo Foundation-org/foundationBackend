@@ -559,6 +559,8 @@ const updateUserSettings = async (req, res) => {
     // Update user settings
     user.userSettings.darkMode = req.body.darkMode;
     user.userSettings.defaultSort = req.body.defaultSort;
+    user.notificationSettings.systemNotifications = req.body.systemNotifications;
+    user.notificationSettings.emailNotifications = req.body.emailNotifications;
     await user.save();
 
     // Respond with updated user settings
@@ -1147,7 +1149,11 @@ const getInstaToken = async (req, res) => {
       }
     );
 
-    console.log("Instagram API Response:", response.data);
+    const data = await axios.get(
+      `https://graph.instagram.com/me?fields=id,username&access_token=${response.data.access_token}`
+    );
+
+    console.log("Instagram API Response:", data);
     res.json(response.data);
   } catch (error) {
     console.error("Error:", error.message);
