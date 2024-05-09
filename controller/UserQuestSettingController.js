@@ -506,7 +506,7 @@ const update = async (req, res) => {
       suppression.map((item) => {
         if (suppression) {
           suppressConditions.forEach((condition) => {
-            if (item._id === condition.id && item.count > condition.minCount) {
+            if (item._id === condition.id && item.count >= condition.minCount) {
               isSuppressed = true;
             }
           });

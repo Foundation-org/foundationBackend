@@ -1252,7 +1252,7 @@ const getQuestsAll = async (req, res) => {
           suppressConditions.forEach((condition) => {
             if (suppressItem._id === condition.id) {
               const violated =
-                suppressItem.count > condition.minCount &&
+                suppressItem.count >= condition.minCount &&
                 condition.id !== "Does not apply to me" &&
                 condition.id !== "Not interested";
               feedback.push({
