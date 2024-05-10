@@ -6,6 +6,7 @@ const UserQuestSettingController = require("../controller/UserQuestSettingContro
 const protect = require("../middleware/protect");
 const socialProtect = require("../middleware/socialProtect");
 const { uploadSingle } = require("../middleware/uploadSingle");
+const isUrlSharedPostValidToInteract = require("../middleware/isUrlSharedPostValidToInteract");
 
 /**
  * @swagger
@@ -41,6 +42,7 @@ router.post(
 
 router.post(
   "/userQuestSetting/create",
+  isUrlSharedPostValidToInteract,
   /**
    * @swagger
    * /userQuestSetting/create:
@@ -91,6 +93,7 @@ router.post(
 
 router.post(
   "/userQuestSetting/link",
+  isUrlSharedPostValidToInteract,
   /**
    * @swagger
    * /userQuestSetting/link:
@@ -116,6 +119,7 @@ router.post(
 
 router.post(
   "/userQuestSetting/customLink",
+  isUrlSharedPostValidToInteract,
   /**
    * @swagger
    * /userQuestSetting/customLink:

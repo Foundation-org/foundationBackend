@@ -4,6 +4,7 @@ const router = express.Router();
 const InfoQuestQuestionController = require("../controller/InfoQuestQuestionController");
 // middleware
 const protect = require("../middleware/protect");
+const isUrlSharedPostValidToInteract = require("../middleware/isUrlSharedPostValidToInteract");
 
 /**
  * @swagger
@@ -210,6 +211,7 @@ router.post(
 
 router.get(
   "/getQuest/:uuid/:id/:page?/:postLink?",
+  isUrlSharedPostValidToInteract,
   /**
    * @swagger
    * /infoquestions/getQuest/{uuid}/{id}/{page}/{postLink}:
@@ -388,6 +390,7 @@ router.get(
 
 router.get(
   "/getQuestsAll",
+  // isUrlSharedPostValidToInteract,
   /**
    * @swagger
    * /infoquestions/getQuestsAll:
