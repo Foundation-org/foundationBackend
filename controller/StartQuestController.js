@@ -19,6 +19,7 @@ const {
 } = require("./InfoQuestQuestionController");
 const { getPercentage } = require("../utils/getPercentage");
 const UserQuestSetting = require("../models/UserQuestSetting");
+const BookmarkQuests = require("../models/BookmarkQuests");
 
 const updateViolationCounter = async (req, res) => {
   try {
@@ -38,6 +39,14 @@ const createStartQuest = async (req, res) => {
   try {
     const currentDate = new Date();
     const { postLink } = req.body;
+    const checkSuppression = await InfoQuestQuestions.findOne({
+      _id: req.body.questForeignKey,
+    });
+    if (checkSuppression.suppressed) {
+      throw new Error(
+        "Sorry, this content has been suppressed and is not available at the moment. Please try again later or contact support for further assistance."
+      );
+    }
     // Update InfoQuestQuestions and get the data
     const getInfoQuestQuestion = await InfoQuestQuestions.findByIdAndUpdate(
       { _id: req.body.questForeignKey },
@@ -441,6 +450,9 @@ const createStartQuest = async (req, res) => {
       amount: QUEST_OWNER_ACCOUNT,
       inc: true,
     });
+    const bookmarkExist = await BookmarkQuests.findOne({
+      questForeignKey: getInfoQuestQuestion._id,
+    });
 
     const infoQuest = await InfoQuestQuestions.find({
       _id: getInfoQuestQuestion._id,
@@ -455,6 +467,7 @@ const createStartQuest = async (req, res) => {
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
       contendedPercentage: item.contendedPercentage,
+      bookmark: !!bookmarkExist,
     }));
 
     res.status(200).json({
@@ -471,6 +484,16 @@ const createStartQuest = async (req, res) => {
 };
 const updateChangeAnsStartQuest = async (req, res) => {
   try {
+    const checkSuppression = await InfoQuestQuestions.findOne({
+      _id: req.body.questId,
+    });
+    if (checkSuppression.suppressed) {
+      if (checkSuppression.suppressed) {
+        throw new Error(
+          "Sorry, this content has been suppressed and is not available at the moment. Please try again later or contact support for further assistance."
+        );
+      }
+    }
     const startQuestQuestion = await StartQuests.findOne({
       questForeignKey: req.body.questId,
       uuid: req.body.uuid,
@@ -946,6 +969,9 @@ const updateChangeAnsStartQuest = async (req, res) => {
     } else {
       responseMsg = "You can change your answer once every 1 hour";
     }
+    const bookmarkExist = await BookmarkQuests.findOne({
+      questForeignKey: getInfoQuestQuestion._id,
+    });
     const infoQuest = await InfoQuestQuestions.find({
       _id: req.body.questId,
     }).populate("getUserBadge", "badges");
@@ -959,6 +985,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
       contendedPercentage: item.contendedPercentage,
+      bookmark: !!bookmarkExist,
     }));
 
     res.status(200).json({
