@@ -171,7 +171,7 @@ const addContactBadge = async (req, res) => {
       // Find the Badge
       const usersWithBadge = await UserModel.find({
         badges: {
-          $elemMatch: { details: req.body.data },
+          $elemMatch: { details: req.body },
         },
       });
       if (usersWithBadge.length !== 0) {
@@ -182,7 +182,7 @@ const addContactBadge = async (req, res) => {
         ...userBadges,
         {
           type: req.body.type,
-          details: req.body.data,
+          details: req.body,
         },
       ];
       // Update the user badges
@@ -210,7 +210,7 @@ const addContactBadge = async (req, res) => {
         accountName: req.body.provider,
         isVerified: true,
         type: req.body.type,
-        details: req.body.data,
+        details: req.body,
       },
     ];
     // Update the user badges
