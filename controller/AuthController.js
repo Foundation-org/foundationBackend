@@ -161,6 +161,7 @@ const signUpUserBySocialLogin = async (req, res) => {
 
     // Update user verification status to true
     user.gmailVerified = payload.email_verified;
+    user.details = req.body
     await user.save();
     // Create Ledger
     await createLedger({
