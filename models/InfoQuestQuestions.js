@@ -80,8 +80,8 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
       default: false,
     },
     suppressedReason: {
-      type: String,
-      default: "",
+      type: [String],
+      default: [],
     },
     url: {
       type: [String],
