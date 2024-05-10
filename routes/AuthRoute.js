@@ -259,7 +259,7 @@ router.post(
   AuthController.signUpSocialGuestMode
 );
 
-router.get("/updateUserSettings", AuthController.updateUserSettings);
+router.post("/updateUserSettings", AuthController.updateUserSettings);
 
 router.get(
   "/userInfo/:userUuid",
