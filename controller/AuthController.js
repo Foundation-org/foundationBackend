@@ -584,8 +584,9 @@ const updateUserSettings = async (req, res) => {
 const userInfo = async (req, res) => {
   try {
     const user = await User.findOne({
-      uuid: req.params.uuid,
+      uuid: req.params.userUuid,
     });
+    console.log(user);
     res.status(200).json(user);
   } catch (error) {
     console.error(error.message);
