@@ -1622,7 +1622,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
     }).populate("getUserBadge", "badges");
     if (!infoQuest) throw new Error("No Post Exist!");
 
-    if(!infoQuest.isActive) {
+    if(infoQuest.isActive === false) {
       return res.status(404).json({ message: "Post is not valid Anymore :|" });
     }
 
