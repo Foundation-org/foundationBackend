@@ -211,7 +211,6 @@ router.post(
 
 router.get(
   "/getQuest/:uuid/:id/:page?/:postLink?",
-  isUrlSharedPostValidToInteract,
   /**
    * @swagger
    * /infoquestions/getQuest/{uuid}/{id}/{page}/{postLink}:
