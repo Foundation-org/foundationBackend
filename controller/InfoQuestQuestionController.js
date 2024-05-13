@@ -1056,7 +1056,17 @@ const getQuestsAll = async (req, res) => {
     allQuestions = await Promise.all(mapPromises);
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
   } else if (Page === "Feedback") {
+    const hiddenUserSettings = await UserQuestSetting.find({
+      hidden: true,
+    });
+
+    // Extract userSettingIds from hiddenUserSettings
+    const hiddenUserSettingIds = hiddenUserSettings.map(
+      (userSetting) => userSetting.questForeignKey
+    );
+
     allQuestions = await InfoQuestQuestions.find({
+      _id: { $in: hiddenUserSettingIds },
       uuid: uuid,
       ...filterObj,
       isActive: true,
@@ -1065,11 +1075,7 @@ const getQuestsAll = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(pageSize)
       .skip(skip);
-    totalQuestionsCount = await InfoQuestQuestions.countDocuments({
-      uuid: uuid,
-      ...filterObj,
-      isActive: true,
-    });
+    console.log("all", allQuestions);
   } else {
     // moderation filter
     filterObj.moderationRatingCount = {
@@ -1270,6 +1276,7 @@ const getQuestsAll = async (req, res) => {
         hidden: true,
         questForeignKey: item._doc._id,
       });
+
       if (resultArray[i]._doc.hiddenCount === 0) {
         if (resultArray[i]._doc.suppressedReason) {
           if (resultArray[i]._doc.suppressedReason === "") {
@@ -1622,7 +1629,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
     }).populate("getUserBadge", "badges");
     if (!infoQuest) throw new Error("No Post Exist!");
 
-    if(!infoQuest.isActive) {
+    if (infoQuest.isActive === false) {
       return res.status(404).json({ message: "Post is not valid Anymore :|" });
     }
 

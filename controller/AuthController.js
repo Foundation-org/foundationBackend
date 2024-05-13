@@ -156,6 +156,7 @@ const signUpUserBySocialLogin = async (req, res) => {
       accountId: payload.sub,
       accountName: payload.provider,
       isVerified: true,
+      details: req.body,
       type: type,
     });
 

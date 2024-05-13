@@ -5,6 +5,7 @@ const BookmarkQuestController = require("../controller/BookmarkQuestController")
 // middleware
 const protect = require("../middleware/protect");
 const cache = require("../middleware/cache");
+const isUrlSharedPostValidToInteract = require("../middleware/isUrlSharedPostValidToInteract");
 
 /**
  * @swagger
@@ -13,7 +14,9 @@ const cache = require("../middleware/cache");
  *   description: Endpoints for bookmarking quests and questions
  */
 
-router.post("/createBookmarkQuest",
+router.post(
+  "/createBookmarkQuest",
+  isUrlSharedPostValidToInteract,
   /**
    * @swagger
    * /bookmarkQuest/createBookmarkQuest:
