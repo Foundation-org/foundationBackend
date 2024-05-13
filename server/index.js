@@ -172,7 +172,7 @@ app.get("/generate-registration-options", async (req, res) => {
     rpName: "SimpleWebAuthn Example",
     rpID: rpID,
     userID: "userID",
-    userName: "userName",
+    userName: "foundationUser",
     // Don't prompt users for additional information about the authenticator
     // (Recommended for smoother UX)
     attestationType: "none",
