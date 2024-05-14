@@ -403,7 +403,7 @@ const signInUser = async (req, res) => {
 
     res.cookie("uuid", user.uuid, cookieConfiguration());
     res.cookie("jwt", token, cookieConfiguration());
-    res.json({ message: "Successful" });
+    res.status(200).json(user);
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -1012,7 +1012,7 @@ const sendVerifyEmail = async (req, res) => {
 
     // Step 3 - Email the user a unique verification link
     const url = `${FRONTEND_URL}/VerifyCode/?${verificationTokenFull}`;
-    // return res.status(200).json({url})
+    return res.status(200).json({ url });
     // console.log("url", url);
 
     // NODEMAILER
