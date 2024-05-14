@@ -1217,6 +1217,7 @@ const verify = async (req, res) => {
     // Create a Badge
     user.badges.unshift({ accountName: "Email", isVerified: true });
     // Step 3 - Update user verification status to true
+    user.requiredAction = true;
     user.gmailVerified = true;
     user.verification = true;
     await user.save();
