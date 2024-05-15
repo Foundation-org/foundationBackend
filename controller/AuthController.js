@@ -788,6 +788,12 @@ const signInUserBySocialBadges = async (req, res) => {
       id = payload.data.userID;
       email = payload.data.email;
     }
+
+    if (payload.provider === "twitter"){
+      id = payload.data.user.uid;
+      email = payload.data.email;
+    }
+
     const user = await User.findOne({
       $or: [{ email: email }, { "badges.0.accountId": id }],
     });
