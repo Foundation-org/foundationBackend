@@ -252,11 +252,15 @@ const signUpUserBySocialBadges = async (req, res) => {
     if (payload.type === "facebook") {
       id = payload.data.userID;
     }
+    
+    if (payload.type === "twitter") {
+      id = payload.data.user.uid;
+    }
 
     const usersWithBadge = await User.find({
       badges: {
         $elemMatch: {
-          accountId: req.body.badgeAccountId,
+          accountId: id,
           accountName: payload.type,
         },
       },
