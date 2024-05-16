@@ -811,9 +811,9 @@ const signInUserBySocialBadges = async (req, res) => {
       email = payload.data.email;
     }
 
-    if (payload.type === "instagram"){
-      id = payload.data.user_id;
-      email = payload.data.email;
+    if (payload.provider === "instagram"){
+      id = req.body.data.user_id;
+      email = "";
     }
 
     const user = await User.findOne({
