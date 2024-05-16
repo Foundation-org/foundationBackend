@@ -261,6 +261,10 @@ const signUpUserBySocialBadges = async (req, res) => {
       id = payload.data.user.uid;
     }
 
+    if (payload.type === "instagram") {
+      id = payload.data.user_id;
+    }
+
     const usersWithBadge = await User.find({
       badges: {
         $elemMatch: {
@@ -804,6 +808,11 @@ const signInUserBySocialBadges = async (req, res) => {
 
     if (payload.provider === "github"){
       id = payload.data.user.uid;
+      email = payload.data.email;
+    }
+
+    if (payload.type === "instagram"){
+      id = payload.data.user_id;
       email = payload.data.email;
     }
 
