@@ -252,7 +252,7 @@ const signUpUserBySocialBadges = async (req, res) => {
     if (payload.type === "facebook") {
       id = payload.data.userID;
     }
-    
+
     if (payload.type === "twitter") {
       id = payload.data.user.uid;
     }
@@ -642,8 +642,37 @@ const signUpGuestBySocialBadges = async (req, res) => {
     const payload = req.body;
 
     // Check if email already exist
-    const AlreadyUser = await User.findOne({ email: payload.email });
-    if (AlreadyUser) throw new Error("Email Already Exist");
+    if (payload.email) {
+      const alreadyUser = await User.findOne({ email: payload.email });
+      if (alreadyUser) throw new Error("Email Already Exists");
+    }
+    let id;
+    if (payload.type === "facebook") {
+      id = payload.userID;
+    }
+
+    if (payload.type === "twitter") {
+      id = payload.user.uid;
+    }
+
+    if (payload.type === "github") {
+      id = payload.user.uid;
+    }
+
+    if (payload.type === "instagram") {
+      id = payload.user_id;
+    }
+
+    const usersWithBadge = await User.find({
+      badges: {
+        $elemMatch: {
+          accountId: id,
+          accountName: payload.type,
+        },
+      },
+    });
+    if (usersWithBadge.length !== 0)
+      throw new Error("Oops! This account is already linked.");
 
     //if user doesnot exist
     const user = await User.findOne({ uuid: payload.uuid });
@@ -654,7 +683,7 @@ const signUpGuestBySocialBadges = async (req, res) => {
       { uuid: uuid },
       {
         $set: {
-          email: payload.email,
+          email: payload.email ? payload.email : "",
           role: "user",
           isGuestMode: false,
         },
@@ -663,16 +692,15 @@ const signUpGuestBySocialBadges = async (req, res) => {
 
     // Create a Badge at starting index
     user.badges.unshift({
-      accountId: req.body.badgeAccountId,
-      accountName: req.body.provider,
-      details: req.body.data,
+      accountId: id,
+      accountName: payload.type,
+      details: payload.data,
       isVerified: true,
       type: "social",
       primary: true,
     });
 
     // Update user verification status to true
-    user.gmailVerified = payload.email_verified;
     await user.save();
     // Create Ledger
     await createLedger({
@@ -734,10 +762,6 @@ const signUpGuestBySocialBadges = async (req, res) => {
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
 
-    if (user.badges[0].type !== "Education") {
-      user.requiredAction = true;
-      await user.save();
-    }
     res.cookie("uuid", user.uuid, cookieConfiguration());
     res.cookie("jwt", token, cookieConfiguration());
     res.status(200).json({ ...user._doc, token });
@@ -801,17 +825,17 @@ const signInUserBySocialBadges = async (req, res) => {
       email = payload.data.email;
     }
 
-    if (payload.provider === "twitter"){
+    if (payload.provider === "twitter") {
       id = payload.data.user.uid;
       email = payload.data.email;
     }
 
-    if (payload.provider === "github"){
+    if (payload.provider === "github") {
       id = payload.data.user.uid;
       email = payload.data.email;
     }
 
-    if (payload.provider === "instagram"){
+    if (payload.provider === "instagram") {
       id = req.body.data.user_id;
       email = "";
     }
@@ -920,12 +944,12 @@ const userInfo = async (req, res) => {
 //         console.log(" I am at Work OR Education");
 //         badge.accountId = decryptData(badge.accountId);
 //         badge.accountName = decryptData(badge.accountName)
-//         badge.details = decryptData(badge.details)        
+//         badge.details = decryptData(badge.details)
 //       } else if(badge.accountName && (decryptData(badge.accountName) === "facebook" || decryptData(badge.accountName) === "linkedin" || decryptData(badge.accountName) === "twitter" || decryptData(badge.accountName) === "instagram" || decryptData(badge.accountName) === "github")) {
 //         console.log(" I am at Social OR Education");
 //         badge.accountId = decryptData(badge.accountId);
 //         badge.accountName = decryptData(badge.accountName)
-//         badge.details = decryptData(badge.details)        
+//         badge.details = decryptData(badge.details)
 //       } else if (badge.personal && badge.personal.work) {
 //         console.log(" I am in Work");
 //         // If badge.personal is an object and contains a work array, decrypt each element in the work array
@@ -942,7 +966,7 @@ const userInfo = async (req, res) => {
 //         console.log(" I am at Desktop");
 //         badge.accountId = decryptData(badge.accountId);
 //         badge.accountName = decryptData(badge.accountName)
-//         badge.data = decryptData(badge.data)  
+//         badge.data = decryptData(badge.data)
 //       } else {
 //         throw new Error("userInfo Issue while getting the Badge.")
 //       }
@@ -964,7 +988,7 @@ const userInfo = async (req, res) => {
 
 //     users.forEach(user => {
 //       let updated = false;
-    
+
 //       // Iterate over each badge in the user's badges array
 //       user.badges.forEach(badge => {
 //         // Check if the badge type is within the specified types and details field doesn't exist
@@ -984,7 +1008,7 @@ const userInfo = async (req, res) => {
 //           }
 //         }
 //       });
-    
+
 //       // If any badge was updated, add the update operation to bulkOps
 //       if (updated) {
 //         bulkOps.push({
@@ -1040,7 +1064,7 @@ const userInfo = async (req, res) => {
 //               badge.data = encryptData(badge.data);
 //             }
 //           });
-  
+
 //           return {
 //             updateOne: {
 //               filter: { _id: user._id },
