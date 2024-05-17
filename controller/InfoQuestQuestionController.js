@@ -1626,7 +1626,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
 
     const infoQuest = await InfoQuestQuestions.find({
       _id: userQuestSetting.questForeignKey,
-    }).populate("getUserBadge", "badges");
+    }).populate("getUserBadge", "badges", "startQuestData");
     if (!infoQuest) throw new Error("No Post Exist!");
 
     if (infoQuest.isActive === false) {
