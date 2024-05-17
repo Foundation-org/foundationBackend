@@ -1608,7 +1608,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
     // req.cookie
     console.log("🚀 ~ getQuestById ~ req.cookie:", req.cookies);
     // return
-    const uuid = req.cookies.uuid;
+    const uuid = req.query.uuid;
     const { uniqueShareLink } = req.params; // Use req.params instead of req.body
 
     const userQuestSetting = await UserQuestSetting.findOne({
@@ -1626,7 +1626,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
 
     const infoQuest = await InfoQuestQuestions.find({
       _id: userQuestSetting.questForeignKey,
-    }).populate("getUserBadge", "badges", "startQuestData");
+    }).populate("getUserBadge", "badges");
     if (!infoQuest) throw new Error("No Post Exist!");
 
     if (infoQuest.isActive === false) {
