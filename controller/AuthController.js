@@ -264,6 +264,9 @@ const signUpUserBySocialBadges = async (req, res) => {
     if (payload.type === "instagram") {
       id = payload.data.user_id;
     }
+    if (payload.type === "linkedin") {
+      id = payload.data.sub;
+    }
 
     const usersWithBadge = await User.find({
       badges: {
@@ -672,6 +675,9 @@ const signUpGuestBySocialBadges = async (req, res) => {
       id = payload.data.sub;
       type = payload.provider
     }
+    if (payload.provider === "linkedin") {
+      id = payload.sub;
+    }
 
     const usersWithBadge = await User.find({
       badges: {
@@ -848,6 +854,10 @@ const signInUserBySocialBadges = async (req, res) => {
     if (payload.provider === "instagram") {
       id = req.body.data.user_id;
       email = "";
+    }
+    if (payload.provider === "linkedin") {
+      id = req.body.data.sub;
+      email = payload.data.email;
     }
 
     if (payload.provider === "linkedin") {
