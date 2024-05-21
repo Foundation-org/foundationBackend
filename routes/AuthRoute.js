@@ -768,4 +768,86 @@ router.post(
   AuthController.getLinkedInUserInfo
 );
 
+// User's List APIs
+
+router.get(
+  "/userList/:userUuid",
+  /**
+   * @swagger
+   * /user/userList/{userUuid}:
+   *   get:
+   *     tags:
+   *       - Authentication
+   *     summary: Get user's list information
+   *     description: Endpoint to get information of a user
+   *     parameters:
+   *       - in: path
+   *         name: userUuid
+   *         required: true
+   *         description: The userUuid of the user
+   *         schema:
+   *           type: string
+   *     responses:
+   *       '200':
+   *         description: User information retrieved successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  AuthController.userList
+);
+
+router.post(
+  "/userList/addCategoryInUserList",
+  /**
+   * @swagger
+   * /user/userList/addCategoryInUserList:
+   *   post:
+   *     tags:
+   *       - Authentication
+   *     summary: Set bookmark states
+   *     description: Endpoint to set bookmark states for a user
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/BookmarkStatesSetRequest'
+   *     responses:
+   *       '200':
+   *         description: Bookmark states set successfully
+   *       '400':
+   *         description: Invalid request body
+   *       '500':
+   *         description: Internal server error
+   */
+  AuthController.addCategoryInUserList
+);
+
+router.post(
+  "/userList/addPostInCategoryInUserList",
+  /**
+   * @swagger
+   * /user/userList/addPostInCategoryInUserList:
+   *   post:
+   *     tags:
+   *       - Authentication
+   *     summary: Set bookmark states
+   *     description: Endpoint to set bookmark states for a user
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/BookmarkStatesSetRequest'
+   *     responses:
+   *       '200':
+   *         description: Bookmark states set successfully
+   *       '400':
+   *         description: Invalid request body
+   *       '500':
+   *         description: Internal server error
+   */
+  AuthController.addPostInCategoryInUserList
+);
+
 module.exports = router;
