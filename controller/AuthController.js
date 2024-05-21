@@ -1,4 +1,5 @@
 const User = require("../models/UserModel");
+const { UserListSchema, CategorySchema, PostSchema } = require("../models/UserList");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
@@ -443,6 +444,17 @@ const createGuestMode = async (req, res) => {
     });
     const users = await user.save();
     if (!users) throw new Error("User not Created");
+
+    const createUserList = new UserListSchema({
+      userUuid: users.uuid
+    })
+    const newUserList = await createUserList.save();
+    if(!newUserList) {
+      await users.deleteOne({
+        uuid: uuid
+      })
+      throw new Error("User not created due to list")
+    }
 
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
@@ -1771,6 +1783,95 @@ const getLinkedInUserInfo = async (req, res) => {
   }
 };
 
+// User's List APIs
+
+const userList = async (req, res) => {
+  try {
+
+    const userUuid  = req.params.userUuid;
+
+    const userList = await UserListSchema.findOne({
+      userUuid: userUuid
+    })
+
+    res.status(200).json({
+      message: "List found successfully.",
+      userList: userList.list,
+    });      
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while getting the userList: ${error.message}`,
+    });
+  }
+}
+
+const addCategoryInUserList = async (req, res) => {
+  try {
+    const { userUuid, category } = req.body;
+
+    const userList = await UserListSchema.findOne({
+      userUuid: userUuid
+    })
+    if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
+
+    const newCategory = new CategorySchema({
+      category: category,
+    });
+    userList.list.push(newCategory)
+
+    await userList.save();
+
+    res.status(200).json({
+      message: "New category is created successfully.",
+      userList: userList.list,
+    });      
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while getting the userList: ${error.message}`,
+    });
+  }
+}
+
+const addPostInCategoryInUserList = async (req, res) => {
+  try {
+    const { userUuid, categoryId, data } = req.body;
+
+    // Find UserList Document
+    const userList = await UserListSchema.findOne({
+      userUuid: userUuid
+    })
+    if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
+
+    // Find the document in the list array by categoryId
+    const categoryDoc = userList.list.id(categoryId);
+    if (!categoryDoc) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    const newPost = new PostSchema({
+      data: data
+    })
+    categoryDoc.post.push(newPost)
+
+    await userList.save();
+
+    res.status(200).json({
+      message: `Post is added successfully into your category: ${categoryDoc.category}`,
+      userList: userList.list,
+    });      
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while getting the userList: ${error.message}`,
+    });
+  }
+}
+
 module.exports = {
   changePassword,
   signUpUser,
@@ -1800,4 +1901,7 @@ module.exports = {
   signUpUserBySocialBadges,
   signUpGuestBySocialBadges,
   signInUserBySocialBadges,
+  userList,
+  addCategoryInUserList,
+  addPostInCategoryInUserList
 };
