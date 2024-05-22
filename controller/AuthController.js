@@ -445,16 +445,16 @@ const createGuestMode = async (req, res) => {
     const users = await user.save();
     if (!users) throw new Error("User not Created");
 
-    const createUserList = new UserListSchema({
-      userUuid: users.uuid
-    })
-    const newUserList = await createUserList.save();
-    if(!newUserList) {
-      await users.deleteOne({
-        uuid: uuid
-      })
-      throw new Error("User not created due to list")
-    }
+    // const createUserList = new UserListSchema({
+    //   userUuid: users.uuid
+    // })
+    // const newUserList = await createUserList.save();
+    // if(!newUserList) {
+    //   await users.deleteOne({
+    //     uuid: uuid
+    //   })
+    //   throw new Error("User not created due to list")
+    // }
 
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
@@ -1788,16 +1788,17 @@ const getLinkedInUserInfo = async (req, res) => {
 const userList = async (req, res) => {
   try {
 
-    const userUuid  = req.params.userUuid;
+    const userUuid = req.params.userUuid;
 
     const userList = await UserListSchema.findOne({
       userUuid: userUuid
     })
+    if (!userList) res.status(404).json({ message: `No list is found for User: ${userUuid}` });
 
     res.status(200).json({
       message: "List found successfully.",
       userList: userList.list,
-    });      
+    });
 
   } catch (error) {
     console.error(error.message);
@@ -1814,7 +1815,7 @@ const addCategoryInUserList = async (req, res) => {
     const userList = await UserListSchema.findOne({
       userUuid: userUuid
     })
-    if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
+    if (!userList) res.status(404).json({ message: `No list is found for User: ${userUuid}` });
 
     const newCategory = new CategorySchema({
       category: category,
@@ -1826,7 +1827,81 @@ const addCategoryInUserList = async (req, res) => {
     res.status(200).json({
       message: "New category is created successfully.",
       userList: userList.list,
-    });      
+    });
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while getting the userList: ${error.message}`,
+    });
+  }
+}
+
+const findCategoryById = async (req, res) => {
+  try {
+
+    const userUuid = req.params.userUuid;
+    const categoryId = req.params.categoryId;
+
+    // Find UserList Document
+    const userList = await UserListSchema.findOne({
+      userUuid: userUuid
+    })
+    if (!userList) res.status(404).json({ message: `No list is found for User: ${userUuid}` });
+
+    // Find the document in the list array by categoryId
+    const categoryDoc = userList.list.id(categoryId);
+    if (!categoryDoc) res.status(404).json({ message: `Category not found in the list against: ${categoryId}` });
+
+    res.status(200).json({
+      message: `Category found successfully in the list against: ${categoryId}`,
+      category: categoryDoc,
+    });
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while getting the userList: ${error.message}`,
+    });
+  }
+}
+
+const updateCategoryInUserList = async (req, res) => {
+  try {
+    const { userUuid, categoryId } = req.params;
+    const postId = req.query;
+    const { category } = req.body;
+
+    if(!postId && !category) res.status(400).json({ message: `Please provide either postId in query or category in request` });
+
+    const userList = await UserListSchema.findOne({
+      userUuid: userUuid
+    })
+    if (!userList) res.status(404).json({ message: `No list is found for User: ${userUuid}` });
+
+    let categoryDoc;
+    let post;
+
+    if (category) {
+      // Find the document in the list array by categoryId
+      categoryDoc = userList.list.id(categoryId);
+      if (!categoryDoc) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+      // categoryDoc.category = category;
+
+      if(postId) {
+        post = categoryDoc.post.id(postId);
+      }
+
+      // categoryDoc.updatedAt = new Date().toISOString();
+      // await categoryDoc.save();
+    }
+
+    res.status(200).json({
+      message: "Post foundd successfully.",
+      post: post,
+    });
 
   } catch (error) {
     console.error(error.message);
@@ -1844,7 +1919,7 @@ const addPostInCategoryInUserList = async (req, res) => {
     const userList = await UserListSchema.findOne({
       userUuid: userUuid
     })
-    if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
+    if (!userList) res.status(404).json({ message: `No list is found for User: ${userUuid}` });
 
     // Find the document in the list array by categoryId
     const categoryDoc = userList.list.id(categoryId);
@@ -1861,8 +1936,8 @@ const addPostInCategoryInUserList = async (req, res) => {
 
     res.status(200).json({
       message: `Post is added successfully into your category: ${categoryDoc.category}`,
-      userList: userList.list,
-    });      
+      userList: categoryDoc,
+    });
 
   } catch (error) {
     console.error(error.message);
@@ -1903,5 +1978,7 @@ module.exports = {
   signInUserBySocialBadges,
   userList,
   addCategoryInUserList,
+  findCategoryById,
+  updateCategoryInUserList,
   addPostInCategoryInUserList
 };
