@@ -1814,11 +1814,9 @@ const addCategoryInUserList = async (req, res) => {
   try {
     const { userUuid, category } = req.body;
 
-    const userList = await UserListSchema.findOne({ userUuid: userUuid })
-      .populate({
-        path: 'list.post.questForeginKey',
-        model: 'InfoQuestQuestions'
-      });
+    const userList = await UserListSchema.findOne({
+      userUuid: userUuid
+    })
     if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
     const newCategory = new CategorySchema({
@@ -1828,14 +1826,15 @@ const addCategoryInUserList = async (req, res) => {
 
     await userList.save();
 
-    await userList.populate({
-      path: 'list.post.questForeginKey',
-      model: 'InfoQuestQuestions'
-    }).execPopulate();
+    const populatedUserList = await UserListSchema.findOne({ userUuid: userUuid })
+      .populate({
+        path: 'list.post.questForeginKey',
+        model: 'InfoQuestQuestions'
+      });
 
     res.status(200).json({
       message: "New category is created successfully.",
-      userList: userList.list,
+      userList: populatedUserList.list,
     });
 
   } catch (error) {
@@ -1848,7 +1847,7 @@ const addCategoryInUserList = async (req, res) => {
 
 const addPostInCategoryInUserList = async (req, res) => {
   try {
-    const { userUuid, categoryId, data } = req.body;
+    const { userUuid, categoryId, questForeginKey } = req.body;
 
     // Find UserList Document
     const userList = await UserListSchema.findOne({
@@ -1863,20 +1862,21 @@ const addPostInCategoryInUserList = async (req, res) => {
     }
 
     const newPost = new PostSchema({
-      data: data
+      questForeginKey: questForeginKey
     })
     categoryDoc.post.push(newPost)
 
     await userList.save();
 
-    await userList.populate({
-      path: 'list.post.questForeginKey',
-      model: 'InfoQuestQuestions'
-    }).execPopulate();
+    const populatedUserList = await UserListSchema.findOne({ userUuid: userUuid })
+      .populate({
+        path: 'list.post.questForeginKey',
+        model: 'InfoQuestQuestions'
+      });
 
     res.status(200).json({
       message: `Post is added successfully into your category: ${categoryDoc.category}`,
-      userList: userList.list,
+      userList: populatedUserList.list,
     });
 
   } catch (error) {
