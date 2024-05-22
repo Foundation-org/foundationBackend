@@ -1819,6 +1819,11 @@ const addCategoryInUserList = async (req, res) => {
     })
     if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
+    // Check if userList already has a category with the same name
+    const categoryExists = userList.list.some(obj => obj.category === category);
+    console.log(categoryExists);
+    if(categoryExists) throw new Error(`Category: ${category}, Already exists in the user list.`);
+
     const newCategory = new CategorySchema({
       category: category,
     });
@@ -1860,6 +1865,10 @@ const addPostInCategoryInUserList = async (req, res) => {
     if (!categoryDoc) {
       return res.status(404).json({ message: "Category not found" });
     }
+
+    // Check if the questForeginKey already exists in any post in the category
+    const questForeginKeyExists = categoryDoc.post.some(obj => obj.questForeginKey.equals(questForeginKey));
+    if(questForeginKeyExists) throw new Error(`Post: ${questForeginKey}, Already exists in the Category: ${categoryDoc.category}, of user list.`);
 
     const newPost = new PostSchema({
       questForeginKey: questForeginKey
