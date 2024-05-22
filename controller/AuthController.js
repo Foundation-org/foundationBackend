@@ -282,7 +282,7 @@ const signUpUserBySocialBadges = async (req, res) => {
 
     const uuid = crypto.randomBytes(11).toString("hex");
     const user = await new User({
-      email: payload.data.email ? payload.data.email : "",
+      email: payload.data.email ? payload.data.email : null,
       uuid: uuid,
       role: "user",
     });
@@ -711,7 +711,7 @@ const signUpGuestBySocialBadges = async (req, res) => {
       { uuid: uuid },
       {
         $set: {
-          email: payload.email ? payload.email : "",
+          email: payload.email ? payload.email : null,
           role: "user",
           isGuestMode: false,
         },
