@@ -1,8 +1,13 @@
 const mongoose = require("mongoose");
+const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 
 // Define the schema for objects within the post array
 const postSchema = mongoose.Schema({
-    data: { type: Object, required: true },
+    questForeginKey: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: InfoQuestQuestions,
+        required: true
+    },
     clicks: { type: Number, default: null, },
     participents: { type: Number, default: null, },
     createdAt: { type: String, default: () => new Date().toISOString(), },
