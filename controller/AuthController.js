@@ -1898,30 +1898,37 @@ const addPostInCategoryInUserList = async (req, res) => {
 
 const createUserListForAllUsers = async (req, res) => {
   try {
-
     // Fetch all users from the users collection
     const users = await User.find({});
 
-    // Iterate over each user and create a corresponding userlist document
-    const userListPromises = users.map(user => {
-      const userList = new UserListSchema({
-        userUuid: user.uuid,
-        // The list field will default to an empty array
-        // Other fields will default as per the schema
-      });
+    // Array to store promises for creating userlists
+    const userListPromises = [];
 
-      return userList.save();
-    });
+    // Iterate over each user
+    for (const user of users) {
+      // Check if a userList already exists for the user
+      const existingUserList = await UserListSchema.findOne({ userUuid: user.uuid });
+
+      // If userList does not exist for the user, create one
+      if (!existingUserList) {
+        const userList = new UserListSchema({
+          userUuid: user.uuid,
+          // Other fields will default as per the schema
+        });
+
+        // Save the userList and push the promise to the array
+        userListPromises.push(userList.save());
+      }
+    }
 
     // Wait for all userlist documents to be created
     const result = await Promise.all(userListPromises);
-    if(!result) throw new Error("No result found");
 
+    // Send success response
     res.status(200).json({
-      message: `UserList Collection is Refactored successfully`,
+      message: 'UserList Collection is Refactored successfully',
       userList: result,
-    });      
-
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
