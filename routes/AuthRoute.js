@@ -810,7 +810,7 @@ router.post(
    *       required: true
    *       content:
    *         application/json:
-   *           schema:
+   *           schema: 
    *             $ref: '#/components/schemas/BookmarkStatesSetRequest'
    *     responses:
    *       '200':
@@ -821,6 +821,78 @@ router.post(
    *         description: Internal server error
    */
   AuthController.addCategoryInUserList
+);
+
+router.get(
+  "/userList/findCategoryById/:userUuid/:categoryId",
+  /**
+   * @swagger
+   * /user/userList/findCategoryById/{userUuid}/{categoryId}:
+   *   get:
+   *     tags:
+   *       - Authentication
+   *     summary: Get user's list information
+   *     description: Endpoint to get information of a user
+   *     parameters:
+   *       - in: path
+   *         name: userUuid
+   *         required: true
+   *         description: The userUuid of the user
+   *       - in: path
+   *         name: categoryId
+   *         required: true
+   *         description: The categoryId of the user's List
+   *         schema:
+   *           type: string
+   *     responses:
+   *       '200':
+   *         description: User information retrieved successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  AuthController.findCategoryById
+);
+
+router.patch(
+  "/userList/updateCategoryInUserList/:userUuid/:categoryId/:postId?",
+  /**
+   * @swagger
+   * /user/userList/updateCategoryInUserList/{userUuid}/{categoryId}/{postId}:
+   *   patch:
+   *     tags:
+   *       - Authentication
+   *     summary: Update bookmark states
+   *     description: Endpoint to update bookmark states for a user
+   *     parameters:
+   *       - in: path
+   *         name: userUuid
+   *         required: true
+   *         description: The userUuid of the user
+   *       - in: path
+   *         name: categoryId
+   *         required: true
+   *         description: The categoryId of the user's List
+   *       - name: postId
+   *         in: query
+   *         required: false
+   *         schema:
+   *           type: string
+   *         description: ID of the post (optional)
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/BookmarkStatesSetRequest'
+   *     responses:
+   *       '200':
+   *         description: Bookmark states updated successfully
+   *       '400':
+   *         description: Invalid request body
+   *       '500':
+   *         description: Internal server error
+   */
+  AuthController.updateCategoryInUserList
 );
 
 router.post(
@@ -837,7 +909,7 @@ router.post(
    *       required: true
    *       content:
    *         application/json:
-   *           schema:
+   *           schema: 
    *             $ref: '#/components/schemas/BookmarkStatesSetRequest'
    *     responses:
    *       '200':
