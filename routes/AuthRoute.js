@@ -879,7 +879,6 @@ router.patch(
    *           type: string
    *         description: ID of the post (optional)
    *     requestBody:
-   *       required: true
    *       content:
    *         application/json:
    *           schema:
@@ -893,6 +892,40 @@ router.patch(
    *         description: Internal server error
    */
   AuthController.updateCategoryInUserList
+);
+
+router.delete(
+  "/userList/deleteCategoryFromList/:userUuid/:categoryId",
+  /**
+   * @swagger
+   * /user/userList/deleteCategoryFromList/{userUuid}/{categoryId}:
+   *   delete:
+   *     tags:
+   *       - Authentication
+   *     summary: Delete a post from a user's category
+   *     description: Endpoint to delete a specific post from a user's category list
+   *     parameters:
+   *       - in: path
+   *         name: userUuid
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: UUID of the user
+   *       - in: path
+   *         name: categoryId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the category
+   *     responses:
+   *       '200':
+   *         description: Post deleted successfully
+   *       '404':
+   *         description: User, category, or post not found
+   *       '500':
+   *         description: Internal server error
+   */
+  AuthController.deleteCategoryFromList
 );
 
 router.post(
