@@ -445,16 +445,16 @@ const createGuestMode = async (req, res) => {
     const users = await user.save();
     if (!users) throw new Error("User not Created");
 
-    // const createUserList = new UserListSchema({
-    //   userUuid: users.uuid
-    // })
-    // const newUserList = await createUserList.save();
-    // if(!newUserList) {
-    //   await users.deleteOne({
-    //     uuid: uuid
-    //   })
-    //   throw new Error("User not created due to list")
-    // }
+    const createUserList = new UserListSchema({
+      userUuid: users.uuid
+    })
+    const newUserList = await createUserList.save();
+    if(!newUserList) {
+      await users.deleteOne({
+        uuid: uuid
+      })
+      throw new Error("User not created due to list")
+    }
 
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
@@ -1821,8 +1821,7 @@ const addCategoryInUserList = async (req, res) => {
 
     // Check if userList already has a category with the same name
     const categoryExists = userList.list.some(obj => obj.category === category);
-    console.log(categoryExists);
-    if(categoryExists) throw new Error(`Category: ${category}, Already exists in the user list.`);
+    if (categoryExists) throw new Error(`Category: ${category}, Already exists in the user list.`);
 
     const newCategory = new CategorySchema({
       category: category,
@@ -1840,6 +1839,71 @@ const addCategoryInUserList = async (req, res) => {
     res.status(200).json({
       message: "New category is created successfully.",
       userList: populatedUserList.list,
+    });
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while getting the userList: ${error.message}`,
+    });
+  }
+}
+
+const findCategoryById = async (req, res) => {
+  try {
+
+    const { userUuid, categoryId } = req.params;
+
+    const userList = await UserListSchema.findOne({ userUuid: userUuid })
+      .populate({
+        path: 'list.post.questForeginKey',
+        model: 'InfoQuestQuestions'
+      });
+    if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
+
+    // Find the category within the list array based on categoryId
+    const categoryDoc = userList.list.id(categoryId);
+
+    if (!categoryDoc) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    res.status(200).json({
+      message: `Category found successfully`,
+      userList: categoryDoc,
+    });
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while getting the userList: ${error.message}`,
+    });
+  }
+}
+
+const updateCategoryInUserList = async (req, res) => {
+  try {
+
+    const { userUuid, categoryId } = req.params;
+
+    // Find UserList Document
+    const userList = await UserListSchema.findOne({
+      userUuid: userUuid
+    })
+    if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
+
+    // Find the document in the list array by categoryId
+    const categoryDoc = userList.list.id(categoryId);
+    if (!categoryDoc) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    // Populate the questForignKey field within the post array of the categoryDoc
+    await categoryDoc.populate('post.questForignKey').execPopulate();
+
+    res.status(200).json({
+      message: `Category found successfully`,
+      userList: categoryDoc,
     });
 
   } catch (error) {
@@ -1868,7 +1932,7 @@ const addPostInCategoryInUserList = async (req, res) => {
 
     // Check if the questForeginKey already exists in any post in the category
     const questForeginKeyExists = categoryDoc.post.some(obj => obj.questForeginKey.equals(questForeginKey));
-    if(questForeginKeyExists) throw new Error(`Post: ${questForeginKey}, Already exists in the Category: ${categoryDoc.category}, of user list.`);
+    if (questForeginKeyExists) throw new Error(`Post: ${questForeginKey}, Already exists in the Category: ${categoryDoc.category}, of user list.`);
 
     const newPost = new PostSchema({
       questForeginKey: questForeginKey
