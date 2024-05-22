@@ -1896,6 +1896,40 @@ const addPostInCategoryInUserList = async (req, res) => {
   }
 }
 
+const createUserListForAllUsers = async (req, res) => {
+  try {
+
+    // Fetch all users from the users collection
+    const users = await User.find({});
+
+    // Iterate over each user and create a corresponding userlist document
+    const userListPromises = users.map(user => {
+      const userList = new UserListSchema({
+        userUuid: user.uuid,
+        // The list field will default to an empty array
+        // Other fields will default as per the schema
+      });
+
+      return userList.save();
+    });
+
+    // Wait for all userlist documents to be created
+    const result = await Promise.all(userListPromises);
+    if(!result) throw new Error("No result found");
+
+    res.status(200).json({
+      message: `UserList Collection is Refactored successfully`,
+      userList: result,
+    });      
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while creating the userList: ${error.message}`,
+    });
+  }
+}
+
 module.exports = {
   changePassword,
   signUpUser,
@@ -1927,5 +1961,6 @@ module.exports = {
   signInUserBySocialBadges,
   userList,
   addCategoryInUserList,
-  addPostInCategoryInUserList
+  addPostInCategoryInUserList,
+  createUserListForAllUsers,
 };
