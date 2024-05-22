@@ -449,7 +449,7 @@ const createGuestMode = async (req, res) => {
       userUuid: users.uuid
     })
     const newUserList = await createUserList.save();
-    if(!newUserList) {
+    if (!newUserList) {
       await users.deleteOne({
         uuid: uuid
       })
@@ -1828,6 +1828,7 @@ const addCategoryInUserList = async (req, res) => {
     });
     userList.list.push(newCategory)
 
+    userList.updatedAt = new Date().toISOString();
     await userList.save();
 
     const populatedUserList = await UserListSchema.findOne({ userUuid: userUuid })
@@ -1885,11 +1886,17 @@ const updateCategoryInUserList = async (req, res) => {
   try {
 
     const { userUuid, categoryId } = req.params;
+    const { postId } = req.query;
+    const { category } = req.body;
+
+    if (!postId && !category || postId && category) throw new Error("Bad Request: Please Provide either category in your request, or postId in query");
 
     // Find UserList Document
-    const userList = await UserListSchema.findOne({
-      userUuid: userUuid
-    })
+    const userList = await UserListSchema.findOne({ userUuid: userUuid })
+      .populate({
+        path: 'list.post.questForeginKey',
+        model: 'InfoQuestQuestions'
+      });
     if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
     // Find the document in the list array by categoryId
@@ -1898,8 +1905,19 @@ const updateCategoryInUserList = async (req, res) => {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    // Populate the questForignKey field within the post array of the categoryDoc
-    await categoryDoc.populate('post.questForignKey').execPopulate();
+    // Delete Post Or Update Category Only.
+    if (postId) categoryDoc.post.pull({ _id: postId });
+    if (category) {
+      // Check if userList already has a category with the same name
+      const categoryExists = userList.list.some(obj => obj.category === category);
+      if (categoryExists) throw new Error(`Category: ${category}, Already exists in the user list.`);
+      categoryDoc.category = category;
+    }
+
+    categoryDoc.updatedAt = new Date().toISOString();
+    userList.updatedAt = new Date().toISOString();
+    // Save the updated userList document
+    await userList.save();
 
     res.status(200).json({
       message: `Category found successfully`,
@@ -1913,6 +1931,33 @@ const updateCategoryInUserList = async (req, res) => {
     });
   }
 }
+
+const deleteCategoryFromList = async (req, res) => {
+  try {
+    const { userUuid, categoryId } = req.params;
+
+    // Find UserList Document
+    const userList = await UserListSchema.findOne({ userUuid: userUuid })
+      .populate({
+        path: 'list.post.questForeginKey',
+        model: 'InfoQuestQuestions'
+      });
+    if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
+
+    userList.list.pull({_id: categoryId});
+    userList.updatedAt = new Date().toISOString();
+    // Save the updated userList document
+    await userList.save();
+
+    res.status(200).json({
+      message: "New category is created successfully.",
+      userList: userList.list,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: `An error occurred: ${error.message}` });
+  }
+};
 
 const addPostInCategoryInUserList = async (req, res) => {
   try {
@@ -1938,6 +1983,7 @@ const addPostInCategoryInUserList = async (req, res) => {
       questForeginKey: questForeginKey
     })
     categoryDoc.post.push(newPost)
+    userList.updatedAt = new Date().toISOString();
 
     await userList.save();
 
@@ -2034,6 +2080,7 @@ module.exports = {
   addCategoryInUserList,
   findCategoryById,
   updateCategoryInUserList,
+  deleteCategoryFromList,
   addPostInCategoryInUserList,
   createUserListForAllUsers,
 };
