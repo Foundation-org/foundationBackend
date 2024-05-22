@@ -1817,7 +1817,7 @@ const addCategoryInUserList = async (req, res) => {
     const userList = await UserListSchema.findOne({
       userUuid: userUuid
     })
-    if (!userList) res.status(404).json({ message: `No list is found for User: ${userUuid}` });
+    if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
     // Check if userList already has a category with the same name
     const categoryExists = userList.list.some(obj => obj.category === category);
@@ -1858,7 +1858,7 @@ const addPostInCategoryInUserList = async (req, res) => {
     const userList = await UserListSchema.findOne({
       userUuid: userUuid
     })
-    if (!userList) res.status(404).json({ message: `No list is found for User: ${userUuid}` });
+    if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
     // Find the document in the list array by categoryId
     const categoryDoc = userList.list.id(categoryId);
