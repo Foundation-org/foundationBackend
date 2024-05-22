@@ -98,7 +98,7 @@ router.post(
   "/signUpUser/socialBadges",
   /**
    * @swagger
-   * /user/signUpUser/social:
+   * /user/signUpUser/socialBadges:
    *   post:
    *     tags:
    *       - Authentication
