@@ -1828,6 +1828,7 @@ const addCategoryInUserList = async (req, res) => {
     });
     userList.list.push(newCategory)
 
+    userList.updatedAt = new Date().toISOString();
     await userList.save();
 
     const populatedUserList = await UserListSchema.findOne({ userUuid: userUuid })
@@ -1914,6 +1915,7 @@ const updateCategoryInUserList = async (req, res) => {
     }
 
     categoryDoc.updatedAt = new Date().toISOString();
+    userList.updatedAt = new Date().toISOString();
     // Save the updated userList document
     await userList.save();
 
@@ -1943,6 +1945,7 @@ const deleteCategoryFromList = async (req, res) => {
     if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
     userList.list.pull({_id: categoryId});
+    userList.updatedAt = new Date().toISOString();
     // Save the updated userList document
     await userList.save();
 
@@ -1980,6 +1983,7 @@ const addPostInCategoryInUserList = async (req, res) => {
       questForeginKey: questForeginKey
     })
     categoryDoc.post.push(newPost)
+    userList.updatedAt = new Date().toISOString();
 
     await userList.save();
 
