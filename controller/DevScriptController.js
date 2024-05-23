@@ -1,5 +1,5 @@
-const User = require("../models/UserModel");
-const { UserListSchema, CategorySchema, PostSchema } = require("../models/UserList");
+// const User = require("../models/UserModel");
+// const { UserListSchema, CategorySchema, PostSchema } = require("../models/UserList");
 
 // const excep = async (req, res) => {
 //   try {
