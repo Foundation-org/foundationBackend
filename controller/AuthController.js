@@ -1799,7 +1799,7 @@ const userList = async (req, res) => {
 
     res.status(200).json({
       message: "List found successfully.",
-      userList: userList.list,
+      userList: userList.list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
     });
 
   } catch (error) {
@@ -1961,7 +1961,7 @@ const deleteCategoryFromList = async (req, res) => {
 
 const addPostInCategoryInUserList = async (req, res) => {
   try {
-    const { userUuid, categoryId, questForeginKey } = req.body;
+    const { userUuid, categoryIdArray, questForeginKey } = req.body;
 
     // Find UserList Document
     const userList = await UserListSchema.findOne({
@@ -1969,20 +1969,22 @@ const addPostInCategoryInUserList = async (req, res) => {
     })
     if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
-    // Find the document in the list array by categoryId
-    const categoryDoc = userList.list.id(categoryId);
-    if (!categoryDoc) {
-      return res.status(404).json({ message: "Category not found" });
+    for (const categoryId of categoryIdArray) {
+      const categoryDoc = userList.list.id(categoryId);
+      if (!categoryDoc) {
+        return res.status(404).json({ message: `Category not found: ${categoryId}` });
+      }
+    
+      const questForeginKeyExists = categoryDoc.post.some(obj => obj.questForeginKey.equals(questForeginKey));
+      if (questForeginKeyExists) {
+        return res.status(400).json({ message: `Post: ${questForeginKey} already exists in Category: ${categoryDoc.category}` });
+      }
+    
+      const newPost = new PostSchema({
+        questForeginKey: questForeginKey
+      });
+      categoryDoc.post.push(newPost);
     }
-
-    // Check if the questForeginKey already exists in any post in the category
-    const questForeginKeyExists = categoryDoc.post.some(obj => obj.questForeginKey.equals(questForeginKey));
-    if (questForeginKeyExists) throw new Error(`Post: ${questForeginKey}, Already exists in the Category: ${categoryDoc.category}, of user list.`);
-
-    const newPost = new PostSchema({
-      questForeginKey: questForeginKey
-    })
-    categoryDoc.post.push(newPost)
     userList.updatedAt = new Date().toISOString();
 
     await userList.save();
