@@ -100,6 +100,38 @@ const findCategoryById = async (req, res) => {
     }
 }
 
+const findCategoryByName = async (req, res) => {
+    try {
+
+        const { userUuid, categoryName } = req.params;
+
+        const userList = await UserListSchema.findOne({ userUuid: userUuid })
+            .populate({
+                path: 'list.post.questForeginKey',
+                model: 'InfoQuestQuestions'
+            });
+        if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
+
+        // Find the category within the list array based on categoryName
+        const categoryDoc = userList.list.id(categoryName);
+
+        if (!categoryDoc) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        res.status(200).json({
+            message: `Category found successfully`,
+            userList: categoryDoc,
+        });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({
+            message: `An error occurred while getting the userList: ${error.message}`,
+        });
+    }
+}
+
 const updateCategoryInUserList = async (req, res) => {
     try {
 
@@ -270,6 +302,7 @@ module.exports = {
     userList,
     addCategoryInUserList,
     findCategoryById,
+    findCategoryByName,
     updateCategoryInUserList,
     deleteCategoryFromList,
     addPostInCategoryInUserList,
