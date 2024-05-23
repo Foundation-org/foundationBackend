@@ -197,23 +197,4 @@ router.post(
   UserSurveyListController.addPostInCategoryInUserList
 );
 
-router.get(
-  "/createUserListForAllUsers",
-  /**
-   * @swagger
-   * /userlists/createUserListForAllUsers:
-   *   get:
-   *     tags:
-   *       - UserSurveyList
-   *     summary: Get user's list information
-   *     description: Endpoint to get information of a user
-   *     responses:
-   *       '200':
-   *         description: User information retrieved successfully
-   *       '500':
-   *         description: Internal server error
-   */
-  UserSurveyListController.createUserListForAllUsers
-);
-
 module.exports = router;
