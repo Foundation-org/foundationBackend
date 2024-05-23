@@ -99,7 +99,7 @@ router.get(
     "/userList/findCategoryByName/:userUuid/:categoryName",
     /**
      * @swagger
-     * /userlists/userList/findCategoryById/{userUuid}/{categoryName}:
+     * /userlists/userList/findCategoryByName/{userUuid}/{categoryName}:
      *   get:
      *     tags:
      *       - UserSurveyList

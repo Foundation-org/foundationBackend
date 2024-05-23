@@ -82,10 +82,7 @@ const findCategoryById = async (req, res) => {
 
         // Find the category within the list array based on categoryId
         const categoryDoc = userList.list.id(categoryId);
-
-        if (!categoryDoc) {
-            return res.status(404).json({ message: 'Category not found' });
-        }
+        if (!categoryDoc) throw new Error('Category not found');
 
         res.status(200).json({
             message: `Category found successfully`,
@@ -113,11 +110,8 @@ const findCategoryByName = async (req, res) => {
         if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
         // Find the category within the list array based on categoryName
-        const categoryDoc = userList.list.id(categoryName);
-
-        if (!categoryDoc) {
-            return res.status(404).json({ message: 'Category not found' });
-        }
+        const categoryDoc = userList.list.find(obj => obj.category === categoryName);
+        if (!categoryDoc) throw new Error('Category not found');
 
         res.status(200).json({
             message: `Category found successfully`,
@@ -151,9 +145,7 @@ const updateCategoryInUserList = async (req, res) => {
 
         // Find the document in the list array by categoryId
         const categoryDoc = userList.list.id(categoryId);
-        if (!categoryDoc) {
-            return res.status(404).json({ message: "Category not found" });
-        }
+        if (!categoryDoc) throw new Error('Category not found');
 
         // Delete Post Or Update Category Only.
         if (postId) categoryDoc.post.pull({ _id: postId });
