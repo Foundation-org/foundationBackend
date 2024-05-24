@@ -96,34 +96,34 @@ router.get(
 );
 
 router.get(
-    "/userList/findCategoryByName/:userUuid/:categoryName",
-    /**
-     * @swagger
-     * /userlists/userList/findCategoryByName/{userUuid}/{categoryName}:
-     *   get:
-     *     tags:
-     *       - UserSurveyList
-     *     summary: Get user's list information
-     *     description: Endpoint to get information of a user
-     *     parameters:
-     *       - in: path
-     *         name: userUuid
-     *         required: true
-     *         description: The userUuid of the user
-     *       - in: path
-     *         name: categoryName
-     *         required: true
-     *         description: The categoryName of the user's List
-     *         schema:
-     *           type: string
-     *     responses:
-     *       '200':
-     *         description: User information retrieved successfully
-     *       '500':
-     *         description: Internal server error
-     */
-    UserSurveyListController.findCategoryByName
-  );
+  "/userList/findCategoryByName/:userUuid/:categoryName",
+  /**
+   * @swagger
+   * /userlists/userList/findCategoryByName/{userUuid}/{categoryName}:
+   *   get:
+   *     tags:
+   *       - UserSurveyList
+   *     summary: Get user's list information
+   *     description: Endpoint to get information of a user
+   *     parameters:
+   *       - in: path
+   *         name: userUuid
+   *         required: true
+   *         description: The userUuid of the user
+   *       - in: path
+   *         name: categoryName
+   *         required: true
+   *         description: The categoryName of the user's List
+   *         schema:
+   *           type: string
+   *     responses:
+   *       '200':
+   *         description: User information retrieved successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  UserSurveyListController.findCategoryByName
+);
 
 router.patch(
   "/userList/updateCategoryInUserList/:userUuid/:categoryId/:postId?",
@@ -198,6 +198,59 @@ router.delete(
    *         description: Internal server error
    */
   UserSurveyListController.deleteCategoryFromList
+);
+
+router.post(
+  "/userList/generateCategoryShareLink",
+  /**
+   * @swagger
+   * /userlists/userList/generateCategoryShareLink:
+   *   post:
+   *     tags:
+   *       - UserSurveyList
+   *     summary: Set bookmark states
+   *     description: Endpoint to set bookmark states for a user
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema: 
+   *             $ref: '#/components/schemas/BookmarkStatesSetRequest'
+   *     responses:
+   *       '200':
+   *         description: Bookmark states set successfully
+   *       '400':
+   *         description: Invalid request body
+   *       '500':
+   *         description: Internal server error
+   */
+  UserSurveyListController.generateCategoryShareLink
+);
+
+router.get(
+  "/userList/generateCategoryShareLink",
+  /**
+   * @swagger
+   * /userlists/userList/generateCategoryShareLink:
+   *   get:
+   *     tags:
+   *       - UserSurveyList
+   *     summary: Get user's list information
+   *     description: Endpoint to get information of a user
+   *     parameters:
+   *       - in: path
+   *         name: userUuid
+   *         required: true
+   *         description: The userUuid of the user
+   *         schema:
+   *           type: string
+   *     responses:
+   *       '200':
+   *         description: User information retrieved successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  UserSurveyListController.userList
 );
 
 router.post(

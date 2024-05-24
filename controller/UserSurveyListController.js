@@ -1,5 +1,6 @@
 const User = require("../models/UserModel");
 const { UserListSchema, CategorySchema, PostSchema } = require("../models/UserList");
+const shortLink = require("shortlink");
 
 // User's List APIs
 
@@ -201,6 +202,46 @@ const deleteCategoryFromList = async (req, res) => {
     }
 };
 
+const generateCategoryShareLink = async (req, res) => {
+    try {
+        const { userUuid, category } = req.body;
+
+        const userList = await UserListSchema.findOne({
+            userUuid: userUuid
+        })
+        if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
+
+        // Check if userList already has a category with the same name
+        const categoryExists = userList.list.some(obj => obj.category === category);
+        if (categoryExists) throw new Error(`Category: ${category}, Already exists in the user list.`);
+
+        const newCategory = new CategorySchema({
+            category: category,
+        });
+        userList.list.push(newCategory)
+
+        userList.updatedAt = new Date().toISOString();
+        await userList.save();
+
+        const populatedUserList = await UserListSchema.findOne({ userUuid: userUuid })
+            .populate({
+                path: 'list.post.questForeginKey',
+                model: 'InfoQuestQuestions'
+            });
+
+        res.status(200).json({
+            message: "New category is created successfully.",
+            userList: populatedUserList.list,
+        });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({
+            message: `An error occurred while getting the userList: ${error.message}`,
+        });
+    }
+}
+
 const addPostInCategoryInUserList = async (req, res) => {
     try {
         const { userUuid, categoryIdArray, questForeginKey } = req.body;
@@ -297,6 +338,7 @@ module.exports = {
     findCategoryByName,
     updateCategoryInUserList,
     deleteCategoryFromList,
+    generateCategoryShareLink,
     addPostInCategoryInUserList,
     createUserListForAllUsers,
 };
