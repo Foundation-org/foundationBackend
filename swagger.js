@@ -12,7 +12,7 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: 'http://localhost:7355',
+                url: 'http://localhost:7354',
             },
         ],
     },
