@@ -200,27 +200,39 @@ router.delete(
   UserSurveyListController.deleteCategoryFromList
 );
 
-router.post(
-  "/userList/generateCategoryShareLink",
+// Generate Link or Customized Link for List.
+router.get(
+  "/userList/generateCategoryShareLink/:userUuid/:categoryId/:customizedLink?",
   /**
    * @swagger
-   * /userlists/userList/generateCategoryShareLink:
-   *   post:
+   * /userlists/userList/generateCategoryShareLink/{userUuid}/{categoryId}:
+   *   get:
    *     tags:
    *       - UserSurveyList
-   *     summary: Set bookmark states
-   *     description: Endpoint to set bookmark states for a user
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema: 
-   *             $ref: '#/components/schemas/BookmarkStatesSetRequest'
+   *     summary: Get user's list shared link
+   *     description: Endpoint to get shared link of a user
+   *     parameters:
+   *       - in: path
+   *         name: userUuid
+   *         required: true
+   *         description: The userUuid of the user
+   *         schema:
+   *           type: string
+   *       - in: path
+   *         name: categoryId
+   *         required: true
+   *         description: The categoryId of the user
+   *         schema:
+   *           type: string
+   *       - in: query
+   *         name: customizedLink
+   *         required: false
+   *         description: A String to customized List Sharing link
+   *         schema:
+   *           type: string
    *     responses:
    *       '200':
-   *         description: Bookmark states set successfully
-   *       '400':
-   *         description: Invalid request body
+   *         description: User shared link retrieved successfully
    *       '500':
    *         description: Internal server error
    */
@@ -228,20 +240,20 @@ router.post(
 );
 
 router.get(
-  "/userList/generateCategoryShareLink",
+  "/userList/findCategoryByLink/:categoryLink",
   /**
    * @swagger
-   * /userlists/userList/generateCategoryShareLink:
+   * /userlists/userList/findCategoryByLink/{categoryLink}:
    *   get:
    *     tags:
    *       - UserSurveyList
    *     summary: Get user's list information
-   *     description: Endpoint to get information of a user
+   *     description: Endpoint to get list of a user by link
    *     parameters:
    *       - in: path
-   *         name: userUuid
+   *         name: categoryLink
    *         required: true
-   *         description: The userUuid of the user
+   *         description: The categoryLink of the user
    *         schema:
    *           type: string
    *     responses:
@@ -250,7 +262,7 @@ router.get(
    *       '500':
    *         description: Internal server error
    */
-  UserSurveyListController.userList
+  UserSurveyListController.findCategoryByLink
 );
 
 router.post(
