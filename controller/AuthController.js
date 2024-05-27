@@ -670,7 +670,7 @@ const signUpGuestBySocialBadges = async (req, res) => {
     let id;
     let type;
     if (payload.type === "facebook") {
-      id = payload.userID;
+      id = payload.id;
       type = req.body.type;
     }
 
@@ -852,7 +852,7 @@ const signInUserBySocialBadges = async (req, res) => {
     let email;
     const payload = req.body;
     if (payload.provider === "facebook") {
-      id = payload.data.userID;
+      id = payload.data.id;
       email = payload.data.email;
     }
 
