@@ -150,8 +150,8 @@ router.patch(
    *         name: categoryId
    *         required: true
    *         description: The categoryId of the user's List
-   *       - name: postId
-   *         in: query
+   *       - in: path
+   *         name: postId
    *         required: false
    *         schema:
    *           type: string
