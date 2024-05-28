@@ -24,7 +24,12 @@ const userList = async (req, res) => {
                 return regex.test(obj.category);
             });
 
-            if (categories.length === 0) throw new Error('No categories found');
+            if (categories.length === 0) {
+                res.status(200).json({
+                    message: "No Category found.",
+                    userList: [],
+                });
+            }
 
             res.status(200).json({
                 message: `Categories found successfully`,
