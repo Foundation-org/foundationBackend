@@ -1,6 +1,8 @@
 const User = require("../models/UserModel");
 const { UserListSchema, CategorySchema, PostSchema } = require("../models/UserList");
 const shortLink = require("shortlink");
+const InfoQuestQuestions = require("../models/InfoQuestQuestions");
+const StartQuests = require("../models/StartQuests");
 
 // User's List APIs
 
@@ -9,7 +11,7 @@ const userList = async (req, res) => {
 
         const userUuid = req.params.userUuid;
         const categoryName = req.query.categoryName;
-        
+
         if (categoryName) {
             const userList = await UserListSchema.findOne({ userUuid: userUuid })
                 .populate({
@@ -164,7 +166,7 @@ const findCategoryByName = async (req, res) => {
 const updateCategoryInUserList = async (req, res) => {
     try {
 
-        const { userUuid, categoryId} = req.params;
+        const { userUuid, categoryId } = req.params;
         const postId = req.query.postId;
         const category = req.body.category;
 
@@ -289,6 +291,7 @@ const findCategoryByLink = async (req, res) => {
     try {
 
         const { categoryLink } = req.params;
+        const { uuid } = req.query;
 
         // Find the user list that contains a category with the given link
         const userList = await UserListSchema.findOne({
@@ -304,10 +307,64 @@ const findCategoryByLink = async (req, res) => {
         const categoryDoc = userList.list.find(obj => obj.link === categoryLink);
         if (!categoryDoc) throw new Error('Category not found');
 
-        res.status(200).json({
-            message: `Category found successfully`,
-            category: categoryDoc,
-        });
+        if (uuid) {
+            const questForeignKeys = categoryDoc.post.map(post => post.questForeginKey._id);
+            let startQuestData;
+            if (uuid && questForeignKeys.length > 0) {
+                startQuestData = await StartQuests.find({
+                    uuid: uuid,
+                    questForeignKey: { $in: questForeignKeys }
+                });
+
+                if (startQuestData.length === 0) {
+                    throw new Error("Please submit a response");
+                }
+            }
+
+            // Create a map for quick lookup of startQuestData by questForeignKey
+            const startQuestDataMap = startQuestData.reduce((map, data) => {
+                map[data.questForeignKey.toString()] = data;
+                return map;
+            }, {});
+
+            // Add the startQuestData field to each post
+            const updatedPosts = categoryDoc.post.map(post => {
+                const questForeignKey = post.questForeginKey._id.toString();
+                let updatedPost = {
+                    ...post.toObject(), // Convert Mongoose document to plain JS object
+                    startQuestData: startQuestDataMap[questForeignKey] || null
+                };
+                return updatedPost
+            });
+
+            const newCategoryDoc = {
+                category: categoryDoc.category,
+                post: updatedPosts,
+                link: categoryDoc.link,
+                isLinkUserCustomized: categoryDoc.isLinkUserCustomized,
+                clicks: categoryDoc.clicks,
+                participents: categoryDoc.participents,
+                createdAt: categoryDoc.createdAt,
+                updatedAt: categoryDoc.updatedAt,
+                deletedAt: categoryDoc.deletedAt,
+                isActive: categoryDoc.isActive,
+                _id: categoryDoc._id
+            };
+
+            res.status(200).json({
+                message: `Category found successfully`,
+                category: newCategoryDoc,
+            });
+
+        }
+        else {
+
+            res.status(200).json({
+                message: `Category found successfully`,
+                category: categoryDoc,
+            });
+
+        }
 
     } catch (error) {
         console.error(error.message);
