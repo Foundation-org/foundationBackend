@@ -301,7 +301,7 @@ router.get(
   "/userList/categoryParticipentsCount/:categoryLink",
   /**
    * @swagger
-   * /userlists/userList/findCategoryByLink/{categoryLink}:
+   * /userlists/userList/categoryParticipentsCount/{categoryLink}:
    *   get:
    *     tags:
    *       - UserSurveyList
@@ -327,7 +327,7 @@ router.get(
   "/userList/categoryStatistics/:categoryId",
   /**
    * @swagger
-   * /userlists/userList/findCategoryByLink/{categoryId}:
+   * /userlists/userList/categoryStatistics/{categoryId}:
    *   get:
    *     tags:
    *       - UserSurveyList
