@@ -264,9 +264,55 @@ const generateCategoryShareLink = async (req, res) => {
             if (customizedLink) {
                 categoryDoc.link = customizedLink;
                 categoryDoc.isLinkUserCustomized = true;
+                await createLedger({
+                    uuid: userUuid,
+                    txUserAction: "listLinkCreatedCustom",
+                    txID: crypto.randomBytes(11).toString("hex"),
+                    txAuth: "User",
+                    txFrom: userUuid,
+                    txTo: "dao",
+                    txAmount: 2.5,
+                    txData: userUuid,
+                    txDate: Date.now(),
+                    txDescription: "List Link Customized",
+                });
+                // Create Ledger
+                await createLedger({
+                    uuid: userUuid,
+                    txUserAction: "listLinkCreatedCustom",
+                    txID: crypto.randomBytes(11).toString("hex"),
+                    txAuth: "DAO",
+                    txFrom: "DAO Treasury",
+                    txTo: userUuid,
+                    txAmount: 0,
+                    txDate: Date.now(),
+                    txDescription: "List Link Customized",
+                });
+                // Increment the Treasury
+                await updateTreasury({
+                    amount: 2.5,
+                    inc: true,
+                });
+                // Decrement the UserBalance
+                await updateUserBalance({
+                    uuid: userUuid,
+                    amount: 2.5,
+                    dec: true,
+                });
             }
             else {
                 categoryDoc.link = shortLink.generate(8);
+                await createLedger({
+                    uuid: userUuid,
+                    txUserAction: "listLinkCreated",
+                    txID: crypto.randomBytes(11).toString("hex"),
+                    txAuth: "User",
+                    txFrom: userUuid,
+                    txTo: "dao",
+                    txAmount: "0",
+                    txData: userUuid,
+                    // txDescription : "User changes password"
+                });
             }
 
             categoryDoc.updatedAt = new Date().toISOString();
