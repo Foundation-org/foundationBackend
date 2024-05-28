@@ -132,10 +132,10 @@ router.get(
 );
 
 router.patch(
-  "/userList/updateCategoryInUserList/:userUuid/:categoryId/:postId?",
+  "/userList/updateCategoryInUserList/:userUuid/:categoryId/:postId",
   /**
    * @swagger
-   * /userlists/userList/updateCategoryInUserList/{userUuid}/{categoryId}:
+   * /userlists/userList/updateCategoryInUserList/{userUuid}/{categoryId}/{postId}:
    *   patch:
    *     tags:
    *       - UserSurveyList
@@ -150,7 +150,7 @@ router.patch(
    *         name: categoryId
    *         required: true
    *         description: The categoryId of the user's List
-   *       - in: query
+   *       - in: path
    *         name: postId
    *         required: false
    *         schema:
