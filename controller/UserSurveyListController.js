@@ -30,11 +30,13 @@ const userList = async (req, res) => {
                     userList: [],
                 });
             }
+            else {
+                res.status(200).json({
+                    message: `Categories found successfully`,
+                    userList: categories,
+                });
+            }
 
-            res.status(200).json({
-                message: `Categories found successfully`,
-                userList: categories,
-            });
         } else {
             const userList = await UserListSchema.findOne({ userUuid: userUuid })
                 .populate({
