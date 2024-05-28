@@ -275,7 +275,7 @@ router.get(
   "/userList/categoryViewCount/:categoryLink",
   /**
    * @swagger
-   * /userlists/userList/findCategoryByLink/{categoryLink}:
+   * /userlists/userList/categoryViewCount/{categoryLink}:
    *   get:
    *     tags:
    *       - UserSurveyList
