@@ -327,14 +327,18 @@ const findCategoryByLink = async (req, res) => {
                 return map;
             }, {});
 
-            // Add the startQuestData field to each post
+            // Add the startQuestData field to the questForeginKey object of each post
             const updatedPosts = categoryDoc.post.map(post => {
                 const questForeignKey = post.questForeginKey._id.toString();
-                let updatedPost = {
-                    ...post.toObject(), // Convert Mongoose document to plain JS object
+                const questForeginKeyWithStartQuestData = {
+                    ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                     startQuestData: startQuestDataMap[questForeignKey] || null
                 };
-                return updatedPost
+
+                return {
+                    ...post.toObject(), // Convert Mongoose document to plain JS object
+                    questForeginKey: questForeginKeyWithStartQuestData
+                };
             });
 
             const newCategoryDoc = {
