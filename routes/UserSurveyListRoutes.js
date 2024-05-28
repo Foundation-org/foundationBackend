@@ -16,7 +16,7 @@ router.get(
   "/userList/:userUuid/:categoryName?",
   /**
    * @swagger
-   * /userlists/userList/{userUuid}/{categoryName}:
+   * /userlists/userList/{userUuid}:
    *   get:
    *     tags:
    *       - UserSurveyList
@@ -29,7 +29,7 @@ router.get(
    *         description: The userUuid of the user
    *         schema:
    *           type: string
-   *       - in: path
+   *       - in: query
    *         name: categoryName
    *         required: false
    *         description: The categoryName of the user's List
@@ -132,10 +132,10 @@ router.get(
 );
 
 router.patch(
-  "/userList/updateCategoryInUserList/:userUuid/:categoryId/:postId",
+  "/userList/updateCategoryInUserList/:userUuid/:categoryId/:postId?",
   /**
    * @swagger
-   * /userlists/userList/updateCategoryInUserList/{userUuid}/{categoryId}/{postId}:
+   * /userlists/userList/updateCategoryInUserList/{userUuid}/{categoryId}:
    *   patch:
    *     tags:
    *       - UserSurveyList
@@ -150,7 +150,7 @@ router.patch(
    *         name: categoryId
    *         required: true
    *         description: The categoryId of the user's List
-   *       - in: path
+   *       - in: query
    *         name: postId
    *         required: false
    *         schema:

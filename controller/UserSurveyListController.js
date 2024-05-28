@@ -8,8 +8,8 @@ const userList = async (req, res) => {
     try {
 
         const userUuid = req.params.userUuid;
-        const categoryName = req.params.categoryName;
-
+        const categoryName = req.query.categoryName;
+        
         if (categoryName) {
             const userList = await UserListSchema.findOne({ userUuid: userUuid })
                 .populate({
@@ -157,8 +157,8 @@ const findCategoryByName = async (req, res) => {
 const updateCategoryInUserList = async (req, res) => {
     try {
 
-        const { userUuid, categoryId, postId} = req.params;
-        // const {postId} = req.query;
+        const { userUuid, categoryId} = req.params;
+        const postId = req.query.postId;
         const category = req.body.category;
 
         if (!postId && !category || postId && category) throw new Error("Bad Request: Please Provide either category in your request, or postId in query");
