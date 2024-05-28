@@ -315,51 +315,56 @@ const findCategoryByLink = async (req, res) => {
                     uuid: uuid,
                     questForeignKey: { $in: questForeignKeys }
                 });
-
-                if (startQuestData.length === 0) {
-                    throw new Error("Please submit a response");
-                }
             }
 
-            // Create a map for quick lookup of startQuestData by questForeignKey
-            const startQuestDataMap = startQuestData.reduce((map, data) => {
-                map[data.questForeignKey.toString()] = data;
-                return map;
-            }, {});
+            if (startQuestData.length === 0) {
+                res.status(200).json({
+                    message: `Category found successfully`,
+                    category: categoryDoc,
+                });
+            } else {
 
-            // Add the startQuestData field to the questForeginKey object of each post
-            const updatedPosts = categoryDoc.post.map(post => {
-                const questForeignKey = post.questForeginKey._id.toString();
-                const questForeginKeyWithStartQuestData = {
-                    ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
-                    startQuestData: startQuestDataMap[questForeignKey] || null
+
+                // Create a map for quick lookup of startQuestData by questForeignKey
+                const startQuestDataMap = startQuestData.reduce((map, data) => {
+                    map[data.questForeignKey.toString()] = data;
+                    return map;
+                }, {});
+
+                // Add the startQuestData field to the questForeginKey object of each post
+                const updatedPosts = categoryDoc.post.map(post => {
+                    const questForeignKey = post.questForeginKey._id.toString();
+                    const questForeginKeyWithStartQuestData = {
+                        ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                        startQuestData: startQuestDataMap[questForeignKey] || null
+                    };
+
+                    return {
+                        ...post.toObject(), // Convert Mongoose document to plain JS object
+                        questForeginKey: questForeginKeyWithStartQuestData
+                    };
+                });
+
+                const newCategoryDoc = {
+                    category: categoryDoc.category,
+                    post: updatedPosts,
+                    link: categoryDoc.link,
+                    isLinkUserCustomized: categoryDoc.isLinkUserCustomized,
+                    clicks: categoryDoc.clicks,
+                    participents: categoryDoc.participents,
+                    createdAt: categoryDoc.createdAt,
+                    updatedAt: categoryDoc.updatedAt,
+                    deletedAt: categoryDoc.deletedAt,
+                    isActive: categoryDoc.isActive,
+                    _id: categoryDoc._id
                 };
 
-                return {
-                    ...post.toObject(), // Convert Mongoose document to plain JS object
-                    questForeginKey: questForeginKeyWithStartQuestData
-                };
-            });
+                res.status(200).json({
+                    message: `Category found successfully`,
+                    category: newCategoryDoc,
+                });
 
-            const newCategoryDoc = {
-                category: categoryDoc.category,
-                post: updatedPosts,
-                link: categoryDoc.link,
-                isLinkUserCustomized: categoryDoc.isLinkUserCustomized,
-                clicks: categoryDoc.clicks,
-                participents: categoryDoc.participents,
-                createdAt: categoryDoc.createdAt,
-                updatedAt: categoryDoc.updatedAt,
-                deletedAt: categoryDoc.deletedAt,
-                isActive: categoryDoc.isActive,
-                _id: categoryDoc._id
-            };
-
-            res.status(200).json({
-                message: `Category found successfully`,
-                category: newCategoryDoc,
-            });
-
+            }
         }
         else {
 
