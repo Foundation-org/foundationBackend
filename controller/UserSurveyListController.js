@@ -51,9 +51,17 @@ const userList = async (req, res) => {
                 });
             if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
+            // Create a deep copy of the userList object to sort and return without saving
+            const sortedUserList = JSON.parse(JSON.stringify(userList));
+
+            // Iterate over each category in the list array and sort the post array by order
+            sortedUserList.list.forEach(category => {
+                category.post.sort((a, b) => a.order - b.order);
+            });
+
             res.status(200).json({
-                message: "List found successfully.",
-                userList: userList.list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+                message: 'List found successfully.',
+                userList: sortedUserList.list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
             });
         }
 
@@ -575,7 +583,7 @@ const updatePostOrder = async (req, res) => {
             // Use the `hasOwnProperty` method to check for the key in orderMap
             if (!orderMap.hasOwnProperty(postIdString)) throw new Error(`Wrong identifires are being sent in order: ${order}`);
             post.order = orderMap[postIdString]; // Access the value using the key
-            
+
         });
 
         await userList.save();
