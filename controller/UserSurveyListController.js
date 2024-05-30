@@ -680,12 +680,21 @@ const submitResponse = async (req, res) => {
             await postData.save();
         }
 
-        const newPostData = new ResponseDataSchema({
-            responsingUserUuid: responsingUserUuid,
-            response: response,
-            addedAnswer: addedAnswer,
-            startStatus: "change answer"
-        });
+        let newPostData;
+        if(req.body.addedAnswer){
+            newPostData = new ResponseDataSchema({
+                responsingUserUuid: responsingUserUuid,
+                response: response,
+                addedAnswer: addedAnswer,
+                startStatus: "change answer"
+            });
+        } else {
+            newPostData = new ResponseDataSchema({
+                responsingUserUuid: responsingUserUuid,
+                response: response,
+                startStatus: "change answer"
+            });
+        }
 
         postData.responseData.push(newPostData);
         postData.updatedAt = new Date().toISOString();
