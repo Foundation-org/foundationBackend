@@ -403,6 +403,7 @@ const findCategoryByLink = async (req, res) => {
                         startQuestData: {
                             uuid: responseDataDoc.responseData[0].responsingUserUuid,
                             postId: postId,
+                            data: responseDataDoc.responseData[0].response,
                             addedAnswer: responseDataDoc.responseData[0].addedAnswer,
                         },
                         bookmark: bookmark ? true : false,
