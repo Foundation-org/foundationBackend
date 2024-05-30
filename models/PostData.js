@@ -5,7 +5,7 @@ const PostSchema = require("../models/UserList");
 const responseDataSchema = mongoose.Schema({
     responsingUserUuid: { type: String, required: true, },
     response: { type: Object, required: true, },
-    addedAnswer: { type: String, required: true, },
+    addedAnswer: { type: String, default: "", },
     startStatus: { type: String, required: true, },
     createdAt: { type: String, default: () => new Date().toISOString(), },
     updatedAt: { type: String, default: () => new Date().toISOString(), },
