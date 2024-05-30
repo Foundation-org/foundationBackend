@@ -369,89 +369,71 @@ const findCategoryByLink = async (req, res) => {
         if (!categoryDoc) throw new Error('Category not found');
 
         if (uuid) {
-            const questForeignKeys = categoryDoc.post.map(post => post.questForeginKey._id);
-            let startQuestData;
-            if (uuid && questForeignKeys.length > 0) {
-                startQuestData = await StartQuests.find({
-                    uuid: uuid,
-                    questForeignKey: { $in: questForeignKeys }
-                });
-            }
+            let updatedPosts = [];
 
-            if (startQuestData.length === 0) {
-                res.status(200).json({
-                    message: `Category found successfully`,
-                    category: categoryDoc,
-                });
-            } else {
-
-                let updatedPosts;
-
-                for (const post of categoryDoc.post) {
-                    const postId = new mongoose.Types.ObjectId(post._id.toString());
-                
-                    // Find the postData document
-                    const postData = await PostDataSchema.findOne({ postId });
-                
-                    // Check if responseData exists for the given uuid
-                    const responseDataDoc = await PostDataSchema.findOne({
-                        postId, // Ensure we're checking the correct document
-                        'responseData': {
-                            $elemMatch: {
-                                responsingUserUuid: uuid
-                            }
+            for (const post of categoryDoc.post) {
+                const postId = new mongoose.Types.ObjectId(post._id.toString());
+                // Find the postData document
+                const postData = await PostDataSchema.findOne({ postId: postId });
+                // Check if responseData exists for the given uuid
+                const responseDataDoc = await PostDataSchema.findOne({
+                    postId, // Ensure we're checking the correct document
+                    'responseData': {
+                        $elemMatch: {
+                            responsingUserUuid: uuid
                         }
-                    });
-                
-                    // If postData or responseDataDoc is not found, throw an error
-                    if (!postData || !responseDataDoc) {
-                        throw new Error("Couldn't Find StartQuestData");
                     }
+                });
 
+                if (!postData) {
+                    // Add the updated post to the array
+                    updatedPosts.push({
+                        ...post.toObject()
+                    });
+                } else {
                     const bookmark = await BookmarkQuestsSchema.findOne({
                         questForeignKey: post.questForeginKey.toString(),
                         uuid: uuid
                     })
-                
+
                     // Build the updated questForeginKey object
                     const questForeginKeyWithStartQuestData = {
                         ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
-                        startStatus: responseDataDoc.startStatus,
+                        startStatus: responseDataDoc.responseData[0].startStatus,
                         startQuestData: {
-                            uuid: responseDataDoc.responsingUserUuid,
+                            uuid: responseDataDoc.responseData[0].responsingUserUuid,
                             postId: postId,
-                            addedAnswer: responseDataDoc.addedAnswer,
+                            addedAnswer: responseDataDoc.responseData[0].addedAnswer,
                         },
                         bookmark: bookmark ? true : false,
                     };
-                
+
                     // Add the updated post to the array
                     updatedPosts.push({
                         ...post.toObject(), // Convert Mongoose document to plain JS object
                         questForeginKey: questForeginKeyWithStartQuestData
                     });
                 }
-
-                const newCategoryDoc = {
-                    category: categoryDoc.category,
-                    post: updatedPosts,
-                    link: categoryDoc.link,
-                    isLinkUserCustomized: categoryDoc.isLinkUserCustomized,
-                    clicks: categoryDoc.clicks,
-                    participents: categoryDoc.participents,
-                    createdAt: categoryDoc.createdAt,
-                    updatedAt: categoryDoc.updatedAt,
-                    deletedAt: categoryDoc.deletedAt,
-                    isActive: categoryDoc.isActive,
-                    _id: categoryDoc._id
-                };
-
-                res.status(200).json({
-                    message: `Category found successfully`,
-                    category: newCategoryDoc,
-                });
-
             }
+
+            const newCategoryDoc = {
+                category: categoryDoc.category,
+                post: updatedPosts,
+                link: categoryDoc.link,
+                isLinkUserCustomized: categoryDoc.isLinkUserCustomized,
+                clicks: categoryDoc.clicks,
+                participents: categoryDoc.participents,
+                createdAt: categoryDoc.createdAt,
+                updatedAt: categoryDoc.updatedAt,
+                deletedAt: categoryDoc.deletedAt,
+                isActive: categoryDoc.isActive,
+                _id: categoryDoc._id
+            };
+
+            res.status(200).json({
+                message: `Category found successfully`,
+                category: newCategoryDoc,
+            });
         }
         else {
 
