@@ -1,5 +1,7 @@
 const User = require("../models/UserModel");
-const { UserListSchema, CategorySchema, PostSchema } = require("../models/UserList");
+const { UserListSchema, CategorySchema, PostSchema, } = require("../models/UserList");
+const BookmarkQuestsSchema = require("../models/BookmarkQuests");
+const { PostDataSchema, ResponseDataSchema, } = require("../models/PostData");
 const shortLink = require("shortlink");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const StartQuests = require("../models/StartQuests");
@@ -7,6 +9,7 @@ const { createLedger } = require("../utils/createLedger");
 const { updateTreasury } = require("../utils/treasuryService");
 const { updateUserBalance } = require("../utils/userServices")
 const crypto = require("crypto");
+const mongoose = require("mongoose");
 
 // User's List APIs
 
@@ -382,26 +385,52 @@ const findCategoryByLink = async (req, res) => {
                 });
             } else {
 
+                let updatedPosts;
 
-                // Create a map for quick lookup of startQuestData by questForeignKey
-                const startQuestDataMap = startQuestData.reduce((map, data) => {
-                    map[data.questForeignKey.toString()] = data;
-                    return map;
-                }, {});
+                for (const post of categoryDoc.post) {
+                    const postId = new mongoose.Types.ObjectId(post._id.toString());
+                
+                    // Find the postData document
+                    const postData = await PostDataSchema.findOne({ postId });
+                
+                    // Check if responseData exists for the given uuid
+                    const responseDataDoc = await PostDataSchema.findOne({
+                        postId, // Ensure we're checking the correct document
+                        'responseData': {
+                            $elemMatch: {
+                                responsingUserUuid: uuid
+                            }
+                        }
+                    });
+                
+                    // If postData or responseDataDoc is not found, throw an error
+                    if (!postData || !responseDataDoc) {
+                        throw new Error("Couldn't Find StartQuestData");
+                    }
 
-                // Add the startQuestData field to the questForeginKey object of each post
-                const updatedPosts = categoryDoc.post.map(post => {
-                    const questForeignKey = post.questForeginKey._id.toString();
+                    const bookmark = await BookmarkQuestsSchema.findOne({
+                        questForeignKey: post.questForeginKey.toString(),
+                        uuid: uuid
+                    })
+                
+                    // Build the updated questForeginKey object
                     const questForeginKeyWithStartQuestData = {
                         ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
-                        startQuestData: startQuestDataMap[questForeignKey] || null
+                        startStatus: responseDataDoc.startStatus,
+                        startQuestData: {
+                            uuid: responseDataDoc.responsingUserUuid,
+                            postId: postId,
+                            addedAnswer: responseDataDoc.addedAnswer,
+                        },
+                        bookmark: bookmark ? true : false,
                     };
-
-                    return {
+                
+                    // Add the updated post to the array
+                    updatedPosts.push({
                         ...post.toObject(), // Convert Mongoose document to plain JS object
                         questForeginKey: questForeginKeyWithStartQuestData
-                    };
-                });
+                    });
+                }
 
                 const newCategoryDoc = {
                     category: categoryDoc.category,
@@ -652,43 +681,42 @@ const addPostInCategoryInUserList = async (req, res) => {
     }
 }
 
-const createUserListForAllUsers = async (req, res) => {
+const submitResponse = async (req, res) => {
     try {
-        // Fetch all users from the users collection
-        const users = await User.find({});
+        const postId = req.body.postId;
+        const responsingUserUuid = req.body.uuid;
+        const response = req.body.data;
+        const addedAnswer = req.body.addedAnswer;
 
-        // Array to store promises for creating userlists
-        const userListPromises = [];
-
-        // Iterate over each user
-        for (const user of users) {
-            // Check if a userList already exists for the user
-            const existingUserList = await UserListSchema.findOne({ userUuid: user.uuid });
-
-            // If userList does not exist for the user, create one
-            if (!existingUserList) {
-                const userList = new UserListSchema({
-                    userUuid: user.uuid,
-                    // Other fields will default as per the schema
-                });
-
-                // Save the userList and push the promise to the array
-                userListPromises.push(userList.save());
-            }
+        // Find postData Document
+        let postData = await PostDataSchema.findOne({ postId: new mongoose.Types.ObjectId(postId) })
+        if (!postData) {
+            postData = new PostDataSchema({
+                postId: new mongoose.Types.ObjectId(postId)
+            })
+            await postData.save();
         }
 
-        // Wait for all userlist documents to be created
-        const result = await Promise.all(userListPromises);
-
-        // Send success response
-        res.status(200).json({
-            message: 'UserList Collection is Refactored successfully',
-            userList: result,
+        const newPostData = new ResponseDataSchema({
+            responsingUserUuid: responsingUserUuid,
+            response: response,
+            addedAnswer: addedAnswer,
+            startStatus: "change answer"
         });
+
+        postData.responseData.push(newPostData);
+        postData.updatedAt = new Date().toISOString();
+
+        await postData.save();
+        res.status(200).json({
+            message: `Post Response Submitted w.r.t List ${postId}`,
+            userList: postData,
+        });
+
     } catch (error) {
         console.error(error.message);
         res.status(500).json({
-            message: `An error occurred while creating the userList: ${error.message}`,
+            message: `An error occurred while getting the userList: ${error.message}`,
         });
     }
 }
@@ -707,5 +735,5 @@ module.exports = {
     categoryStatistics,
     updatePostOrder,
     addPostInCategoryInUserList,
-    createUserListForAllUsers,
+    submitResponse
 };

@@ -409,4 +409,31 @@ router.post(
   UserSurveyListController.addPostInCategoryInUserList
 );
 
+router.post(
+  "/submitResponse",
+  /**
+   * @swagger
+   * /userlists/submitResponse:
+   *   post:
+   *     tags:
+   *       - UserSurveyList
+   *     summary: Submit the response to the Posts belonging to a particular List
+   *     description: Endpoint to Submit the response to the Posts belonging to a particular List
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema: 
+   *             $ref: '#/components/schemas/BookmarkStatesSetRequest'
+   *     responses:
+   *       '200':
+   *         description: Data saved successfully
+   *       '400':
+   *         description: Invalid request body
+   *       '500':
+   *         description: Internal server error
+   */
+  UserSurveyListController.submitResponse
+);
+
 module.exports = router;
