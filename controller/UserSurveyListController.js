@@ -781,7 +781,7 @@ const findCategoryByLink = async (req, res) => {
                                 startQuestData: {
                                     uuid: responseDataDoc.responsingUserUuid,
                                     postId: postId,
-                                    data: [responseDataDoc.response],
+                                    data: responseDataDoc.response,
                                     addedAnswer: responseDataDoc.addedAnswer,
                                 },
                                 startStatus: responseDataDoc.startStatus,
