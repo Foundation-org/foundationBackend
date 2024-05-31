@@ -659,7 +659,7 @@ const findCategoryByLink = async (req, res) => {
                                 startQuestData: {
                                     uuid: responseDataDoc.responsingUserUuid,
                                     postId: postId,
-                                    data: responseDataDoc.response,
+                                    data: [responseDataDoc.response],
                                     addedAnswer: responseDataDoc.addedAnswer,
                                 },
                                 result: [
@@ -690,7 +690,7 @@ const findCategoryByLink = async (req, res) => {
                                 startQuestData: {
                                     uuid: responseDataDoc.responsingUserUuid,
                                     postId: postId,
-                                    data: responseDataDoc.response,
+                                    data: [responseDataDoc.response],
                                     addedAnswer: responseDataDoc.addedAnswer,
                                 },
                                 result: [
@@ -721,7 +721,7 @@ const findCategoryByLink = async (req, res) => {
                                 startQuestData: {
                                     uuid: responseDataDoc.responsingUserUuid,
                                     postId: postId,
-                                    data: responseDataDoc.response,
+                                    data: [responseDataDoc.response],
                                     addedAnswer: responseDataDoc.addedAnswer,
                                 },
                                 result: [
@@ -785,7 +785,7 @@ const findCategoryByLink = async (req, res) => {
                                 startQuestData: {
                                     uuid: responseDataDoc.responsingUserUuid,
                                     postId: postId,
-                                    data: responseDataDoc.response,
+                                    data: [responseDataDoc.response],
                                     addedAnswer: responseDataDoc.addedAnswer,
                                 },
                                 startStatus: responseDataDoc.startStatus,
@@ -1064,10 +1064,10 @@ const viewList = async (req, res) => {
 
                     // Sort ranks by total rank values
                     const sortedRanks = Object.entries(ranks).sort((a, b) => a[1] - b[1]);
-                    const data = {
-                        ...responseDataDoc.response,
-                        contended: []
-                    }
+                    // const data = {
+                    //     ...postData.responseData.response,
+                    //     contended: []
+                    // }
 
                     // Calculate the total rank sum
                     const totalRanksSum = Object.values(ranks).reduce((sum, rank) => sum + rank, 0);
@@ -1089,14 +1089,14 @@ const viewList = async (req, res) => {
 
                     questForeginKeyWithStartQuestData = {
                         ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
-                        startQuestData: {
-                            uuid: responseDataDoc.responsingUserUuid,
-                            postId: postId,
-                            data: [data],
-                            questForeignKey: post.questForeginKey._id,
-                            addedAnswer: responseDataDoc.addedAnswer,
-                        },
-                        startStatus: responseDataDoc.startStatus,
+                        // startQuestData: {
+                        //     uuid: responseDataDoc.responsingUserUuid,
+                        //     postId: postId,
+                        //     data: [data],
+                        //     questForeignKey: post.questForeginKey._id,
+                        //     addedAnswer: responseDataDoc.addedAnswer,
+                        // },
+                        // startStatus: responseDataDoc.startStatus,
                         bookmark: bookmark ? true : false,
                         getUserBadge: {
                             _id: user._id,
