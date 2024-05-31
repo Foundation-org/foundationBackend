@@ -757,13 +757,17 @@ const findCategoryByLink = async (req, res) => {
                             responseDataStats[0].multipleChoice.forEach(item => {
                                 selectedPercentage[0][item.question] = (Math.round(item.percentage)).toString() + "%";
                             });
+                            const data = {
+                                ...responseDataDoc.response,
+                                contended: []
+                            }
                             questForeginKeyWithStartQuestData = {
                                 ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                                 startStatus: responseDataDoc.startStatus,
                                 startQuestData: {
                                     uuid: responseDataDoc.responsingUserUuid,
                                     postId: postId,
-                                    data: [responseDataDoc.response],
+                                    data: [data],
                                     addedAnswer: responseDataDoc.addedAnswer,
                                 },
                                 result: result,
