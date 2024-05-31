@@ -669,7 +669,7 @@ const findCategoryByLink = async (req, res) => {
                                 },
                             };
                         }
-                        else if (responseDataStats[0].multipleChoice && responseDataStats[0].multipleChoice.length > 1) {
+                        else if (responseDataStats[0].multipleChoice) {
                             let result = [{
                                 selected: {}
                             }];
@@ -1027,7 +1027,7 @@ const viewList = async (req, res) => {
                         },
                     };
                 }
-                else if (responseDataStats[0].multipleChoice && responseDataStats[0].multipleChoice.length > 1) {
+                else if (responseDataStats[0].multipleChoice) {
                     let result = [{
                         selected: {}
                     }];
