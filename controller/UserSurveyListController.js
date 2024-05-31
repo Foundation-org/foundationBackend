@@ -382,27 +382,37 @@ const findCategoryByLink = async (req, res) => {
 
                 const postData = await PostDataSchema.findOne({ postId: postId });
                 if (!postData) {
-                    // Add the updated post to the array
-                    updatedPosts.push({
-                        ...post.toObject(),
+
+                    const questForeginKeyWithStartQuestData = {
+                        ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                         bookmark: bookmark ? true : false,
                         getUserBadge: {
                             _id: user._id,
                             badges: user.badges,
                         },
+                    };
+                    // Add the updated post to the array
+                    updatedPosts.push({
+                        ...post.toObject(), // Convert Mongoose document to plain JS object
+                        questForeginKey: questForeginKeyWithStartQuestData
                     });
+
                 }
                 else {
                     const responseDataDoc = postData.responseData.find(item => item.responsingUserUuid === uuid);
                     if (!responseDataDoc) {
-                        // Add the updated post to the array
-                        updatedPosts.push({
-                            ...post.toObject(),
+                        const questForeginKeyWithStartQuestData = {
+                            ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                             bookmark: bookmark ? true : false,
                             getUserBadge: {
                                 _id: user._id,
                                 badges: user.badges,
                             },
+                        };
+                        // Add the updated post to the array
+                        updatedPosts.push({
+                            ...post.toObject(), // Convert Mongoose document to plain JS object
+                            questForeginKey: questForeginKeyWithStartQuestData
                         });
                     }
                     else {
@@ -492,23 +502,111 @@ const findCategoryByLink = async (req, res) => {
                             }
                         ]);
 
-                        const questForeginKeyWithStartQuestData = {
-                            ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
-                            startStatus: responseDataDoc.startStatus,
-                            startQuestData: {
-                                uuid: responseDataDoc.responsingUserUuid,
-                                postId: postId,
-                                data: responseDataDoc.response,
-                                addedAnswer: responseDataDoc.addedAnswer,
-                            },
-                            bookmark: bookmark ? true : false,
-                            getUserBadge: {
-                                _id: user._id,
-                                badges: user.badges,
-                            },
-                            result: responseDataStats,
-                        };
+                        let questForeginKeyWithStartQuestData;
 
+                        if (responseDataStats[0].yesNo) {
+                            questForeginKeyWithStartQuestData = {
+                                ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                                startQuestData: {
+                                    uuid: responseDataDoc.responsingUserUuid,
+                                    postId: postId,
+                                    data: responseDataDoc.response,
+                                    addedAnswer: responseDataDoc.addedAnswer,
+                                },
+                                result: [
+                                    {
+                                        selected: {
+                                            Yes: responseDataStats[0].yesNo.Yes,
+                                            No: responseDataStats[0].yesNo.No,
+                                        }
+                                    }
+                                ],
+                                selectedPercentage: [
+                                    {
+                                        Yes: (Math.round(responseDataStats[0].yesNo.YesPercentage)).toString() + "%",
+                                        No: (Math.round(responseDataStats[0].yesNo.NoPercentage)).toString() + "%",
+                                    }
+                                ],
+                                bookmark: bookmark ? true : false,
+                                getUserBadge: {
+                                    _id: user._id,
+                                    badges: user.badges,
+                                },
+                            };
+                        } else if (responseDataStats[0].agreeDisagree) {
+                            questForeginKeyWithStartQuestData = {
+                                ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                                startQuestData: {
+                                    uuid: responseDataDoc.responsingUserUuid,
+                                    postId: postId,
+                                    data: responseDataDoc.response,
+                                    addedAnswer: responseDataDoc.addedAnswer,
+                                },
+                                result: [
+                                    {
+                                        selected: {
+                                            Agree: responseDataStats[0].agreeDisagree.Agree,
+                                            Disagree: responseDataStats[0].agreeDisagree.Disagree,
+                                        }
+                                    }
+                                ],
+                                selectedPercentage: [
+                                    {
+                                        Agree: (Math.round(responseDataStats[0].agreeDisagree.AgreePercentage)).toString() + "%",
+                                        Disagree: (Math.round(responseDataStats[0].agreeDisagree.DisagreePercentage)).toString() + "%",
+                                    }
+                                ],
+                                bookmark: bookmark ? true : false,
+                                getUserBadge: {
+                                    _id: user._id,
+                                    badges: user.badges,
+                                },
+                            };
+                        } else if (responseDataStats[0].likeDislike) {
+                            questForeginKeyWithStartQuestData = {
+                                ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                                startQuestData: {
+                                    uuid: responseDataDoc.responsingUserUuid,
+                                    postId: postId,
+                                    data: responseDataDoc.response,
+                                    addedAnswer: responseDataDoc.addedAnswer,
+                                },
+                                result: [
+                                    {
+                                        selected: {
+                                            Like: responseDataStats[0].likeDislike.Like,
+                                            Dislike: responseDataStats[0].likeDislike.Dislike,
+                                        }
+                                    }
+                                ],
+                                selectedPercentage: [
+                                    {
+                                        Like: (Math.round(responseDataStats[0].likeDislike.LikePercentage)).toString() + "%",
+                                        Dislike: (Math.round(responseDataStats[0].likeDislike.DislikePercentage)).toString() + "%",
+                                    }
+                                ],
+                                bookmark: bookmark ? true : false,
+                                getUserBadge: {
+                                    _id: user._id,
+                                    badges: user.badges,
+                                },
+                            };
+                        } else {
+                            questForeginKeyWithStartQuestData = {
+                                ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                                startQuestData: {
+                                    uuid: responseDataDoc.responsingUserUuid,
+                                    postId: postId,
+                                    data: responseDataDoc.response,
+                                    addedAnswer: responseDataDoc.addedAnswer,
+                                },
+                                bookmark: bookmark ? true : false,
+                                getUserBadge: {
+                                    _id: user._id,
+                                    badges: user.badges,
+                                },
+                            };
+                        }
                         // Add the updated post to the array
                         updatedPosts.push({
                             ...post.toObject(), // Convert Mongoose document to plain JS object
@@ -674,15 +772,87 @@ const viewList = async (req, res) => {
                     }
                 ]);
 
-                const questForeginKeyWithStartQuestData = {
-                    ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
-                    bookmark: bookmark ? true : false,
-                    getUserBadge: {
-                        _id: user._id,
-                        badges: user.badges,
-                    },
-                    result: responseDataStats,
-                };
+                let questForeginKeyWithStartQuestData;
+
+                if (responseDataStats[0].yesNo) {
+                    questForeginKeyWithStartQuestData = {
+                        ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                        result: [
+                            {
+                                selected: {
+                                    Yes: responseDataStats[0].yesNo.Yes,
+                                    No: responseDataStats[0].yesNo.No,
+                                }
+                            }
+                        ],
+                        selectedPercentage: [
+                            {
+                                Yes: (Math.round(responseDataStats[0].yesNo.YesPercentage)).toString() + "%",
+                                No: (Math.round(responseDataStats[0].yesNo.NoPercentage)).toString() + "%",
+                            }
+                        ],
+                        bookmark: bookmark ? true : false,
+                        getUserBadge: {
+                            _id: user._id,
+                            badges: user.badges,
+                        },
+                    };
+                } else if (responseDataStats[0].agreeDisagree) {
+                    questForeginKeyWithStartQuestData = {
+                        ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                        result: [
+                            {
+                                selected: {
+                                    Agree: responseDataStats[0].agreeDisagree.Agree,
+                                    Disagree: responseDataStats[0].agreeDisagree.Disagree,
+                                }
+                            }
+                        ],
+                        selectedPercentage: [
+                            {
+                                Agree: (Math.round(responseDataStats[0].agreeDisagree.AgreePercentage)).toString() + "%",
+                                Disagree: (Math.round(responseDataStats[0].agreeDisagree.DisagreePercentage)).toString() + "%",
+                            }
+                        ],
+                        bookmark: bookmark ? true : false,
+                        getUserBadge: {
+                            _id: user._id,
+                            badges: user.badges,
+                        },
+                    };
+                } else if (responseDataStats[0].likeDislike) {
+                    questForeginKeyWithStartQuestData = {
+                        ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                        result: [
+                            {
+                                selected: {
+                                    Like: responseDataStats[0].likeDislike.Like,
+                                    Dislike: responseDataStats[0].likeDislike.Dislike,
+                                }
+                            }
+                        ],
+                        selectedPercentage: [
+                            {
+                                Like: (Math.round(responseDataStats[0].likeDislike.LikePercentage)).toString() + "%",
+                                Dislike: (Math.round(responseDataStats[0].likeDislike.DislikePercentage)).toString() + "%",
+                            }
+                        ],
+                        bookmark: bookmark ? true : false,
+                        getUserBadge: {
+                            _id: user._id,
+                            badges: user.badges,
+                        },
+                    };
+                } else {
+                    questForeginKeyWithStartQuestData = {
+                        ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                        bookmark: bookmark ? true : false,
+                        getUserBadge: {
+                            _id: user._id,
+                            badges: user.badges,
+                        },
+                    };
+                }
 
                 // Add the updated post to the array
                 updatedPosts.push({
@@ -698,7 +868,6 @@ const viewList = async (req, res) => {
                         _id: user._id,
                         badges: user.badges,
                     },
-                    result: null,
                 })
             }
 
