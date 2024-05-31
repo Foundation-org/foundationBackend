@@ -573,10 +573,64 @@ const findCategoryByLink = async (req, res) => {
                                 }
                             }
                         ]);
-
                         let questForeginKeyWithStartQuestData;
 
-                        if (responseDataStats[0].yesNo) {
+                        const isPostRankedChoice = await InfoQuestQuestions.findOne({ _id: new mongoose.Types.ObjectId((post.questForeginKey._id).toString()) })
+                        if (isPostRankedChoice.whichTypeQuestion === "ranked choise") {
+                            // continue;
+                            const choices = isPostRankedChoice.QuestAnswers.map(answer => answer.question);
+
+                            // Initialize a ranks object to store the rank totals for each choice
+                            const ranks = {};
+
+                            // Initialize the ranks object with each choice
+                            choices.forEach(choice => {
+                                ranks[choice] = 0;
+                            });
+
+                            // Iterate through each user's response in the responseData array
+                            postData.responseData.forEach(responseDoc => {
+                                const response = responseDoc.response;
+                                if (response && Array.isArray(response.selected)) {
+                                    response.selected.forEach((selectedItem, index) => {
+                                        const choice = selectedItem.question;
+                                        if (ranks.hasOwnProperty(choice)) {
+                                            // Add the rank (index) to the total rank for this choice
+                                            ranks[choice] += index + 1;  // Adding 1 because index is 0-based
+                                        }
+                                    });
+                                }
+                            });
+
+                            // Sort ranks by total rank values
+                            const sortedRanks = Object.entries(ranks).sort((a, b) => a[1] - b[1]);
+
+                            console.log("Ranks------------------->", ranks)
+                            console.log("Sorted Ranks------------------->", sortedRanks)
+                            const data = {
+                                ...responseDataDoc.response,
+                                contented: []
+                            }
+
+                            questForeginKeyWithStartQuestData = {
+                                ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                                startQuestData: {
+                                    uuid: responseDataDoc.responsingUserUuid,
+                                    postId: postId,
+                                    data: [data],
+                                    questForeignKey: post.questForeginKey._id,
+                                    addedAnswer: responseDataDoc.addedAnswer,
+                                },
+                                startStatus: responseDataDoc.startStatus,
+                                bookmark: bookmark ? true : false,
+                                getUserBadge: {
+                                    _id: user._id,
+                                    badges: user.badges,
+                                },
+                                result: []
+                            };
+                        }
+                        else if (responseDataStats[0].yesNo) {
                             questForeginKeyWithStartQuestData = {
                                 ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                                 startStatus: responseDataDoc.startStatus,
