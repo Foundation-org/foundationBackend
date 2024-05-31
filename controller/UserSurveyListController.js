@@ -374,46 +374,147 @@ const findCategoryByLink = async (req, res) => {
             for (const post of categoryDoc.post) {
                 const postId = new mongoose.Types.ObjectId(post._id.toString());
                 // Find the postData document
-                const postData = await PostDataSchema.findOne({ postId: postId });
-                // Check if responseData exists for the given uuid
-                const responseDataDoc = await PostDataSchema.findOne({
-                    postId, // Ensure we're checking the correct document
-                    'responseData': {
-                        $elemMatch: {
-                            responsingUserUuid: uuid
-                        }
-                    }
-                });
+                const bookmark = await BookmarkQuestsSchema.findOne({
+                    questForeignKey: post.questForeginKey.toString(),
+                    createdBy: uuid
+                })
+                const user = await User.findOne({ uuid: userList.userUuid });
 
+                const postData = await PostDataSchema.findOne({ postId: postId });
                 if (!postData) {
                     // Add the updated post to the array
                     updatedPosts.push({
-                        ...post.toObject()
-                    });
-                } else {
-                    const bookmark = await BookmarkQuestsSchema.findOne({
-                        questForeignKey: post.questForeginKey.toString(),
-                        uuid: uuid
-                    })
-
-                    // Build the updated questForeginKey object
-                    const questForeginKeyWithStartQuestData = {
-                        ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
-                        startStatus: responseDataDoc.responseData[0].startStatus,
-                        startQuestData: {
-                            uuid: responseDataDoc.responseData[0].responsingUserUuid,
-                            postId: postId,
-                            data: responseDataDoc.responseData[0].response,
-                            addedAnswer: responseDataDoc.responseData[0].addedAnswer,
-                        },
+                        ...post.toObject(),
                         bookmark: bookmark ? true : false,
-                    };
-
-                    // Add the updated post to the array
-                    updatedPosts.push({
-                        ...post.toObject(), // Convert Mongoose document to plain JS object
-                        questForeginKey: questForeginKeyWithStartQuestData
+                        getUserBadge: {
+                            _id: user._id,
+                            badges: user.badges,
+                        },
                     });
+                }
+                else {
+                    const responseDataDoc = postData.responseData.find(item => item.responsingUserUuid === uuid);
+                    if (!responseDataDoc) {
+                        // Add the updated post to the array
+                        updatedPosts.push({
+                            ...post.toObject(),
+                            bookmark: bookmark ? true : false,
+                            getUserBadge: {
+                                _id: user._id,
+                                badges: user.badges,
+                            },
+                        });
+                    }
+                    else {
+                        const responseDataStats = await PostDataSchema.aggregate([
+                            {
+                                $match: { postId: postId }
+                            },
+                            {
+                                $unwind: '$responseData'
+                            },
+                            {
+                                $group: {
+                                    _id: null,
+                                    totalCount: { $sum: 1 },
+                                    yesCount: {
+                                        $sum: {
+                                            $cond: [{ $eq: ['$responseData.response.selected', 'Yes'] }, 1, 0]
+                                        }
+                                    },
+                                    noCount: {
+                                        $sum: {
+                                            $cond: [{ $eq: ['$responseData.response.selected', 'No'] }, 1, 0]
+                                        }
+                                    },
+                                    agreeCount: {
+                                        $sum: {
+                                            $cond: [{ $eq: ['$responseData.response.selected', 'Agree'] }, 1, 0]
+                                        }
+                                    },
+                                    disagreeCount: {
+                                        $sum: {
+                                            $cond: [{ $eq: ['$responseData.response.selected', 'Disagree'] }, 1, 0]
+                                        }
+                                    },
+                                    likeCount: {
+                                        $sum: {
+                                            $cond: [{ $eq: ['$responseData.response.selected', 'Like'] }, 1, 0]
+                                        }
+                                    },
+                                    dislikeCount: {
+                                        $sum: {
+                                            $cond: [{ $eq: ['$responseData.response.selected', 'Dislike'] }, 1, 0]
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                $project: {
+                                    _id: 0,
+                                    yesNo: {
+                                        $cond: {
+                                            if: { $gt: [{ $add: ['$yesCount', '$noCount'] }, 0] },
+                                            then: {
+                                                Yes: '$yesCount',
+                                                YesPercentage: { $multiply: [{ $divide: ['$yesCount', '$totalCount'] }, 100] },
+                                                No: '$noCount',
+                                                NoPercentage: { $multiply: [{ $divide: ['$noCount', '$totalCount'] }, 100] }
+                                            },
+                                            else: '$$REMOVE'
+                                        }
+                                    },
+                                    agreeDisagree: {
+                                        $cond: {
+                                            if: { $gt: [{ $add: ['$agreeCount', '$disagreeCount'] }, 0] },
+                                            then: {
+                                                Agree: '$agreeCount',
+                                                AgreePercentage: { $multiply: [{ $divide: ['$agreeCount', '$totalCount'] }, 100] },
+                                                Disagree: '$disagreeCount',
+                                                DisagreePercentage: { $multiply: [{ $divide: ['$disagreeCount', '$totalCount'] }, 100] }
+                                            },
+                                            else: '$$REMOVE'
+                                        }
+                                    },
+                                    likeDislike: {
+                                        $cond: {
+                                            if: { $gt: [{ $add: ['$likeCount', '$dislikeCount'] }, 0] },
+                                            then: {
+                                                Like: '$likeCount',
+                                                LikePercentage: { $multiply: [{ $divide: ['$likeCount', '$totalCount'] }, 100] },
+                                                Dislike: '$dislikeCount',
+                                                DislikePercentage: { $multiply: [{ $divide: ['$dislikeCount', '$totalCount'] }, 100] }
+                                            },
+                                            else: '$$REMOVE'
+                                        }
+                                    }
+                                }
+                            }
+                        ]);
+
+                        const questForeginKeyWithStartQuestData = {
+                            ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                            startStatus: responseDataDoc.startStatus,
+                            startQuestData: {
+                                uuid: responseDataDoc.responsingUserUuid,
+                                postId: postId,
+                                data: responseDataDoc.response,
+                                addedAnswer: responseDataDoc.addedAnswer,
+                            },
+                            bookmark: bookmark ? true : false,
+                            getUserBadge: {
+                                _id: user._id,
+                                badges: user.badges,
+                            },
+                            result: responseDataStats,
+                        };
+
+                        // Add the updated post to the array
+                        updatedPosts.push({
+                            ...post.toObject(), // Convert Mongoose document to plain JS object
+                            questForeginKey: questForeginKeyWithStartQuestData
+                        });
+                    }
                 }
             }
 
@@ -445,6 +546,182 @@ const findCategoryByLink = async (req, res) => {
 
         }
 
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({
+            message: `An error occurred while getting the userList: ${error.message}`,
+        });
+    }
+}
+
+const viewList = async (req, res) => {
+    try {
+
+        const { categoryId, userUuid } = req.params;
+
+        // Find the user list that contains a category with the given link
+        const userList = await UserListSchema.findOne({
+            userUuid: userUuid,
+        }).populate({
+            path: 'list.post.questForeginKey',
+            model: 'InfoQuestQuestions'
+        });
+        if (!userList) throw new Error(`No list is found with the category ID: ${categoryId}`);
+
+        // Find the category within the list array based on the category link
+        const categoryDoc = userList.list.id(categoryId);
+        if (!categoryDoc) throw new Error('Category not found');
+
+        let updatedPosts = [];
+
+        for (const post of categoryDoc.post) {
+            const postId = new mongoose.Types.ObjectId(post._id.toString());
+            // Find the postData document
+            const bookmark = await BookmarkQuestsSchema.findOne({
+                questForeignKey: post.questForeginKey.toString(),
+                createdBy: userUuid
+            })
+            const user = await User.findOne({ uuid: userList.userUuid });
+
+            const postData = await PostDataSchema.findOne({
+                postId: postId
+            })
+
+            if (postData) {
+                const responseDataStats = await PostDataSchema.aggregate([
+                    {
+                        $match: { postId: postId }
+                    },
+                    {
+                        $unwind: '$responseData'
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            totalCount: { $sum: 1 },
+                            yesCount: {
+                                $sum: {
+                                    $cond: [{ $eq: ['$responseData.response.selected', 'Yes'] }, 1, 0]
+                                }
+                            },
+                            noCount: {
+                                $sum: {
+                                    $cond: [{ $eq: ['$responseData.response.selected', 'No'] }, 1, 0]
+                                }
+                            },
+                            agreeCount: {
+                                $sum: {
+                                    $cond: [{ $eq: ['$responseData.response.selected', 'Agree'] }, 1, 0]
+                                }
+                            },
+                            disagreeCount: {
+                                $sum: {
+                                    $cond: [{ $eq: ['$responseData.response.selected', 'Disagree'] }, 1, 0]
+                                }
+                            },
+                            likeCount: {
+                                $sum: {
+                                    $cond: [{ $eq: ['$responseData.response.selected', 'Like'] }, 1, 0]
+                                }
+                            },
+                            dislikeCount: {
+                                $sum: {
+                                    $cond: [{ $eq: ['$responseData.response.selected', 'Dislike'] }, 1, 0]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            yesNo: {
+                                $cond: {
+                                    if: { $gt: [{ $add: ['$yesCount', '$noCount'] }, 0] },
+                                    then: {
+                                        Yes: '$yesCount',
+                                        YesPercentage: { $multiply: [{ $divide: ['$yesCount', '$totalCount'] }, 100] },
+                                        No: '$noCount',
+                                        NoPercentage: { $multiply: [{ $divide: ['$noCount', '$totalCount'] }, 100] }
+                                    },
+                                    else: '$$REMOVE'
+                                }
+                            },
+                            agreeDisagree: {
+                                $cond: {
+                                    if: { $gt: [{ $add: ['$agreeCount', '$disagreeCount'] }, 0] },
+                                    then: {
+                                        Agree: '$agreeCount',
+                                        AgreePercentage: { $multiply: [{ $divide: ['$agreeCount', '$totalCount'] }, 100] },
+                                        Disagree: '$disagreeCount',
+                                        DisagreePercentage: { $multiply: [{ $divide: ['$disagreeCount', '$totalCount'] }, 100] }
+                                    },
+                                    else: '$$REMOVE'
+                                }
+                            },
+                            likeDislike: {
+                                $cond: {
+                                    if: { $gt: [{ $add: ['$likeCount', '$dislikeCount'] }, 0] },
+                                    then: {
+                                        Like: '$likeCount',
+                                        LikePercentage: { $multiply: [{ $divide: ['$likeCount', '$totalCount'] }, 100] },
+                                        Dislike: '$dislikeCount',
+                                        DislikePercentage: { $multiply: [{ $divide: ['$dislikeCount', '$totalCount'] }, 100] }
+                                    },
+                                    else: '$$REMOVE'
+                                }
+                            }
+                        }
+                    }
+                ]);
+
+                const questForeginKeyWithStartQuestData = {
+                    ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                    bookmark: bookmark ? true : false,
+                    getUserBadge: {
+                        _id: user._id,
+                        badges: user.badges,
+                    },
+                    result: responseDataStats,
+                };
+
+                // Add the updated post to the array
+                updatedPosts.push({
+                    ...post.toObject(), // Convert Mongoose document to plain JS object
+                    questForeginKey: questForeginKeyWithStartQuestData
+                });
+            }
+            else {
+                updatedPosts.push({
+                    ...post.questForeginKey.toObject(),
+                    bookmark: bookmark ? true : false,
+                    getUserBadge: {
+                        _id: user._id,
+                        badges: user.badges,
+                    },
+                    result: null,
+                })
+            }
+
+        }
+
+        const newCategoryDoc = {
+            category: categoryDoc.category,
+            post: updatedPosts,
+            link: categoryDoc.link,
+            isLinkUserCustomized: categoryDoc.isLinkUserCustomized,
+            clicks: categoryDoc.clicks,
+            participents: categoryDoc.participents,
+            createdAt: categoryDoc.createdAt,
+            updatedAt: categoryDoc.updatedAt,
+            deletedAt: categoryDoc.deletedAt,
+            isActive: categoryDoc.isActive,
+            _id: categoryDoc._id
+        };
+
+        res.status(200).json({
+            message: `Category found successfully`,
+            category: newCategoryDoc,
+        });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({
@@ -681,7 +958,7 @@ const submitResponse = async (req, res) => {
         }
 
         let newPostData;
-        if(req.body.addedAnswer){
+        if (req.body.addedAnswer) {
             newPostData = new ResponseDataSchema({
                 responsingUserUuid: responsingUserUuid,
                 response: response,
@@ -722,6 +999,7 @@ module.exports = {
     deleteCategoryFromList,
     generateCategoryShareLink,
     findCategoryByLink,
+    viewList,
     categoryViewCount,
     categoryParticipentsCount,
     categoryStatistics,
