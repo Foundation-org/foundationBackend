@@ -507,6 +507,7 @@ const findCategoryByLink = async (req, res) => {
                         if (responseDataStats[0].yesNo) {
                             questForeginKeyWithStartQuestData = {
                                 ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                                startStatus: responseDataDoc.startStatus,
                                 startQuestData: {
                                     uuid: responseDataDoc.responsingUserUuid,
                                     postId: postId,
@@ -536,6 +537,7 @@ const findCategoryByLink = async (req, res) => {
                         } else if (responseDataStats[0].agreeDisagree) {
                             questForeginKeyWithStartQuestData = {
                                 ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                                startStatus: responseDataDoc.startStatus,
                                 startQuestData: {
                                     uuid: responseDataDoc.responsingUserUuid,
                                     postId: postId,
@@ -565,6 +567,7 @@ const findCategoryByLink = async (req, res) => {
                         } else if (responseDataStats[0].likeDislike) {
                             questForeginKeyWithStartQuestData = {
                                 ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                                startStatus: responseDataDoc.startStatus,
                                 startQuestData: {
                                     uuid: responseDataDoc.responsingUserUuid,
                                     postId: postId,
@@ -600,6 +603,7 @@ const findCategoryByLink = async (req, res) => {
                                     data: responseDataDoc.response,
                                     addedAnswer: responseDataDoc.addedAnswer,
                                 },
+                                startStatus: responseDataDoc.startStatus,
                                 bookmark: bookmark ? true : false,
                                 getUserBadge: {
                                     _id: user._id,
