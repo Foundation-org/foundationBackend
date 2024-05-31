@@ -865,13 +865,17 @@ const viewList = async (req, res) => {
                 });
             }
             else {
-                updatedPosts.push({
+                const questForeginKeyWithStartQuestData = {
                     ...post.questForeginKey.toObject(),
                     bookmark: bookmark ? true : false,
                     getUserBadge: {
                         _id: user._id,
                         badges: user.badges,
                     },
+                }
+                updatedPosts.push({
+                    ...post.toObject(),
+                    questForeginKey: questForeginKeyWithStartQuestData
                 })
             }
 
