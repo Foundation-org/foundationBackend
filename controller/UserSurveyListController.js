@@ -456,6 +456,71 @@ const findCategoryByLink = async (req, res) => {
                                         $sum: {
                                             $cond: [{ $eq: ['$responseData.response.selected', 'Dislike'] }, 1, 0]
                                         }
+                                    },
+                                    multipleChoiceResponses: {
+                                        $push: '$responseData.response.selected'
+                                    }
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    path: '$multipleChoiceResponses',
+                                    preserveNullAndEmptyArrays: true
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    path: '$multipleChoiceResponses',
+                                    preserveNullAndEmptyArrays: true
+                                }
+                            },
+                            {
+                                $group: {
+                                    _id: {
+                                        question: '$multipleChoiceResponses.question'
+                                    },
+                                    questionCount: { $sum: 1 },
+                                    totalMultipleChoiceCount: { $sum: 1 },  // Total count for this specific group
+                                    totalCount: { $first: '$totalCount' },
+                                    yesCount: { $first: '$yesCount' },
+                                    noCount: { $first: '$noCount' },
+                                    agreeCount: { $first: '$agreeCount' },
+                                    disagreeCount: { $first: '$disagreeCount' },
+                                    likeCount: { $first: '$likeCount' },
+                                    dislikeCount: { $first: '$dislikeCount' }
+                                }
+                            },
+                            {
+                                $group: {
+                                    _id: null,
+                                    totalCount: { $first: '$totalCount' },
+                                    yesCount: { $first: '$yesCount' },
+                                    noCount: { $first: '$noCount' },
+                                    agreeCount: { $first: '$agreeCount' },
+                                    disagreeCount: { $first: '$disagreeCount' },
+                                    likeCount: { $first: '$likeCount' },
+                                    dislikeCount: { $first: '$dislikeCount' },
+                                    totalMultipleChoiceCount: { $sum: '$totalMultipleChoiceCount' },  // Sum of all multiple choice counts
+                                    questions: {
+                                        $push: {
+                                            question: '$_id.question',
+                                            count: '$questionCount'
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                $addFields: {
+                                    questions: {
+                                        $map: {
+                                            input: '$questions',
+                                            as: 'question',
+                                            in: {
+                                                question: '$$question.question',
+                                                count: '$$question.count',
+                                                percentage: { $multiply: [{ $divide: ['$$question.count', '$totalMultipleChoiceCount'] }, 100] }  // Calculate percentage correctly
+                                            }
+                                        }
                                     }
                                 }
                             },
@@ -497,6 +562,13 @@ const findCategoryByLink = async (req, res) => {
                                             },
                                             else: '$$REMOVE'
                                         }
+                                    },
+                                    multipleChoice: {
+                                        $cond: {
+                                            if: { $gt: [{ $size: '$questions' }, 0] },
+                                            then: '$questions',
+                                            else: '$$REMOVE'
+                                        }
                                     }
                                 }
                             }
@@ -534,7 +606,8 @@ const findCategoryByLink = async (req, res) => {
                                     badges: user.badges,
                                 },
                             };
-                        } else if (responseDataStats[0].agreeDisagree) {
+                        }
+                        else if (responseDataStats[0].agreeDisagree) {
                             questForeginKeyWithStartQuestData = {
                                 ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                                 startStatus: responseDataDoc.startStatus,
@@ -564,7 +637,8 @@ const findCategoryByLink = async (req, res) => {
                                     badges: user.badges,
                                 },
                             };
-                        } else if (responseDataStats[0].likeDislike) {
+                        }
+                        else if (responseDataStats[0].likeDislike) {
                             questForeginKeyWithStartQuestData = {
                                 ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                                 startStatus: responseDataDoc.startStatus,
@@ -594,7 +668,38 @@ const findCategoryByLink = async (req, res) => {
                                     badges: user.badges,
                                 },
                             };
-                        } else {
+                        }
+                        else if (responseDataStats[0].multipleChoice && responseDataStats[0].multipleChoice.length > 1) {
+                            let result = [{
+                                selected: {}
+                            }];
+                            responseDataStats[0].multipleChoice.forEach(item => {
+                                result[0].selected[item.question] = item.count;
+                            });
+                            let selectedPercentage = [{}];
+                            // Iterate over the multipleChoice array and populate the object
+                            responseDataStats[0].multipleChoice.forEach(item => {
+                                selectedPercentage[0][item.question] = (Math.round(item.percentage)).toString() + "%";
+                            });
+                            questForeginKeyWithStartQuestData = {
+                                ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                                startStatus: responseDataDoc.startStatus,
+                                startQuestData: {
+                                    uuid: responseDataDoc.responsingUserUuid,
+                                    postId: postId,
+                                    data: responseDataDoc.response,
+                                    addedAnswer: responseDataDoc.addedAnswer,
+                                },
+                                result: result,
+                                selectedPercentage: selectedPercentage,
+                                bookmark: bookmark ? true : false,
+                                getUserBadge: {
+                                    _id: user._id,
+                                    badges: user.badges,
+                                },
+                            };
+                        }
+                        else {
                             questForeginKeyWithStartQuestData = {
                                 ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                                 startQuestData: {
@@ -730,6 +835,71 @@ const viewList = async (req, res) => {
                                 $sum: {
                                     $cond: [{ $eq: ['$responseData.response.selected', 'Dislike'] }, 1, 0]
                                 }
+                            },
+                            multipleChoiceResponses: {
+                                $push: '$responseData.response.selected'
+                            }
+                        }
+                    },
+                    {
+                        $unwind: {
+                            path: '$multipleChoiceResponses',
+                            preserveNullAndEmptyArrays: true
+                        }
+                    },
+                    {
+                        $unwind: {
+                            path: '$multipleChoiceResponses',
+                            preserveNullAndEmptyArrays: true
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: {
+                                question: '$multipleChoiceResponses.question'
+                            },
+                            questionCount: { $sum: 1 },
+                            totalMultipleChoiceCount: { $sum: 1 },  // Total count for this specific group
+                            totalCount: { $first: '$totalCount' },
+                            yesCount: { $first: '$yesCount' },
+                            noCount: { $first: '$noCount' },
+                            agreeCount: { $first: '$agreeCount' },
+                            disagreeCount: { $first: '$disagreeCount' },
+                            likeCount: { $first: '$likeCount' },
+                            dislikeCount: { $first: '$dislikeCount' }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            totalCount: { $first: '$totalCount' },
+                            yesCount: { $first: '$yesCount' },
+                            noCount: { $first: '$noCount' },
+                            agreeCount: { $first: '$agreeCount' },
+                            disagreeCount: { $first: '$disagreeCount' },
+                            likeCount: { $first: '$likeCount' },
+                            dislikeCount: { $first: '$dislikeCount' },
+                            totalMultipleChoiceCount: { $sum: '$totalMultipleChoiceCount' },  // Sum of all multiple choice counts
+                            questions: {
+                                $push: {
+                                    question: '$_id.question',
+                                    count: '$questionCount'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        $addFields: {
+                            questions: {
+                                $map: {
+                                    input: '$questions',
+                                    as: 'question',
+                                    in: {
+                                        question: '$$question.question',
+                                        count: '$$question.count',
+                                        percentage: { $multiply: [{ $divide: ['$$question.count', '$totalMultipleChoiceCount'] }, 100] }  // Calculate percentage correctly
+                                    }
+                                }
                             }
                         }
                     },
@@ -771,6 +941,13 @@ const viewList = async (req, res) => {
                                     },
                                     else: '$$REMOVE'
                                 }
+                            },
+                            multipleChoice: {
+                                $cond: {
+                                    if: { $gt: [{ $size: '$questions' }, 0] },
+                                    then: '$questions',
+                                    else: '$$REMOVE'
+                                }
                             }
                         }
                     }
@@ -801,7 +978,8 @@ const viewList = async (req, res) => {
                             badges: user.badges,
                         },
                     };
-                } else if (responseDataStats[0].agreeDisagree) {
+                }
+                else if (responseDataStats[0].agreeDisagree) {
                     questForeginKeyWithStartQuestData = {
                         ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                         result: [
@@ -824,7 +1002,8 @@ const viewList = async (req, res) => {
                             badges: user.badges,
                         },
                     };
-                } else if (responseDataStats[0].likeDislike) {
+                }
+                else if (responseDataStats[0].likeDislike) {
                     questForeginKeyWithStartQuestData = {
                         ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                         result: [
@@ -847,7 +1026,31 @@ const viewList = async (req, res) => {
                             badges: user.badges,
                         },
                     };
-                } else {
+                }
+                else if (responseDataStats[0].multipleChoice && responseDataStats[0].multipleChoice.length > 1) {
+                    let result = [{
+                        selected: {}
+                    }];
+                    responseDataStats[0].multipleChoice.forEach(item => {
+                        result[0].selected[item.question] = item.count;
+                    });
+                    let selectedPercentage = [{}];
+                    // Iterate over the multipleChoice array and populate the object
+                    responseDataStats[0].multipleChoice.forEach(item => {
+                        selectedPercentage[0][item.question] = (Math.round(item.percentage)).toString() + "%";
+                    });
+                    questForeginKeyWithStartQuestData = {
+                        ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                        result: result,
+                        selectedPercentage: selectedPercentage,
+                        bookmark: bookmark ? true : false,
+                        getUserBadge: {
+                            _id: user._id,
+                            badges: user.badges,
+                        },
+                    };
+                }
+                else {
                     questForeginKeyWithStartQuestData = {
                         ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                         bookmark: bookmark ? true : false,
