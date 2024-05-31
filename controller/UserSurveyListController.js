@@ -604,13 +604,28 @@ const findCategoryByLink = async (req, res) => {
 
                             // Sort ranks by total rank values
                             const sortedRanks = Object.entries(ranks).sort((a, b) => a[1] - b[1]);
-
-                            console.log("Ranks------------------->", ranks)
-                            console.log("Sorted Ranks------------------->", sortedRanks)
                             const data = {
                                 ...responseDataDoc.response,
-                                contented: []
+                                contended: []
                             }
+
+                            // Calculate the total rank sum
+                            const totalRanksSum = Object.values(ranks).reduce((sum, rank) => sum + rank, 0);
+
+                            // Calculate the inverted percentages
+                            const invertedPercentages = {};
+                            choices.forEach(choice => {
+                                const choiceRank = ranks[choice];
+                                // Calculate the inverted rank sum as the difference between the total rank sum and the choice's rank sum
+                                const invertedRank = totalRanksSum - choiceRank;
+                                invertedPercentages[choice] = (invertedRank / (totalRanksSum * (choices.length - 1))) * 100;
+                            });
+
+                            // Transform inverted percentages to formatted strings
+                            const formattedPercentages = {};
+                            Object.entries(invertedPercentages).forEach(([choice, percentage]) => {
+                                formattedPercentages[choice] = `${Math.round(percentage)}%`;
+                            });
 
                             questForeginKeyWithStartQuestData = {
                                 ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
@@ -627,7 +642,14 @@ const findCategoryByLink = async (req, res) => {
                                     _id: user._id,
                                     badges: user.badges,
                                 },
-                                result: []
+                                result: [
+                                    {
+                                        selected: ranks
+                                    }
+                                ],
+                                selectedPercentage: [
+                                    formattedPercentages
+                                ],
                             };
                         }
                         else if (responseDataStats[0].yesNo) {
@@ -1009,7 +1031,84 @@ const viewList = async (req, res) => {
 
                 let questForeginKeyWithStartQuestData;
 
-                if (responseDataStats[0].yesNo) {
+                const isPostRankedChoice = await InfoQuestQuestions.findOne({ _id: new mongoose.Types.ObjectId((post.questForeginKey._id).toString()) })
+                if (isPostRankedChoice.whichTypeQuestion === "ranked choise") {
+                    // continue;
+                    const choices = isPostRankedChoice.QuestAnswers.map(answer => answer.question);
+
+                    // Initialize a ranks object to store the rank totals for each choice
+                    const ranks = {};
+
+                    // Initialize the ranks object with each choice
+                    choices.forEach(choice => {
+                        ranks[choice] = 0;
+                    });
+
+                    // Iterate through each user's response in the responseData array
+                    postData.responseData.forEach(responseDoc => {
+                        const response = responseDoc.response;
+                        if (response && Array.isArray(response.selected)) {
+                            response.selected.forEach((selectedItem, index) => {
+                                const choice = selectedItem.question;
+                                if (ranks.hasOwnProperty(choice)) {
+                                    // Add the rank (index) to the total rank for this choice
+                                    ranks[choice] += index + 1;  // Adding 1 because index is 0-based
+                                }
+                            });
+                        }
+                    });
+
+                    // Sort ranks by total rank values
+                    const sortedRanks = Object.entries(ranks).sort((a, b) => a[1] - b[1]);
+                    const data = {
+                        ...responseDataDoc.response,
+                        contended: []
+                    }
+
+                    // Calculate the total rank sum
+                    const totalRanksSum = Object.values(ranks).reduce((sum, rank) => sum + rank, 0);
+
+                    // Calculate the inverted percentages
+                    const invertedPercentages = {};
+                    choices.forEach(choice => {
+                        const choiceRank = ranks[choice];
+                        // Calculate the inverted rank sum as the difference between the total rank sum and the choice's rank sum
+                        const invertedRank = totalRanksSum - choiceRank;
+                        invertedPercentages[choice] = (invertedRank / (totalRanksSum * (choices.length - 1))) * 100;
+                    });
+
+                    // Transform inverted percentages to formatted strings
+                    const formattedPercentages = {};
+                    Object.entries(invertedPercentages).forEach(([choice, percentage]) => {
+                        formattedPercentages[choice] = `${Math.round(percentage)}%`;
+                    });
+
+                    questForeginKeyWithStartQuestData = {
+                        ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
+                        startQuestData: {
+                            uuid: responseDataDoc.responsingUserUuid,
+                            postId: postId,
+                            data: [data],
+                            questForeignKey: post.questForeginKey._id,
+                            addedAnswer: responseDataDoc.addedAnswer,
+                        },
+                        startStatus: responseDataDoc.startStatus,
+                        bookmark: bookmark ? true : false,
+                        getUserBadge: {
+                            _id: user._id,
+                            badges: user.badges,
+                        },
+                        result: [
+                            {
+                                selected: ranks
+                            }
+                        ],
+                        selectedPercentage: [
+                            formattedPercentages
+                        ],
+                    };
+                }
+                else if (responseDataStats[0].yesNo) {
                     questForeginKeyWithStartQuestData = {
                         ...post.questForeginKey.toObject(), // Convert Mongoose document to plain JS object
                         result: [
