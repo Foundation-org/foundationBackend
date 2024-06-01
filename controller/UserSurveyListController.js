@@ -1644,12 +1644,6 @@ const viewListAll = async (req, res) => {
                         },
                     };
                 }
-
-                // Add the updated post to the array
-                updatedPosts.push({
-                    ...post.toObject(), // Convert Mongoose document to plain JS object
-                    questForeginKey: questForeginKeyWithStartQuestData
-                });
             }
             else {
                 questForeginKeyWithStartQuestData = {
@@ -1660,18 +1654,9 @@ const viewListAll = async (req, res) => {
                         badges: user.badges,
                     },
                 }
-                updatedPosts.push({
-                    ...post.toObject(),
-                    questForeginKey: questForeginKeyWithStartQuestData
-                })
             }
 
             const desiredResult = await getQuestByIdQuestForeignKey(post.questForeginKey._id.toString());
-
-            console.log("For Adding Purposes: ", questForeginKeyWithStartQuestData)
-
-            console.log("Required: ", desiredResult);
-
             const questResult = questForeginKeyWithStartQuestData.result && questForeginKeyWithStartQuestData.result[0].selected ? questForeginKeyWithStartQuestData.result[0].selected : {};
             const desiredResultSelected = desiredResult.result && desiredResult.result[0].selected ? desiredResult.result[0].selected : {};
 
@@ -1718,10 +1703,15 @@ const viewListAll = async (req, res) => {
                 //     badges: user.badges,
                 // },
             }
+
+            console.log(questForeginKeyWithStartQuestDataR)
+            
             updatedPosts.push({
                 ...post.toObject(),
                 questForeginKey: questForeginKeyWithStartQuestDataR
             })
+
+            console.log(updatedPosts)
 
         }
 
