@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const { getTreasury, updateTreasury } = require("../utils/treasuryService");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const BookmarkQuests = require("../models/BookmarkQuests");
-const { getPercentage } = require("../utils/getPercentage");
+const { getPercentage, getPercentageQuestForeignKey} = require("../utils/getPercentage");
 const shortLink = require("shortlink");
 const { execSync } = require("child_process");
 const UserQuestSetting = require("../models/UserQuestSetting");
@@ -1606,7 +1606,6 @@ const getQuestById = async (req, res) => {
 
 async function getQuestByIdQuestForeignKey (questForeignKey) {
   try {
-    const page = "SharedLink"
     const infoQuest = await InfoQuestQuestions.find({
       _id: new mongoose.Types.ObjectId(questForeignKey.toString()),
     }).populate("getUserBadge", "badges");
@@ -1618,12 +1617,12 @@ async function getQuestByIdQuestForeignKey (questForeignKey) {
 
     let quest;
 
-    if (page === "SharedLink") {
+    // if (page === "SharedLink") {
       quest = await UserQuestSetting.findOne({ questForeignKey: questForeignKey });
-    }
-    console.log("questSharedLink", quest);
+    // }
+    // console.log("questSharedLink", quest);
 
-    const resultArray = result1.map((item) => getPercentage(item, page, quest));
+    const resultArray = result1.map((item) => getPercentageQuestForeignKey(item, quest));
 
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
