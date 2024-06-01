@@ -1,6 +1,7 @@
 const User = require("../models/UserModel");
 const { UserListSchema, CategorySchema, PostSchema, } = require("../models/UserList");
 const BookmarkQuestsSchema = require("../models/BookmarkQuests");
+const { getQuestByIdQuestForeignKey } = require("../controller/InfoQuestQuestionController");
 const { PostDataSchema, ResponseDataSchema, } = require("../models/PostData");
 const shortLink = require("shortlink");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
@@ -1267,6 +1268,84 @@ const viewList = async (req, res) => {
     }
 }
 
+const viewListAll = async (req, res) => {
+    try {
+
+        const { categoryId, userUuid } = req.params;
+
+        // Find the user list that contains a category with the given link
+        const userList = await UserListSchema.findOne({
+            userUuid: userUuid,
+        }).populate({
+            path: 'list.post.questForeginKey',
+            model: 'InfoQuestQuestions'
+        });
+        if (!userList) throw new Error(`No list is found with the category ID: ${categoryId}`);
+
+        // Find the category within the list array based on the category link
+        const categoryDoc = userList.list.id(categoryId);
+        if (!categoryDoc) throw new Error('Category not found');
+
+        let updatedPosts = [];
+
+        for (const post of categoryDoc.post) {
+            const postId = new mongoose.Types.ObjectId(post._id.toString());
+            // Find the postData document
+            const bookmark = await BookmarkQuestsSchema.findOne({
+                questForeignKey: post.questForeginKey.toString(),
+                createdBy: userUuid
+            })
+            const user = await User.findOne({ uuid: userList.userUuid });
+
+            const postData = await PostDataSchema.findOne({
+                postId: postId
+            })
+
+            const desiredResult = await getQuestByIdQuestForeignKey(post.questForeginKey._id.toString());
+
+            console.log(desiredResult);
+
+            const questForeginKeyWithStartQuestData = {
+                ...desiredResult,
+                bookmark: bookmark ? true : false,
+                // getUserBadge: {
+                //     _id: user._id,
+                //     badges: user.badges,
+                // },
+            }
+            updatedPosts.push({
+                ...post.toObject(),
+                questForeginKey: questForeginKeyWithStartQuestData
+            })
+
+        }
+
+        const newCategoryDoc = {
+            category: categoryDoc.category,
+            post: updatedPosts,
+            link: categoryDoc.link,
+            isLinkUserCustomized: categoryDoc.isLinkUserCustomized,
+            clicks: categoryDoc.clicks,
+            participents: categoryDoc.participents,
+            createdAt: categoryDoc.createdAt,
+            updatedAt: categoryDoc.updatedAt,
+            deletedAt: categoryDoc.deletedAt,
+            isActive: categoryDoc.isActive,
+            _id: categoryDoc._id
+        };
+
+        res.status(200).json({
+            message: `Category found successfully`,
+            category: newCategoryDoc,
+        });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({
+            message: `An error occurred while getting the userList: ${error.message}`,
+        });
+    }
+}
+
 const categoryViewCount = async (req, res) => {
     try {
 
@@ -1537,6 +1616,7 @@ module.exports = {
     generateCategoryShareLink,
     findCategoryByLink,
     viewList,
+    viewListAll,
     categoryViewCount,
     categoryParticipentsCount,
     categoryStatistics,

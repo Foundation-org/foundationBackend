@@ -310,6 +310,38 @@ router.get(
 );
 
 router.get(
+  "/viewListAll/:categoryId/:userUuid",
+  /**
+   * @swagger
+   * /userlists/viewListAll/{categoryId}/{userUuid}:
+   *   get:
+   *     tags:
+   *       - UserSurveyList
+   *     summary: Get user's list information
+   *     description: Endpoint to get list of a user by link
+   *     parameters:
+   *       - in: path
+   *         name: categoryId
+   *         required: true
+   *         description: The categoryId of the user
+   *         schema:
+   *           type: string
+   *       - in: path
+   *         name: userUuid
+   *         required: true
+   *         description: The userUuid of the user
+   *         schema:
+   *           type: string
+   *     responses:
+   *       '200':
+   *         description: User information retrieved successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  UserSurveyListController.viewListAll
+);
+
+router.get(
   "/categoryViewCount/:categoryLink",
   /**
    * @swagger
