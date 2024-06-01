@@ -27,7 +27,29 @@ const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
 const { getRandomDigits } = require("../utils/getRandomDigits");
 const { sendEmailMessage } = require("../utils/sendEmailMessage");
-const { FRONTEND_URL, JWT_SECRET, FACEBOOK_APP_SECRET } = require("../config/env");
+const {
+  FRONTEND_URL,
+  JWT_SECRET,
+  FACEBOOK_APP_SECRET,
+} = require("../config/env");
+const personalKeys = [
+  "firstName",
+  "lastName",
+  "geolocation",
+  "security-question",
+  "dateOfBirth",
+  "currentCity",
+  "homeTown",
+  "relationshipStatus",
+];
+
+// Encryption/Decryption Security Purposes.
+const {
+  encryptData,
+  decryptData,
+  userCustomizedEncryptData,
+  userCustomizedDecryptData,
+} = require("../utils/security");
 
 const changePassword = async (req, res) => {
   try {
@@ -72,10 +94,10 @@ const changePassword = async (req, res) => {
 
 const signUpUser = async (req, res) => {
   try {
-    const alreadyUser = await User.findOne({ email: req.body.userEmail });
+    const alreadyUser = await User.findOne({ email: req.body.email });
     if (alreadyUser) throw new Error("Email Already Exists");
 
-    const checkGoogleEmail = await isGoogleEmail(req.body.userEmail);
+    const checkGoogleEmail = await isGoogleEmail(req.body.email);
     if (checkGoogleEmail)
       throw new Error(
         "We have detected that this is a Google hosted e-mail-For greater security,please use 'Continue with Google'"
@@ -85,9 +107,9 @@ const signUpUser = async (req, res) => {
     //console.log(uuid);
 
     const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(req.body.userPassword, salt);
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
     const user = await new User({
-      email: req.body.userEmail,
+      email: req.body.email,
       password: hashPassword,
       uuid: uuid,
       role: "user",
@@ -96,7 +118,24 @@ const signUpUser = async (req, res) => {
     if (!users) throw new Error("User not Created");
 
     // Generate a JWT token
-    const token = createToken({ uuid: user.uuid });
+    // const token = createToken({ uuid: user.uuid });
+
+    const userList = await UserListSchema.findOne({
+      userUuid: uuid,
+    });
+
+    if (!userList) {
+      const createUserList = new UserListSchema({
+        userUuid: uuid,
+      });
+      const newUserList = await createUserList.save();
+      if (!newUserList) {
+        await user.deleteOne({
+          uuid: uuid,
+        });
+        throw new Error("User not created due to list");
+      }
+    }
 
     // Create Ledger
     await createLedger({
@@ -161,7 +200,7 @@ const signUpUserBySocialLogin = async (req, res) => {
       accountId: payload.sub,
       accountName: payload.provider,
       isVerified: true,
-      details: req.body,
+      details: encryptData(req.body),
       type: type,
     });
 
@@ -170,10 +209,10 @@ const signUpUserBySocialLogin = async (req, res) => {
     await user.save();
 
     const userList = await UserListSchema.findOne({
-      userUuid: user.uuid
-    })
+      userUuid: user.uuid,
+    });
 
-    if(!userList){
+    if (!userList) {
       const createUserList = new UserListSchema({
         userUuid: user.uuid,
       });
@@ -250,9 +289,14 @@ const signUpUserBySocialLogin = async (req, res) => {
       user.requiredAction = true;
       await user.save();
     }
+
+    // Decrypt Saved Data
+    const decryptUser = user._doc;
+    decryptUser.badges[0].details = decryptData(decryptUser.badges[0].details);
+
     res.cookie("uuid", user.uuid, cookieConfiguration());
     res.cookie("jwt", token, cookieConfiguration());
-    res.status(200).json({ ...user._doc, token });
+    res.status(200).json({ ...decryptUser, token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -266,10 +310,6 @@ const signUpUserBySocialBadges = async (req, res) => {
     // Check Google Account
     const payload = req.body;
     // Check if email already exist
-    if (payload.data.email) {
-      const alreadyUser = await User.findOne({ email: payload.data.email });
-      if (alreadyUser) throw new Error("Email Already Exists");
-    }
 
     let id;
     if (payload.type === "facebook") {
@@ -313,7 +353,7 @@ const signUpUserBySocialBadges = async (req, res) => {
     user.badges.unshift({
       accountId: id,
       accountName: payload.type,
-      details: payload.data,
+      details: encryptData(payload.data),
       isVerified: true,
       type: "social",
       primary: true,
@@ -323,10 +363,10 @@ const signUpUserBySocialBadges = async (req, res) => {
     await user.save();
 
     const userList = await UserListSchema.findOne({
-      userUuid: user.uuid
-    })
+      userUuid: user.uuid,
+    });
 
-    if(!userList){
+    if (!userList) {
       const createUserList = new UserListSchema({
         userUuid: user.uuid,
       });
@@ -403,9 +443,14 @@ const signUpUserBySocialBadges = async (req, res) => {
       user.requiredAction = true;
       await user.save();
     }
+
+    // Decrypt Saved Data
+    const decryptUser = user._doc;
+    decryptUser.badges[0].details = decryptData(decryptUser.badges[0].details);
+
     res.cookie("uuid", user.uuid, cookieConfiguration());
     res.cookie("jwt", token, cookieConfiguration());
-    res.status(200).json({ ...user._doc, token });
+    res.status(200).json({ ...decryptUser, token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -486,10 +531,10 @@ const createGuestMode = async (req, res) => {
     if (!users) throw new Error("User not Created");
 
     const userList = await UserListSchema.findOne({
-      userUuid: user.uuid
-    })
+      userUuid: user.uuid,
+    });
 
-    if(!userList){
+    if (!userList) {
       const createUserList = new UserListSchema({
         userUuid: user.uuid,
       });
@@ -533,12 +578,13 @@ const createGuestMode = async (req, res) => {
 
 const signUpGuestMode = async (req, res) => {
   try {
-    //console.log(req.body.uuid);
-    const guestUserMode = await User.findOne({ uuid: req.body.uuid });
-    if (!guestUserMode) throw new Error("Guest Mode not Exist!");
-
     const alreadyUser = await User.findOne({ email: req.body.email });
     if (alreadyUser) throw new Error("Email Already Exists");
+    const guestUserMode = await User.findOne({ uuid: req.body.uuid });
+    if (!guestUserMode) {
+      await signUpUser(req, res); //Do a regular signup if user not found
+      return;
+    }
 
     const checkGoogleEmail = await isGoogleEmail(req.body.email);
     if (checkGoogleEmail)
@@ -561,24 +607,24 @@ const signUpGuestMode = async (req, res) => {
     );
 
     const userList = await UserListSchema.findOne({
-      userUuid: user.uuid
-    })
+      userUuid: req.body.uuid,
+    });
 
-    if(!userList){
+    if (!userList) {
       const createUserList = new UserListSchema({
-        userUuid: user.uuid,
+        userUuid: req.body.uuid,
       });
       const newUserList = await createUserList.save();
       if (!newUserList) {
         await user.deleteOne({
-          uuid: uuid,
+          uuid: req.body.uuid,
         });
         throw new Error("User not created due to list");
       }
     }
 
     // Generate a JWT token
-    const token = createToken({ uuid: req.body.uuid });
+    // const token = createToken({ uuid: req.body.uuid });
 
     // Create Ledger
     await createLedger({
@@ -611,7 +657,10 @@ const signUpSocialGuestMode = async (req, res) => {
 
     //if user doesnot exist
     const user = await User.findOne({ uuid: payload.uuid });
-    if (!user) throw new Error("User doesn't Exist");
+    if (!user) {
+      await signUpUserBySocialLogin(req, res);
+      return;
+    }
 
     const uuid = payload.uuid;
     await User.updateOne(
@@ -624,36 +673,36 @@ const signUpSocialGuestMode = async (req, res) => {
         },
       }
     );
-
+    const updatedUser = await User.findOne({ uuid: payload.uuid });
     // Check Email Category
     const emailStatus = await eduEmailCheck(req, res, payload.email);
     let type = "";
     if (emailStatus.status === "OK") type = "Education";
 
     // Create a Badge at starting index
-    user.badges.unshift({
+    updatedUser.badges.unshift({
       accountId: payload.sub,
       accountName: payload.provider,
-      details: payload,
+      details: encryptData(payload),
       isVerified: true,
       type: type,
     });
 
     // Update user verification status to true
-    user.gmailVerified = payload.email_verified;
-    await user.save();
+    updatedUser.gmailVerified = payload.email_verified;
+    await updatedUser.save();
 
     const userList = await UserListSchema.findOne({
-      userUuid: user.uuid
-    })
+      userUuid: updatedUser.uuid,
+    });
 
-    if(!userList){
+    if (!userList) {
       const createUserList = new UserListSchema({
-        userUuid: user.uuid,
+        userUuid: updatedUser.uuid,
       });
       const newUserList = await createUserList.save();
       if (!newUserList) {
-        await user.deleteOne({
+        await updatedUser.deleteOne({
           uuid: uuid,
         });
         throw new Error("User not created due to list");
@@ -674,14 +723,14 @@ const signUpSocialGuestMode = async (req, res) => {
     });
     // Create Ledger
     await createLedger({
-      uuid: user.uuid,
+      uuid: updatedUser.uuid,
       txUserAction: "accountLogin",
       txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.uuid,
+      txData: updatedUser.uuid,
       // txDescription : "user logs in"
     });
     // Create Ledger
@@ -693,7 +742,7 @@ const signUpSocialGuestMode = async (req, res) => {
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.badges[0]._id,
+      txData: updatedUser.badges[0]._id,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
@@ -712,7 +761,7 @@ const signUpSocialGuestMode = async (req, res) => {
 
     // Increment the UserBalance
     await updateUserBalance({
-      uuid: user.uuid,
+      uuid: updatedUser.uuid,
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
@@ -720,13 +769,18 @@ const signUpSocialGuestMode = async (req, res) => {
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
 
-    if (user.badges[0].type !== "Education") {
-      user.requiredAction = true;
-      await user.save();
+    if (updatedUser.badges[0].type !== "Education") {
+      updatedUser.requiredAction = true;
+      await updatedUser.save();
     }
-    res.cookie("uuid", user.uuid, cookieConfiguration());
+
+    // Decrypt Saved Data
+    const decryptUser = updatedUser._doc;
+    decryptUser.badges[0].details = decryptData(decryptUser.badges[0].details);
+
+    res.cookie("uuid", updatedUser.uuid, cookieConfiguration());
     res.cookie("jwt", token, cookieConfiguration());
-    res.status(200).json({ ...user._doc, token });
+    res.status(200).json({ ...decryptUser, token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -739,11 +793,6 @@ const signUpGuestBySocialBadges = async (req, res) => {
   try {
     const payload = req.body;
 
-    // Check if email already exist
-    if (payload.email) {
-      const alreadyUser = await User.findOne({ email: payload.data.email });
-      if (alreadyUser) throw new Error("Email Already Exists");
-    }
     let id;
     let type;
     if (payload.type === "facebook") {
@@ -784,7 +833,10 @@ const signUpGuestBySocialBadges = async (req, res) => {
 
     //if user doesnot exist
     const user = await User.findOne({ uuid: payload.data.uuid });
-    if (!user) throw new Error("User doesn't Exist");
+    if (!user) {
+      await signUpUserBySocialBadges(req, res);
+      return;
+    }
 
     const uuid = payload.data.uuid;
     await User.updateOne(
@@ -801,8 +853,8 @@ const signUpGuestBySocialBadges = async (req, res) => {
     // Create a Badge at starting index
     user.badges.unshift({
       accountId: id,
-      accountName: type,
-      details: payload.data,
+      accountName: payload.type,
+      details: encryptData(payload.data),
       isVerified: true,
       type: "social",
       primary: true,
@@ -812,10 +864,10 @@ const signUpGuestBySocialBadges = async (req, res) => {
     await user.save();
 
     const userList = await UserListSchema.findOne({
-      userUuid: user.uuid
-    })
+      userUuid: user.uuid,
+    });
 
-    if(!userList){
+    if (!userList) {
       const createUserList = new UserListSchema({
         userUuid: user.uuid,
       });
@@ -887,9 +939,13 @@ const signUpGuestBySocialBadges = async (req, res) => {
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
 
+    // Decrypt Saved Data
+    const decryptUser = user._doc;
+    decryptUser.badges[0].details = decryptData(decryptUser.badges[0].details);
+
     res.cookie("uuid", user.uuid, cookieConfiguration());
     res.cookie("jwt", token, cookieConfiguration());
-    res.status(200).json({ ...user._doc, token });
+    res.status(200).json({ ...decryptUser, token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -925,10 +981,65 @@ const signInUserBySocialLogin = async (req, res) => {
       // txDescription : "user logs in"
     });
 
-    // res.status(200).json(user);
-    res.cookie("uuid", user.uuid, cookieConfiguration());
-    res.cookie("jwt", token, cookieConfiguration());
-    res.status(200).json({ ...user._doc, token });
+    if (user.isPasswordEncryption) {
+      res.cookie("uuid", user.uuid, cookieConfiguration());
+      res.cookie("jwt", token, cookieConfiguration());
+      res.status(200).json({ ...user._doc, token, isPasswordEncryption: true });
+    } else {
+      user.badges.forEach((badge) => {
+        if (badge.legacy || badge.accountName === "Email") {
+          return;
+        } else if (badge.type && badge.type === "cell-phone") {
+          badge.details = decryptData(badge.details);
+        } else if (
+          badge.type &&
+          ["work", "education", "personal", "social", "default"].includes(
+            badge.type
+          )
+        ) {
+          badge.details = decryptData(badge.details);
+        } else if (
+          badge.accountName &&
+          [
+            "facebook",
+            "linkedin",
+            "twitter",
+            "instagram",
+            "github",
+            "Email",
+            "google",
+          ].includes(badge.accountName)
+        ) {
+          badge.details = decryptData(badge.details);
+        } else if (badge.personal && badge.personal.work) {
+          badge.personal.work = badge.personal.work.map((encryptedData) => {
+            return decryptData(encryptedData);
+          });
+        } else if (badge.personal) {
+          // Decrypt each key in the personal object if it matches one of the personalKeys
+          const decryptedPersonal = {};
+          for (const key of personalKeys) {
+            if (badge.personal.hasOwnProperty(key)) {
+              decryptedPersonal[key] = decryptData(badge.personal[key]);
+            }
+          }
+
+          badge.personal = decryptedPersonal;
+        } else if (badge.web3) {
+          console.log("I am AT WEB3------------------------");
+          badge.web3 = decryptData(badge.web3);
+        } else if (
+          badge.type &&
+          ["desktop", "mobile", "farcaster"].includes(badge.type)
+        ) {
+          console.log("I am AT Passkey------------------------");
+          badge.data = decryptData(badge.data);
+        }
+      });
+      res.cookie("uuid", user.uuid, cookieConfiguration());
+      res.cookie("jwt", token, cookieConfiguration());
+      res.status(200).json({ ...user._doc, token });
+    }
     // res.status(201).send("Signed in Successfully");
     // if(req.query.GoogleAccount){
     //   signUpUserBySocialLogin(req, res)
@@ -943,35 +1054,27 @@ const signInUserBySocialLogin = async (req, res) => {
 const signInUserBySocialBadges = async (req, res) => {
   try {
     let id;
-    let email;
     const payload = req.body;
     if (payload.type === "facebook") {
       id = payload.data.id;
-      email = payload.data.email;
     }
 
     if (payload.type === "twitter") {
       id = payload.data.user.uid;
-      email = payload.data.email;
     }
 
     if (payload.type === "github") {
       id = payload.data.user.uid;
-      email = payload.data.email;
     }
 
     if (payload.type === "instagram") {
       id = payload.data.user_id;
-      email = "";
     }
     if (payload.type === "linkedin") {
       id = payload.data.sub;
-      email = payload.data.email;
     }
 
-    const user = await User.findOne({
-      $and: [{ email: email }, { "badges.0.accountId": id }],
-    });
+    const user = await User.findOne({ "badges.0.accountId": id });
     if (!user) throw new Error("User not Found");
 
     // Generate a JWT token
@@ -990,10 +1093,70 @@ const signInUserBySocialBadges = async (req, res) => {
       // txDescription : "user logs in"
     });
 
+    // // Decrypt Saved Data
+    // const decryptUser = user._doc;
+    // decryptUser.badges[0].details = decryptData(decryptUser.badges[0].details);
+
     // res.status(200).json(user);
-    res.cookie("uuid", user.uuid, cookieConfiguration());
-    res.cookie("jwt", token, cookieConfiguration());
-    res.status(200).json({ ...user._doc, token });
+    if (user.isPasswordEncryption) {
+      res.cookie("uuid", user.uuid, cookieConfiguration());
+      res.cookie("jwt", token, cookieConfiguration());
+      res.status(200).json({ ...user._doc, token, isPasswordEncryption: true });
+    } else {
+      user.badges.forEach((badge) => {
+        if (badge.legacy || badge.accountName === "Email") {
+          return;
+        } else if (badge.type && badge.type === "cell-phone") {
+          badge.details = decryptData(badge.details);
+        } else if (
+          badge.type &&
+          ["work", "education", "personal", "social", "default"].includes(
+            badge.type
+          )
+        ) {
+          badge.details = decryptData(badge.details);
+        } else if (
+          badge.accountName &&
+          [
+            "facebook",
+            "linkedin",
+            "twitter",
+            "instagram",
+            "github",
+            "Email",
+            "google",
+          ].includes(badge.accountName)
+        ) {
+          badge.details = decryptData(badge.details);
+        } else if (badge.personal && badge.personal.work) {
+          badge.personal.work = badge.personal.work.map((encryptedData) => {
+            return decryptData(encryptedData);
+          });
+        } else if (badge.personal) {
+          // Decrypt each key in the personal object if it matches one of the personalKeys
+          const decryptedPersonal = {};
+          for (const key of personalKeys) {
+            if (badge.personal.hasOwnProperty(key)) {
+              decryptedPersonal[key] = decryptData(badge.personal[key]);
+            }
+          }
+
+          badge.personal = decryptedPersonal;
+        } else if (badge.web3) {
+          console.log("I am AT WEB3------------------------");
+          badge.web3 = decryptData(badge.web3);
+        } else if (
+          badge.type &&
+          ["desktop", "mobile", "farcaster"].includes(badge.type)
+        ) {
+          console.log("I am AT Passkey------------------------");
+          badge.data = decryptData(badge.data);
+        }
+      });
+      res.cookie("uuid", user.uuid, cookieConfiguration());
+      res.cookie("jwt", token, cookieConfiguration());
+      res.status(200).json({ ...user._doc, token });
+    }
     // res.status(201).send("Signed in Successfully");
     // if(req.query.GoogleAccount){
     //   signUpUserBySocialLogin(req, res)
@@ -1040,15 +1203,287 @@ const updateUserSettings = async (req, res) => {
 
 const userInfo = async (req, res) => {
   try {
+    const password = req.query.infoc;
+
     const user = await User.findOne({
       uuid: req.params.userUuid,
     });
-    //console.log(user);
+    // Check if user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isPasswordEncryption) {
+      if (!password)
+        throw new Error(
+          "No Password Provided in request body, Request can't be proceeded."
+        );
+      user.badges.forEach((badge) => {
+        if (badge.legacy || badge.accountName === "Email") {
+          console.log("Email");
+          return;
+        } else if (badge.type && badge.type === "cell-phone") {
+          badge.details = userCustomizedDecryptData(badge.details, password);
+        } else if (
+          badge.type &&
+          ["work", "education", "personal", "social", "default"].includes(
+            badge.type
+          )
+        ) {
+          badge.details = userCustomizedDecryptData(badge.details, password);
+        } else if (
+          badge.accountName &&
+          [
+            "facebook",
+            "linkedin",
+            "twitter",
+            "instagram",
+            "github",
+            "Email",
+            "google",
+          ].includes(badge.accountName)
+        ) {
+          badge.details = userCustomizedDecryptData(badge.details, password);
+        } else if (badge.personal && badge.personal.work) {
+          badge.personal.work = badge.personal.work.map((item) => {
+            return userCustomizedDecryptData(item, password);
+          });
+        } else if (badge.personal) {
+          const decryptedPersonal = {};
+          for (const key of personalKeys) {
+            if (badge.personal.hasOwnProperty(key)) {
+              decryptedPersonal[key] = userCustomizedDecryptData(
+                badge.personal[key],
+                password
+              );
+            }
+          }
+          badge.personal = decryptedPersonal;
+        } else if (badge.web3) {
+          badge.web3 = userCustomizedDecryptData(badge.web3, password);
+        } else if (
+          badge.type &&
+          ["desktop", "mobile", "farcaster"].includes(badge.type)
+        ) {
+          badge.data = userCustomizedDecryptData(badge.data, password);
+        }
+      });
+    }
+
+    // Decrypt the 'personal' field or the 'work' array in each badge
+    user.badges.forEach((badge) => {
+      if (badge.legacy || badge.accountName === "Email") {
+        return;
+      } else if (badge.type && badge.type === "cell-phone") {
+        console.log("I am AT Cell-Phone------------------------");
+        badge.details = decryptData(badge.details);
+      } else if (
+        badge.type &&
+        ["work", "education", "personal", "social", "default"].includes(
+          badge.type
+        )
+      ) {
+        console.log("I am AT TYPE------------------------");
+        badge.details = decryptData(badge.details);
+      } else if (
+        badge.accountName &&
+        [
+          "facebook",
+          "linkedin",
+          "twitter",
+          "instagram",
+          "github",
+          "Email",
+          "google",
+        ].includes(badge.accountName)
+      ) {
+        console.log("I am AT Acc-Name------------------------");
+        badge.details = decryptData(badge.details);
+      } else if (badge.personal && badge.personal.work) {
+        console.log("I am AT Personal Work------------------------");
+        badge.personal.work = badge.personal.work.map((encryptedData) => {
+          return decryptData(encryptedData);
+        });
+      } else if (badge.personal) {
+        console.log("I am AT Personal------------------------");
+        // Decrypt each key in the personal object if it matches one of the personalKeys
+        const decryptedPersonal = {};
+        for (const key of personalKeys) {
+          if (badge.personal.hasOwnProperty(key)) {
+            decryptedPersonal[key] = decryptData(badge.personal[key]);
+          }
+        }
+
+        badge.personal = decryptedPersonal;
+      } else if (badge.web3) {
+        console.log("I am AT WEB3------------------------");
+        badge.web3 = decryptData(badge.web3);
+      } else if (
+        badge.type &&
+        ["desktop", "mobile", "farcaster"].includes(badge.type)
+      ) {
+        console.log("I am AT Passkey------------------------");
+        badge.data = decryptData(badge.data);
+      }
+    });
+
     res.status(200).json(user);
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
-      message: `An error occurred while userInfo Auth: ${error.message}`,
+      message: `An error occurred while processing userInfo: ${error.message}`,
+    });
+  }
+};
+
+const runtimeSignInPassword = async (req, res) => {
+  try {
+    const infoc = req.body.infoc;
+    const hash = crypto.createHash("sha256").update(infoc).digest("hex");
+
+    const password = hash;
+
+    const user = await User.findOne({
+      uuid: req.body.userUuid,
+    });
+    // Check if user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isPasswordEncryption) {
+      if (!password)
+        throw new Error(
+          "No Password Provided in request body, Request can't be proceeded."
+        );
+      user.badges.forEach((badge) => {
+        if (badge.legacy || badge.accountName === "Email") {
+          return;
+        } else if (badge.type && badge.type === "cell-phone") {
+          badge.details = userCustomizedDecryptData(badge.details, password);
+        } else if (
+          badge.type &&
+          ["work", "education", "personal", "social", "default"].includes(
+            badge.type
+          )
+        ) {
+          badge.details = userCustomizedDecryptData(badge.details, password);
+        } else if (
+          badge.accountName &&
+          [
+            "facebook",
+            "linkedin",
+            "twitter",
+            "instagram",
+            "github",
+            "Email",
+            "google",
+          ].includes(badge.accountName)
+        ) {
+          badge.details = userCustomizedDecryptData(badge.details, password);
+        } else if (badge.personal && badge.personal.work) {
+          badge.personal.work = badge.personal.work.map((item) => {
+            return userCustomizedDecryptData(item, password);
+          });
+        } else if (badge.personal) {
+          const decryptedPersonal = {};
+          for (const key of personalKeys) {
+            if (badge.personal.hasOwnProperty(key)) {
+              decryptedPersonal[key] = userCustomizedDecryptData(
+                badge.personal[key],
+                password
+              );
+            }
+          }
+          badge.personal = decryptedPersonal;
+        } else if (badge.web3) {
+          badge.web3 = userCustomizedDecryptData(badge.web3, password);
+        } else if (
+          badge.type &&
+          ["desktop", "mobile", "farcaster"].includes(badge.type)
+        ) {
+          badge.data = userCustomizedDecryptData(badge.data, password);
+        }
+      });
+    }
+
+    // Decrypt the 'personal' field or the 'work' array in each badge
+    user.badges.forEach((badge) => {
+      if (badge.legacy || badge.accountName === "Email") {
+        return;
+      } else if (badge.type && badge.type === "cell-phone") {
+        console.log("I am AT Cell-Phone------------------------");
+        badge.details = decryptData(badge.details);
+      } else if (
+        badge.type &&
+        ["work", "education", "personal", "social", "default"].includes(
+          badge.type
+        )
+      ) {
+        console.log("I am AT TYPE------------------------");
+        badge.details = decryptData(badge.details);
+      } else if (
+        badge.accountName &&
+        [
+          "facebook",
+          "linkedin",
+          "twitter",
+          "instagram",
+          "github",
+          "Email",
+          "google",
+        ].includes(badge.accountName)
+      ) {
+        console.log("I am AT Acc-Name------------------------");
+        badge.details = decryptData(badge.details);
+      } else if (badge.personal && badge.personal.work) {
+        console.log("I am AT Personal Work------------------------");
+        badge.personal.work = badge.personal.work.map((encryptedData) => {
+          return decryptData(encryptedData);
+        });
+      } else if (badge.personal) {
+        console.log("I am AT Personal------------------------");
+        // Decrypt each key in the personal object if it matches one of the personalKeys
+        const decryptedPersonal = {};
+        for (const key of personalKeys) {
+          if (badge.personal.hasOwnProperty(key)) {
+            decryptedPersonal[key] = decryptData(badge.personal[key]);
+          }
+        }
+
+        badge.personal = decryptedPersonal;
+      } else if (badge.web3) {
+        console.log("I am AT WEB3------------------------");
+        badge.web3 = decryptData(badge.web3);
+      } else if (
+        badge.type &&
+        ["desktop", "mobile", "farcaster"].includes(badge.type)
+      ) {
+        console.log("I am AT Passkey------------------------");
+        badge.data = decryptData(badge.data);
+      }
+    });
+
+    res.status(200).json({ user: user, hash: hash });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `Wrong Password: ${error.message}`,
+    });
+  }
+};
+
+const infoc = async (req, res) => {
+  try {
+    const infoc = req.body.infoc;
+    const hash = crypto.createHash("sha256").update(infoc).digest("hex");
+    res.status(200).json({
+      message: "Success",
+      data: hash,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while infoc: ${error.message}`,
     });
   }
 };
@@ -1123,6 +1558,7 @@ const sendVerifyEmailGuest = async (req, res) => {
 
     // Step 3 - Email the user a unique verification link
     const url = `${FRONTEND_URL}/VerifyCode/?${verificationTokenFull}`;
+    // return res.status(200).json({ url });
 
     const SES_CONFIG = {
       region: process.env.AWS_SES_REGION,
@@ -1182,7 +1618,7 @@ const sendVerifyEmailGuest = async (req, res) => {
 
 const sendVerifyEmail = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.userEmail });
+    const user = await User.findOne({ email: req.body.email });
 
     //console.log("user", user);
     !user && res.status(404).json("User not Found");
@@ -1246,7 +1682,7 @@ const sendVerifyEmail = async (req, res) => {
     let params = {
       Source: process.env.AWS_SES_SENDER,
       Destination: {
-        ToAddresses: [req.body.userEmail],
+        ToAddresses: [req.body.email],
       },
       ReplyToAddresses: [],
       Message: {
@@ -1277,7 +1713,7 @@ const sendVerifyEmail = async (req, res) => {
     }
 
     return res.status(200).send({
-      message: `Sent a verification email to ${req.body.userEmail}`,
+      message: `Sent a verification email to ${req.body.email}`,
     });
   } catch (error) {
     console.error(error.message);
@@ -1405,7 +1841,11 @@ const verify = async (req, res) => {
     }
 
     // Create a Badge
-    user.badges.unshift({ accountName: "Email", isVerified: true });
+    user.badges.unshift({
+      accountId: user.email,
+      accountName: "Email",
+      isVerified: true,
+    });
     // Step 3 - Update user verification status to true
     user.requiredAction = true;
     user.gmailVerified = true;
@@ -1725,23 +2165,29 @@ const getFacebookUserInfo = async (req, res) => {
         timeout: 10000, // Set timeout to 10 seconds (adjust as needed)
       }
     );
-    // //console.log("Response Token Via Facebook: ", responseAccessToken);
-    if (!responseAccessToken.data.access_token) throw new Error("Token not found!");
+    // console.log("Response Token Via Facebook: ", responseAccessToken);
+    if (!responseAccessToken.data.access_token)
+      throw new Error("Token not found!");
     // if token found
     // // Second Axios request to get user info using the access token
-    const response = await axios.get(`https://graph.facebook.com/v19.0/me?access_token=${responseAccessToken.data.access_token}&fields=${"id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender,age_range,friends,link,birthday"}`, {
-      // headers: {
-      //   Authorization: `Bearer ${responseAccessToken.data.access_token}`,
-      //   "Content-Type": "application/json",
-      // },
-      timeout: 10000, // Set timeout to 10 seconds (adjust as needed)
-    });
-    if(!response.data) throw new Error("No Data Found");
-    //console.log("LinkedIn API Response:", response.data);
-    res.status(200).send(response.data)
+    const response = await axios.get(
+      `https://graph.facebook.com/v19.0/me?access_token=${
+        responseAccessToken.data.access_token
+      }&fields=${"id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender,age_range,friends,link,birthday"}`,
+      {
+        // headers: {
+        //   Authorization: `Bearer ${responseAccessToken.data.access_token}`,
+        //   "Content-Type": "application/json",
+        // },
+        timeout: 10000, // Set timeout to 10 seconds (adjust as needed)
+      }
+    );
+    if (!response.data) throw new Error("No Data Found");
+    console.log("LinkedIn API Response:", response.data);
+    res.status(200).send(response.data);
   } catch (error) {
-    console.error('Error:', error);
-    return error.message
+    console.error("Error:", error);
+    return error.message;
   }
 };
 
@@ -1755,6 +2201,8 @@ module.exports = {
   signUpSocialGuestMode,
   signInUserBySocialLogin,
   userInfo,
+  runtimeSignInPassword,
+  infoc,
   setUserWallet,
   signedUuid,
   sendVerifyEmail,
