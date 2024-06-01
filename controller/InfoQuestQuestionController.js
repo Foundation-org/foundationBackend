@@ -8,11 +8,12 @@ const crypto = require("crypto");
 const { getTreasury, updateTreasury } = require("../utils/treasuryService");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const BookmarkQuests = require("../models/BookmarkQuests");
-const { getPercentage } = require("../utils/getPercentage");
+const { getPercentage, getPercentageQuestForeignKey} = require("../utils/getPercentage");
 const shortLink = require("shortlink");
 const { execSync } = require("child_process");
 const UserQuestSetting = require("../models/UserQuestSetting");
 const axios = require("axios");
+const mongoose = require("mongoose");
 
 const createInfoQuestQuest = async (req, res) => {
   try {
@@ -1603,6 +1604,42 @@ const getQuestById = async (req, res) => {
   }
 };
 
+async function getQuestByIdQuestForeignKey (questForeignKey) {
+  try {
+    const infoQuest = await InfoQuestQuestions.find({
+      _id: new mongoose.Types.ObjectId(questForeignKey.toString()),
+    }).populate("getUserBadge", "badges");
+    if (!infoQuest) throw new Error("No Quest Exist!");
+
+    const result = await getQuestionsWithStatusQuestForeignKey(infoQuest, questForeignKey);
+    // getQuestionsWithUserSettings
+    const result1 = await getQuestionsWithUserSettingsQuestForeignKey(result, questForeignKey);
+
+    let quest;
+
+    // if (page === "SharedLink") {
+      quest = await UserQuestSetting.findOne({ questForeignKey: questForeignKey });
+    // }
+    // console.log("questSharedLink", quest);
+
+    const resultArray = result1.map((item) => getPercentageQuestForeignKey(item, quest));
+
+    const desiredArray = resultArray.map((item) => ({
+      ...item._doc,
+      selectedPercentage: item.selectedPercentage,
+      contendedPercentage: item.contendedPercentage,
+      userQuestSetting: item.userQuestSetting,
+    }));
+
+    return desiredArray[0];
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: `An error occurred while getQuestById InfoQuest: ${error.message}`,
+    });
+  }
+};
+
 const getQuestByUniqueShareLink = async (req, res) => {
   try {
     // req.cookie
@@ -2124,6 +2161,83 @@ async function getQuestionsWithUserSettings(allQuestions, uuid) {
   }
 }
 
+async function getQuestionsWithStatusQuestForeignKey(allQuestions, questForeignKey) {
+  try {
+    if (questForeignKey === "" || questForeignKey === undefined) {
+      return allQuestions;
+    } else {
+      const startedQuestions = await StartQuests.find({
+        questForeignKey: questForeignKey,
+      });
+
+      let Result = [];
+      await allQuestions.map(async function (rcrd) {
+        await startedQuestions.map(function (rec) {
+          if (rec.questForeignKey === rcrd?._id?.toString()) {
+            if (
+              rcrd.usersChangeTheirAns?.trim() !== "" ||
+              rcrd.whichTypeQuestion === "ranked choise"
+            ) {
+              rcrd.startStatus = "change answer";
+              rcrd.startQuestData = rec;
+            } else {
+              rcrd.startStatus = "completed";
+              rcrd.startQuestData = rec;
+            }
+          }
+        });
+
+        Result.push(rcrd);
+      });
+
+      return Result;
+    }
+  } catch (err) {
+    throw err;
+  }
+}
+
+async function getQuestionsWithUserSettingsQuestForeignKey(allQuestions, questForeignKey) {
+  try {
+    if (questForeignKey === "" || questForeignKey === undefined) {
+      return allQuestions;
+    } else {
+      const userQuestSettings = await UserQuestSetting.find({
+        questForeignKey: questForeignKey,
+      });
+      // console.log(
+      //   "🚀 ~ getQuestionsWithUserSettings ~ userQuestSettings:",
+      //   userQuestSettings
+      // );
+
+      let Result = [];
+      await allQuestions.map(async function (rcrd) {
+        await userQuestSettings.map(function (rec) {
+          if (rec.questForeignKey === rcrd?._id?.toString()) {
+            rcrd.userQuestSetting = rec;
+            // if (
+            //   rcrd.usersChangeTheirAns?.trim() !== "" ||
+            //   rcrd.whichTypeQuestion === "ranked choise"
+            // ) {
+            //   rcrd.startStatus = "change answer";
+            //   rcrd.startQuestData = rec;
+            // } else {
+            //   rcrd.startStatus = "completed";
+            //   rcrd.startQuestData = rec;
+            // }
+          }
+        });
+
+        Result.push(rcrd);
+      });
+
+      return Result;
+    }
+  } catch (err) {
+    throw err;
+  }
+}
+
 // Controller function to check if ID exists in the database collection
 const checkMediaDuplicateUrl = async (req, res) => {
   try {
@@ -2233,4 +2347,7 @@ module.exports = {
   getFlickerUrl,
   getQuestsAll,
   suppressPost,
+  getQuestByIdQuestForeignKey,
+  getQuestionsWithStatusQuestForeignKey,
+  getQuestionsWithUserSettingsQuestForeignKey
 };
