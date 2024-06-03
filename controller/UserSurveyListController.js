@@ -378,7 +378,7 @@ const findCategoryByLink = async (req, res) => {
                 // Find the postData document
                 const bookmark = await BookmarkQuestsSchema.findOne({
                     questForeignKey: post.questForeginKey.toString(),
-                    createdBy: uuid
+                    uuid: uuid
                 })
                 const user = await User.findOne({ uuid: userList.userUuid });
 
@@ -868,7 +868,7 @@ const viewList = async (req, res) => {
             // Find the postData document
             const bookmark = await BookmarkQuestsSchema.findOne({
                 questForeignKey: post.questForeginKey.toString(),
-                createdBy: userUuid
+                uuid: userUuid
             })
             const user = await User.findOne({ uuid: userList.userUuid });
 
@@ -1294,7 +1294,7 @@ const viewListAll = async (req, res) => {
             // Find the postData document
             const bookmark = await BookmarkQuestsSchema.findOne({
                 questForeignKey: post.questForeginKey.toString(),
-                createdBy: userUuid
+                uuid: userUuid
             })
             const user = await User.findOne({ uuid: userList.userUuid });
 
