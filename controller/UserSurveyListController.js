@@ -11,6 +11,7 @@ const { updateTreasury } = require("../utils/treasuryService");
 const { updateUserBalance } = require("../utils/userServices")
 const crypto = require("crypto");
 const mongoose = require("mongoose");
+const { QUEST_COMPLETED_AMOUNT } = require("../constants/index");
 
 // User's List APIs
 
@@ -1988,6 +1989,10 @@ const submitResponse = async (req, res) => {
         postData.updatedAt = new Date().toISOString();
 
         await postData.save();
+
+        const user = await User.findOne({uuid: responsingUserUuid});
+        user.balance = user.balance + QUEST_COMPLETED_AMOUNT
+        await user.save();
         res.status(200).json({
             message: `Post Response Submitted w.r.t List ${postId}`,
             userList: postData,
