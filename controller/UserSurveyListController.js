@@ -2447,9 +2447,11 @@ const submitResponse = async (req, res) => {
                 }
             }
 
+            const foundPost = updatedPosts.find(post => post._id === postId);
+
             const newCategoryDoc = {
                 category: categoryDoc.category,
-                post: updatedPosts,
+                post: foundPost,
                 link: categoryDoc.link,
                 isLinkUserCustomized: categoryDoc.isLinkUserCustomized,
                 clicks: categoryDoc.clicks,
