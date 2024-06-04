@@ -2497,5 +2497,4 @@ module.exports = {
     updatePostOrder,
     addPostInCategoryInUserList,
     submitResponse,
-    changeAnswer
 };
