@@ -1002,12 +1002,19 @@ const signInUserBySocialLogin = async (req, res) => {
             throw new Error("Neither Badge Details nor Data is found");
           }
         }
-        if (badge.personal && badge.personal.work) {
-          badge.personal.work = badge.personal.work.map(decryptData);
-        } else if (badge.personal) {
+        // if (badge.personal && badge.personal.work) {
+        //   badge.personal.work = badge.personal.work.map(decryptData);
+        // }
+        else if (badge.personal) {
           badge.personal = Object.fromEntries(
             Object.entries(badge.personal).map(([key, value]) =>
-              [key, decryptData(value)]
+              {
+                if (["firstName", "lastName", "security-question"].includes(key)) {
+                  return [key, decryptData(value)];
+                } else {
+                  return [key, value]; // If the key is not in the list, return the original value
+                }
+              }
             )
           );
         }
@@ -1099,12 +1106,19 @@ const signInUserBySocialBadges = async (req, res) => {
             throw new Error("Neither Badge Details nor Data is found");
           }
         }
-        if (badge.personal && badge.personal.work) {
-          badge.personal.work = badge.personal.work.map(decryptData);
-        } else if (badge.personal) {
+        // if (badge.personal && badge.personal.work) {
+        //   badge.personal.work = badge.personal.work.map(decryptData);
+        // }
+        else if (badge.personal) {
           badge.personal = Object.fromEntries(
             Object.entries(badge.personal).map(([key, value]) =>
-              [key, decryptData(value)]
+              {
+                if (["firstName", "lastName", "security-question"].includes(key)) {
+                  return [key, decryptData(value)];
+                } else {
+                  return [key, value]; // If the key is not in the list, return the original value
+                }
+              }
             )
           );
         }
@@ -1398,12 +1412,19 @@ const userInfo = async (req, res) => {
             throw new Error("Neither Badge Details nor Data is found");
           }
         }
-        if (badge.personal && badge.personal.work) {
-          badge.personal.work = badge.personal.work.map((item) => userCustomizedDecryptData(item, password));
-        } else if (badge.personal) {
+        // if (badge.personal && badge.personal.work) {
+        //   badge.personal.work = badge.personal.work.map((item) => userCustomizedDecryptData(item, password));
+        // }
+        else if (badge.personal) {
           badge.personal = Object.fromEntries(
             Object.entries(badge.personal).map(([key, value]) =>
-              [key, userCustomizedDecryptData(value, password)]
+            {
+              if (["firstName", "lastName", "security-question"].includes(key)) {
+                return [key, userCustomizedDecryptData(value, password)];
+              } else {
+                return [key, value]; // If the key is not in the list, return the original value
+              }
+            }
             )
           );
         }
@@ -1430,12 +1451,19 @@ const userInfo = async (req, res) => {
           throw new Error("Neither Badge Details nor Data is found");
         }
       }
-      if (badge.personal && badge.personal.work) {
-        badge.personal.work = badge.personal.work.map(decryptData);
-      } else if (badge.personal) {
+      // if (badge.personal && badge.personal.work) {
+      //   badge.personal.work = badge.personal.work.map(decryptData);
+      // }
+      else if (badge.personal) {
         badge.personal = Object.fromEntries(
           Object.entries(badge.personal).map(([key, value]) =>
-            [key, decryptData(value)]
+            {
+              if (["firstName", "lastName", "security-question"].includes(key)) {
+                return [key, decryptData(value)];
+              } else {
+                return [key, value]; // If the key is not in the list, return the original value
+              }
+            }
           )
         );
       }
@@ -1560,12 +1588,19 @@ const runtimeSignInPassword = async (req, res) => {
             throw new Error("Neither Badge Details nor Data is found");
           }
         }
-        if (badge.personal && badge.personal.work) {
-          badge.personal.work = badge.personal.work.map((item) => userCustomizedDecryptData(item, password));
-        } else if (badge.personal) {
+        // if (badge.personal && badge.personal.work) {
+        //   badge.personal.work = badge.personal.work.map((item) => userCustomizedDecryptData(item, password));
+        // }
+        else if (badge.personal) {
           badge.personal = Object.fromEntries(
             Object.entries(badge.personal).map(([key, value]) =>
-              [key, userCustomizedDecryptData(value, password)]
+              {
+                if (["firstName", "lastName", "security-question"].includes(key)) {
+                  return [key, userCustomizedDecryptData(value, password)];
+                } else {
+                  return [key, value]; // If the key is not in the list, return the original value
+                }
+              }
             )
           );
         }
@@ -1585,12 +1620,19 @@ const runtimeSignInPassword = async (req, res) => {
       if (typesToDecrypt.includes(badge.type) || accountsToDecrypt.includes(badge.accountName)) {
         badge.details = decryptData(badge.details);
       }
-      if (badge.personal && badge.personal.work) {
-        badge.personal.work = badge.personal.work.map(decryptData);
-      } else if (badge.personal) {
+      // if (badge.personal && badge.personal.work) {
+      //   badge.personal.work = badge.personal.work.map(decryptData);
+      // } 
+      else if (badge.personal) {
         badge.personal = Object.fromEntries(
           Object.entries(badge.personal).map(([key, value]) =>
-            [key, decryptData(value)]
+            {
+              if (["firstName", "lastName", "security-question"].includes(key)) {
+                return [key, decryptData(value)];
+              } else {
+                return [key, value]; // If the key is not in the list, return the original value
+              }
+            }
           )
         );
       }
