@@ -1469,6 +1469,29 @@ const userInfo = async (req, res) => {
     }
     const suppressQuestsCount = uniqueHiddenMessages.size;
 
+    // Total shared lists count for a specific user
+    const totalSharedListsCount = await UserListSchema.countDocuments({
+      "userUuid": userUuid,
+      "list.link": { $ne: null }
+    });
+    // Total shared lists clicks count for a specific user
+    const totalSharedListsClicksCount = await UserListSchema.aggregate([
+      { $match: { "userUuid": userUuid } },
+      { $unwind: "$list" },
+      { $match: { "list.link": { $ne: null } } },
+      { $group: { _id: null, totalClicks: { $sum: "$list.clicks" } } }
+    ]);
+    // Total shared lists participents count for a specific user
+    const totalSharedListsParticipentsCount = await UserListSchema.aggregate([
+      { $match: { "userUuid": userUuid } },
+      { $unwind: "$list" },
+      { $match: { "list.link": { $ne: null } } },
+      { $group: { _id: null, totalParticipents: { $sum: "$list.participents" } } }
+    ]);
+    // Extracting counts from aggregation results
+    const clicksCount = totalSharedListsClicksCount.length > 0 ? totalSharedListsClicksCount[0].totalClicks : 0;
+    const participentsCount = totalSharedListsParticipentsCount.length > 0 ? totalSharedListsParticipentsCount[0].totalParticipents : 0;
+
     const resUser = {
       ...user._doc,
       sharedQuestsStatistics: {
@@ -1484,6 +1507,11 @@ const userInfo = async (req, res) => {
         myHiddenQuestsCount: await UserQuestSetting.countDocuments({ hidden: true, uuid: userUuid }),
         myCreatedQuestsCount: await InfoQuestQuestions.countDocuments({ uuid: userUuid }),
         myQuestsEngagementCount: await StartQuests.countDocuments({ uuid: userUuid })
+      },
+      myListStatistics: {
+        totalSharedListsCount: totalSharedListsCount,
+        totalSharedListsClicksCount: clicksCount,
+        totalSharedListsParticipentsCount: participentsCount
       }
     };
 
