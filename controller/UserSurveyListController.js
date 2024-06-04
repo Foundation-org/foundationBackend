@@ -2447,7 +2447,7 @@ const submitResponse = async (req, res) => {
                 }
             }
 
-            const foundPost = updatedPosts.find(post => post._id === mongoose.Types.ObjectId(postId.toString()));
+            const foundPost = updatedPosts.find(post => post._id === new mongoose.Types.ObjectId(postId.toString()));
 
             const newCategoryDoc = {
                 category: categoryDoc.category,
