@@ -1287,7 +1287,7 @@ const updateUserSettings = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (req.body.email && typeof(req.body.emailNotifications) === 'boolean') throw new Error("Please provide both email and emailNotifications for email")
+    if (req.body.email && !typeof(req.body.emailNotifications) === 'boolean' || !req.body.email && typeof(req.body.emailNotifications) === 'boolean') throw new Error("Please provide both email and emailNotifications for email")
 
     if (req.body.email && typeof(req.body.emailNotifications) === 'boolean') {
       const emailExists = await Email.findOne({ email: req.body.email, userUuid: req.body.uuid });
