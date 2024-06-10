@@ -1282,27 +1282,44 @@ const updateUserSettings = async (req, res) => {
   try {
     // Find the user by uuid
     let user = await User.findOne({ uuid: req.body.uuid });
-
     // Check if the user exists
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update user settings
-    user.userSettings.darkMode = req.body.darkMode;
-    user.userSettings.defaultSort = req.body.defaultSort;
-    user.notificationSettings.systemNotifications =
-      req.body.systemNotifications;
-    user.notificationSettings.emailNotifications = req.body.emailNotifications;
-    await user.save();
+    if (req.body.email && typeof(req.body.emailNotifications) === 'boolean') throw new Error("Please provide both email and emailNotifications for email")
 
-    // Respond with updated user settings
-    res.status(200).json({
-      message: {
-        userSettings: user.userSettings,
-        notificationSettings: user.notificationSettings,
-      },
-    });
+    if (req.body.email && typeof(req.body.emailNotifications) === 'boolean') {
+      const emailExists = await Email.findOne({ email: req.body.email, userUuid: req.body.uuid });
+      if (!emailExists) throw new Error("Someting went wrong! Email not found, This must not be happening!");
+      user.notificationSettings.emailNotifications = req.body.emailNotifications;
+      await user.save();
+      // Respond with updated user settings
+      res.status(200).json({
+        message: {
+          userSettings: user.userSettings,
+          notificationSettings: user.notificationSettings,
+        },
+      });
+    } else if (
+      typeof(req.body.darkMode) === 'boolean' ||
+      typeof(req.body.defaultSort) === 'boolean' ||
+      typeof(req.body.systemNotifications) === 'boolean'
+    ) {
+      // Update user settings
+      user.userSettings.darkMode = req.body.darkMode;
+      user.userSettings.defaultSort = req.body.defaultSort;
+      user.notificationSettings.systemNotifications = req.body.systemNotifications;
+      await user.save();
+
+      // Respond with updated user settings
+      res.status(200).json({
+        message: {
+          userSettings: user.userSettings,
+          notificationSettings: user.notificationSettings,
+        },
+      });
+    }
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
