@@ -1291,7 +1291,11 @@ const updateUserSettings = async (req, res) => {
 
     if (req.body.email && typeof(req.body.emailNotifications) === 'boolean') {
       const emailExists = await Email.findOne({ email: req.body.email, userUuid: req.body.uuid });
-      if (!emailExists) throw new Error("Someting went wrong! Email not found, This must not be happening!");
+      if (!emailExists) {
+        res.status(403).json({
+          message: `No Email Found Against the User.`
+        });
+      }
       user.notificationSettings.emailNotifications = req.body.emailNotifications;
       await user.save();
       // Respond with updated user settings
