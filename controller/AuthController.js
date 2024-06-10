@@ -1287,28 +1287,29 @@ const updateUserSettings = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (req.body.email && !typeof(req.body.emailNotifications) === 'boolean' || !req.body.email && typeof(req.body.emailNotifications) === 'boolean') throw new Error("Please provide both email and emailNotifications for email")
+    if (req.body.email && !typeof (req.body.emailNotifications) === 'boolean' || !req.body.email && typeof (req.body.emailNotifications) === 'boolean') throw new Error("Please provide both email and emailNotifications for email")
 
-    if (req.body.email && typeof(req.body.emailNotifications) === 'boolean') {
+    if (req.body.email && typeof (req.body.emailNotifications) === 'boolean') {
       const emailExists = await Email.findOne({ email: req.body.email, userUuid: req.body.uuid });
       if (!emailExists) {
         res.status(403).json({
           message: `No Email Found Against the User.`
         });
+      } else {
+        user.notificationSettings.emailNotifications = req.body.emailNotifications;
+        await user.save();
+        // Respond with updated user settings
+        res.status(200).json({
+          message: {
+            userSettings: user.userSettings,
+            notificationSettings: user.notificationSettings,
+          },
+        });
       }
-      user.notificationSettings.emailNotifications = req.body.emailNotifications;
-      await user.save();
-      // Respond with updated user settings
-      res.status(200).json({
-        message: {
-          userSettings: user.userSettings,
-          notificationSettings: user.notificationSettings,
-        },
-      });
     } else if (
-      typeof(req.body.darkMode) === 'boolean' ||
-      typeof(req.body.defaultSort) === 'boolean' ||
-      typeof(req.body.systemNotifications) === 'boolean'
+      typeof (req.body.darkMode) === 'boolean' ||
+      typeof (req.body.defaultSort) === 'boolean' ||
+      typeof (req.body.systemNotifications) === 'boolean'
     ) {
       // Update user settings
       user.userSettings.darkMode = req.body.darkMode;
