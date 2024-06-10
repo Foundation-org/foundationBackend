@@ -22,7 +22,8 @@ const {
   getTreasury,
   updateTreasury,
 } = require("../utils/treasuryService");
-const { ACCOUNT_BADGE_ADDED_AMOUNT,
+const {
+  ACCOUNT_BADGE_ADDED_AMOUNT,
   QUEST_COMPLETED_AMOUNT,
   QUEST_OWNER_ACCOUNT,
   QUEST_COMPLETED_CHANGE_AMOUNT,
@@ -31,7 +32,8 @@ const { ACCOUNT_BADGE_ADDED_AMOUNT,
   QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
   QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
   USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
-  MASTER_ARRAY_TOPICS } = require("../constants");
+  MASTER_ARRAY_TOPICS,
+} = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
 const { getRandomDigits } = require("../utils/getRandomDigits");
@@ -54,7 +56,7 @@ const personalKeys = [
 ];
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const StartQuests = require("../models/StartQuests");
-const Email = require("../models/Email")
+const Email = require("../models/Email");
 const guestUserEmailRegex = /^user-\d+@guest\.com$/;
 
 // Encryption/Decryption Security Purposes.
@@ -64,6 +66,7 @@ const {
   userCustomizedEncryptData,
   userCustomizedDecryptData,
 } = require("../utils/security");
+const Treasury = require("../models/Treasury");
 
 const changePassword = async (req, res) => {
   try {
@@ -131,11 +134,16 @@ const signUpUser = async (req, res) => {
     const users = await user.save();
     if (!users) throw new Error("User not Created");
 
-    if (users.email !== null && users.email !== undefined && users.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (
+      users.email !== null &&
+      users.email !== undefined &&
+      users.email !== "" &&
+      !guestUserEmailRegex.test(user.email)
+    ) {
       const userEmailModel = new Email({
         userUuid: users.uuid,
-        email: users.email
-      })
+        email: users.email,
+      });
       const userEmail = await userEmailModel.save();
       if (!userEmail) {
         await user.deleteOne({
@@ -236,11 +244,16 @@ const signUpUserBySocialLogin = async (req, res) => {
     user.gmailVerified = payload.email_verified;
     await user.save();
 
-    if (user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (
+      user.email !== null &&
+      user.email !== undefined &&
+      user.email !== "" &&
+      !guestUserEmailRegex.test(user.email)
+    ) {
       const userEmailModel = new Email({
         userUuid: user.uuid,
-        email: user.email
-      })
+        email: user.email,
+      });
       const userEmail = await userEmailModel.save();
       if (!userEmail) {
         await user.deleteOne({
@@ -404,11 +417,16 @@ const signUpUserBySocialBadges = async (req, res) => {
     // Update user verification status to true
     await user.save();
 
-    if (user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (
+      user.email !== null &&
+      user.email !== undefined &&
+      user.email !== "" &&
+      !guestUserEmailRegex.test(user.email)
+    ) {
       const userEmailModel = new Email({
         userUuid: user.uuid,
-        email: user.email
-      })
+        email: user.email,
+      });
       const userEmail = await userEmailModel.save();
       if (!userEmail) {
         await user.deleteOne({
@@ -662,11 +680,16 @@ const signUpGuestMode = async (req, res) => {
       }
     );
 
-    if (user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (
+      user.email !== null &&
+      user.email !== undefined &&
+      user.email !== "" &&
+      !guestUserEmailRegex.test(user.email)
+    ) {
       const userEmailModel = new Email({
         userUuid: user.uuid,
-        email: user.email
-      })
+        email: user.email,
+      });
       const userEmail = await userEmailModel.save();
       if (!userEmail) {
         await user.deleteOne({
@@ -762,11 +785,16 @@ const signUpSocialGuestMode = async (req, res) => {
     updatedUser.gmailVerified = payload.email_verified;
     await updatedUser.save();
 
-    if (updatedUser.email !== null && updatedUser.email !== undefined && updatedUser.email !== "" && !guestUserEmailRegex.test(updatedUser.email)) {
+    if (
+      updatedUser.email !== null &&
+      updatedUser.email !== undefined &&
+      updatedUser.email !== "" &&
+      !guestUserEmailRegex.test(updatedUser.email)
+    ) {
       const userEmailModel = new Email({
         userUuid: updatedUser.uuid,
-        email: updatedUser.email
-      })
+        email: updatedUser.email,
+      });
       const userEmail = await userEmailModel.save();
       if (!userEmail) {
         await user.deleteOne({
@@ -947,11 +975,16 @@ const signUpGuestBySocialBadges = async (req, res) => {
     // Update user verification status to true
     await user.save();
 
-    if (user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (
+      user.email !== null &&
+      user.email !== undefined &&
+      user.email !== "" &&
+      !guestUserEmailRegex.test(user.email)
+    ) {
       const userEmailModel = new Email({
         userUuid: user.uuid,
-        email: user.email
-      })
+        email: user.email,
+      });
       const userEmail = await userEmailModel.save();
       if (!userEmail) {
         await user.deleteOne({
@@ -1287,16 +1320,26 @@ const updateUserSettings = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (req.body.email && !typeof (req.body.emailNotifications) === 'boolean' || !req.body.email && typeof (req.body.emailNotifications) === 'boolean') throw new Error("Please provide both email and emailNotifications for email")
+    if (
+      (req.body.email && !typeof req.body.emailNotifications === "boolean") ||
+      (!req.body.email && typeof req.body.emailNotifications === "boolean")
+    )
+      throw new Error(
+        "Please provide both email and emailNotifications for email"
+      );
 
-    if (req.body.email && typeof (req.body.emailNotifications) === 'boolean') {
-      const emailExists = await Email.findOne({ email: req.body.email, userUuid: req.body.uuid });
+    if (req.body.email && typeof req.body.emailNotifications === "boolean") {
+      const emailExists = await Email.findOne({
+        email: req.body.email,
+        userUuid: req.body.uuid,
+      });
       if (!emailExists) {
         res.status(403).json({
-          message: `No Email Found Against the User.`
+          message: `No Email Found Against the User.`,
         });
       } else {
-        user.notificationSettings.emailNotifications = req.body.emailNotifications;
+        user.notificationSettings.emailNotifications =
+          req.body.emailNotifications;
         await user.save();
         // Respond with updated user settings
         res.status(200).json({
@@ -1307,14 +1350,15 @@ const updateUserSettings = async (req, res) => {
         });
       }
     } else if (
-      typeof (req.body.darkMode) === 'boolean' ||
-      typeof (req.body.defaultSort) === 'boolean' ||
-      typeof (req.body.systemNotifications) === 'boolean'
+      typeof req.body.darkMode === "boolean" ||
+      typeof req.body.defaultSort === "boolean" ||
+      typeof req.body.systemNotifications === "boolean"
     ) {
       // Update user settings
       user.userSettings.darkMode = req.body.darkMode;
       user.userSettings.defaultSort = req.body.defaultSort;
-      user.notificationSettings.systemNotifications = req.body.systemNotifications;
+      user.notificationSettings.systemNotifications =
+        req.body.systemNotifications;
       await user.save();
 
       // Respond with updated user settings
@@ -2007,8 +2051,9 @@ const sendVerifyEmailGuest = async (req, res) => {
     );
 
     // Step 3 - Email the user a unique verification link
-    const url = `${FRONTEND_URL.split(",")[0]
-      }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${
+      FRONTEND_URL.split(",")[0]
+    }/VerifyCode/?${verificationTokenFull}`;
     console.log("url", url);
     // return res.status(200).json({ url });
 
@@ -2089,8 +2134,9 @@ const sendVerifyEmail = async (req, res) => {
     //console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
-    const url = `${FRONTEND_URL.split(",")[0]
-      }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${
+      FRONTEND_URL.split(",")[0]
+    }/VerifyCode/?${verificationTokenFull}`;
     console.log("url", url);
     // return res.status(200).json({ url });
     // //console.log("url", url);
@@ -2625,7 +2671,8 @@ const getFacebookUserInfo = async (req, res) => {
     // if token found
     // // Second Axios request to get user info using the access token
     const response = await axios.get(
-      `https://graph.facebook.com/v19.0/me?access_token=${responseAccessToken.data.access_token
+      `https://graph.facebook.com/v19.0/me?access_token=${
+        responseAccessToken.data.access_token
       }&fields=${"id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender,age_range,friends,link,birthday"}`,
       {
         // headers: {
@@ -2644,9 +2691,8 @@ const getFacebookUserInfo = async (req, res) => {
   }
 };
 
-const getVariables = async () => {
+const getVariables = async (req, res) => {
   try {
-
     const getTreasury = await Treasury.findOne();
 
     const variables = {
@@ -2661,18 +2707,13 @@ const getVariables = async () => {
       USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
       topicsArray: MASTER_ARRAY_TOPICS,
       Treasury_balance: getTreasury?.amount?.toString(),
-
-    }
-    res.status(200).json(variables)
+    };
+    res.status(200).json(variables);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error fetching variables" });
   }
-
-  catch (error) {
-    res.status(500).json({ message: 'Error fetching variables' })
-  }
-}
-
-
-
+};
 
 module.exports = {
   changePassword,
