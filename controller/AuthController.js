@@ -22,7 +22,16 @@ const {
   getTreasury,
   updateTreasury,
 } = require("../utils/treasuryService");
-const { ACCOUNT_BADGE_ADDED_AMOUNT } = require("../constants");
+const { ACCOUNT_BADGE_ADDED_AMOUNT,
+  QUEST_COMPLETED_AMOUNT,
+  QUEST_OWNER_ACCOUNT,
+  QUEST_COMPLETED_CHANGE_AMOUNT,
+  QUEST_CREATED_AMOUNT,
+  QUEST_OPTION_ADDED_AMOUNT,
+  QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
+  QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
+  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+  MASTER_ARRAY_TOPICS } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
 const { getRandomDigits } = require("../utils/getRandomDigits");
@@ -122,13 +131,13 @@ const signUpUser = async (req, res) => {
     const users = await user.save();
     if (!users) throw new Error("User not Created");
 
-    if(users.email !== null && users.email !== undefined && users.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (users.email !== null && users.email !== undefined && users.email !== "" && !guestUserEmailRegex.test(user.email)) {
       const userEmailModel = new Email({
         userUuid: users.uuid,
         email: users.email
       })
       const userEmail = await userEmailModel.save();
-      if(!userEmail) {
+      if (!userEmail) {
         await user.deleteOne({
           uuid: users.uuid,
         });
@@ -227,13 +236,13 @@ const signUpUserBySocialLogin = async (req, res) => {
     user.gmailVerified = payload.email_verified;
     await user.save();
 
-    if(user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
       const userEmailModel = new Email({
         userUuid: user.uuid,
         email: user.email
       })
       const userEmail = await userEmailModel.save();
-      if(!userEmail) {
+      if (!userEmail) {
         await user.deleteOne({
           uuid: user.uuid,
         });
@@ -395,13 +404,13 @@ const signUpUserBySocialBadges = async (req, res) => {
     // Update user verification status to true
     await user.save();
 
-    if(user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
       const userEmailModel = new Email({
         userUuid: user.uuid,
         email: user.email
       })
       const userEmail = await userEmailModel.save();
-      if(!userEmail) {
+      if (!userEmail) {
         await user.deleteOne({
           uuid: user.uuid,
         });
@@ -653,13 +662,13 @@ const signUpGuestMode = async (req, res) => {
       }
     );
 
-    if(user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
       const userEmailModel = new Email({
         userUuid: user.uuid,
         email: user.email
       })
       const userEmail = await userEmailModel.save();
-      if(!userEmail) {
+      if (!userEmail) {
         await user.deleteOne({
           uuid: user.uuid,
         });
@@ -753,13 +762,13 @@ const signUpSocialGuestMode = async (req, res) => {
     updatedUser.gmailVerified = payload.email_verified;
     await updatedUser.save();
 
-    if(updatedUser.email !== null && updatedUser.email !== undefined && updatedUser.email !== "" && !guestUserEmailRegex.test(updatedUser.email)) {
+    if (updatedUser.email !== null && updatedUser.email !== undefined && updatedUser.email !== "" && !guestUserEmailRegex.test(updatedUser.email)) {
       const userEmailModel = new Email({
         userUuid: updatedUser.uuid,
         email: updatedUser.email
       })
       const userEmail = await userEmailModel.save();
-      if(!userEmail) {
+      if (!userEmail) {
         await user.deleteOne({
           uuid: updatedUser.uuid,
         });
@@ -938,13 +947,13 @@ const signUpGuestBySocialBadges = async (req, res) => {
     // Update user verification status to true
     await user.save();
 
-    if(user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
+    if (user.email !== null && user.email !== undefined && user.email !== "" && !guestUserEmailRegex.test(user.email)) {
       const userEmailModel = new Email({
         userUuid: user.uuid,
         email: user.email
       })
       const userEmail = await userEmailModel.save();
-      if(!userEmail) {
+      if (!userEmail) {
         await user.deleteOne({
           uuid: user.uuid,
         });
@@ -1976,9 +1985,8 @@ const sendVerifyEmailGuest = async (req, res) => {
     );
 
     // Step 3 - Email the user a unique verification link
-    const url = `${
-      FRONTEND_URL.split(",")[0]
-    }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${FRONTEND_URL.split(",")[0]
+      }/VerifyCode/?${verificationTokenFull}`;
     console.log("url", url);
     // return res.status(200).json({ url });
 
@@ -2059,9 +2067,8 @@ const sendVerifyEmail = async (req, res) => {
     //console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
-    const url = `${
-      FRONTEND_URL.split(",")[0]
-    }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${FRONTEND_URL.split(",")[0]
+      }/VerifyCode/?${verificationTokenFull}`;
     console.log("url", url);
     // return res.status(200).json({ url });
     // //console.log("url", url);
@@ -2596,8 +2603,7 @@ const getFacebookUserInfo = async (req, res) => {
     // if token found
     // // Second Axios request to get user info using the access token
     const response = await axios.get(
-      `https://graph.facebook.com/v19.0/me?access_token=${
-        responseAccessToken.data.access_token
+      `https://graph.facebook.com/v19.0/me?access_token=${responseAccessToken.data.access_token
       }&fields=${"id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender,age_range,friends,link,birthday"}`,
       {
         // headers: {
@@ -2615,6 +2621,36 @@ const getFacebookUserInfo = async (req, res) => {
     return error.message;
   }
 };
+
+const getVariables = async () => {
+  try {
+
+    const getTreasury = await Treasury.findOne();
+
+    const variables = {
+      ACCOUNT_BADGE_ADDED_AMOUNT,
+      QUEST_COMPLETED_AMOUNT,
+      QUEST_OWNER_ACCOUNT,
+      QUEST_COMPLETED_CHANGE_AMOUNT,
+      QUEST_CREATED_AMOUNT,
+      QUEST_OPTION_ADDED_AMOUNT,
+      QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
+      QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
+      USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+      topicsArray: MASTER_ARRAY_TOPICS,
+      Treasury_balance: getTreasury?.amount?.toString(),
+
+    }
+    res.status(200).json(variables)
+  }
+
+  catch (error) {
+    res.status(500).json({ message: 'Error fetching variables' })
+  }
+}
+
+
+
 
 module.exports = {
   changePassword,
@@ -2648,4 +2684,5 @@ module.exports = {
   signUpUserBySocialBadges,
   signUpGuestBySocialBadges,
   signInUserBySocialBadges,
+  getVariables,
 };
