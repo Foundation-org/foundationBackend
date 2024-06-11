@@ -286,7 +286,7 @@ const generateCategoryShareLink = async (req, res) => {
                 categoryDoc.isLinkUserCustomized = true;
                 await createLedger({
                     uuid: userUuid,
-                    txUserAction: "listLinkCreatedCustom",
+                    txUserAction: "postListLinkCreatedCustom",
                     txID: crypto.randomBytes(11).toString("hex"),
                     txAuth: "User",
                     txFrom: userUuid,
@@ -299,7 +299,7 @@ const generateCategoryShareLink = async (req, res) => {
                 // Create Ledger
                 await createLedger({
                     uuid: userUuid,
-                    txUserAction: "listLinkCreatedCustom",
+                    txUserAction: "postListLinkCreatedCustom",
                     txID: crypto.randomBytes(11).toString("hex"),
                     txAuth: "DAO",
                     txFrom: "DAO Treasury",
@@ -324,7 +324,7 @@ const generateCategoryShareLink = async (req, res) => {
                 categoryDoc.link = shortLink.generate(8);
                 await createLedger({
                     uuid: userUuid,
-                    txUserAction: "listLinkCreated",
+                    txUserAction: "postListLinkCreated",
                     txID: crypto.randomBytes(11).toString("hex"),
                     txAuth: "User",
                     txFrom: userUuid,
