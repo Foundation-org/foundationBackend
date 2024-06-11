@@ -2051,9 +2051,8 @@ const sendVerifyEmailGuest = async (req, res) => {
     );
 
     // Step 3 - Email the user a unique verification link
-    const url = `${
-      FRONTEND_URL.split(",")[0]
-    }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${FRONTEND_URL.split(",")[0]
+      }/VerifyCode/?${verificationTokenFull}`;
     console.log("url", url);
     // return res.status(200).json({ url });
 
@@ -2134,9 +2133,8 @@ const sendVerifyEmail = async (req, res) => {
     //console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
-    const url = `${
-      FRONTEND_URL.split(",")[0]
-    }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${FRONTEND_URL.split(",")[0]
+      }/VerifyCode/?${verificationTokenFull}`;
     console.log("url", url);
     // return res.status(200).json({ url });
     // //console.log("url", url);
@@ -2671,8 +2669,7 @@ const getFacebookUserInfo = async (req, res) => {
     // if token found
     // // Second Axios request to get user info using the access token
     const response = await axios.get(
-      `https://graph.facebook.com/v19.0/me?access_token=${
-        responseAccessToken.data.access_token
+      `https://graph.facebook.com/v19.0/me?access_token=${responseAccessToken.data.access_token
       }&fields=${"id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender,age_range,friends,link,birthday"}`,
       {
         // headers: {
@@ -2691,10 +2688,10 @@ const getFacebookUserInfo = async (req, res) => {
   }
 };
 
-const getVariables = async (req, res) => {
+const getConstants = async (req, res) => {
   try {
     const getTreasury = await Treasury.findOne();
-
+    console.log(getTreasury);
     const variables = {
       ACCOUNT_BADGE_ADDED_AMOUNT,
       QUEST_COMPLETED_AMOUNT,
@@ -2705,13 +2702,12 @@ const getVariables = async (req, res) => {
       QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
       QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
       USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
-      topicsArray: MASTER_ARRAY_TOPICS,
-      Treasury_balance: getTreasury?.amount?.toString(),
+      TREASURY_BALANCE: getTreasury ? (getTreasury?.amount?.toString()) : '0',
     };
     res.status(200).json(variables);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Error fetching variables" });
+    res.status(500).json({ message: "Error fetching constants" });
   }
 };
 
@@ -2747,5 +2743,5 @@ module.exports = {
   signUpUserBySocialBadges,
   signUpGuestBySocialBadges,
   signInUserBySocialBadges,
-  getVariables,
+  getConstants,
 };
