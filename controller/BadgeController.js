@@ -507,7 +507,7 @@ const addPersonalBadge = async (req, res) => {
           personal: req.body.personal,
         },
       ];
-      console.log(updatedUserBadges);
+      // console.log(updatedUserBadges);
     } else {
       if (User.isPasswordEncryption) {
         if (!req.body.infoc)
@@ -530,7 +530,7 @@ const addPersonalBadge = async (req, res) => {
               personal: encryptedPersonal,
             },
           ];
-          console.log(updatedUserBadges);
+          // console.log(updatedUserBadges);
         } else {
           // Handle case where no key is found, if needed
           console.log("No matching key found in personal object.");
@@ -549,7 +549,7 @@ const addPersonalBadge = async (req, res) => {
               personal: encryptedPersonal,
             },
           ];
-          console.log(updatedUserBadges);
+          // console.log(updatedUserBadges);
         } else {
           // Handle case where no key is found, if needed
           console.log("No matching key found in personal object.");
@@ -861,7 +861,7 @@ const getAWorkAndEducationBadge = async (req, res) => {
         badge.personal &&
         badge.personal[req.body.type] &&
         badge.personal[req.body.type].some((edu) => {
-          console.log(edu.id, req.body.id);
+          // console.log(edu.id, req.body.id);
           return edu.id === req.body.id;
         })
       );
@@ -1070,7 +1070,7 @@ const updateWorkAndEducationBadge = async (req, res) => {
         badge.personal &&
         badge.personal[req.body.type] &&
         badge.personal[req.body.type].some((edu) => {
-          console.log(edu.id, req.body.id, "new");
+          // console.log(edu.id, req.body.id, "new");
           return edu.id === req.body.id;
         })
       );
@@ -1974,7 +1974,7 @@ const addPasswordBadgesUpdate = async (req, res) => {
           "No eyk Provided in request body, Request can't be proceeded."
         );
 
-      console.log("Remove Legacy Encryption!");
+      // console.log("Remove Legacy Encryption!");
 
       // As Legacy Password is added so we need to Remove it.
       user.badges.forEach((badge) => {
@@ -2054,7 +2054,7 @@ const addPasswordBadgesUpdate = async (req, res) => {
         data: user,
       });
     } else if (!user.isPasswordEncryption) {
-      console.log("Apply Legacy Encryption!");
+      // console.log("Apply Legacy Encryption!");
 
       // As Legacy Password is removed so we need to Add it.
       user.badges.forEach((badge) => {

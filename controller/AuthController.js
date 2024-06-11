@@ -2053,7 +2053,7 @@ const sendVerifyEmailGuest = async (req, res) => {
     // Step 3 - Email the user a unique verification link
     const url = `${FRONTEND_URL.split(",")[0]
       }/VerifyCode/?${verificationTokenFull}`;
-    console.log("url", url);
+    // console.log("url", url);
     // return res.status(200).json({ url });
 
     const SES_CONFIG = {
@@ -2096,7 +2096,7 @@ const sendVerifyEmailGuest = async (req, res) => {
 
     try {
       const res = await sesClient.sendEmail(params).promise();
-      console.log("Email has been sent!", res);
+      // console.log("Email has been sent!", res);
     } catch (error) {
       console.log(error);
     }
@@ -2135,7 +2135,7 @@ const sendVerifyEmail = async (req, res) => {
     // Step 3 - Email the user a unique verification link
     const url = `${FRONTEND_URL.split(",")[0]
       }/VerifyCode/?${verificationTokenFull}`;
-    console.log("url", url);
+    // console.log("url", url);
     // return res.status(200).json({ url });
     // //console.log("url", url);
 
@@ -2205,7 +2205,7 @@ const sendVerifyEmail = async (req, res) => {
 
     try {
       const res = await sesClient.sendEmail(params).promise();
-      console.log("Email has been sent!", res);
+      // console.log("Email has been sent!", res);
     } catch (error) {
       console.log(error);
     }
@@ -2680,7 +2680,7 @@ const getFacebookUserInfo = async (req, res) => {
       }
     );
     if (!response.data) throw new Error("No Data Found");
-    console.log("LinkedIn API Response:", response.data);
+    // console.log("LinkedIn API Response:", response.data);
     res.status(200).send(response.data);
   } catch (error) {
     console.error("Error:", error);
@@ -2691,7 +2691,7 @@ const getFacebookUserInfo = async (req, res) => {
 const getConstants = async (req, res) => {
   try {
     const getTreasury = await Treasury.findOne();
-    console.log(getTreasury);
+    // console.log(getTreasury);
     const variables = {
       ACCOUNT_BADGE_ADDED_AMOUNT,
       QUEST_COMPLETED_AMOUNT,
