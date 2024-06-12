@@ -126,6 +126,9 @@ const createStartQuest = async (req, res) => {
         amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
         dec: true,
       });
+      const userSpent = await User.findOne({uuid: req.body.uuid});
+      userSpent.fdxSpent = userSpent.fdxSpent + QUEST_OPTION_CONTENTION_GIVEN_AMOUNT;
+      await userSpent.save();
     }
 
     await User.findOneAndUpdate(
@@ -344,6 +347,10 @@ const createStartQuest = async (req, res) => {
         amount: QUEST_OPTION_ADDED_AMOUNT,
         inc: true,
       });
+      const userEarned = await User.findOne({uuid: req.body.uuid});
+      userEarned.fdxEarned = userEarned.fdxEarned + QUEST_OPTION_ADDED_AMOUNT;
+      userEarned.rewardSchedual.postParticipationFdx = userEarned.rewardSchedual.postParticipationFdx + QUEST_OPTION_ADDED_AMOUNT;
+      await userEarned.save();
     }
     // Correct Answer or Wrong Answer
     const questionCorrectAnswer =
@@ -430,6 +437,11 @@ const createStartQuest = async (req, res) => {
       inc: true,
     });
 
+    const responsingUserEarnedFDX =  await User.findOne({uuid: req.body.uuid});
+    responsingUserEarnedFDX.fdxEarned = responsingUserEarnedFDX.fdxEarned + QUEST_COMPLETED_AMOUNT;
+    responsingUserEarnedFDX.rewardSchedual.myEngagementInPostFdx = responsingUserEarnedFDX.rewardSchedual.myEngagementInPostFdx + QUEST_COMPLETED_AMOUNT;
+    await responsingUserEarnedFDX.save();
+
     // Create Ledger
     await createLedger({
       uuid: getInfoQuestQuestion.uuid,
@@ -450,6 +462,11 @@ const createStartQuest = async (req, res) => {
       amount: QUEST_OWNER_ACCOUNT,
       inc: true,
     });
+    const ownerEarnedFDX =  await User.findOne({uuid: getInfoQuestQuestion.uuid});
+    ownerEarnedFDX.fdxEarned = ownerEarnedFDX.fdxEarned + QUEST_OWNER_ACCOUNT;
+    ownerEarnedFDX.rewardSchedual.postParticipationFdx = ownerEarnedFDX.rewardSchedual.postParticipationFdx + QUEST_OWNER_ACCOUNT;
+    await ownerEarnedFDX.save();
+
     const bookmarkExist = await BookmarkQuests.findOne({
       questForeignKey: getInfoQuestQuestion._id,
     });
@@ -573,6 +590,9 @@ async function createStartQuestUserList (req, res) {
         amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
         dec: true,
       });
+      const userSpent = await User.findOne({uuid: req.body.uuid});
+      userSpent.fdxSpent = userSpent.fdxSpent + QUEST_OPTION_CONTENTION_GIVEN_AMOUNT;
+      await userSpent.save();
     }
 
     await User.findOneAndUpdate(
@@ -791,6 +811,9 @@ async function createStartQuestUserList (req, res) {
         amount: QUEST_OPTION_ADDED_AMOUNT,
         inc: true,
       });
+      const userEarned = await User.findOne({uuid: req.body.uuid});
+      userEarned.fdxEarned = userEarned.fdxEarned + QUEST_OPTION_ADDED_AMOUNT;
+      await userEarned.save();
     }
     // Correct Answer or Wrong Answer
     const questionCorrectAnswer =
@@ -876,6 +899,9 @@ async function createStartQuestUserList (req, res) {
       amount: QUEST_COMPLETED_AMOUNT,
       inc: true,
     });
+    const userEarned = await User.findOne({uuid: req.body.uuid});
+    userEarned.fdxEarned = userEarned.fdxEarned + QUEST_COMPLETED_AMOUNT;
+    await userEarned.save();
 
     // Create Ledger
     await createLedger({
@@ -897,6 +923,9 @@ async function createStartQuestUserList (req, res) {
       amount: QUEST_OWNER_ACCOUNT,
       inc: true,
     });
+    const ownerUserEarned = await User.findOne({uuid: getInfoQuestQuestion.uuid});
+    ownerUserEarned.fdxEarned = ownerUserEarned.fdxEarned + QUEST_OWNER_ACCOUNT;
+    await ownerUserEarned.save();
     const bookmarkExist = await BookmarkQuests.findOne({
       questForeignKey: getInfoQuestQuestion._id,
     });
@@ -1156,6 +1185,9 @@ const updateChangeAnsStartQuest = async (req, res) => {
         dec: true,
         uuid: req.body.uuid,
       });
+      const userSpent = await User.findOne({uuid: req.body.uuid});
+      userSpent.fdxSpent = userSpent.fdxSpent + (QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter);
+      await userSpent.save();
     } else if (contentionGivenCounter < 0) {
       // Create Ledger
       await createLedger({
@@ -1198,6 +1230,9 @@ const updateChangeAnsStartQuest = async (req, res) => {
         inc: true,
         uuid: req.body.uuid,
       });
+      const userSpent = await User.findOne({uuid: req.body.uuid});
+      userSpent.fdxSpent = userSpent.fdxSpent + (QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter));
+      await userSpent.save();
     }
 
     await User.findOneAndUpdate(
@@ -1691,6 +1726,9 @@ const updateChangeAnsStartQuestUserList = async (req) => {
         dec: true,
         uuid: req.body.uuid,
       });
+      const userSpent = await User.findOne({uuid: req.body.uuid});
+      userSpent.fdxSpent = userSpent.fdxSpent + (QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter);
+      await userSpent.save();
     } else if (contentionGivenCounter < 0) {
       // Create Ledger
       await createLedger({
@@ -1733,6 +1771,9 @@ const updateChangeAnsStartQuestUserList = async (req) => {
         inc: true,
         uuid: req.body.uuid,
       });
+      const userEarned = await User.findOne({uuid: req.body.uuid});
+      userEarned.fdxEarned = userEarned.fdxEarned + (QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter));
+      await userEarned.save();
     }
 
     await User.findOneAndUpdate(

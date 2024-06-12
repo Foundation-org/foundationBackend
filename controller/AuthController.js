@@ -58,6 +58,8 @@ const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const StartQuests = require("../models/StartQuests");
 const Email = require("../models/Email");
 const guestUserEmailRegex = /^user-\d+@guest\.com$/;
+const Redeem = require("../models/Redeem");
+const mongoose = require("mongoose");
 
 // Encryption/Decryption Security Purposes.
 const {
@@ -337,6 +339,10 @@ const signUpUserBySocialLogin = async (req, res) => {
       inc: true,
     });
 
+    user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await user.save();
+
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
 
@@ -509,6 +515,10 @@ const signUpUserBySocialBadges = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await user.save();
 
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
@@ -878,6 +888,10 @@ const signUpSocialGuestMode = async (req, res) => {
       inc: true,
     });
 
+    updatedUser.fdxEarned = updatedUser.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    updatedUser.rewardSchedual.addingBadgeFdx = updatedUser.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await updatedUser.save();
+
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
 
@@ -1066,6 +1080,10 @@ const signUpGuestBySocialBadges = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await user.save();
 
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
@@ -2382,6 +2400,9 @@ const verify = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
     // return res.status(200).send({
     //   message: "Gmail Account verified",
     //   uuid: req.user.uuid,

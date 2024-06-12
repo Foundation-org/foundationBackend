@@ -105,6 +105,10 @@ const createInfoQuestQuest = async (req, res) => {
       dec: true,
     });
 
+    user.fdxSpent = user.fdxSpent + QUEST_CREATED_AMOUNT;
+    user.feeSchedual.creatingPostFdx = user.feeSchedual.creatingPostFdx + QUEST_CREATED_AMOUNT;
+    await user.save()
+
     res.status(201).json({
       message: "Quest has been Created",
       questID: createdQuestion._id,
@@ -177,6 +181,9 @@ const deleteInfoQuestQuest = async (req, res) => {
       amount: QUEST_CREATED_AMOUNT,
       inc: true,
     });
+
+    user.fdxEarned = user.fdxEarned + QUEST_CREATED_AMOUNT;
+    await user.save();
 
     res
       .status(200)

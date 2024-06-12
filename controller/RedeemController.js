@@ -38,6 +38,10 @@ const create = async (req, res) => {
       amount: amount,
       dec: true,
     });
+    User.fdxSpent = User.fdxSpent + amount;
+    User.redemptionStatistics.myTotalRedemptionCodeCreationCount = User.redemptionStatistics.myTotalRedemptionCodeCreationCount + 1;
+    User.redemptionStatistics.createCodeFdxSpent = User.redemptionStatistics.createCodeFdxSpent + amount;
+    await User.save();
     //   Generate unique code
     req.body.code = shortlink.generate(10);
     // convert into integer
@@ -85,6 +89,9 @@ const transfer = async (req, res) => {
       // txDescription : "User update redemption code"
       type: "redemption",
     });
+    // const senderSpent = await UserModel.findOne({uuid: getRedeem.owner.uuid});
+    // senderSpent.fdxSpent = senderSpent.fdxSpent + getRedeem.amount;
+    // await senderSpent.save();
     // Create Ledger
     // receiver
     await createLedger({
@@ -104,6 +111,10 @@ const transfer = async (req, res) => {
       amount: getRedeem.amount,
       inc: true,
     });
+    const receiverEarned = await UserModel.findOne({uuid: req.body.uuid});
+    receiverEarned.fdxEarned = receiverEarned.fdxEarned + getRedeem.amount;
+    receiverEarned.redemptionStatistics.codeRedeemedFdxEarned = receiverEarned.redemptionStatistics.codeRedeemedFdxEarned + getRedeem.amount;
+    await receiverEarned.save();
     // Update the Redeem
     // getRedeem.code = shortlink.generate(10),
     getRedeem.owner = User._id;
@@ -189,6 +200,9 @@ const balance = async (req, res) => {
       amount: getRedeem.amount,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + getRedeem.amount;
+    await User.save();
 
     // Delete the Redeem
     const deletedRedeem = await getRedeem.deleteOne();

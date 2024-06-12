@@ -155,6 +155,10 @@ const addBadgeSocial = async (req, res) => {
       inc: true,
     });
 
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
+
     res.clearCookie("social");
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -335,6 +339,10 @@ const addContactBadge = async (req, res) => {
       inc: true,
     });
 
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
+
     // res.clearCookie("social");
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -427,6 +435,10 @@ const addBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -593,6 +605,10 @@ const addPersonalBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -1185,6 +1201,10 @@ const addWorkEducationBadge = async (req, res) => {
       inc: true,
     });
 
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
+
     res.status(200).json({ data, message: "Successful" });
   } catch (error) {
     res.status(500).json({
@@ -1254,6 +1274,10 @@ const addWeb3Badge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -1778,6 +1802,10 @@ const addPasskeyBadge = async (req, res) => {
       inc: true,
     });
 
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
+
     res.status(200).json({ message: "Successful" });
   } catch (error) {
     res.status(500).json({
@@ -1878,6 +1906,10 @@ const addFarCasterBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -2153,6 +2185,10 @@ const addPasswordBadgesUpdate = async (req, res) => {
         amount: ACCOUNT_BADGE_ADDED_AMOUNT,
         inc: true,
       });
+      
+    user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await user.save();
 
       res.status(200).json({
         message: `User's customized password encryption is added successful.`,

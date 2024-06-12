@@ -319,6 +319,10 @@ const generateCategoryShareLink = async (req, res) => {
                     amount: 2.5,
                     dec: true,
                 });
+                const userSpent = await User.findOne({uuid: userUuid});
+                userSpent.fdxSpent = userSpent.fdxSpent + 2.5;
+                userSpent.feeSchedual.creatingListCustomLinkFdx = userSpent.feeSchedual.creatingListCustomLinkFdx + 2.5;
+                await userSpent.save();
             }
             else {
                 categoryDoc.link = shortLink.generate(8);
@@ -333,6 +337,9 @@ const generateCategoryShareLink = async (req, res) => {
                     txData: userUuid,
                     // txDescription : "User changes password"
                 });
+                const userSpent = await User.findOne({uuid: userUuid});
+                userSpent.feeSchedual.creatingListLinkFdx = userSpent.feeSchedual.creatingListLinkFdx + 0;
+                await userSpent.save();
             }
 
             categoryDoc.updatedAt = new Date().toISOString();
