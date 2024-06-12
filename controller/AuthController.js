@@ -32,7 +32,7 @@ const {
   QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
   QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
   USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
-  MASTER_ARRAY_TOPICS,
+  TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX,
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
@@ -2723,6 +2723,7 @@ const getConstants = async (req, res) => {
       QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
       QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
       USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+      TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX,
       TREASURY_BALANCE: getTreasury ? (getTreasury?.amount?.toString()) : '0',
     };
     res.status(200).json(variables);
