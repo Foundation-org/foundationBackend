@@ -42,15 +42,15 @@ module.exports = {
     "Please enter your job title. If the title is valid and complete, it will be echoed back to you. If it contains any errors, it will be only auto-corrected to standard. If it's not recognized as a valid job title, it will be Rejected."
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
-  ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,  // accountBadgeAdded
-  QUEST_COMPLETED_AMOUNT: 0.96,       // postCompleted
-  QUEST_OWNER_ACCOUNT: 0.10,          // postCompletedUser
+  ACCOUNT_BADGE_ADDED_AMOUNT: 0.96 * 10,  // accountBadgeAdded
+  QUEST_COMPLETED_AMOUNT: 0.96 * 10,       // postCompleted
+  QUEST_OWNER_ACCOUNT: 0.10 * 10,          // postCompletedUser
   QUEST_COMPLETED_CHANGE_AMOUNT: 0.00, // postCompletedChange
-  QUEST_CREATED_AMOUNT: 0.1,           // postCreated
-  QUEST_OPTION_ADDED_AMOUNT: 0.10,       // postOptionAdded
-  QUEST_OPTION_CONTENTION_GIVEN_AMOUNT: 0.10,  // postOptionContentionGiven
-  QUEST_OPTION_CONTENTION_REMOVED_AMOUNT: 0.10,  // postOptionContentionRemoved
-  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 2.500,  // postLinkCreatedCustom   
+  QUEST_CREATED_AMOUNT: 0.1 * 10,           // postCreated
+  QUEST_OPTION_ADDED_AMOUNT: 0.10 * 10,       // postOptionAdded
+  QUEST_OPTION_CONTENTION_GIVEN_AMOUNT: 0.10 * 10,  // postOptionContentionGiven
+  QUEST_OPTION_CONTENTION_REMOVED_AMOUNT: 0.10 * 10,  // postOptionContentionRemoved
+  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 2.5 * 10,  // postLinkCreatedCustom   
   TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX: 2.5,    // FDX conversion rate wrt USD
   MASTER_ARRAY_TOPICS: ["Architecture", "Arts", "Business", "Culture", "Economics", "Education", "Entertainment", "Environment", "Ethics", "Finance", "Fitness", "Food", "Geography", "Health", "History", "Hobbies", "Home", "Law", "Media", "Music", "Parenting", "Pets", "Philosophy", "Personal", "Politics", "Preferences", "Psychology", "Religion", "Science", "Society", "Sports", "Technology"],
   POST_CREATE: 0,
