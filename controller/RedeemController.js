@@ -112,8 +112,8 @@ const transfer = async (req, res) => {
       inc: true,
     });
     const receiverEarned = await UserModel.findOne({uuid: req.body.uuid});
-    receiverEarned.fdxEarned = receiverEarned.fdxEarned + getRedeem.amount;
-    receiverEarned.redemptionStatistics.codeRedeemedFdxEarned = receiverEarned.redemptionStatistics.codeRedeemedFdxEarned + getRedeem.amount;
+    receiverEarned.fdxEarned = receiverEarned.fdxEarned + Number(getRedeem.amount);
+    receiverEarned.redemptionStatistics.codeRedeemedFdxEarned = receiverEarned.redemptionStatistics.codeRedeemedFdxEarned + Number(getRedeem.amount);
     await receiverEarned.save();
     // Update the Redeem
     // getRedeem.code = shortlink.generate(10),
