@@ -33,6 +33,13 @@ const {
   QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
   USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
   TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX,
+  POST_CREATE,
+  POST_LINK,
+  POST_SHARE,
+  LIST_CREATE,
+  LIST_LINK,
+  LIST_SHARE,
+  TRANSECTION
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
@@ -2724,6 +2731,13 @@ const getConstants = async (req, res) => {
       USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
       FDX_CONVERSION_RATE_WRT_USD: TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX,
       TREASURY_BALANCE: getTreasury ? (getTreasury?.amount?.toString()) : '0',
+      POST_CREATE,
+      POST_LINK,
+      POST_SHARE,
+      LIST_CREATE,
+      LIST_LINK,
+      LIST_SHARE,
+      TRANSECTION
     };
     console.log(variables);
     res.status(200).json(variables);
