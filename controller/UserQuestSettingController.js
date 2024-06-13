@@ -116,7 +116,7 @@ const link = async (req, res) => {
       });
     }
 
-  const userSpent = await User.findOne({uuid: payload.uuid});
+  const userSpent = await UserModel.findOne({uuid: payload.uuid});
   userSpent.feeSchedual.creatingPostLinkFdx = userSpent.feeSchedual.creatingPostLinkFdx + 0;
   await userSpent.save();
 
