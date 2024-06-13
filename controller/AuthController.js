@@ -2712,7 +2712,6 @@ const getFacebookUserInfo = async (req, res) => {
 const getConstants = async (req, res) => {
   try {
     const getTreasury = await Treasury.findOne();
-    // console.log(getTreasury);
     const variables = {
       ACCOUNT_BADGE_ADDED_AMOUNT,
       QUEST_COMPLETED_AMOUNT,
@@ -2723,9 +2722,10 @@ const getConstants = async (req, res) => {
       QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
       QUEST_OPTION_CONTENTION_REMOVED_AMOUNT,
       USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
-      FDX_CONVERSION_RATE: TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX,
+      FDX_CONVERSION_RATE_WRT_USD: TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX,
       TREASURY_BALANCE: getTreasury ? (getTreasury?.amount?.toString()) : '0',
     };
+    console.log(variables);
     res.status(200).json(variables);
   } catch (error) {
     console.log(error);
