@@ -52,7 +52,7 @@ module.exports = {
   QUEST_OPTION_CONTENTION_REMOVED_AMOUNT: 1,  // postOptionContentionRemoved
   USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 25,  // postLinkCreatedCustom   
   USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 25,          //postListLinkCreatedCustom
-  TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX: 25,    // FDX conversion rate wrt USD
+  TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX: 2.5,    // FDX conversion rate wrt USD
   MASTER_ARRAY_TOPICS: ["Architecture", "Arts", "Business", "Culture", "Economics", "Education", "Entertainment", "Environment", "Ethics", "Finance", "Fitness", "Food", "Geography", "Health", "History", "Hobbies", "Home", "Law", "Media", "Music", "Parenting", "Pets", "Philosophy", "Personal", "Politics", "Preferences", "Psychology", "Religion", "Science", "Society", "Sports", "Technology"],
   POST_CREATE: 0,
   POST_LINK: 0,
