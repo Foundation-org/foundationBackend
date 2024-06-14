@@ -42,17 +42,17 @@ module.exports = {
     "Please enter your job title. If the title is valid and complete, it will be echoed back to you. If it contains any errors, it will be only auto-corrected to standard. If it's not recognized as a valid job title, it will be Rejected."
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
-  ACCOUNT_BADGE_ADDED_AMOUNT: 0.96 * 10,  // accountBadgeAdded
-  QUEST_COMPLETED_AMOUNT: 0.96 * 10,       // postCompleted
-  QUEST_OWNER_ACCOUNT: 0.10 * 10,          // postCompletedUser
-  QUEST_COMPLETED_CHANGE_AMOUNT: 0.00, // postCompletedChange
-  QUEST_CREATED_AMOUNT: 0.1 * 10,           // postCreated
-  QUEST_OPTION_ADDED_AMOUNT: 0.10 * 10,       // postOptionAdded
-  QUEST_OPTION_CONTENTION_GIVEN_AMOUNT: 0.10 * 10,  // postOptionContentionGiven
-  QUEST_OPTION_CONTENTION_REMOVED_AMOUNT: 0.10 * 10,  // postOptionContentionRemoved
-  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 2.5 * 10,  // postLinkCreatedCustom   
-  USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 2.5 * 10,          //postListLinkCreatedCustom
-  TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX: 2.5,    // FDX conversion rate wrt USD
+  ACCOUNT_BADGE_ADDED_AMOUNT: 10,  // accountBadgeAdded
+  QUEST_COMPLETED_AMOUNT: 10,       // postCompleted
+  QUEST_OWNER_ACCOUNT: 1,          // postCompletedUser
+  QUEST_COMPLETED_CHANGE_AMOUNT: 0, // postCompletedChange
+  QUEST_CREATED_AMOUNT: 1,           // postCreated
+  QUEST_OPTION_ADDED_AMOUNT: 1,       // postOptionAdded
+  QUEST_OPTION_CONTENTION_GIVEN_AMOUNT: 1,  // postOptionContentionGiven
+  QUEST_OPTION_CONTENTION_REMOVED_AMOUNT: 1,  // postOptionContentionRemoved
+  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 25,  // postLinkCreatedCustom   
+  USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 25,          //postListLinkCreatedCustom
+  TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX: 25,    // FDX conversion rate wrt USD
   MASTER_ARRAY_TOPICS: ["Architecture", "Arts", "Business", "Culture", "Economics", "Education", "Entertainment", "Environment", "Ethics", "Finance", "Fitness", "Food", "Geography", "Health", "History", "Hobbies", "Home", "Law", "Media", "Music", "Parenting", "Pets", "Philosophy", "Personal", "Politics", "Preferences", "Psychology", "Religion", "Science", "Society", "Sports", "Technology"],
   POST_CREATE: 0,
   POST_LINK: 0,
