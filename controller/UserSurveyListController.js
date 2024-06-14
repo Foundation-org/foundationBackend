@@ -11,7 +11,7 @@ const { updateTreasury } = require("../utils/treasuryService");
 const { updateUserBalance } = require("../utils/userServices")
 const crypto = require("crypto");
 const mongoose = require("mongoose");
-const { QUEST_COMPLETED_AMOUNT } = require("../constants/index");
+const { QUEST_COMPLETED_AMOUNT, USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT } = require("../constants/index");
 const UserQuestSetting = require("../models/UserQuestSetting");
 const { linkUserList, sharedLinkDynamicImageUserList } = require("../controller/UserQuestSettingController")
 const { createStartQuestUserList, updateChangeAnsStartQuestUserList } = require("../controller/StartQuestController")
@@ -291,7 +291,7 @@ const generateCategoryShareLink = async (req, res) => {
                     txAuth: "User",
                     txFrom: userUuid,
                     txTo: "dao",
-                    txAmount: 2.5,
+                    txAmount: 0,
                     txData: userUuid,
                     txDate: Date.now(),
                     txDescription: "List Link Customized",
@@ -304,7 +304,7 @@ const generateCategoryShareLink = async (req, res) => {
                     txAuth: "DAO",
                     txFrom: "DAO Treasury",
                     txTo: userUuid,
-                    txAmount: 0,
+                    txAmount: USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
                     txDate: Date.now(),
                     txDescription: "List Link Customized",
                 });
@@ -319,7 +319,7 @@ const generateCategoryShareLink = async (req, res) => {
                     amount: 2.5,
                     dec: true,
                 });
-                const userSpent = await User.findOne({uuid: userUuid});
+                const userSpent = await User.findOne({ uuid: userUuid });
                 userSpent.fdxSpent = userSpent.fdxSpent + 2.5;
                 userSpent.feeSchedual.creatingListCustomLinkFdx = userSpent.feeSchedual.creatingListCustomLinkFdx + 2.5;
                 await userSpent.save();
@@ -337,7 +337,7 @@ const generateCategoryShareLink = async (req, res) => {
                     txData: userUuid,
                     // txDescription : "User changes password"
                 });
-                const userSpent = await User.findOne({uuid: userUuid});
+                const userSpent = await User.findOne({ uuid: userUuid });
                 userSpent.feeSchedual.creatingListLinkFdx = userSpent.feeSchedual.creatingListLinkFdx + 0;
                 await userSpent.save();
             }

@@ -116,9 +116,9 @@ const link = async (req, res) => {
       });
     }
 
-  const userSpent = await UserModel.findOne({uuid: payload.uuid});
-  userSpent.feeSchedual.creatingPostLinkFdx = userSpent.feeSchedual.creatingPostLinkFdx + 0;
-  await userSpent.save();
+    const userSpent = await UserModel.findOne({ uuid: payload.uuid });
+    userSpent.feeSchedual.creatingPostLinkFdx = userSpent.feeSchedual.creatingPostLinkFdx + 0;
+    await userSpent.save();
 
     return res.status(201).json({
       message: "UserQuestSetting link Created Successfully!",
@@ -338,13 +338,12 @@ const status = async (req, res) => {
       return res.status(404).json({ message: "Share link not found" });
     }
     return res.status(200).json({
-      message: `Share link ${
-        status === "Disable"
+      message: `Share link ${status === "Disable"
           ? "Disabled"
           : status === "Delete"
-          ? "Deleted"
-          : "Enabled"
-      } Successfully`,
+            ? "Deleted"
+            : "Enabled"
+        } Successfully`,
       data: updatedUserQuestSetting,
     });
   } catch (error) {
@@ -695,7 +694,7 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
-      txAmount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+      txAmount: 0,
       txData: userQuestSetting_id,
       txDate: Date.now(),
       txDescription: "Quest Link Customized",
@@ -708,7 +707,7 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: uuid,
-      txAmount: 0,
+      txAmount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
       txData: userQuestSetting_id,
       txDate: Date.now(),
       txDescription: "Quest Link Customized",
@@ -724,7 +723,7 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
       amount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
       dec: true,
     });
-    const userSpent = await UserModel.findOne({uuid: uuid});
+    const userSpent = await UserModel.findOne({ uuid: uuid });
     userSpent.fdxSpent = userSpent.fdxSpent + USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
     await userSpent.save();
   } catch (error) {
@@ -926,7 +925,7 @@ async function sharedLinkDynamicImageUserList(link, questStartData) {
           }
           //console.log("File deleted successfully");
         });
-        
+
         //console.log(imageName);
 
         const userQuestSettingUpdate = await UserQuestSetting.findOneAndUpdate(
