@@ -12,7 +12,7 @@ const fs = require("fs");
 const { updateUserBalance } = require("../utils/userServices");
 const { updateTreasury } = require("../utils/treasuryService");
 const {
-  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT, POST_LINK
 } = require("../constants/index");
 const nodeHtmlToImage = require("node-html-to-image");
 const puppeteer = require("puppeteer");
@@ -117,7 +117,7 @@ const link = async (req, res) => {
     }
 
     const userSpent = await UserModel.findOne({ uuid: payload.uuid });
-    userSpent.feeSchedual.creatingPostLinkFdx = userSpent.feeSchedual.creatingPostLinkFdx + 0;
+    userSpent.feeSchedual.creatingPostLinkFdx = userSpent.feeSchedual.creatingPostLinkFdx + POST_LINK;
     await userSpent.save();
 
     return res.status(201).json({
