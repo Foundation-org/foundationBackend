@@ -2741,7 +2741,7 @@ const getConstants = async (req, res) => {
       LIST_SHARE,
       TRANSECTION
     };
-    console.log(variables);
+    // console.log(variables);
     res.status(200).json(variables);
   } catch (error) {
     console.log(error);
