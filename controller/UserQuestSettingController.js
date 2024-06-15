@@ -339,10 +339,10 @@ const status = async (req, res) => {
     }
     return res.status(200).json({
       message: `Share link ${status === "Disable"
-          ? "Disabled"
-          : status === "Delete"
-            ? "Deleted"
-            : "Enabled"
+        ? "Disabled"
+        : status === "Delete"
+          ? "Deleted"
+          : "Enabled"
         } Successfully`,
       data: updatedUserQuestSetting,
     });
@@ -738,9 +738,9 @@ const ledgerEntryAdded = async (uuid, questOwnerUuid) => {
       uuid: uuid,
       txUserAction: "postHiddenAdded",
       txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "DAO",
-      txFrom: "dao",
-      txTo: uuid,
+      txAuth: "User",
+      txFrom: uuid,
+      txTo: "dao",
       txAmount: "0",
       txData: uuid,
       // txDescription : "User creates a new account"

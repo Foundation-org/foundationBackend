@@ -221,12 +221,24 @@ const spay = async (req, res) => {
       uuid: userUuid,
       txUserAction: "fdxPurchased",
       txID: ledgerCode,
+      txAuth: "User",
+      txFrom: userUuid,
+      txTo: "dao",
+      txAmount: 0,
+      // txData : user.badges[0]._id,
+      txDescription: "FDX are purchased"
+    });
+
+    await createLedger({
+      uuid: userUuid,
+      txUserAction: "fdxPurchased",
+      txID: ledgerCode,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: userUuid,
       txAmount: parseFloat(fdxRequired),
       // txData : user.badges[0]._id,
-      txDescription : "FDX are purchased"
+      txDescription: "FDX are purchased"
     });
     // Decrement the Treasury
     await updateTreasury({ amount: parseFloat(fdxRequired), dec: true });
@@ -238,7 +250,7 @@ const spay = async (req, res) => {
       inc: true,
     });
 
-    const user = await User.findOne({uuid: userUuid});
+    const user = await User.findOne({ uuid: userUuid });
     user.fdxEarned = user.fdxEarned + parseFloat(fdxRequired);
     await user.save();
 
@@ -456,12 +468,25 @@ const ppay = async (req, res) => {
       uuid: userUuid,
       txUserAction: "fdxPurchased",
       txID: ledgerCode,
+      txAuth: "User",
+      txFrom: userUuid,
+      txTo: "dao",
+      txAmount: 0,
+      // txData : user.badges[0]._id,
+      txDescription: "FDX are purchased"
+    });
+
+
+    await createLedger({
+      uuid: userUuid,
+      txUserAction: "fdxPurchased",
+      txID: ledgerCode,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: userUuid,
       txAmount: parseFloat(fdxRequired),
       // txData : user.badges[0]._id,
-      txDescription : "FDX are purchased"
+      txDescription: "FDX are purchased"
     });
     // Decrement the Treasury
     await updateTreasury({ amount: parseFloat(fdxRequired), dec: true });
@@ -473,7 +498,7 @@ const ppay = async (req, res) => {
       inc: true,
     });
 
-    const user = await User.findOne({uuid: userUuid});
+    const user = await User.findOne({ uuid: userUuid });
     user.fdxEarned = user.fdxEarned + parseFloat(fdxRequired);
     await user.save();
 
@@ -492,8 +517,8 @@ const purchasedFdxHistory = async (req, res) => {
       { userUuid: req.params.userUuid },
       { 'providerDetails.details': 0 } // This will exclude the 'details' field from each document in the 'providerDetails' array
     );
-    
-    if(!purchasedFdxHistory) {
+
+    if (!purchasedFdxHistory) {
       res.status(200).json({
         message: `User ${req.params.userUuid} purchase history.`,
         history: []
@@ -508,7 +533,7 @@ const purchasedFdxHistory = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: ` An error occurred while getting the history: ${error.message}`,});
+    res.status(500).json({ message: ` An error occurred while getting the history: ${error.message}`, });
   }
 };
 

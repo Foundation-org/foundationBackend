@@ -17,6 +17,18 @@ const create = async (req, res) => {
     const userBalance = await getUserBalance(req.body.uuid);
     if (userBalance <= amount * 1)
       throw new Error("Your balance is insufficient to create this redemption");
+
+    await createLedger({
+      uuid: req.body.uuid,
+      txUserAction: "redemptionCreated",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: req.body.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      // txDescription : "User create redemption code"
+      type: "redemption",
+    });
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
@@ -76,6 +88,18 @@ const transfer = async (req, res) => {
     //   throw new Error("You're already the owner of this redemption");
 
     // Create Ledger
+
+    await createLedger({
+      uuid: getRedeem.owner.uuid,
+      txUserAction: "redemptionTransferred",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: getRedeem.owner.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
     // sender
     await createLedger({
       uuid: getRedeem.owner.uuid,
@@ -92,6 +116,17 @@ const transfer = async (req, res) => {
     // senderSpent.fdxSpent = senderSpent.fdxSpent + getRedeem.amount;
     // await senderSpent.save();
     // Create Ledger
+    await createLedger({
+      uuid: req.body.uuid,
+      txUserAction: "redemptionReceived",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "DAO",
+      txFrom: getRedeem.owner.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
     // receiver
     await createLedger({
       uuid: req.body.uuid,
@@ -183,6 +218,18 @@ const balance = async (req, res) => {
     if (getRedeem.owner.uuid !== uuid) throw new Error("You cannot redeem!");
 
     // Create Ledger
+
+    await createLedger({
+      uuid: req.body.uuid,
+      txUserAction: "balanceRedeem",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: getRedeem.owner.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
     // receiver
     await createLedger({
       uuid: req.body.uuid,
