@@ -2331,7 +2331,7 @@ const getFlickerUrl = async (req, res) => {
       if (response.status === 429) {
         return res.status(429).json({ message: "Too many requests. Please try again later." });
       }
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error("Invalid Flickr photo URL");
     }
 
     // Parse the response as JSON
@@ -2351,7 +2351,7 @@ const getFlickerUrl = async (req, res) => {
   } catch (error) {
     // If an error occurs, return an error response
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: `${error.message}` });
   }
 };
 
