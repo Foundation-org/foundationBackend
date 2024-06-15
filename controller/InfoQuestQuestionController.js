@@ -204,7 +204,7 @@ const constraintForUniqueQuestion = async (req, res) => {
       Question: { $regex: new RegExp(queryQuestion, "i") },
     });
 
-    if (matchingQuestion) {
+    if (matchingQuestion && matchingQuestion?.isActive) {
       // If a matching question is found, it's not unique
       return res.status(200).json({ isUnique: false });
     }
