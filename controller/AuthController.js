@@ -1739,7 +1739,10 @@ const userInfo = async (req, res) => {
       }
     });
 
-    const sharedQuests = await UserQuestSetting.find({ uuid: userUuid });
+    const sharedQuests = await UserQuestSetting.find({
+      uuid: userUuid,
+      linkStatus: { $ne: 'Delete' }
+    });
     const totals = sharedQuests.reduce(
       (acc, quest) => {
         acc.questImpression += quest.questImpression || 0;
