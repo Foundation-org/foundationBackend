@@ -2322,26 +2322,35 @@ const getFlickerUrl = async (req, res) => {
     const flickrUrl = req.query.url;
 
     // Make a GET request to Flickr's API with the dynamic URL
-    const response = await axios.get(
-      `http://www.flickr.com/services/oembed/?format=json&url=${encodeURIComponent(
-        flickrUrl
-      )}`
+    const response = await fetch(
+      `http://www.flickr.com/services/oembed/?format=json&url=${encodeURIComponent(flickrUrl)}`
     );
 
+    // Check if the response is successful
+    if (!response.ok) {
+      if (response.status === 429) {
+        return res.status(429).json({ message: "Too many requests. Please try again later." });
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Parse the response as JSON
+    const data = await response.json();
+
     // Check if the response from Flickr contains the image URL
-    if (!response.data.url) {
+    if (!data.url) {
       // If the response does not contain the image URL, throw an error
       throw new Error("Invalid Flickr photo URL");
     }
 
     // Extract the image URL from the response data
-    const imageUrl = response.data.url;
+    const imageUrl = data.url;
 
     // Return the image URL as the API response
     res.json({ imageUrl });
   } catch (error) {
     // If an error occurs, return an error response
-    // console.error(error);
+    console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
