@@ -310,18 +310,18 @@ const generateCategoryShareLink = async (req, res) => {
                 });
                 // Increment the Treasury
                 await updateTreasury({
-                    amount: 2.5,
+                    amount: USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
                     inc: true,
                 });
                 // Decrement the UserBalance
                 await updateUserBalance({
                     uuid: userUuid,
-                    amount: 2.5,
+                    amount: USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
                     dec: true,
                 });
                 const userSpent = await User.findOne({ uuid: userUuid });
-                userSpent.fdxSpent = userSpent.fdxSpent + 2.5;
-                userSpent.feeSchedual.creatingListCustomLinkFdx = userSpent.feeSchedual.creatingListCustomLinkFdx + 2.5;
+                userSpent.fdxSpent = userSpent.fdxSpent + USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
+                userSpent.feeSchedual.creatingListCustomLinkFdx = userSpent.feeSchedual.creatingListCustomLinkFdx + USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
                 await userSpent.save();
             }
             else {
@@ -333,7 +333,7 @@ const generateCategoryShareLink = async (req, res) => {
                     txAuth: "User",
                     txFrom: userUuid,
                     txTo: "dao",
-                    txAmount: "0",
+                    txAmount: 0,
                     txData: userUuid,
                     // txDescription : "User changes password"
                 });
