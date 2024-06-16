@@ -1756,7 +1756,7 @@ const userInfo = async (req, res) => {
       { uuid: userUuid },
       { _id: 1 }
     );
-    const questsIdsArray = questsIds.map((doc) => doc._id);
+    const questsIdsArray = questsIds.map((doc) => doc._id.toString());
 
     const result = await UserQuestSetting.aggregate([
       { $match: { hidden: true, questForeignKey: { $in: questsIdsArray }, uuid: { $ne: userUuid } } },
@@ -1787,6 +1787,8 @@ const userInfo = async (req, res) => {
         $count: "suppressedPostCount"
       }
     ]);
+
+    console.log(suppressedPosts)
     
     const suppressQuestsCount = suppressedPosts.length > 0 ? suppressedPosts[0].suppressedPostCount : 0;
 
