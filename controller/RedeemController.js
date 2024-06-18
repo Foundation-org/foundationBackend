@@ -47,11 +47,11 @@ const create = async (req, res) => {
       amount: amount,
       dec: true,
     });
-    User.fdxSpent = User.fdxSpent + amount;
+    User.fdxSpent = User.fdxSpent + Number(amount);
     User.redemptionStatistics.myTotalRedemptionCodeCreationCount =
       User.redemptionStatistics.myTotalRedemptionCodeCreationCount + 1;
     User.redemptionStatistics.createCodeFdxSpent =
-      User.redemptionStatistics.createCodeFdxSpent + amount;
+      User.redemptionStatistics.createCodeFdxSpent + Number(amount);
     await User.save();
     //   Generate unique code
     req.body.code = shortlink.generate(10);
