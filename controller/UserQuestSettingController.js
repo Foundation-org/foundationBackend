@@ -209,7 +209,7 @@ const customLink = async (req, res) => {
       });
 
     const user = await UserModel.findOne({ uuid: req.body.uuid });
-    if (user.balance < 2.5) {
+    if (user.balance < USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT) {
       return res.status(409).json({
         message: `Insufficient balance`,
       });
