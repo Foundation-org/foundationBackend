@@ -47,7 +47,9 @@ const {
   DELETE_MY_LIST,
   REMOVE_MY_OBJECTION,
   ADD_OBJECTION_TO_POST,
-  HIDE_POST
+  HIDE_POST,
+  MY_POST_ENGAGEMENT,
+  SHARED_POST_ENGAGEMENT
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
@@ -2768,7 +2770,9 @@ const getConstants = async (req, res) => {
       DELETE_MY_LIST,
       REMOVE_MY_OBJECTION,
       ADD_OBJECTION_TO_POST,
-      HIDE_POST
+      HIDE_POST,
+      MY_POST_ENGAGEMENT,
+      SHARED_POST_ENGAGEMENT
     };
     // console.log(variables);
     res.status(200).json(variables);
