@@ -39,7 +39,15 @@ const {
   LIST_LINK,
   LIST_SHARE,
   TRANSACTION,
-  USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT
+  USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+  LIST_SHARE_ENGAGEMENT,
+  ADD_POST_TO_LIST,
+  REMOVE_BADGE,
+  DELETE_MY_POST,
+  DELETE_MY_LIST,
+  REMOVE_MY_OBJECTION,
+  ADD_OBJECTION_TO_POST,
+  HIDE_POST
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
@@ -2752,7 +2760,15 @@ const getConstants = async (req, res) => {
       LIST_CREATE,
       LIST_LINK,
       LIST_SHARE,
-      TRANSACTION
+      TRANSACTION,
+      LIST_SHARE_ENGAGEMENT,
+      ADD_POST_TO_LIST,
+      REMOVE_BADGE,
+      DELETE_MY_POST,
+      DELETE_MY_LIST,
+      REMOVE_MY_OBJECTION,
+      ADD_OBJECTION_TO_POST,
+      HIDE_POST
     };
     // console.log(variables);
     res.status(200).json(variables);
