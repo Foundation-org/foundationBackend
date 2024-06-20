@@ -1847,6 +1847,7 @@ const userInfo = async (req, res) => {
         }),
         myCreatedQuestsCount: await InfoQuestQuestions.countDocuments({
           uuid: userUuid,
+          isActive: true,
         }),
         myQuestsEngagementCount: await StartQuests.countDocuments({
           uuid: userUuid,
