@@ -280,6 +280,10 @@ const generateCategoryShareLink = async (req, res) => {
 
         if (customizedLink && categoryDoc.isLinkUserCustomized) throw new Error("Link can be customized only once.")
 
+        const user = await User.findOne({uuid: userUuid});
+
+        if(customizedLink && user.balance <= USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT) throw new Error("Link Cannot be customized, Insufficient Balance");
+
         if (categoryDoc.link === null || !categoryDoc.isLinkUserCustomized) {
             if (customizedLink) {
                 categoryDoc.link = customizedLink;
