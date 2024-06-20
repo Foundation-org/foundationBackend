@@ -24,7 +24,7 @@ const create = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionCreated",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: req.body.uuid,
       txTo: "dao",
@@ -36,7 +36,7 @@ const create = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionCreated",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: req.body.uuid,
       txTo: req.body.uuid,
@@ -98,7 +98,7 @@ const transfer = async (req, res) => {
     await createLedger({
       uuid: getRedeem.owner.uuid,
       txUserAction: "redemptionTransferred",
-      txID: ledger.txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: getRedeem.owner.uuid,
       txTo: "dao",
@@ -110,7 +110,7 @@ const transfer = async (req, res) => {
     await createLedger({
       uuid: getRedeem.owner.uuid,
       txUserAction: "redemptionTransferred",
-      txID: ledger.txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: getRedeem.owner.uuid,
       txTo: req.body.uuid,
@@ -125,7 +125,7 @@ const transfer = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionReceived",
-      txID: ledger.txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: getRedeem.owner.uuid,
       txTo: "dao",
@@ -137,7 +137,7 @@ const transfer = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionReceived",
-      txID: ledger.txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: getRedeem.owner.uuid,
       txTo: req.body.uuid,
@@ -192,7 +192,7 @@ const deleteRedeem = async (req, res) => {
     await createLedger({
       uuid: uuid,
       txUserAction: "redemptionDeleted",
-      txID: ledger.txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: deletedRedeem.owner.uuid,
       txTo: req.body.uuid,
@@ -231,7 +231,7 @@ const balance = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "balanceRedeem",
-      txID: ledger.txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: getRedeem.owner.uuid,
       txTo: "dao",
@@ -243,7 +243,7 @@ const balance = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "balanceRedeem",
-      txID: ledger.txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "DAO",
       txFrom: getRedeem.owner.uuid,
       txTo: req.body.uuid,
