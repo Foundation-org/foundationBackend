@@ -83,41 +83,76 @@ const getAll = async (req, res) => {
 
 const search = async (req, res) => {
   try {
-    const { page, limit, sort, term, type, uuid } = req.body.params;
+    const { page, limit, sort, term, txAuth, uuid } = req.body.params;
     const skip = (page - 1) * limit;
     const searchTerm = term || "";
 
-    const ledger = await Ledgers.find({
-      type,
-      uuid,
-      $or: [
-        { txUserAction: { $regex: searchTerm, $options: "i" } },
-        { txID: { $regex: searchTerm, $options: "i" } },
-        { txData: { $regex: searchTerm, $options: "i" } },
-      ],
-    })
-      .sort(sort === "newest" ? { _id: 1 } : { _id: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
+    if(txAuth){
+      const ledger = await Ledgers.find({
+        txAuth,
+        uuid,
+        $or: [
+          { txUserAction: { $regex: searchTerm, $options: "i" } },
+          { txID: { $regex: searchTerm, $options: "i" } },
+          { txData: { $regex: searchTerm, $options: "i" } },
+        ],
+      })
+        .sort(sort === "newest" ? { _id: 1 } : { _id: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+  
+      const totalCount = await Ledgers.countDocuments({
+        // type,
+        uuid,
+        $or: [
+          { txUserAction: { $regex: searchTerm, $options: "i" } },
+          { txID: { $regex: searchTerm, $options: "i" } },
+          { txData: { $regex: searchTerm, $options: "i" } },
+        ],
+      });
+      const pageCount = Math.ceil(totalCount / limit);
+      //console.log(pageCount);
+      //console.log(totalCount);
+  
+      res.status(200).json({
+        data: ledger,
+        pageCount,
+        totalCount,
+      });
+    } else {
+      const ledger = await Ledgers.find({
+        uuid,
+        $or: [
+          { txUserAction: { $regex: searchTerm, $options: "i" } },
+          { txID: { $regex: searchTerm, $options: "i" } },
+          { txData: { $regex: searchTerm, $options: "i" } },
+        ],
+      })
+        .sort(sort === "newest" ? { _id: 1 } : { _id: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+  
+      const totalCount = await Ledgers.countDocuments({
+        // type,
+        txAuth,
+        uuid,
+        $or: [
+          { txUserAction: { $regex: searchTerm, $options: "i" } },
+          { txID: { $regex: searchTerm, $options: "i" } },
+          { txData: { $regex: searchTerm, $options: "i" } },
+        ],
+      });
+      const pageCount = Math.ceil(totalCount / limit);
+      //console.log(pageCount);
+      //console.log(totalCount);
+  
+      res.status(200).json({
+        data: ledger,
+        pageCount,
+        totalCount,
+      });
 
-    const totalCount = await Ledgers.countDocuments({
-      type,
-      uuid,
-      $or: [
-        { txUserAction: { $regex: searchTerm, $options: "i" } },
-        { txID: { $regex: searchTerm, $options: "i" } },
-        { txData: { $regex: searchTerm, $options: "i" } },
-      ],
-    });
-    const pageCount = Math.ceil(totalCount / limit);
-    //console.log(pageCount);
-    //console.log(totalCount);
-
-    res.status(200).json({
-      data: ledger,
-      pageCount,
-      totalCount,
-    });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({
