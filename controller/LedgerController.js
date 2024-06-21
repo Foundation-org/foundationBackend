@@ -24,46 +24,29 @@ const getById = async (req, res) => {
     const filterObj = {};
     if (txAuth) {
       filterObj.txAuth = txAuth;
-      filterObj.uuid = uuid
       // filterObj.$or = [
       //   { txFrom: { $regex: "DAO Treasury", $options: "i" } }, // Case-insensitive match for txFrom
       //   { txTo: { $regex: "DAO Treasury", $options: "i" } }    // Case-insensitive match for txTo
       // ]
-      const skip = (page - 1) * limit;
-
-      const ledger = await Ledgers.find(filterObj)
-        // .sort({ _id: 1 }) // Adjust the sorting based on your needs
-        .sort(req.query.sort === "newest" ? { _id: -1 } : { _id: 1 }) // Adjust the sorting based on your needs
-        .skip(skip)
-        .limit(parseInt(limit));
-  
-      const totalCount = await Ledgers.countDocuments(filterObj);
-      const pageCount = Math.ceil(totalCount / limit);
-  
-      res.status(200).json({
-        data: ledger,
-        pageCount,
-        totalCount,
-      });
     } else {
       filterObj.uuid = uuid
-      const skip = (page - 1) * limit;
-
-      const ledger = await Ledgers.find(filterObj)
-        // .sort({ _id: 1 }) // Adjust the sorting based on your needs
-        .sort(req.query.sort === "newest" ? { _id: -1 } : { _id: 1 }) // Adjust the sorting based on your needs
-        .skip(skip)
-        .limit(parseInt(limit));
-  
-      const totalCount = await Ledgers.countDocuments(filterObj);
-      const pageCount = Math.ceil(totalCount / limit);
-  
-      res.status(200).json({
-        data: ledger,
-        pageCount,
-        totalCount,
-      });
     }
+    const skip = (page - 1) * limit;
+
+    const ledger = await Ledgers.find(filterObj)
+      // .sort({ _id: 1 }) // Adjust the sorting based on your needs
+      .sort(req.query.sort === "newest" ? { _id: -1 } : { _id: 1 }) // Adjust the sorting based on your needs
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const totalCount = await Ledgers.countDocuments(filterObj);
+    const pageCount = Math.ceil(totalCount / limit);
+
+    res.status(200).json({
+      data: ledger,
+      pageCount,
+      totalCount,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
