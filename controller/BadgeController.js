@@ -2183,12 +2183,12 @@ const addPasswordBadgesUpdate = async (req, res) => {
       user.badges = updatedUserBadges;
       user.isPasswordEncryption = true;
       await user.save();
-
+      const txID = crypto.randomBytes(11).toString("hex");
       // Create Ledger
       await createLedger({
         uuid: user.uuid,
         txUserAction: "accountBadgeAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: user.uuid,
         txTo: "dao",
@@ -2199,7 +2199,7 @@ const addPasswordBadgesUpdate = async (req, res) => {
       await createLedger({
         uuid: user.uuid,
         txUserAction: "accountBadgeAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: "DAO Treasury",
         txTo: user.uuid,

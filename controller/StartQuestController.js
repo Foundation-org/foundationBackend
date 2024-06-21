@@ -76,8 +76,7 @@ const createStartQuest = async (req, res) => {
       { $inc: { yourPostEngaged: 1 } }
     );
 
-    if (req.body.isSharedLinkAns) {
-      // Increament $inc userQuest submtted count if questForeignKey exist in UserQuestSetting Model
+    if (req.body.isSharedLinkAns) {// Increament $inc userQuest submtted count if questForeignKey exist in UserQuestSetting Model
       await UserQuestSetting.findOneAndUpdate(
         { questForeignKey: req.body.questForeignKey, link: req.body.postLink },
         { $inc: { questsCompleted: 1 } } // Increment questImpression field by 1
@@ -316,12 +315,13 @@ const createStartQuest = async (req, res) => {
           },
         }
       );
+      const txID2 = crypto.randomBytes(11).toString("hex");
 
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionAdded",
-        txID: txID,
+        txID: txID2,
         txAuth: "User",
         txFrom: req.body.questForeignKey,
         txTo: "dao",
@@ -333,7 +333,7 @@ const createStartQuest = async (req, res) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionAdded",
-        txID: txID,
+        txID: txID2,
         txAuth: "DAO",
         txFrom: "DAO Treasury",
         txTo: req.body.uuid,
@@ -406,11 +406,14 @@ const createStartQuest = async (req, res) => {
       { uuid: req.body.uuid },
       { $addToSet: { completedQuests: getInfoQuestQuestion._id } }
     );
+
+    const txID3 = crypto.randomBytes(11).toString("hex");
+
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "postCompleted",
-      txID: txID,
+      txID: txID3,
       txAuth: "User",
       txFrom: req.body.uuid,
       txTo: "dao",
@@ -422,7 +425,7 @@ const createStartQuest = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "postCompleted",
-      txID: txID,
+      txID: txID3,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: req.body.uuid,
@@ -448,7 +451,7 @@ const createStartQuest = async (req, res) => {
     await createLedger({
       uuid: getInfoQuestQuestion.uuid,
       txUserAction: "postCompletedUser",
-      txID: txID,
+      txID: txID3,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: getInfoQuestQuestion.uuid,
@@ -783,12 +786,13 @@ async function createStartQuestUserList(req, res) {
           },
         }
       );
+      const txID2 = crypto.randomBytes(11).toString("hex");
 
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionAdded",
-        txID: txID,
+        txID: txID2,
         txAuth: "User",
         txFrom: req.body.questForeignKey,
         txTo: "dao",
@@ -800,7 +804,7 @@ async function createStartQuestUserList(req, res) {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionAdded",
-        txID: txID,
+        txID: txID2,
         txAuth: "DAO",
         txFrom: "DAO Treasury",
         txTo: req.body.uuid,
@@ -872,11 +876,14 @@ async function createStartQuestUserList(req, res) {
       { uuid: req.body.uuid },
       { $addToSet: { completedQuests: getInfoQuestQuestion._id } }
     );
+
+    const txID3 = crypto.randomBytes(11).toString("hex");
+
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "postCompleted",
-      txID: txID,
+      txID: txID3,
       txAuth: "User",
       txFrom: req.body.uuid,
       txTo: "dao",
@@ -888,7 +895,7 @@ async function createStartQuestUserList(req, res) {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "postCompleted",
-      txID: txID,
+      txID: txID3,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: req.body.uuid,
@@ -912,7 +919,7 @@ async function createStartQuestUserList(req, res) {
     await createLedger({
       uuid: getInfoQuestQuestion.uuid,
       txUserAction: "postCompletedUser",
-      txID: txID,
+      txID: txID3,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: getInfoQuestQuestion.uuid,
@@ -1149,13 +1156,6 @@ const updateChangeAnsStartQuest = async (req, res) => {
 
     //check if ledger already exists
 
-    let txID;
-    const ledger = await Ledgers.findOne({ uuid: req.body.uuid, txUserAction: "postCompleted", txData: req.body.questId })
-    if (ledger) {
-      txID = ledger.txID;
-    } else {
-      throw new Error("Ledger doesnot exists")
-    }
 
 
     // Increment Counter
@@ -1166,6 +1166,9 @@ const updateChangeAnsStartQuest = async (req, res) => {
         QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter
       )
         throw new Error("The balance is insufficient to give the contention!");
+
+
+      const txID = crypto.randomBytes(11).toString("hex")
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
@@ -1205,11 +1208,14 @@ const updateChangeAnsStartQuest = async (req, res) => {
       userSpent.fdxSpent = userSpent.fdxSpent + (QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter);
       await userSpent.save();
     } else if (contentionGivenCounter < 0) {
+
+
+      const txID2 = crypto.randomBytes(11).toString("hex")
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionRemoved",
-        txID: txID,
+        txID: txID2,
         txAuth: "User",
         txFrom: req.body.uuid,
         txTo: "dao",
@@ -1221,7 +1227,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionRemoved",
-        txID: txID,
+        txID: txID2,
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
@@ -1423,11 +1429,12 @@ const updateChangeAnsStartQuest = async (req, res) => {
           }
         );
 
+        const txID3 = crypto.randomBytes(11).toString("hex")
         // Create Ledger
         await createLedger({
           uuid: req.body.uuid,
           txUserAction: "postCompletedChange",
-          txID: txID,
+          txID: txID3,
           txAuth: "User",
           txFrom: req.body.uuid,
           txTo: "dao",
@@ -1712,6 +1719,9 @@ const updateChangeAnsStartQuestUserList = async (req) => {
         QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter
       )
         throw new Error("The balance is insufficient to give the contention!");
+
+
+      const txID = crypto.randomBytes(11).toString("hex")
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
@@ -1751,11 +1761,14 @@ const updateChangeAnsStartQuestUserList = async (req) => {
       userSpent.fdxSpent = userSpent.fdxSpent + (QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter);
       await userSpent.save();
     } else if (contentionGivenCounter < 0) {
+
+
+      const txID2 = crypto.randomBytes(11).toString("hex")
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionRemoved",
-        txID: txID,
+        txID: txID2,
         txAuth: "User",
         txFrom: req.body.uuid,
         txTo: "dao",
@@ -1767,7 +1780,7 @@ const updateChangeAnsStartQuestUserList = async (req) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionRemoved",
-        txID: txID,
+        txID: txID2,
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
@@ -1968,11 +1981,13 @@ const updateChangeAnsStartQuestUserList = async (req) => {
             },
           }
         );
+
+        const txID3 = crypto.randomBytes(11).toString("hex")
         // Create Ledger
         await createLedger({
           uuid: req.body.uuid,
           txUserAction: "postCompletedChange",
-          txID: txID,
+          txID: txID3,
           txAuth: "User",
           txFrom: req.body.uuid,
           txTo: "dao",

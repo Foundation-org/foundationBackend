@@ -32,12 +32,12 @@ const googleHandler = async (req, res) => {
       const newUser = await new User({
         email: payload._json.email,
         uuid: uuid,
-        role: 'user' 
+        role: 'user'
       });
 
       let type = "";
       // Check Email Category
-      if(payload._json.email === "google") {
+      if (payload._json.email === "google") {
         const emailStatus = await eduEmailCheck(req, res, payload._json.email);
         if (emailStatus.status === "OK") type = "Education";
       } else {
@@ -53,12 +53,12 @@ const googleHandler = async (req, res) => {
 
       // Update newUser verification status to true
       newUser.gmailVerified = payload._json.email_verified;
-
+      const txID = crypto.randomBytes(11).toString("hex");
       // Create Ledger
       await createLedger({
         uuid: uuid,
         txUserAction: "accountBadgeAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: uuid,
         txTo: "dao",
@@ -69,7 +69,7 @@ const googleHandler = async (req, res) => {
       await createLedger({
         uuid: uuid,
         txUserAction: "accountBadgeAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: "DAO Treasury",
         txTo: uuid,
@@ -153,11 +153,12 @@ const addBadge = async (req, res) => {
     // Update the action
     await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
@@ -168,7 +169,7 @@ const addBadge = async (req, res) => {
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,

@@ -119,18 +119,7 @@ const transfer = async (req, res) => {
     // const senderSpent = await UserModel.findOne({uuid: getRedeem.owner.uuid});
     // senderSpent.fdxSpent = senderSpent.fdxSpent + getRedeem.amount;
     // await senderSpent.save();
-    // Create Ledger
-    await createLedger({
-      uuid: req.body.uuid,
-      txUserAction: "redemptionReceived",
-      txID: txID,
-      txAuth: "DAO",
-      txFrom: getRedeem.owner.uuid,
-      txTo: "dao",
-      txAmount: "0",
-      // txDescription : "User update redemption code"
-      type: "redemption",
-    });
+
     // receiver
     await createLedger({
       uuid: req.body.uuid,

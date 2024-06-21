@@ -104,14 +104,6 @@ const changePassword = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const newHashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
-    let txID;
-    const ledger = await Ledgers.findOne({ uuid: req.body.uuid, txUserAction: "accountPasswordChange", txData: req.body.questId })
-    if (ledger) {
-      txID = ledger.txID;
-    } else {
-      txID = crypto.randomBytes(11).toString("hex");
-    }
-
     // Update the user's password
     user.password = newHashedPassword;
     await user.save();
@@ -119,7 +111,7 @@ const changePassword = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountPasswordChange",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
@@ -207,7 +199,7 @@ const signUpUser = async (req, res) => {
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
@@ -308,15 +300,12 @@ const signUpUserBySocialLogin = async (req, res) => {
         });
         throw new Error("User not created due to list");
       }
-    }
-
-    const txID = crypto.randomBytes(11).toString("hex")
-
+    } d
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
@@ -328,7 +317,7 @@ const signUpUserBySocialLogin = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountLogin",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
@@ -336,6 +325,8 @@ const signUpUserBySocialLogin = async (req, res) => {
       txData: type,
       // txDescription : "user logs in"
     });
+    const txID = crypto.randomBytes(11).toString("hex");
+
     // Create Ledger
     await createLedger({
       uuid: uuid,
@@ -488,13 +479,11 @@ const signUpUserBySocialBadges = async (req, res) => {
         throw new Error("User not created due to list");
       }
     }
-
-    const txID = crypto.randomBytes(11).toString("hex");
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
@@ -506,7 +495,7 @@ const signUpUserBySocialBadges = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountLogin",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
@@ -518,7 +507,7 @@ const signUpUserBySocialBadges = async (req, res) => {
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
@@ -526,6 +515,9 @@ const signUpUserBySocialBadges = async (req, res) => {
       txData: payload.type,
       // txDescription : "User adds a verification badge"
     });
+
+    const txID = crypto.randomBytes(11).toString("hex");
+
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
@@ -597,7 +589,7 @@ const signInUser = async (req, res) => {
       await createLedger({
         uuid: user.uuid,
         txUserAction: "accountLoginFail",
-        txID: txID,
+        txID: crypto.randomBytes(11).toString("hex"),
         txAuth: "User",
         txFrom: user.uuid,
         txTo: "dao",
@@ -615,7 +607,7 @@ const signInUser = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountLogin",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
@@ -864,13 +856,11 @@ const signUpSocialGuestMode = async (req, res) => {
       }
     }
 
-    const txID = crypto.randomBytes(11).toString("hex");
-
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
@@ -882,7 +872,7 @@ const signUpSocialGuestMode = async (req, res) => {
     await createLedger({
       uuid: updatedUser.uuid,
       txUserAction: "accountLogin",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
@@ -890,6 +880,8 @@ const signUpSocialGuestMode = async (req, res) => {
       txData: type,
       // txDescription : "user logs in"
     });
+
+    const txID = crypto.randomBytes(11).toString("hex");
     // Create Ledger
     await createLedger({
       uuid: uuid,
@@ -1059,13 +1051,11 @@ const signUpGuestBySocialBadges = async (req, res) => {
         throw new Error("User not created due to list");
       }
     }
-
-    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
@@ -1077,7 +1067,7 @@ const signUpGuestBySocialBadges = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountLogin",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
@@ -1085,6 +1075,8 @@ const signUpGuestBySocialBadges = async (req, res) => {
       txData: payload.type,
       // txDescription : "user logs in"
     });
+
+    const txID = crypto.randomBytes(11).toString("hex");
     // Create Ledger
     await createLedger({
       uuid: uuid,
@@ -2421,13 +2413,7 @@ const verify = async (req, res) => {
     await user.save();
 
 
-    let txID;
-    const ledger = await Ledgers.findOne({ uuid: req.user.uuid, txUserAction: "accountCreated" })
-    if (ledger) {
-      txID = ledger.txID;
-    } else {
-      throw new Error("Ledger doesnot exists")
-    }
+    const txID = crypto.randomBytes(11).toString("hex");
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
@@ -2454,7 +2440,7 @@ const verify = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountLogin",
-      txID: txID,
+      txID: crypto.randomBytes(11).toString("hex"),
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",

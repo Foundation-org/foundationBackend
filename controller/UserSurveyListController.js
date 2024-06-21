@@ -334,7 +334,7 @@ const generateCategoryShareLink = async (req, res) => {
                 await createLedger({
                     uuid: userUuid,
                     txUserAction: "postListLinkCreated",
-                    txID: txID,
+                    txID: crypto.randomBytes(11).toString("hex"),
                     txAuth: "User",
                     txFrom: userUuid,
                     txTo: "dao",
