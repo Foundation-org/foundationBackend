@@ -40,6 +40,7 @@ const easySearch = async (req, res) => {
         $gte: moderationRatingFilter?.initial,
         $lte: moderationRatingFilter?.final,
       },
+      isActive: true,
     }).populate("getUserBadge", "badges");
 
     const resultArray = results.map(getPercentage);
