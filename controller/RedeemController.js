@@ -24,7 +24,7 @@ const create = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: req.body.uuid,
       txTo: "dao",
@@ -36,7 +36,7 @@ const create = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: req.body.uuid,
       txTo: req.body.uuid,
@@ -91,14 +91,12 @@ const transfer = async (req, res) => {
     //   throw new Error("You're already the owner of this redemption");
 
     // Create Ledger
-
-    const ledger = await Ledgers.findOne({ uuid: uuid, txUserAction: "redemptionCreated" })
-
+    const txID = crypto.randomBytes(11).toString("hex")
 
     await createLedger({
       uuid: getRedeem.owner.uuid,
       txUserAction: "redemptionTransferred",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: getRedeem.owner.uuid,
       txTo: "dao",
@@ -110,7 +108,7 @@ const transfer = async (req, res) => {
     await createLedger({
       uuid: getRedeem.owner.uuid,
       txUserAction: "redemptionTransferred",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: getRedeem.owner.uuid,
       txTo: req.body.uuid,
@@ -125,7 +123,7 @@ const transfer = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionReceived",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: getRedeem.owner.uuid,
       txTo: "dao",
@@ -137,7 +135,7 @@ const transfer = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionReceived",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: getRedeem.owner.uuid,
       txTo: req.body.uuid,
@@ -186,13 +184,13 @@ const deleteRedeem = async (req, res) => {
       "uuid"
     );
     // if (!deletedRedeem) throw new Error("Code is invalid!");
-    const ledger = await Ledgers.findOne({ uuid: uuid, txUserAction: "redemptionCreated" })
+    const txID = crypto.randomBytes(11).toString("hex")
 
     // Create ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "redemptionDeleted",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: deletedRedeem.owner.uuid,
       txTo: req.body.uuid,
@@ -226,12 +224,12 @@ const balance = async (req, res) => {
 
     // Create Ledger
 
-    const ledger = await Ledgers.findOne({ uuid: uuid, txUserAction: "redemptionCreated" })
+    const txID = crypto.randomBytes(11).toString("hex")
 
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "balanceRedeem",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: getRedeem.owner.uuid,
       txTo: "dao",
@@ -243,7 +241,7 @@ const balance = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "balanceRedeem",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: getRedeem.owner.uuid,
       txTo: req.body.uuid,

@@ -86,6 +86,7 @@ const {
   userCustomizedDecryptData,
 } = require("../utils/security");
 const Treasury = require("../models/Treasury");
+const Ledgers = require("../models/Ledgers");
 
 const changePassword = async (req, res) => {
   try {
@@ -103,6 +104,14 @@ const changePassword = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const newHashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
+    let txID;
+    const ledger = await Ledgers.findOne({ uuid: req.body.uuid, txUserAction: "accountPasswordChange", txData: req.body.questId })
+    if (ledger) {
+      txID = ledger.txID;
+    } else {
+      txID = crypto.randomBytes(11).toString("hex");
+    }
+
     // Update the user's password
     user.password = newHashedPassword;
     await user.save();
@@ -110,7 +119,7 @@ const changePassword = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountPasswordChange",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
@@ -192,16 +201,18 @@ const signUpUser = async (req, res) => {
       }
     }
 
+    const txID = crypto.randomBytes(11).toString("hex");
+
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: uuid,
+      txData: "email",
       // txDescription : "User creates a new account"
     });
     // Create Ledger
@@ -299,51 +310,53 @@ const signUpUserBySocialLogin = async (req, res) => {
       }
     }
 
+    const txID = crypto.randomBytes(11).toString("hex")
+
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: uuid,
+      txData: type,
       // txDescription : "User creates a new account"
     });
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountLogin",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.uuid,
+      txData: type,
       // txDescription : "user logs in"
     });
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.badges[0]._id,
+      txData: type,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : user.badges[0]._id,
+      txData: type,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -476,51 +489,52 @@ const signUpUserBySocialBadges = async (req, res) => {
       }
     }
 
+    const txID = crypto.randomBytes(11).toString("hex");
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: uuid,
+      txData: payload.type,
       // txDescription : "User creates a new account"
     });
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountLogin",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.uuid,
+      txData: payload.type,
       // txDescription : "user logs in"
     });
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.badges[0]._id,
+      txData: payload.type,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : user.badges[0]._id,
+      txData: payload.type,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -576,12 +590,14 @@ const signInUser = async (req, res) => {
 
     const compPass = await bcrypt.compare(req.body.password, user.password);
 
+    const txID = crypto.randomBytes(11).toString("hex");
+
     if (!compPass) {
       // Create Ledger
       await createLedger({
         uuid: user.uuid,
         txUserAction: "accountLoginFail",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: user.uuid,
         txTo: "dao",
@@ -599,7 +615,7 @@ const signInUser = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountLogin",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
@@ -755,7 +771,7 @@ const signUpGuestMode = async (req, res) => {
       txFrom: req.body.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: req.body.uuid,
+      txData: "email",
     });
 
     await sendVerifyEmailGuest(req, res);
@@ -848,51 +864,53 @@ const signUpSocialGuestMode = async (req, res) => {
       }
     }
 
+    const txID = crypto.randomBytes(11).toString("hex");
+
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: uuid,
+      txData: type,
       // txDescription : "User creates a new account"
     });
     // Create Ledger
     await createLedger({
       uuid: updatedUser.uuid,
       txUserAction: "accountLogin",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: updatedUser.uuid,
+      txData: type,
       // txDescription : "user logs in"
     });
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: updatedUser.badges[0]._id,
+      txData: type,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : user.badges[0]._id,
+      txData: type,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -1041,51 +1059,53 @@ const signUpGuestBySocialBadges = async (req, res) => {
         throw new Error("User not created due to list");
       }
     }
+
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: uuid,
+      txData: payload.type,
       // txDescription : "User creates a new account"
     });
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountLogin",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.uuid,
+      txData: payload.type,
       // txDescription : "user logs in"
     });
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.badges[0]._id,
+      txData: payload.type,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : user.badges[0]._id,
+      txData: payload.type,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -1143,7 +1163,7 @@ const signInUserBySocialLogin = async (req, res) => {
       txFrom: user.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.uuid,
+      txData: user?.badges[0]?.accountName,
       // txDescription : "user logs in"
     });
 
@@ -1261,7 +1281,7 @@ const signInUserBySocialBadges = async (req, res) => {
       txFrom: user.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.uuid,
+      txData: payload.type,
       // txDescription : "user logs in"
     });
 
@@ -1772,7 +1792,7 @@ const userInfo = async (req, res) => {
       { $match: { hidden: true, questForeignKey: { $in: questsIdsArray }, uuid: { $ne: userUuid } } },
       { $group: { _id: null, uniqueQuests: { $addToSet: "$questForeignKey" } } },
       { $project: { _id: 0, totalCount: { $size: "$uniqueQuests" } } },
-    ]);    
+    ]);
 
     const otherHidingOurQuestsCount =
       result.length > 0 ? result[0].totalCount : 0;
@@ -1796,7 +1816,7 @@ const userInfo = async (req, res) => {
       {
         $count: "suppressedPostCount"
       }
-    ]);    
+    ]);
     const suppressQuestsCount = suppressedPosts.length > 0 ? suppressedPosts[0].suppressedPostCount : 0;
 
     // Total shared lists count for a specific user
@@ -2399,28 +2419,47 @@ const verify = async (req, res) => {
     user.gmailVerified = true;
     user.verification = true;
     await user.save();
+
+
+    let txID;
+    const ledger = await Ledgers.findOne({ uuid: req.user.uuid, txUserAction: "accountCreated" })
+    if (ledger) {
+      txID = ledger.txID;
+    } else {
+      throw new Error("Ledger doesnot exists")
+    }
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.badges[0]._id,
+      txData: user.badges[0]?.accountName,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: user.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: user.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : user.badges[0]._id,
-      // txDescription : "Incentive for adding badges"
+      txData: user.badges[0]?.accountName,      // txDescription : "Incentive for adding badges"
+    });
+
+    await createLedger({
+      uuid: user.uuid,
+      txUserAction: "accountLogin",
+      txID: txID,
+      txAuth: "User",
+      txFrom: user.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: user.badges[0]?.accountName,      // txDescription : "user logs in"
     });
     //
     // Decrement the Treasury

@@ -686,11 +686,14 @@ const ledgerEntryPostLinkCreated = async (uuid) => {
 
 const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
   try {
+
+
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "postLinkCreatedCustom",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
@@ -703,7 +706,7 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
     await createLedger({
       uuid: uuid,
       txUserAction: "postLinkCreatedCustom",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: uuid,
@@ -733,11 +736,13 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
 
 const ledgerEntryAdded = async (uuid, questOwnerUuid) => {
   try {
+
+    const txID = crypto.randomBytes(11).toString("hex")
     // User
     await createLedger({
       uuid: uuid,
       txUserAction: "postHiddenAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
@@ -748,7 +753,7 @@ const ledgerEntryAdded = async (uuid, questOwnerUuid) => {
     await createLedger({
       uuid: questOwnerUuid,
       txUserAction: "postHiddenAddedUser",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: questOwnerUuid,
       txTo: "dao",
@@ -763,11 +768,14 @@ const ledgerEntryAdded = async (uuid, questOwnerUuid) => {
 
 const ledgerEntryRemoved = async (uuid, questOwnerUuid) => {
   try {
+
+
+    const txID = crypto.randomBytes(11).toString("hex")
     // User
     await createLedger({
       uuid: uuid,
       txUserAction: "postHiddenRemoved",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: uuid,
       txTo: "dao",
@@ -778,7 +786,7 @@ const ledgerEntryRemoved = async (uuid, questOwnerUuid) => {
     await createLedger({
       uuid: questOwnerUuid,
       txUserAction: "postHiddenRemovedUser",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: questOwnerUuid,
       txTo: "dao",

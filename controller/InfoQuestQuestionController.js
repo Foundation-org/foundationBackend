@@ -72,11 +72,13 @@ const createInfoQuestQuest = async (req, res) => {
     // Save the updated user object
     await user.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
+
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
       txUserAction: "postCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "dao",
@@ -88,12 +90,12 @@ const createInfoQuestQuest = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "postCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: user.uuid,
       txTo: "DAO Treasury",
       txAmount: QUEST_CREATED_AMOUNT,
-      // txData : createdQuestion._id,
+      txData: createdQuestion._id,
       // txDescription : "Incentive for creating a quest"
     });
     // Increment the Treasury
@@ -147,16 +149,19 @@ const deleteInfoQuestQuest = async (req, res) => {
     user.questsCreated -= 1;
     await user.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
+
+
     // Create Ledger
     await createLedger({
       uuid: user.uuid,
       txUserAction: "postDeleted",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: user.uuid,
       txTo: "DAO",
       txAmount: 0,
-      txData: user.uuid,
+      txData: req.params.questId,
       txDate: Date.now(),
       txDescription: "User deleted a Post",
     });
@@ -164,14 +169,14 @@ const deleteInfoQuestQuest = async (req, res) => {
     await createLedger({
       uuid: user.uuid,
       txUserAction: "postDeleted",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: user.uuid,
       txAmount: QUEST_CREATED_AMOUNT,
       txDate: Date.now(),
       txDescription: "User deleted a Post",
-      // txData : createdQuestion._id,
+      txData: req.params.questId,
       // txDescription : "Incentive for creating a quest"
     });
     // Increment the Treasury

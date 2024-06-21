@@ -282,6 +282,7 @@ const generateCategoryShareLink = async (req, res) => {
 
         const user = await User.findOne({ uuid: userUuid });
 
+        const txID = crypto.randomBytes(11).toString("hex")
         if (customizedLink && user.balance <= USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT) throw new Error("Insufficient Balance");
 
         if (categoryDoc.link === null || !categoryDoc.isLinkUserCustomized) {
@@ -291,7 +292,7 @@ const generateCategoryShareLink = async (req, res) => {
                 await createLedger({
                     uuid: userUuid,
                     txUserAction: "postListLinkCreatedCustom",
-                    txID: crypto.randomBytes(11).toString("hex"),
+                    txID: txID,
                     txAuth: "User",
                     txFrom: userUuid,
                     txTo: "dao",
@@ -304,7 +305,7 @@ const generateCategoryShareLink = async (req, res) => {
                 await createLedger({
                     uuid: userUuid,
                     txUserAction: "postListLinkCreatedCustom",
-                    txID: crypto.randomBytes(11).toString("hex"),
+                    txID: txID,
                     txAuth: "DAO",
                     txFrom: "DAO Treasury",
                     txTo: userUuid,
@@ -333,7 +334,7 @@ const generateCategoryShareLink = async (req, res) => {
                 await createLedger({
                     uuid: userUuid,
                     txUserAction: "postListLinkCreated",
-                    txID: crypto.randomBytes(11).toString("hex"),
+                    txID: txID,
                     txAuth: "User",
                     txFrom: userUuid,
                     txTo: "dao",

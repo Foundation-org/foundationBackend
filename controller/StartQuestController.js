@@ -20,6 +20,7 @@ const {
 const { getPercentage } = require("../utils/getPercentage");
 const UserQuestSetting = require("../models/UserQuestSetting");
 const BookmarkQuests = require("../models/BookmarkQuests");
+const Ledgers = require("../models/Ledgers");
 
 const updateViolationCounter = async (req, res) => {
   try {
@@ -83,6 +84,7 @@ const createStartQuest = async (req, res) => {
       );
     }
 
+    const txID = crypto.randomBytes(11).toString("hex");
     // Process the 'contended' array and increment 'contentionsGiven'
     const contendedArray = req.body.data?.contended || [];
     const contentionsGivenIncrement = contendedArray.length;
@@ -95,24 +97,24 @@ const createStartQuest = async (req, res) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionGiven",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: req.body.uuid,
         txTo: "dao",
         txAmount: "0",
-        txData: req.body.uuid,
+        txData: req.body.questForeignKey,
         // txDescription : "User gives contention to a quest answer"
       });
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionGiven",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
         txAmount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
-        // txData : req.body.uuid,
+        txData: req.body.questForeignKey,
         // txDescription : "DisInsentive for giving contention"
       });
       // Increment the Treasury
@@ -126,7 +128,7 @@ const createStartQuest = async (req, res) => {
         amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
         dec: true,
       });
-      const userSpent = await User.findOne({uuid: req.body.uuid});
+      const userSpent = await User.findOne({ uuid: req.body.uuid });
       userSpent.fdxSpent = userSpent.fdxSpent + QUEST_OPTION_CONTENTION_GIVEN_AMOUNT;
       await userSpent.save();
     }
@@ -319,24 +321,24 @@ const createStartQuest = async (req, res) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: req.body.questForeignKey,
         txTo: "dao",
         txAmount: "0",
-        txData: question._id,
+        txData: req.body.questForeignKey,
         // txDescription : "User adds an answer to a quest"
       });
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: "DAO Treasury",
         txTo: req.body.uuid,
         txAmount: QUEST_OPTION_ADDED_AMOUNT,
-        // txData : question._id,
+        txData: req.body.questForeignKey,
         // txDescription : "Incentive for adding answer to quest"
       });
       // Decrement the Treasury
@@ -347,7 +349,7 @@ const createStartQuest = async (req, res) => {
         amount: QUEST_OPTION_ADDED_AMOUNT,
         inc: true,
       });
-      const userEarned = await User.findOne({uuid: req.body.uuid});
+      const userEarned = await User.findOne({ uuid: req.body.uuid });
       userEarned.fdxEarned = userEarned.fdxEarned + QUEST_OPTION_ADDED_AMOUNT;
       userEarned.rewardSchedual.postParticipationFdx = userEarned.rewardSchedual.postParticipationFdx + QUEST_OPTION_ADDED_AMOUNT;
       await userEarned.save();
@@ -408,24 +410,24 @@ const createStartQuest = async (req, res) => {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "postCompleted",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: req.body.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: question._id,
+      txData: req.body.questForeignKey,
       // txDescription : "User completes a quest"
     });
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "postCompleted",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: req.body.uuid,
       txAmount: QUEST_COMPLETED_AMOUNT,
-      // txData : question._id,
+      txData: req.body.questForeignKey,
       // txDescription : "Incentive for completing quests"
     });
     // Decrement the Treasury
@@ -437,7 +439,7 @@ const createStartQuest = async (req, res) => {
       inc: true,
     });
 
-    const responsingUserEarnedFDX =  await User.findOne({uuid: req.body.uuid});
+    const responsingUserEarnedFDX = await User.findOne({ uuid: req.body.uuid });
     responsingUserEarnedFDX.fdxEarned = responsingUserEarnedFDX.fdxEarned + QUEST_COMPLETED_AMOUNT;
     responsingUserEarnedFDX.rewardSchedual.myEngagementInPostFdx = responsingUserEarnedFDX.rewardSchedual.myEngagementInPostFdx + QUEST_COMPLETED_AMOUNT;
     await responsingUserEarnedFDX.save();
@@ -446,12 +448,12 @@ const createStartQuest = async (req, res) => {
     await createLedger({
       uuid: getInfoQuestQuestion.uuid,
       txUserAction: "postCompletedUser",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: getInfoQuestQuestion.uuid,
       txAmount: QUEST_OWNER_ACCOUNT,
-      // txData : question._id,
+      txData: req.body.questForeignKey,
       // txDescription : "Incentive to Quest owner for completed quest"
     });
     // Decrement the Treasury
@@ -462,7 +464,7 @@ const createStartQuest = async (req, res) => {
       amount: QUEST_OWNER_ACCOUNT,
       inc: true,
     });
-    const ownerEarnedFDX =  await User.findOne({uuid: getInfoQuestQuestion.uuid});
+    const ownerEarnedFDX = await User.findOne({ uuid: getInfoQuestQuestion.uuid });
     ownerEarnedFDX.fdxEarned = ownerEarnedFDX.fdxEarned + QUEST_OWNER_ACCOUNT;
     ownerEarnedFDX.rewardSchedual.postParticipationFdx = ownerEarnedFDX.rewardSchedual.postParticipationFdx + QUEST_OWNER_ACCOUNT;
     await ownerEarnedFDX.save();
@@ -499,7 +501,7 @@ const createStartQuest = async (req, res) => {
     });
   }
 };
-async function createStartQuestUserList (req, res) {
+async function createStartQuestUserList(req, res) {
   try {
     const currentDate = new Date();
     const { postLink } = req.body;
@@ -550,6 +552,9 @@ async function createStartQuestUserList (req, res) {
     // Process the 'contended' array and increment 'contentionsGiven'
     const contendedArray = req.body.data?.contended || [];
     const contentionsGivenIncrement = contendedArray.length;
+
+    const txID = crypto.randomBytes(11).toString("hex");
+
     // if user gives contention
     if (contendedArray.length) {
       const userBalance = await getUserBalance(req.body.uuid);
@@ -559,24 +564,24 @@ async function createStartQuestUserList (req, res) {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionGiven",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: req.body.uuid,
         txTo: "dao",
         txAmount: "0",
-        txData: req.body.uuid,
+        txData: req.body.questForeignKey,
         // txDescription : "User gives contention to a quest answer"
       });
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionGiven",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
         txAmount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
-        // txData : req.body.uuid,
+        txData: req.body.questForeignKey,
         // txDescription : "DisInsentive for giving contention"
       });
       // Increment the Treasury
@@ -590,7 +595,7 @@ async function createStartQuestUserList (req, res) {
         amount: QUEST_OPTION_CONTENTION_GIVEN_AMOUNT,
         dec: true,
       });
-      const userSpent = await User.findOne({uuid: req.body.uuid});
+      const userSpent = await User.findOne({ uuid: req.body.uuid });
       userSpent.fdxSpent = userSpent.fdxSpent + QUEST_OPTION_CONTENTION_GIVEN_AMOUNT;
       await userSpent.save();
     }
@@ -783,24 +788,24 @@ async function createStartQuestUserList (req, res) {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: req.body.questForeignKey,
         txTo: "dao",
         txAmount: "0",
-        txData: question._id,
+        txData: req.body.questForeignKey,
         // txDescription : "User adds an answer to a quest"
       });
       // Create Ledger
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: "DAO Treasury",
         txTo: req.body.uuid,
         txAmount: QUEST_OPTION_ADDED_AMOUNT,
-        // txData : question._id,
+        txData: req.body.questForeignKey,
         // txDescription : "Incentive for adding answer to quest"
       });
       // Decrement the Treasury
@@ -811,7 +816,7 @@ async function createStartQuestUserList (req, res) {
         amount: QUEST_OPTION_ADDED_AMOUNT,
         inc: true,
       });
-      const userEarned = await User.findOne({uuid: req.body.uuid});
+      const userEarned = await User.findOne({ uuid: req.body.uuid });
       userEarned.fdxEarned = userEarned.fdxEarned + QUEST_OPTION_ADDED_AMOUNT;
       await userEarned.save();
     }
@@ -871,24 +876,24 @@ async function createStartQuestUserList (req, res) {
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "postCompleted",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: req.body.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: question._id,
+      txData: req.body.questForeignKey,
       // txDescription : "User completes a quest"
     });
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "postCompleted",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: req.body.uuid,
       txAmount: QUEST_COMPLETED_AMOUNT,
-      // txData : question._id,
+      txData: req.body.questForeignKey,
       // txDescription : "Incentive for completing quests"
     });
     // Decrement the Treasury
@@ -899,7 +904,7 @@ async function createStartQuestUserList (req, res) {
       amount: QUEST_COMPLETED_AMOUNT,
       inc: true,
     });
-    const userEarned = await User.findOne({uuid: req.body.uuid});
+    const userEarned = await User.findOne({ uuid: req.body.uuid });
     userEarned.fdxEarned = userEarned.fdxEarned + QUEST_COMPLETED_AMOUNT;
     await userEarned.save();
 
@@ -907,12 +912,12 @@ async function createStartQuestUserList (req, res) {
     await createLedger({
       uuid: getInfoQuestQuestion.uuid,
       txUserAction: "postCompletedUser",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: getInfoQuestQuestion.uuid,
       txAmount: QUEST_OWNER_ACCOUNT,
-      // txData : question._id,
+      txData: req.body.questForeignKey,
       // txDescription : "Incentive to Quest owner for completed quest"
     });
     // Decrement the Treasury
@@ -923,7 +928,7 @@ async function createStartQuestUserList (req, res) {
       amount: QUEST_OWNER_ACCOUNT,
       inc: true,
     });
-    const ownerUserEarned = await User.findOne({uuid: getInfoQuestQuestion.uuid});
+    const ownerUserEarned = await User.findOne({ uuid: getInfoQuestQuestion.uuid });
     ownerUserEarned.fdxEarned = ownerUserEarned.fdxEarned + QUEST_OWNER_ACCOUNT;
     await ownerUserEarned.save();
     const bookmarkExist = await BookmarkQuests.findOne({
@@ -1142,6 +1147,17 @@ const updateChangeAnsStartQuest = async (req, res) => {
         ?.length ?? 0;
     let contentionGivenCounter = requestedContention - savedContention;
 
+    //check if ledger already exists
+
+    let txID;
+    const ledger = await Ledgers.findOne({ uuid: req.body.uuid, txUserAction: "postCompleted", txData: req.body.questId })
+    if (ledger) {
+      txID = ledger.txID;
+    } else {
+      throw new Error("Ledger doesnot exists")
+    }
+
+
     // Increment Counter
     if (contentionGivenCounter > 0) {
       const userBalance = await getUserBalance(req.body.uuid);
@@ -1154,7 +1170,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionGiven",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: req.body.uuid,
         txTo: "dao",
@@ -1166,7 +1182,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionGiven",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
@@ -1185,7 +1201,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         dec: true,
         uuid: req.body.uuid,
       });
-      const userSpent = await User.findOne({uuid: req.body.uuid});
+      const userSpent = await User.findOne({ uuid: req.body.uuid });
       userSpent.fdxSpent = userSpent.fdxSpent + (QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter);
       await userSpent.save();
     } else if (contentionGivenCounter < 0) {
@@ -1193,7 +1209,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionRemoved",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: req.body.uuid,
         txTo: "dao",
@@ -1205,7 +1221,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionRemoved",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
@@ -1230,7 +1246,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         inc: true,
         uuid: req.body.uuid,
       });
-      const userSpent = await User.findOne({uuid: req.body.uuid});
+      const userSpent = await User.findOne({ uuid: req.body.uuid });
       userSpent.fdxSpent = userSpent.fdxSpent + (QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter));
       await userSpent.save();
     }
@@ -1327,8 +1343,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
           });
         } else {
           selectedCounter[
-            `result.selected.${
-              initialStartQuestData[initialStartQuestData.length - 1]?.selected
+            `result.selected.${initialStartQuestData[initialStartQuestData.length - 1]?.selected
             }`
           ] = -1;
         }
@@ -1392,9 +1407,8 @@ const updateChangeAnsStartQuest = async (req, res) => {
           });
         } else {
           selectedCounter[
-            `result.selected.${
-              startQuestQuestion.data[startQuestQuestion.data.length - 1]
-                ?.selected
+            `result.selected.${startQuestQuestion.data[startQuestQuestion.data.length - 1]
+              ?.selected
             }`
           ] = 1;
         }
@@ -1409,12 +1423,11 @@ const updateChangeAnsStartQuest = async (req, res) => {
           }
         );
 
-        const commonTxId = crypto.randomBytes(11).toString("hex");
         // Create Ledger
         await createLedger({
           uuid: req.body.uuid,
           txUserAction: "postCompletedChange",
-          txID: commonTxId,
+          txID: txID,
           txAuth: "User",
           txFrom: req.body.uuid,
           txTo: "dao",
@@ -1683,6 +1696,14 @@ const updateChangeAnsStartQuestUserList = async (req) => {
         ?.length ?? 0;
     let contentionGivenCounter = requestedContention - savedContention;
 
+    let txID;
+    const ledger = await Ledgers.findOne({ uuid: req.body.uuid, txUserAction: "postCompleted", txData: req.body.questId })
+    if (ledger) {
+      txID = ledger.txID;
+    } else {
+      throw new Error("Ledger doesnot exists")
+    }
+
     // Increment Counter
     if (contentionGivenCounter > 0) {
       const userBalance = await getUserBalance(req.body.uuid);
@@ -1695,7 +1716,7 @@ const updateChangeAnsStartQuestUserList = async (req) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionGiven",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: req.body.uuid,
         txTo: "dao",
@@ -1707,7 +1728,7 @@ const updateChangeAnsStartQuestUserList = async (req) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionGiven",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
@@ -1726,7 +1747,7 @@ const updateChangeAnsStartQuestUserList = async (req) => {
         dec: true,
         uuid: req.body.uuid,
       });
-      const userSpent = await User.findOne({uuid: req.body.uuid});
+      const userSpent = await User.findOne({ uuid: req.body.uuid });
       userSpent.fdxSpent = userSpent.fdxSpent + (QUEST_OPTION_CONTENTION_GIVEN_AMOUNT * contentionGivenCounter);
       await userSpent.save();
     } else if (contentionGivenCounter < 0) {
@@ -1734,7 +1755,7 @@ const updateChangeAnsStartQuestUserList = async (req) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionRemoved",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: req.body.uuid,
         txTo: "dao",
@@ -1746,7 +1767,7 @@ const updateChangeAnsStartQuestUserList = async (req) => {
       await createLedger({
         uuid: req.body.uuid,
         txUserAction: "postOptionContentionRemoved",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: req.body.uuid,
         txTo: "DAO Treasury",
@@ -1771,7 +1792,7 @@ const updateChangeAnsStartQuestUserList = async (req) => {
         inc: true,
         uuid: req.body.uuid,
       });
-      const userEarned = await User.findOne({uuid: req.body.uuid});
+      const userEarned = await User.findOne({ uuid: req.body.uuid });
       userEarned.fdxEarned = userEarned.fdxEarned + (QUEST_OPTION_CONTENTION_REMOVED_AMOUNT * Math.abs(contentionGivenCounter));
       await userEarned.save();
     }
@@ -1868,8 +1889,7 @@ const updateChangeAnsStartQuestUserList = async (req) => {
           });
         } else {
           selectedCounter[
-            `result.selected.${
-              initialStartQuestData[initialStartQuestData.length - 1]?.selected
+            `result.selected.${initialStartQuestData[initialStartQuestData.length - 1]?.selected
             }`
           ] = -1;
         }
@@ -1933,9 +1953,8 @@ const updateChangeAnsStartQuestUserList = async (req) => {
           });
         } else {
           selectedCounter[
-            `result.selected.${
-              startQuestQuestion.data[startQuestQuestion.data.length - 1]
-                ?.selected
+            `result.selected.${startQuestQuestion.data[startQuestQuestion.data.length - 1]
+              ?.selected
             }`
           ] = 1;
         }
@@ -1949,13 +1968,11 @@ const updateChangeAnsStartQuestUserList = async (req) => {
             },
           }
         );
-
-        const commonTxId = crypto.randomBytes(11).toString("hex");
         // Create Ledger
         await createLedger({
           uuid: req.body.uuid,
           txUserAction: "postCompletedChange",
-          txID: commonTxId,
+          txID: txID,
           txAuth: "User",
           txFrom: req.body.uuid,
           txTo: "dao",
@@ -2226,25 +2243,25 @@ const getStartQuestPercent = async (req, res) => {
             Yes: isNaN(percentageOfYesAns)
               ? 0
               : percentageOfYesAns % 1 === 0
-              ? percentageOfYesAns
-              : parseFloat(percentageOfYesAns.toFixed(1)),
+                ? percentageOfYesAns
+                : parseFloat(percentageOfYesAns.toFixed(1)),
             No: isNaN(percentageOfNoAns)
               ? 0
               : percentageOfNoAns % 1 === 0
-              ? percentageOfNoAns
-              : parseFloat(percentageOfNoAns.toFixed(1)),
+                ? percentageOfNoAns
+                : parseFloat(percentageOfNoAns.toFixed(1)),
           },
           contendedPercentage: {
             Yes: isNaN(percentageOfYesConAns)
               ? 0
               : percentageOfYesConAns % 1 === 0
-              ? percentageOfYesConAns
-              : parseFloat(percentageOfYesConAns.toFixed(1)),
+                ? percentageOfYesConAns
+                : parseFloat(percentageOfYesConAns.toFixed(1)),
             No: isNaN(percentageOfNoConAns)
               ? 0
               : percentageOfNoConAns % 1 === 0
-              ? percentageOfNoConAns
-              : parseFloat(percentageOfNoConAns.toFixed(1)),
+                ? percentageOfNoConAns
+                : parseFloat(percentageOfNoConAns.toFixed(1)),
           },
         };
 
@@ -2266,8 +2283,8 @@ const getStartQuestPercent = async (req, res) => {
           percentageOfSelectedOptions[option] = isNaN(percentage)
             ? 0
             : percentage % 1 === 0
-            ? percentage
-            : parseFloat(percentage.toFixed(1));
+              ? percentage
+              : parseFloat(percentage.toFixed(1));
         }
 
         for (const option in contendedOptionsCount) {
@@ -2276,8 +2293,8 @@ const getStartQuestPercent = async (req, res) => {
           percentageOfContendedOptions[option] = isNaN(percentage)
             ? 0
             : percentage % 1 === 0
-            ? percentage
-            : parseFloat(percentage.toFixed(1));
+              ? percentage
+              : parseFloat(percentage.toFixed(1));
         }
 
         const responseObj = {

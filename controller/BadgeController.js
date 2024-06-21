@@ -122,27 +122,28 @@ const addBadgeSocial = async (req, res) => {
     // Update the action
     await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.user.provider,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: req.user.provider,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -306,27 +307,28 @@ const addContactBadge = async (req, res) => {
     // Update the action
     await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -403,27 +405,29 @@ const addBadge = async (req, res) => {
     // Update the action
     await User.save();
 
+
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.provider,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: req.body.provider,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -573,27 +577,29 @@ const addPersonalBadge = async (req, res) => {
     // Update the action
     await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
+
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: foundKey,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: foundKey,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -662,6 +668,18 @@ const removeAWorkEducationBadge = async (req, res) => {
     User.markModified("badges");
     // Save the updated user document
     const data = await User.save();
+
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "accountBadgeRemoved",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: req.body.type,
+      // txDescription : "User adds a verification badge"
+    });
     res.status(200).json({ data, message: "Successful" });
   } catch (error) {
     res.status(500).json({
@@ -926,7 +944,7 @@ const getPersonalBadge = async (req, res) => {
       if (!eyk) throw new Error("Please Provide Password");
       if (index !== -1) {
         // Find the index of the education object within the found badge
-        if(personalKeys.includes(req.body.type)){
+        if (personalKeys.includes(req.body.type)) {
           obj = decryptData(
             userCustomizedDecryptData(
               userBadges[index].personal[req.body.type],
@@ -943,7 +961,7 @@ const getPersonalBadge = async (req, res) => {
     } else {
       if (index !== -1) {
         // Find the index of the education object within the found badge
-        if(personalKeys.includes(req.body.type)){
+        if (personalKeys.includes(req.body.type)) {
           obj = decryptData(userBadges[index].personal[req.body.type]);
         }
         else {
@@ -1166,29 +1184,32 @@ const addWorkEducationBadge = async (req, res) => {
       }
     }
     const data = await User.save();
+
+
+    const txID = crypto.randomBytes(11).toString("hex")
     // Update the action
 
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -1245,25 +1266,30 @@ const addWeb3Badge = async (req, res) => {
     // Update the action
     await User.save();
 
+
+    const txID = crypto.randomBytes(11).toString("hex")
+
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: 'ethereum-wallet',
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      txData: 'ethereum-wallet',
+
     });
     // Decrement the Treasury
     await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
@@ -1307,7 +1333,7 @@ const removePersonalBadge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
 
@@ -1343,7 +1369,7 @@ const removeWeb3Badge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
 
@@ -1428,7 +1454,7 @@ const removeBadge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
     // Update the user badges
@@ -1504,7 +1530,7 @@ const removeContactBadge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
     // Update the user badges
@@ -1772,11 +1798,13 @@ const addPasskeyBadge = async (req, res) => {
     // // Update the action
     // await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
+
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
@@ -1786,7 +1814,7 @@ const addPasskeyBadge = async (req, res) => {
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
@@ -1877,25 +1905,28 @@ const addFarCasterBadge = async (req, res) => {
     // // Update the action
     // await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      txData: req.body.type,
+
     });
     // Decrement the Treasury
     await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
@@ -1944,7 +1975,7 @@ const removePasskeyBadge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
 
@@ -2078,7 +2109,7 @@ const addPasswordBadgesUpdate = async (req, res) => {
         txFrom: user.uuid,
         txTo: "dao",
         txAmount: "0",
-        txData: user.badges[0]._id,
+        txData: 'legacy',
         // txDescription : "User adds a verification badge"
       });
       res.status(200).json({
@@ -2156,24 +2187,24 @@ const addPasswordBadgesUpdate = async (req, res) => {
       // Create Ledger
       await createLedger({
         uuid: user.uuid,
-        txUserAction: "legacyBadgeAdded",
+        txUserAction: "accountBadgeAdded",
         txID: crypto.randomBytes(11).toString("hex"),
         txAuth: "User",
         txFrom: user.uuid,
         txTo: "dao",
         txAmount: "0",
-        txData: user.badges[0]._id,
+        txData: 'legacy',
         // txDescription : "User adds a verification badge"
       });
       await createLedger({
         uuid: user.uuid,
-        txUserAction: "legacyBadgeAdded",
+        txUserAction: "accountBadgeAdded",
         txID: crypto.randomBytes(11).toString("hex"),
         txAuth: "DAO",
         txFrom: "DAO Treasury",
         txTo: user.uuid,
         txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-        // txData : newUser.badges[0]._id,
+        txData: 'legacy',
         // txDescription : "Incentive for adding badges"
       });
       // Decrement the Treasury
@@ -2185,10 +2216,10 @@ const addPasswordBadgesUpdate = async (req, res) => {
         amount: ACCOUNT_BADGE_ADDED_AMOUNT,
         inc: true,
       });
-      
-    user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
-    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
-    await user.save();
+
+      user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+      user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+      await user.save();
 
       res.status(200).json({
         message: `User's customized password encryption is added successful.`,
