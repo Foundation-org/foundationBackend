@@ -4,7 +4,7 @@ const UserModel = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
 const { updateUserBalance, getUserBalance } = require("../utils/userServices");
 const crypto = require("crypto");
-const Ledgers = require("../models/Ledgers");
+const Ledgers = require("../models/Ledgers")
 
 const create = async (req, res) => {
   try {
@@ -39,7 +39,7 @@ const create = async (req, res) => {
       txID: txID,
       txAuth: "DAO",
       txFrom: req.body.uuid,
-      txTo: req.body.uuid,
+      txTo: "DAO Treasury",
       txAmount: amount,
       // txDescription : "User create redemption code"
       type: "redemption",
@@ -98,24 +98,23 @@ const transfer = async (req, res) => {
       txUserAction: "redemptionTransferred",
       txID: txID,
       txAuth: "User",
-      txFrom: getRedeem.owner.uuid,
-      txTo: "dao",
+      txFrom: "dao",
+      txTo: uuid,
       txAmount: "0",
       // txDescription : "User update redemption code"
       type: "redemption",
     });
     // sender
-    await createLedger({
-      uuid: getRedeem.owner.uuid,
-      txUserAction: "redemptionTransferred",
-      txID: txID,
-      txAuth: "DAO",
-      txFrom: getRedeem.owner.uuid,
-      txTo: req.body.uuid,
-      txAmount: getRedeem.amount,
-      // txDescription : "User update redemption code"
-      type: "redemption",
-    });
+    // await createLedger({
+    //   uuid: getRedeem.owner.uuid,
+    //   txUserAction: "redemptionTransferred",
+    //   txID: txID,
+    //   txAuth: "DAO",
+    //   txFrom: "DAO Treasury",
+    //   txTo: req.body.uuid,
+    //   txAmount: getRedeem.amount,
+    //   type: "redemption",
+    // });
     // const senderSpent = await UserModel.findOne({uuid: getRedeem.owner.uuid});
     // senderSpent.fdxSpent = senderSpent.fdxSpent + getRedeem.amount;
     // await senderSpent.save();
@@ -126,7 +125,18 @@ const transfer = async (req, res) => {
       txUserAction: "redemptionReceived",
       txID: txID,
       txAuth: "DAO",
-      txFrom: getRedeem.owner.uuid,
+      txFrom: "dao",
+      txTo: req.body.uuid,
+      txAmount: "0",
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
+    await createLedger({
+      uuid: req.body.uuid,
+      txUserAction: "redemptionReceived",
+      txID: txID,
+      txAuth: "User",
+      txFrom: "DAO Treasury",
       txTo: req.body.uuid,
       txAmount: getRedeem.amount,
       // txDescription : "User update redemption code"
