@@ -22,7 +22,7 @@ const googleHandler = async (req, res) => {
   try {
     // Check Google Account
     const payload = req.user;
-    console.log("🚀 ~ googleHandler ~ payload:", payload)
+    //console.log("🚀 ~ googleHandler ~ payload:", payload)
     // Check if email already exist
     const user = await User.findOne({ email: payload._json.email });
 
@@ -32,12 +32,12 @@ const googleHandler = async (req, res) => {
       const newUser = await new User({
         email: payload._json.email,
         uuid: uuid,
-        role: 'user' 
+        role: 'user'
       });
 
       let type = "";
       // Check Email Category
-      if(payload._json.email === "google") {
+      if (payload._json.email === "google") {
         const emailStatus = await eduEmailCheck(req, res, payload._json.email);
         if (emailStatus.status === "OK") type = "Education";
       } else {
@@ -53,12 +53,12 @@ const googleHandler = async (req, res) => {
 
       // Update newUser verification status to true
       newUser.gmailVerified = payload._json.email_verified;
-
+      const txID = crypto.randomBytes(11).toString("hex");
       // Create Ledger
       await createLedger({
         uuid: uuid,
         txUserAction: "accountBadgeAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "User",
         txFrom: uuid,
         txTo: "dao",
@@ -69,7 +69,7 @@ const googleHandler = async (req, res) => {
       await createLedger({
         uuid: uuid,
         txUserAction: "accountBadgeAdded",
-        txID: crypto.randomBytes(11).toString("hex"),
+        txID: txID,
         txAuth: "DAO",
         txFrom: "DAO Treasury",
         txTo: uuid,
@@ -94,9 +94,12 @@ const googleHandler = async (req, res) => {
         inc: true,
       });
 
+      newUser.fdxEarned = newUser.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+      await newUser.save();
+
       // Generate a JWT token
       const token = createToken({ uuid: newUser.uuid });
-      // console.log(req.get('host'));
+      // //console.log(req.get('host'));
       res.cookie("jwt", token, cookieConfiguration());
       res.cookie("uuid", newUser.uuid, cookieConfiguration());
       res.redirect(`${FRONTEND_URL}/auth0`);
@@ -133,7 +136,7 @@ const googleHandler = async (req, res) => {
 
 const addBadge = async (req, res) => {
   try {
-    console.log(req.user);
+    //console.log(req.user);
     // return
     // const { userId, badgeId } = req.params;
     if (!req.user._json.email) throw new Error("No Email Exist!");
@@ -150,11 +153,12 @@ const addBadge = async (req, res) => {
     // Update the action
     await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
@@ -165,7 +169,7 @@ const addBadge = async (req, res) => {
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
@@ -182,6 +186,9 @@ const addBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.redirect(`${FRONTEND_URL}/profile/verification-badges`);
   } catch (error) {

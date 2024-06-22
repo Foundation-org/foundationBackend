@@ -8,6 +8,11 @@ const columnsSchema = {
 
 const userSchema = mongoose.Schema(
   {
+    email: {
+      type: String,
+      max: 50,
+      // required: true,
+    },
     // username: {
     //   type: String,
     //   unique: true,
@@ -15,12 +20,6 @@ const userSchema = mongoose.Schema(
     //   max: 20,
     //   required: true,
     // },
-    email: {
-      type: String,
-      unique: true,
-      max: 50,
-      // required: true,
-    },
     password: {
       type: String,
       min: 6,
@@ -60,15 +59,19 @@ const userSchema = mongoose.Schema(
       },
       filterByStatus: {
         type: String,
-        default: "",
+        default: "All",
       },
       filterByType: {
         type: String,
-        default: "",
+        default: "All",
       },
       filterByScope: {
         type: String,
-        default: "",
+        default: "All",
+      },
+      filterByMedia: {
+        type: String,
+        default: "All",
       },
       bookmarks: {
         type: Boolean,
@@ -147,6 +150,68 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0.0,
     },
+    fdxEarned: {
+      type: Number,
+      default: 0.0,
+    },
+    fdxSpent: {
+      type: Number,
+      default: 0.0,
+    },
+    redemptionStatistics: {
+      myTotalRedemptionCodeCreationCount: {
+        type: Number,
+        default: 0,
+      },
+      createCodeFdxSpent: {
+        type: Number,
+        default: 0.0,
+      },
+      codeRedeemedFdxEarned: {
+        type: Number,
+        default: 0.0,
+      },
+    },
+    feeSchedual: {
+      creatingPostFdx: {
+        type: Number,
+        default: 0.0,
+      },
+      creatingPostLinkFdx: {
+        type: Number,
+        default: 0.0,
+      },
+      creatingPostCustomLinkFdx: {
+        type: Number,
+        default: 0.0,
+      },
+      creatingListFdx: {
+        type: Number,
+        default: 0.0,
+      },
+      creatingListLinkFdx: {
+        type: Number,
+        default: 0.0,
+      },
+      creatingListCustomLinkFdx: {
+        type: Number,
+        default: 0.0,
+      },
+    },
+    rewardSchedual: {
+      postParticipationFdx: {
+        type: Number,
+        default: 0.0,
+      },
+      myEngagementInPostFdx: {
+        type: Number,
+        default: 0.0,
+      },
+      addingBadgeFdx: {
+        type: Number,
+        default: 0.0,
+      },
+    },
     walletAddr: {
       type: String,
     },
@@ -222,6 +287,7 @@ const userSchema = mongoose.Schema(
         primary: { type: Boolean },
         createdAt: { type: Date, default: new Date() },
         personal: { type: Object },
+        legacy: { type: Object },
         web3: { type: Object },
         data: { type: Object },
       },
@@ -231,8 +297,35 @@ const userSchema = mongoose.Schema(
       enum: ["guest", "user"],
       default: "guest",
     },
+    userSettings: {
+      darkMode: {
+        type: Boolean,
+        default: false,
+      },
+      defaultSort: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    notificationSettings: {
+      emailNotifications: {
+        type: Boolean,
+        default: true,
+      },
+      systemNotifications: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    isPasswordEncryption: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );
+
+// Create a partial index to enforce uniqueness only on non-null emails
+userSchema.index({ email: 1 }, { unique: true, partialFilterExpression: { email: { $type: "string" } } });
 
 module.exports = mongoose.model("user", userSchema);

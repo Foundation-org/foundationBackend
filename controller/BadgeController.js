@@ -13,9 +13,32 @@ const { error } = require("console");
 const Company = require("../models/Company");
 const JobTitle = require("../models/JobTitle");
 const DegreeAndFieldOfStudy = require("../models/DegreeAndFieldOfStudy");
+const mongoose = require("mongoose");
+const User = require("../models/UserModel");
+const personalKeys = [
+  "firstName",
+  "lastName",
+  "security-question",
+];
+const noEncDecPersonalKeys = [
+  "geolocation",
+  "dateOfBirth",
+  "currentCity",
+  "homeTown",
+  "relationshipStatus",
+];
+
+// Encryption/Decryption Security Purposes.
+const {
+  encryptData,
+  decryptData,
+  userCustomizedEncryptData,
+  userCustomizedDecryptData,
+} = require("../utils/security");
 
 const update = async (req, res) => {
   try {
+    let legacyEmail = false;
     const { userId, badgeId } = req.params;
     const User = await UserModel.findOne({ _id: userId });
     if (!User) throw new Error("No such User!");
@@ -23,6 +46,9 @@ const update = async (req, res) => {
     const userBadges = User.badges;
     const updatedUserBadges = userBadges.map((item) => {
       if (item._id.toHexString() == badgeId) {
+        if (item.accountName === "Email") {
+          legacyEmail = true;
+        }
         return { ...item, type: req.body.type, primary: req.body.primary };
         // return item.type = req.body.type;
       }
@@ -36,7 +62,16 @@ const update = async (req, res) => {
     // Generate a JWT token
     const token = createToken({ uuid: User.uuid });
 
-    res.status(200).json({ ...User._doc, token });
+    // Decrypt Saved Data
+    const decryptUser = User._doc;
+
+    if (!legacyEmail) {
+      decryptUser.badges[0].details = decryptData(
+        decryptUser.badges[0].details
+      );
+    }
+
+    res.status(200).json({ ...decryptUser, token });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -87,27 +122,28 @@ const addBadgeSocial = async (req, res) => {
     // Update the action
     await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.user.provider,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: req.user.provider,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -119,6 +155,10 @@ const addBadgeSocial = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.clearCookie("social");
     res.status(200).json({ message: "Successful" });
@@ -133,11 +173,12 @@ const addContactBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
+    const eyk = req.body.infoc;
     // Check education Email
     if (req.body.type === "education") {
       // Check Email Category
       const emailStatus = await eduEmailCheck(req, res, req.body.email);
-      console.log("🚀 ~ addContactBadge ~ emailStatus:", emailStatus);
+      //console.log("🚀 ~ addContactBadge ~ emailStatus:", emailStatus);
       if (emailStatus.status !== "OK") throw new Error(emailStatus.message);
     }
 
@@ -150,7 +191,7 @@ const addContactBadge = async (req, res) => {
       const usersWithEmail = await UserModel.find({
         email: req.body.email,
       });
-      console.log("wamiq", usersWithBadge);
+      //console.log("wamiq", usersWithBadge);
       if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0)
         throw new Error("Oops! This account is already linked.");
 
@@ -167,22 +208,53 @@ const addContactBadge = async (req, res) => {
     }
     if (req.body.type === "cell-phone") {
       // Find the Badge
-      const usersWithBadge = await UserModel.find({
-        badges: {
-          $elemMatch: { details: req.body.data },
-        },
-      });
+      let usersWithBadge;
+      if (User.isPasswordEncryption) {
+        if (!eyk)
+          throw new Error(
+            "No eyk Provided in request body, Request can't be proceeded."
+          );
+        usersWithBadge = await UserModel.find({
+          badges: {
+            $elemMatch: {
+              details: userCustomizedEncryptData(encryptData(req.body), eyk),
+            },
+          },
+        });
+      } else {
+        usersWithBadge = await UserModel.find({
+          badges: {
+            $elemMatch: { details: encryptData(req.body) },
+          },
+        });
+      }
       if (usersWithBadge.length !== 0) {
         throw new Error("Oops! This account is already linked.");
       }
       const userBadges = User.badges;
-      const updatedUserBadges = [
-        ...userBadges,
-        {
-          type: req.body.type,
-          details: req.body.data,
-        },
-      ];
+      let updatedUserBadges;
+      if (User.isPasswordEncryption) {
+        if (!req.body.eyk)
+          throw new Error(
+            "No eyk Provided in request body, Request can't be proceeded."
+          );
+        updatedUserBadges = [
+          ...userBadges,
+          {
+            type: req.body.type,
+            details: userCustomizedEncryptData(encryptData(req.body), eyk),
+          },
+        ];
+      } else {
+        updatedUserBadges = [
+          ...userBadges,
+          {
+            type: req.body.type,
+            details: encryptData(req.body),
+          },
+        ];
+      }
+
       // Update the user badges
       User.badges = updatedUserBadges;
       // Update the action
@@ -201,42 +273,62 @@ const addContactBadge = async (req, res) => {
       throw new Error("Oops! This account is already linked.");
 
     const userBadges = User.badges;
-    const updatedUserBadges = [
-      ...userBadges,
-      {
-        accountId: req.body.sub,
-        accountName: req.body.provider,
-        isVerified: true,
-        type: req.body.type,
-        details: req.body.data,
-      },
-    ];
+
+    let updatedUserBadges;
+    if (User.isPasswordEncryption) {
+      if (!eyk)
+        throw new Error(
+          "No eyk Provided in request body, Request can't be proceeded."
+        );
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          accountId: req.body.sub,
+          accountName: req.body.provider,
+          isVerified: true,
+          type: req.body.type,
+          details: userCustomizedEncryptData(encryptData(req.body), eyk),
+        },
+      ];
+    } else {
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          accountId: req.body.sub,
+          accountName: req.body.provider,
+          isVerified: true,
+          type: req.body.type,
+          details: encryptData(req.body),
+        },
+      ];
+    }
     // Update the user badges
     User.badges = updatedUserBadges;
     // Update the action
     await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -248,6 +340,10 @@ const addContactBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     // res.clearCookie("social");
     res.status(200).json({ message: "Successful" });
@@ -262,6 +358,7 @@ const addBadge = async (req, res) => {
   try {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
+    const eyk = req.body.infoc;
     // Find the Badge
     const usersWithBadge = await UserModel.find({
       badges: {
@@ -275,42 +372,62 @@ const addBadge = async (req, res) => {
       throw new Error("Oops! This account is already linked.");
 
     const userBadges = User.badges;
-    const updatedUserBadges = [
-      ...userBadges,
-      {
-        accountId: req.body.badgeAccountId,
-        accountName: req.body.provider,
-        details: req.body.data,
-        isVerified: true,
-        type: "default",
-      },
-    ];
+    let updatedUserBadges;
+    if (User.isPasswordEncryption) {
+      if (!eyk)
+        throw new Error(
+          "No eyk Provided in request body, Request can't be proceeded."
+        );
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          accountId: req.body.badgeAccountId,
+          accountName: req.body.provider,
+          details: userCustomizedEncryptData(encryptData(req.body.data), eyk),
+          isVerified: true,
+          type: "default",
+        },
+      ];
+    } else {
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          accountId: req.body.badgeAccountId,
+          accountName: req.body.provider,
+          details: encryptData(req.body.data),
+          isVerified: true,
+          type: "default",
+        },
+      ];
+    }
     // Update the user badges
     User.badges = updatedUserBadges;
     // Update the action
     await User.save();
 
+
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.provider,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: req.body.provider,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -322,6 +439,10 @@ const addBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -385,39 +506,100 @@ const addPersonalBadge = async (req, res) => {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
 
+    const eyk = req.body.infoc;
+
     const userBadges = User.badges;
-    const updatedUserBadges = [
-      ...userBadges,
-      {
-        personal: req.body.personal,
-      },
-    ];
+    let updatedUserBadges;
+    const foundKey = personalKeys.find((key) =>
+      req.body.personal.hasOwnProperty(key)
+    );
+    const noEncDecKey = noEncDecPersonalKeys.find((key) =>
+      req.body.personal.hasOwnProperty(key)
+    );
+    if (noEncDecKey) {
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          personal: req.body.personal,
+        },
+      ];
+      // console.log(updatedUserBadges);
+    } else {
+      if (User.isPasswordEncryption) {
+        if (!req.body.infoc)
+          throw new Error(
+            "No eyk Provided in request body, Request can't be proceeded."
+          );
+        if (foundKey) {
+          // Create an encrypted object with the found key
+          const encryptedPersonal = {
+            [foundKey]: userCustomizedEncryptData(
+              encryptData(req.body.personal[foundKey]),
+              eyk
+            ),
+          };
+
+          // Update the user badges with the encrypted personal information
+          updatedUserBadges = [
+            ...userBadges,
+            {
+              personal: encryptedPersonal,
+            },
+          ];
+          // console.log(updatedUserBadges);
+        } else {
+          // Handle case where no key is found, if needed
+          console.log("No matching key found in personal object.");
+        }
+      } else {
+        if (foundKey) {
+          // Create an encrypted object with the found key
+          const encryptedPersonal = {
+            [foundKey]: encryptData(req.body.personal[foundKey]),
+          };
+
+          // Update the user badges with the encrypted personal information
+          updatedUserBadges = [
+            ...userBadges,
+            {
+              personal: encryptedPersonal,
+            },
+          ];
+          // console.log(updatedUserBadges);
+        } else {
+          // Handle case where no key is found, if needed
+          console.log("No matching key found in personal object.");
+        }
+      }
+    }
     // Update the user badges
     User.badges = updatedUserBadges;
     // Update the action
     await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
+
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: foundKey,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: foundKey,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -429,6 +611,10 @@ const addPersonalBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -482,6 +668,18 @@ const removeAWorkEducationBadge = async (req, res) => {
     User.markModified("badges");
     // Save the updated user document
     const data = await User.save();
+
+    await createLedger({
+      uuid: User.uuid,
+      txUserAction: "accountBadgeRemoved",
+      txID: crypto.randomBytes(11).toString("hex"),
+      txAuth: "User",
+      txFrom: User.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      txData: req.body.type,
+      // txDescription : "User adds a verification badge"
+    });
     res.status(200).json({ data, message: "Successful" });
   } catch (error) {
     res.status(500).json({
@@ -489,6 +687,200 @@ const removeAWorkEducationBadge = async (req, res) => {
     });
   }
 };
+
+// const removeAWorkEducationBadge = async (req, res) => {
+//   try {
+//     const User = await UserModel.findOne({ uuid: req.body.uuid });
+//     if (!User) throw new Error("No such User!");
+
+//     const userBadges = User.badges;
+//     let decryptedUserBadges;
+
+//     if (User.isPasswordEncryption) {
+//       if (!req.body.infoc) throw new Error("Please Provide Password");
+
+//       decryptedUserBadges = userBadges.map((badge) => {
+//         if (badge?.personal?.[req.body.type]) {
+//           const decryptedItems = badge.personal[req.body.type].map((item) => {
+//             const decryptedItem = decryptData(
+//               userCustomizedDecryptData(item, req.body.infoc)
+//             );
+//             return decryptedItem;
+//           });
+
+//           // Creating a new badge object to replace the personal type with decrypted items
+//           return {
+//             ...badge,
+//             personal: {
+//               ...badge.personal,
+//               [req.body.type]: decryptedItems,
+//             },
+//           };
+//         }
+
+//         // If the condition does not match, return the badge unchanged
+//         return badge;
+//       });
+//     } else {
+//       decryptedUserBadges = userBadges.map((badge) => {
+//         if (badge?.personal?.[req.body.type]) {
+//           const decryptedItems = badge.personal[req.body.type].map((item) => {
+//             const decryptedItem = decryptData(item);
+//             return decryptedItem;
+//           });
+
+//           // Creating a new badge object to replace the personal type with decrypted items
+//           return {
+//             ...badge,
+//             personal: {
+//               ...badge.personal,
+//               [req.body.type]: decryptedItems,
+//             },
+//           };
+//         }
+
+//         // If the condition does not match, return the badge unchanged
+//         return badge;
+//       });
+//     }
+
+//     // Find the index of the object to remove
+//     const indexToRemove = decryptedUserBadges.findIndex((badge) => {
+//       return (
+//         badge.personal &&
+//         badge.personal[req.body.type] &&
+//         badge.personal[req.body.type].some((edu) => {
+//           //console.log(edu.id, req.body.id);
+//           return edu.id === req.body.id;
+//         })
+//       );
+//     });
+//     if (indexToRemove !== -1) {
+//       if (userBadges[indexToRemove].personal[req.body.type].length === 1) {
+//         userBadges.splice(indexToRemove, 1);
+//       } else {
+//         // Find the index of the education object within the found badge
+//         const educationIndexToRemove = decryptedUserBadges[
+//           indexToRemove
+//         ].personal[req.body.type].findIndex((edu) => edu.id === req.body.id);
+
+//         if (educationIndexToRemove !== -1) {
+//           // Remove the education object from the array
+//           userBadges[indexToRemove].personal[req.body.type].splice(
+//             educationIndexToRemove,
+//             1
+//           );
+//         } else {
+//           throw new Error("Badge Not Found");
+//         }
+//       }
+//     } else {
+//       throw new Error("Badges Not Found");
+//     }
+//     User.badges = userBadges;
+//     User.markModified("badges");
+//     // Save the updated user document
+//     const data = await User.save();
+//     res.status(200).json({ data, message: "Successful" });
+//   } catch (error) {
+//     res.status(500).json({
+//       message: `An error occurred while removeAWorkEducationBadge: ${error.message}`,
+//     });
+//   }
+// };
+
+// const getAWorkAndEducationBadge = async (req, res) => {
+//   try {
+//     const User = await UserModel.findOne({ uuid: req.body.uuid });
+//     if (!User) throw new Error("No such User!");
+
+//     const userBadges = User.badges;
+//     let decryptedUserBadges;
+
+//     if (User.isPasswordEncryption) {
+//       if (!req.body.infoc) throw new Error("Please Provide Password");
+
+//       decryptedUserBadges = userBadges.map((badge) => {
+//         if (badge?.personal?.[req.body.type]) {
+//           const decryptedItems = badge.personal[req.body.type].map((item) => {
+//             const decryptedItem = decryptData(
+//               userCustomizedDecryptData(item, req.body.infoc)
+//             );
+//             return decryptedItem;
+//           });
+
+//           // Creating a new badge object to replace the personal type with decrypted items
+//           return {
+//             ...badge,
+//             personal: {
+//               ...badge.personal,
+//               [req.body.type]: decryptedItems,
+//             },
+//           };
+//         }
+
+//         // If the condition does not match, return the badge unchanged
+//         return badge;
+//       });
+//     } else {
+//       decryptedUserBadges = userBadges.map((badge) => {
+//         if (badge?.personal?.[req.body.type]) {
+//           const decryptedItems = badge.personal[req.body.type].map((item) => {
+//             const decryptedItem = decryptData(item);
+//             return decryptedItem;
+//           });
+
+//           // Creating a new badge object to replace the personal type with decrypted items
+//           return {
+//             ...badge,
+//             personal: {
+//               ...badge.personal,
+//               [req.body.type]: decryptedItems,
+//             },
+//           };
+//         }
+
+//         // If the condition does not match, return the badge unchanged
+//         return badge;
+//       });
+//     }
+
+//     // Find the index of the object to remove
+//     const index = decryptedUserBadges.findIndex((badge) => {
+//       return (
+//         badge.personal &&
+//         badge.personal[req.body.type] &&
+//         badge.personal[req.body.type].some((edu) => {
+//           //console.log(edu.id, req.body.id);
+//           return edu.id === req.body.id;
+//         })
+//       );
+//     });
+//     let obj;
+//     if (index !== -1) {
+//       // Find the index of the education object within the found badge
+//       const educationIndex = decryptedUserBadges[index].personal[
+//         req.body.type
+//       ].findIndex((edu) => edu.id === req.body.id);
+
+//       if (educationIndex !== -1) {
+//         // Remove the education object from the array
+//         obj =
+//           decryptedUserBadges[index].personal[req.body.type][educationIndex];
+//       } else {
+//         throw new Error("Badge Not Found");
+//       }
+//     } else {
+//       throw new Error("Badges Not Found");
+//     }
+
+//     res.status(200).json({ obj, message: "Successful" });
+//   } catch (error) {
+//     res.status(500).json({
+//       message: `An error occurred while fetching WorkEducationBadge: ${error.message}`,
+//     });
+//   }
+// };
 
 const getAWorkAndEducationBadge = async (req, res) => {
   try {
@@ -503,7 +895,7 @@ const getAWorkAndEducationBadge = async (req, res) => {
         badge.personal &&
         badge.personal[req.body.type] &&
         badge.personal[req.body.type].some((edu) => {
-          console.log(edu.id, req.body.id);
+          // console.log(edu.id, req.body.id);
           return edu.id === req.body.id;
         })
       );
@@ -538,6 +930,8 @@ const getPersonalBadge = async (req, res) => {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
 
+    const eyk = req.body.infoc;
+
     const userBadges = User.badges;
 
     // Find the index of the object to remove
@@ -546,11 +940,36 @@ const getPersonalBadge = async (req, res) => {
     });
 
     let obj;
-    if (index !== -1) {
-      // Find the index of the education object within the found badge
-      obj = userBadges[index].personal[req.body.type];
+    if (User.isPasswordEncryption) {
+      if (!eyk) throw new Error("Please Provide Password");
+      if (index !== -1) {
+        // Find the index of the education object within the found badge
+        if (personalKeys.includes(req.body.type)) {
+          obj = decryptData(
+            userCustomizedDecryptData(
+              userBadges[index].personal[req.body.type],
+              eyk
+            )
+          );
+        }
+        else {
+          obj = userBadges[index].personal[req.body.type]
+        }
+      } else {
+        throw new Error("Badges Not Found");
+      }
     } else {
-      throw new Error("Badges Not Found");
+      if (index !== -1) {
+        // Find the index of the education object within the found badge
+        if (personalKeys.includes(req.body.type)) {
+          obj = decryptData(userBadges[index].personal[req.body.type]);
+        }
+        else {
+          obj = userBadges[index].personal[req.body.type]
+        }
+      } else {
+        throw new Error("Badges Not Found");
+      }
     }
 
     res.status(200).json({ obj, message: "Successful" });
@@ -560,6 +979,117 @@ const getPersonalBadge = async (req, res) => {
     });
   }
 };
+
+// const updateWorkAndEducationBadge = async (req, res) => {
+//   try {
+//     const User = await UserModel.findOne({ uuid: req.body.uuid });
+//     if (!User) throw new Error("No such User!");
+
+//     const userBadges = User.badges;
+//     let decryptedUserBadges;
+
+//     if (User.isPasswordEncryption) {
+//       if (!req.body.infoc) throw new Error("Please Provide Password");
+
+//       decryptedUserBadges = userBadges.map((badge) => {
+//         if (badge?.personal?.[req.body.type]) {
+//           const decryptedItems = badge.personal[req.body.type].map((item) => {
+//             const decryptedItem = decryptData(
+//               userCustomizedDecryptData(item, req.body.infoc)
+//             );
+//             return decryptedItem;
+//           });
+
+//           // Creating a new badge object to replace the personal type with decrypted items
+//           return {
+//             ...badge,
+//             personal: {
+//               ...badge.personal,
+//               [req.body.type]: decryptedItems,
+//             },
+//           };
+//         }
+
+//         // If the condition does not match, return the badge unchanged
+//         return badge;
+//       });
+//     } else {
+//       decryptedUserBadges = userBadges.map((badge) => {
+//         if (badge?.personal?.[req.body.type]) {
+//           const decryptedItems = badge.personal[req.body.type].map((item) => {
+//             const decryptedItem = decryptData(item);
+//             return decryptedItem;
+//           });
+
+//           // Creating a new badge object to replace the personal type with decrypted items
+//           return {
+//             ...badge,
+//             personal: {
+//               ...badge.personal,
+//               [req.body.type]: decryptedItems,
+//             },
+//           };
+//         }
+
+//         // If the condition does not match, return the badge unchanged
+//         return badge;
+//       });
+//     }
+
+//     // Find the index of the object
+//     const index = decryptedUserBadges.findIndex((badge) => {
+//       return (
+//         badge.personal &&
+//         badge.personal[req.body.type] &&
+//         badge.personal[req.body.type].some((edu) => {
+//           //console.log(edu.id, req.body.id, "new");
+//           return edu.id === req.body.id;
+//         })
+//       );
+//     });
+//     if (index !== -1) {
+//       // Find the index of the education object within the found badge
+//       const educationIndex = decryptedUserBadges[index].personal[
+//         req.body.type
+//       ].findIndex((edu) => edu.id === req.body.id);
+
+//       if (educationIndex !== -1) {
+//         if (User.isPasswordEncryption) {
+//           if (!req.body.infoc)
+//             throw new Error(
+//               "No eyk Provided in request body, Request can't be proceeded."
+//             );
+//           // Overwrite the existing object with new data
+//           userBadges[index].personal[req.body.type][educationIndex] =
+//             userCustomizedEncryptData(
+//               encryptData(req.body.newData),
+//               req.body.infoc
+//             );
+//         } else {
+//           userBadges[index].personal[req.body.type][educationIndex] =
+//             encryptData(req.body.newData);
+//         }
+
+//         // Update the modified user document
+//         User.badges = userBadges;
+//         User.markModified("badges");
+//         const data = await User.save();
+
+//         return res
+//           .status(200)
+//           .json({ data, message: "Object updated successfully" });
+//       } else {
+//         throw new Error("Badge Not Found");
+//       }
+//     } else {
+//       throw new Error("Badges Not Found");
+//     }
+//   } catch (error) {
+//     res.status(500).json({
+//       message: `An error occurred while updating the object: ${error.message}`,
+//     });
+//   }
+// };
 
 const updateWorkAndEducationBadge = async (req, res) => {
   try {
@@ -574,7 +1104,7 @@ const updateWorkAndEducationBadge = async (req, res) => {
         badge.personal &&
         badge.personal[req.body.type] &&
         badge.personal[req.body.type].some((edu) => {
-          console.log(edu.id, req.body.id, "new");
+          // console.log(edu.id, req.body.id, "new");
           return edu.id === req.body.id;
         })
       );
@@ -617,40 +1147,69 @@ const addWorkEducationBadge = async (req, res) => {
     if (!User) throw new Error("No such User!");
     const newData = req.body.data;
     const userBadges = User.badges;
+    const eyk = req.body.infoc;
 
     const personalBadgeIndex = userBadges.findIndex(
       (badge) => badge.personal && badge.personal[req.body.type]
     );
-    if (personalBadgeIndex !== -1) {
-      User.badges[personalBadgeIndex].personal[req.body.type].push(newData);
-      User.markModified("badges");
+    if (User.isPasswordEncryption) {
+      if (!eyk)
+        throw new Error(
+          "No eyk Provided in request body, Request can't be proceeded."
+        );
+      if (personalBadgeIndex !== -1) {
+        User.badges[personalBadgeIndex].personal[req.body.type].push(
+          newData,
+        );
+        User.markModified("badges");
+      } else {
+        User.badges.push({
+          personal: {
+            [req.body.type]: [
+              newData,
+            ],
+          },
+        });
+      }
     } else {
-      User.badges.push({ personal: { [req.body.type]: [newData] } });
+      if (personalBadgeIndex !== -1) {
+        User.badges[personalBadgeIndex].personal[req.body.type].push(
+          newData
+        );
+        User.markModified("badges");
+      } else {
+        User.badges.push({
+          personal: { [req.body.type]: [newData] },
+        });
+      }
     }
     const data = await User.save();
+
+
+    const txID = crypto.randomBytes(11).toString("hex")
     // Update the action
 
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      // txData : newUser.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "Incentive for adding badges"
     });
     // Decrement the Treasury
@@ -662,6 +1221,10 @@ const addWorkEducationBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ data, message: "Successful" });
   } catch (error) {
@@ -675,37 +1238,58 @@ const addWeb3Badge = async (req, res) => {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
 
+    const eyk = req.body.infoc;
+
     const userBadges = User.badges;
-    const updatedUserBadges = [
-      ...userBadges,
-      {
-        web3: req.body.web3,
-      },
-    ];
+    let updatedUserBadges;
+    if (User.isPasswordEncryption) {
+      if (!eyk)
+        throw new Error(
+          "No eyk Provided in request body, Request can't be proceeded."
+        );
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          web3: userCustomizedEncryptData(encryptData(req.body.web3), eyk),
+        },
+      ];
+    } else {
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          web3: encryptData(req.body.web3),
+        },
+      ];
+    }
     // Update the user badges
     User.badges = updatedUserBadges;
     // Update the action
     await User.save();
 
+
+    const txID = crypto.randomBytes(11).toString("hex")
+
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: 'ethereum-wallet',
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      txData: 'ethereum-wallet',
+
     });
     // Decrement the Treasury
     await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
@@ -716,6 +1300,10 @@ const addWeb3Badge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -745,7 +1333,7 @@ const removePersonalBadge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
 
@@ -781,7 +1369,7 @@ const removeWeb3Badge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
 
@@ -802,6 +1390,8 @@ const updatePersonalBadge = async (req, res) => {
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
 
+    const eyk = req.body.infoc;
+
     const userBadges = User.badges;
 
     const index = userBadges.findIndex((badge) => {
@@ -809,7 +1399,20 @@ const updatePersonalBadge = async (req, res) => {
     });
 
     if (index !== -1) {
-      userBadges[index].personal[req.body.type] = req.body.newData;
+      if (User.isPasswordEncryption) {
+        if (!eyk) throw new Error("No eyk Provided in request body, Request can't be proceeded.");
+        if (personalKeys.includes(req.body.type)) {
+          userBadges[index].personal[req.body.type] = userCustomizedEncryptData(encryptData(req.body.newData), eyk);
+        } else {
+          userBadges[index].personal[req.body.type] = req.body.newData;
+        }
+      } else {
+        if (personalKeys.includes(req.body.type)) {
+          userBadges[index].personal[req.body.type] = encryptData(req.body.newData);
+        } else {
+          userBadges[index].personal[req.body.type] = req.body.newData;
+        }
+      }
     } else {
       throw new Error("Badge Not Found");
     }
@@ -851,7 +1454,7 @@ const removeBadge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
     // Update the user badges
@@ -927,7 +1530,7 @@ const removeContactBadge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
     // Update the user badges
@@ -988,7 +1591,7 @@ const sendVerifyEmail = async ({ email, uuid, type }) => {
     );
 
     // const verificationToken = user.generateVerificationToken();
-    console.log("verificationToken", verificationToken);
+    //console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
     // const url = `${FRONTEND_URL}/VerifyCode?token=${verificationTokenFull}&badge=true`;
@@ -1002,7 +1605,7 @@ const sendVerifyEmail = async ({ email, uuid, type }) => {
       },
     };
     // Create SES service object
-    console.log("before sesClient", SES_CONFIG);
+    //console.log("before sesClient", SES_CONFIG);
 
     const sesClient = new AWS.SES(SES_CONFIG);
 
@@ -1036,7 +1639,7 @@ const sendVerifyEmail = async ({ email, uuid, type }) => {
       const emailRes = await sesClient.sendEmail(params).promise();
       return emailRes;
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
 
     // return res.status(200).send({
@@ -1107,7 +1710,7 @@ const addContactBadgeAdd = async (req, res) => {
     const usersWithEmail = await UserModel.find({
       email: decodedToken.email,
     });
-    console.log("wamiq", usersWithBadge);
+    //console.log("wamiq", usersWithBadge);
     if (usersWithBadge.length !== 0 || usersWithEmail.length !== 0)
       throw new Error("Oops! This account is already linked.");
 
@@ -1151,16 +1754,34 @@ const addPasskeyBadge = async (req, res) => {
       throw new Error("Oops! This account is already linked.");
 
     const userBadges = User.badges;
-    const updatedUserBadges = [
-      ...userBadges,
-      {
-        accountId: req.body.accountId,
-        accountName: req.body.accountName,
-        isVerified: req.body.isVerified,
-        type: req.body.type,
-        data: req.body.data,
-      },
-    ];
+    let updatedUserBadges;
+    if (User.isPasswordEncryption) {
+      if (!req.body.eyk)
+        throw new Error(
+          "No eyk Provided in request body, Request can't be proceeded."
+        );
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          accountId: req.body.accountId,
+          accountName: req.body.accountName,
+          isVerified: req.body.isVerified,
+          type: req.body.type,
+          data: userCustomizedEncryptData(encryptData(req.body.data), eyk),
+        },
+      ];
+    } else {
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          accountId: req.body.accountId,
+          accountName: req.body.accountName,
+          isVerified: req.body.isVerified,
+          type: req.body.type,
+          data: encryptData(req.body.data),
+        },
+      ];
+    }
     // Update the user badges
     User.badges = updatedUserBadges;
     // Update the action
@@ -1177,11 +1798,13 @@ const addPasskeyBadge = async (req, res) => {
     // // Update the action
     // await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
+
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
@@ -1191,7 +1814,7 @@ const addPasskeyBadge = async (req, res) => {
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
@@ -1206,6 +1829,10 @@ const addPasskeyBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -1233,16 +1860,35 @@ const addFarCasterBadge = async (req, res) => {
       throw new Error("Oops! This account is already linked.");
 
     const userBadges = User.badges;
-    const updatedUserBadges = [
-      ...userBadges,
-      {
-        accountId: req.body.accountId,
-        accountName: req.body.accountName,
-        isVerified: req.body.isVerified,
-        type: req.body.type,
-        data: req.body.data,
-      },
-    ];
+    let updatedUserBadges;
+    if (User.isPasswordEncryption) {
+      if (!req.body.eyk)
+        throw new Error(
+          "No eyk Provided in request body, Request can't be proceeded."
+        );
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          accountId: req.body.accountId,
+          accountName: req.body.accountName,
+          isVerified: req.body.isVerified,
+          type: req.body.type,
+          data: userCustomizedEncryptData(encryptData(req.body.data), eyk),
+        },
+      ];
+    } else {
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          accountId: req.body.accountId,
+          accountName: req.body.accountName,
+          isVerified: req.body.isVerified,
+          type: req.body.type,
+          data: encryptData(req.body.data),
+        },
+      ];
+    }
+
     // Update the user badges
     User.badges = updatedUserBadges;
     // Update the action
@@ -1259,25 +1905,28 @@ const addFarCasterBadge = async (req, res) => {
     // // Update the action
     // await User.save();
 
+    const txID = crypto.randomBytes(11).toString("hex")
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "User",
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
     });
     await createLedger({
       uuid: User.uuid,
       txUserAction: "accountBadgeAdded",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: "DAO Treasury",
       txTo: User.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+      txData: req.body.type,
+
     });
     // Decrement the Treasury
     await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
@@ -1288,6 +1937,10 @@ const addFarCasterBadge = async (req, res) => {
       amount: ACCOUNT_BADGE_ADDED_AMOUNT,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    User.rewardSchedual.addingBadgeFdx = User.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    await User.save();
 
     res.status(200).json({ message: "Successful" });
   } catch (error) {
@@ -1322,7 +1975,7 @@ const removePasskeyBadge = async (req, res) => {
       txFrom: User.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: User.badges[0]._id,
+      txData: req.body.type,
       // txDescription : "User adds a verification badge"
     });
 
@@ -1371,6 +2024,216 @@ const removeFarCasterBadge = async (req, res) => {
   }
 };
 
+const addPasswordBadgesUpdate = async (req, res) => {
+  try {
+    const { uuid, eyk } = req.body;
+    const user = await User.findOne({
+      uuid: uuid,
+    });
+
+    if (user.isPasswordEncryption) {
+      if (!eyk)
+        throw new Error(
+          "No eyk Provided in request body, Request can't be proceeded."
+        );
+
+      // console.log("Remove Legacy Encryption!");
+
+      // As Legacy Password is added so we need to Remove it.
+      user.badges.forEach((badge) => {
+        if (badge.legacy || badge.accountName === "Email") {
+          return;
+        } else if (badge.type && badge.type === "cell-phone") {
+          badge.details = userCustomizedDecryptData(badge.details, eyk);
+        } else if (
+          badge.type &&
+          ["work", "education", "personal", "social", "default"].includes(
+            badge.type
+          )
+        ) {
+          badge.details = userCustomizedDecryptData(badge.details, eyk);
+        } else if (
+          badge.accountName &&
+          [
+            "facebook",
+            "linkedin",
+            "twitter",
+            "instagram",
+            "github",
+            "Email",
+            "google",
+          ].includes(badge.accountName)
+        ) {
+          badge.details = userCustomizedDecryptData(badge.details, eyk);
+        }
+        // else if (badge.personal && badge.personal.work) {
+        //   badge.personal.work = badge.personal.work.map((item) =>
+        //     userCustomizedDecryptData(item, eyk)
+        //   );
+        // } 
+        else if (badge.personal) {
+          const decryptedPersonal = badge.personal;
+          for (const key of personalKeys) {
+            if (badge.personal.hasOwnProperty(key)) {
+              decryptedPersonal[key] = userCustomizedDecryptData(badge.personal[key], eyk);
+            }
+          }
+          badge.personal = decryptedPersonal;
+        } else if (badge.web3) {
+          badge.web3 = userCustomizedDecryptData(badge.web3, eyk);
+        } else if (
+          badge.type &&
+          ["desktop", "mobile", "farcaster"].includes(badge.type)
+        ) {
+          badge.data = userCustomizedDecryptData(badge.data, eyk);
+        }
+      });
+
+      // Find the index of badges with legacy key
+      const index = user.badges.findIndex(
+        (badge) => badge.legacy !== undefined
+      );
+      // If index is found, remove the badge with legacy key
+      if (index !== -1) {
+        user.badges.splice(index, 1);
+      }
+      user.isPasswordEncryption = false;
+      await user.save();
+
+      // Create Ledger
+      await createLedger({
+        uuid: user.uuid,
+        txUserAction: "accountBadgeRemoved",
+        txID: crypto.randomBytes(11).toString("hex"),
+        txAuth: "User",
+        txFrom: user.uuid,
+        txTo: "dao",
+        txAmount: "0",
+        txData: 'legacy',
+        // txDescription : "User adds a verification badge"
+      });
+      res.status(200).json({
+        message: `User's customized password decryption is removed successful.`,
+        data: user,
+      });
+    } else if (!user.isPasswordEncryption) {
+      // console.log("Apply Legacy Encryption!");
+
+      // As Legacy Password is removed so we need to Add it.
+      user.badges.forEach((badge) => {
+        if (badge.legacy || badge.accountName === "Email") {
+          return;
+        } else if (badge.type && badge.type === "cell-phone") {
+          badge.details = userCustomizedEncryptData(badge.details, eyk);
+        } else if (
+          badge.type &&
+          ["work", "education", "personal", "social", "default"].includes(
+            badge.type
+          )
+        ) {
+          badge.details = userCustomizedEncryptData(badge.details, eyk);
+        } else if (
+          badge.accountName &&
+          [
+            "facebook",
+            "linkedin",
+            "twitter",
+            "instagram",
+            "github",
+            "Email",
+            "google",
+          ].includes(badge.accountName)
+        ) {
+          badge.details = userCustomizedEncryptData(badge.details, eyk);
+        }
+        // else if (badge.personal && badge.personal.work) {
+        //   badge.personal.work = badge.personal.work.map((item) =>
+        //     userCustomizedEncryptData(item, eyk)
+        //   );
+        // }
+        else if (badge.personal) {
+          const encryptedPersonal = badge.personal;
+          for (const key of personalKeys) {
+            if (badge.personal.hasOwnProperty(key)) {
+              encryptedPersonal[key] = userCustomizedEncryptData(badge.personal[key], eyk);
+            }
+          }
+          badge.personal = encryptedPersonal;
+        } else if (badge.web3) {
+          badge.web3 = userCustomizedEncryptData(badge.web3, eyk);
+        } else if (
+          badge.type &&
+          ["desktop", "mobile", "farcaster"].includes(badge.type)
+        ) {
+          badge.data = userCustomizedEncryptData(badge.data, eyk);
+        }
+      });
+      if (!eyk)
+        throw new Error(
+          "No eyk Provided in request body, Request can't be proceeded."
+        );
+      const userBadges = user.badges;
+      let updatedUserBadges;
+      updatedUserBadges = [
+        ...userBadges,
+        {
+          legacy: true,
+        },
+      ];
+      user.badges = updatedUserBadges;
+      user.isPasswordEncryption = true;
+      await user.save();
+      const txID = crypto.randomBytes(11).toString("hex");
+      // Create Ledger
+      await createLedger({
+        uuid: user.uuid,
+        txUserAction: "accountBadgeAdded",
+        txID: txID,
+        txAuth: "User",
+        txFrom: user.uuid,
+        txTo: "dao",
+        txAmount: "0",
+        txData: 'legacy',
+        // txDescription : "User adds a verification badge"
+      });
+      await createLedger({
+        uuid: user.uuid,
+        txUserAction: "accountBadgeAdded",
+        txID: txID,
+        txAuth: "DAO",
+        txFrom: "DAO Treasury",
+        txTo: user.uuid,
+        txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+        txData: 'legacy',
+        // txDescription : "Incentive for adding badges"
+      });
+      // Decrement the Treasury
+      await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
+
+      // Increment the UserBalance
+      await updateUserBalance({
+        uuid: user.uuid,
+        amount: ACCOUNT_BADGE_ADDED_AMOUNT,
+        inc: true,
+      });
+
+      user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+      user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+      await user.save();
+
+      res.status(200).json({
+        message: `User's customized password encryption is added successful.`,
+        data: user,
+      });
+    }
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while processing your security badge: ${error.message}`,
+    });
+  }
+};
+
 module.exports = {
   update,
   getBadges,
@@ -1398,4 +2261,5 @@ module.exports = {
   getPersonalBadge,
   addFarCasterBadge,
   removeFarCasterBadge,
+  addPasswordBadgesUpdate,
 };

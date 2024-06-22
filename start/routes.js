@@ -14,6 +14,10 @@ const RedeemRoute = require("../routes/RedeemRoute");
 const OtpRoutes = require("../routes/OtpRoutes");
 const DirectMessageRoutes = require("../routes/DirectMessageRoutes");
 const isUnderMaintenance = require("../middleware/maintenance");
+const UserSurveyListRoutes = require("../routes/UserSurveyListRoutes");
+const DevScriptRoutes = require("../routes/DevScriptRoutes");
+const FinanceRoutes = require("../routes/FinanceRoutes");
+
 
 module.exports = function (app) {
     app.use("/",isUnderMaintenance, LedgerRoute)
@@ -32,5 +36,8 @@ module.exports = function (app) {
     app.use("/ledger",isUnderMaintenance,LedgerRoute)
     app.use("/treasury",isUnderMaintenance,TreasuryRoutes)
     app.use("/auth",isUnderMaintenance,PassportRoutes)
+    app.use("/userlists",isUnderMaintenance,UserSurveyListRoutes)
+    app.use("/devscript",isUnderMaintenance,DevScriptRoutes)
+    app.use("/finance",isUnderMaintenance,FinanceRoutes)
     // app.use(error);
   };

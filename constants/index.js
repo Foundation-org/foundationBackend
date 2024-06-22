@@ -42,13 +42,32 @@ module.exports = {
     "Please enter your job title. If the title is valid and complete, it will be echoed back to you. If it contains any errors, it will be only auto-corrected to standard. If it's not recognized as a valid job title, it will be Rejected."
   ],
   // ACCOUNT_SIGNUP_AMOUNT: 4,
-  ACCOUNT_BADGE_ADDED_AMOUNT: 0.96,
-  QUEST_COMPLETED_AMOUNT: 0.96,
-  QUEST_OWNER_ACCOUNT: 0.10,
-  QUEST_COMPLETED_CHANGE_AMOUNT: 0.00,
-  QUEST_CREATED_AMOUNT: 0.1,
-  QUEST_OPTION_ADDED_AMOUNT: 0.10,
-  QUEST_OPTION_CONTENTION_GIVEN_AMOUNT: 0.10,
-  QUEST_OPTION_CONTENTION_REMOVED_AMOUNT: 0.10,
-  MASTER_ARRAY_TOPICS: ["Architecture", "Arts", "Business", "Culture", "Economics", "Education", "Entertainment", "Environment", "Ethics", "Finance", "Fitness", "Food", "Geography", "Health", "History", "Hobbies", "Home", "Law", "Media", "Music", "Parenting", "Pets", "Philosophy", "Personal", "Politics", "Preferences", "Psychology", "Religion", "Science", "Society", "Sports", "Technology"]
+  ACCOUNT_BADGE_ADDED_AMOUNT: 10,  // accountBadgeAdded
+  QUEST_COMPLETED_AMOUNT: 10,       // postCompleted
+  QUEST_OWNER_ACCOUNT: 1,          // postCompletedUser
+  QUEST_COMPLETED_CHANGE_AMOUNT: 0, // postCompletedChange
+  QUEST_CREATED_AMOUNT: 1,           // postCreated
+  QUEST_OPTION_ADDED_AMOUNT: 1,       // postOptionAdded
+  QUEST_OPTION_CONTENTION_GIVEN_AMOUNT: 1,  // postOptionContentionGiven
+  QUEST_OPTION_CONTENTION_REMOVED_AMOUNT: 1,  // postOptionContentionRemoved
+  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 25,  // postLinkCreatedCustom   
+  USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT: 25,          //postListLinkCreatedCustom
+  TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX: 2.5,    // FDX conversion rate wrt USD
+  MASTER_ARRAY_TOPICS: ["Architecture", "Arts", "Business", "Culture", "Economics", "Education", "Entertainment", "Environment", "Ethics", "Finance", "Fitness", "Food", "Geography", "Health", "History", "Hobbies", "Home", "Law", "Media", "Music", "Parenting", "Pets", "Philosophy", "Personal", "Politics", "Preferences", "Psychology", "Religion", "Science", "Society", "Sports", "Technology"],
+  POST_LINK: 0,
+  POST_SHARE: 0,
+  LIST_CREATE: 0,
+  LIST_LINK: 0,
+  LIST_SHARE: 0,
+  LIST_SHARE_ENGAGEMENT: "+1",
+  ADD_POST_TO_LIST: 0,
+  REMOVE_BADGE: 0,
+  DELETE_MY_POST: 0,
+  DELETE_MY_LIST: 0,
+  REMOVE_MY_OBJECTION: "+1",
+  ADD_OBJECTION_TO_POST: "-1",
+  MY_POST_ENGAGEMENT: "+1",
+  SHARED_POST_ENGAGEMENT: "+1",
+  HIDE_POST: 0,
+  TRANSACTION: "4%"
 };

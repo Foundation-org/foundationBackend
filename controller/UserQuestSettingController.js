@@ -6,6 +6,19 @@ const UserModel = require("../models/UserModel");
 const InfoQuestQuestions = require("../models/InfoQuestQuestions");
 const AWS = require("aws-sdk");
 const { uploadS3Bucket } = require("../utils/uploadS3Bucket");
+const path = require("path");
+const { s3ImageUpload } = require("../utils/uploadS3Bucket");
+const fs = require("fs");
+const { updateUserBalance } = require("../utils/userServices");
+const { updateTreasury } = require("../utils/treasuryService");
+const {
+  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT, POST_LINK
+} = require("../constants/index");
+const nodeHtmlToImage = require("node-html-to-image");
+const puppeteer = require("puppeteer");
+const {
+  sharedLinkDynamicImageHTML,
+} = require("../templates/sharedLinkDynamicImageHTML");
 
 const createOrUpdate = async (req, res) => {
   try {
@@ -103,6 +116,160 @@ const link = async (req, res) => {
       });
     }
 
+    const userSpent = await UserModel.findOne({ uuid: payload.uuid });
+    userSpent.feeSchedual.creatingPostLinkFdx = userSpent.feeSchedual.creatingPostLinkFdx + POST_LINK;
+    await userSpent.save();
+
+    return res.status(201).json({
+      message: "UserQuestSetting link Created Successfully!",
+      data: savedOrUpdatedUserQuestSetting,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: ` An error occurred while create UserQuestSetting link: ${error.message}`,
+    });
+  }
+};
+
+async function linkUserList(payload) {
+  try {
+    // if uniqueLink
+    if (payload.isGenerateLink) {
+      await ledgerEntryPostLinkCreated(payload.uuid);
+      payload.link = shortLink.generate(8);
+    }
+
+    // To check the Question Description
+    const infoQuestQuestion = await InfoQuestQuestions.findOne({
+      _id: payload.questForeignKey,
+    });
+
+    const userQuestSettingExist = await UserQuestSetting.findOne({
+      uuid: payload.uuid,
+      questForeignKey: payload.questForeignKey,
+    });
+
+    let savedOrUpdatedUserQuestSetting;
+    // To check the record exist
+    if (userQuestSettingExist) {
+      savedOrUpdatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
+        {
+          uuid: payload.uuid,
+          questForeignKey: payload.questForeignKey,
+        },
+        {
+          // Update fields and values here
+          $set: payload,
+        },
+        {
+          new: true, // Return the modified document rather than the original
+        }
+      );
+      await uploadS3Bucket({
+        fileName: savedOrUpdatedUserQuestSetting.link,
+        description: savedOrUpdatedUserQuestSetting.Question,
+      });
+    } else {
+      // Create a short link
+      const userQuestSetting = new UserQuestSetting({
+        ...payload,
+      });
+      savedOrUpdatedUserQuestSetting = await userQuestSetting.save();
+      await uploadS3Bucket({
+        fileName: savedOrUpdatedUserQuestSetting.link,
+        description: savedOrUpdatedUserQuestSetting.Question,
+      });
+    }
+    return {
+      message: "UserQuestSetting link Created Successfully!",
+      data: savedOrUpdatedUserQuestSetting,
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: ` An error occurred while create UserQuestSetting link: ${error.message}`,
+    });
+  }
+};
+
+const customLink = async (req, res) => {
+  try {
+    const payload = req.body;
+
+    // Check if link already exist
+    const userQuestSettingAlreadyExist = await UserQuestSetting.findOne({
+      link: payload.link,
+    });
+    if (userQuestSettingAlreadyExist)
+      return res.status(409).json({
+        message: `This link cannot be used, Try something unique like ${shortLink.generate(
+          8
+        )}`,
+      });
+
+    const user = await UserModel.findOne({ uuid: req.body.uuid });
+    if (user.balance < USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT) {
+      return res.status(409).json({
+        message: `Insufficient balance`,
+      });
+    }
+
+    // Check if link already customized
+    const linkCustomized = await UserQuestSetting.findOne({
+      uuid: payload.uuid,
+      questForeignKey: payload.questForeignKey,
+      linkCustomized: true,
+    });
+    if (linkCustomized)
+      return res.status(409).json({ message: `Link is already Customized.` });
+
+    // As link is unique Create Ledger and Proceed Normally like before with custom link.
+    await ledgerDeductionPostLinkCustomized(payload.uuid);
+
+    user.fdxSpent = user.fdxSpent + USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
+    user.feeSchedual.creatingPostCustomLinkFdx = user.feeSchedual.creatingPostCustomLinkFdx + USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
+    await user.save();
+
+    const userQuestSettingExist = await UserQuestSetting.findOne({
+      uuid: payload.uuid,
+      questForeignKey: payload.questForeignKey,
+    });
+
+    let savedOrUpdatedUserQuestSetting;
+    // To check the record exist
+    if (userQuestSettingExist) {
+      savedOrUpdatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
+        {
+          uuid: payload.uuid,
+          questForeignKey: payload.questForeignKey,
+        },
+        {
+          $set: {
+            link: payload.link,
+            linkCustomized: true,
+          },
+        },
+        {
+          new: true, // Return the modified document rather than the original
+        }
+      );
+      await uploadS3Bucket({
+        fileName: savedOrUpdatedUserQuestSetting.link,
+        description: savedOrUpdatedUserQuestSetting.Question,
+      });
+    } else {
+      // Create a short link
+      const userQuestSetting = new UserQuestSetting({
+        ...payload,
+      });
+      savedOrUpdatedUserQuestSetting = await userQuestSetting.save();
+      await uploadS3Bucket({
+        fileName: savedOrUpdatedUserQuestSetting.link,
+        description: savedOrUpdatedUserQuestSetting.Question,
+      });
+    }
+
     return res.status(201).json({
       message: "UserQuestSetting link Created Successfully!",
       data: savedOrUpdatedUserQuestSetting,
@@ -171,13 +338,12 @@ const status = async (req, res) => {
       return res.status(404).json({ message: "Share link not found" });
     }
     return res.status(200).json({
-      message: `Share link ${
-        status === "Disable"
-          ? "Disabled"
-          : status === "Delete"
+      message: `Share link ${status === "Disable"
+        ? "Disabled"
+        : status === "Delete"
           ? "Deleted"
           : "Enabled"
-      } Successfully`,
+        } Successfully`,
       data: updatedUserQuestSetting,
     });
   } catch (error) {
@@ -187,6 +353,12 @@ const status = async (req, res) => {
     });
   }
 };
+const suppressConditions = [
+  { id: "Has Mistakes or Errors", minCount: 2 },
+  { id: "Needs More Options", minCount: 2 },
+  { id: "Unclear / Doesn’t make Sense", minCount: 2 },
+  { id: "Duplicate / Similar Post", minCount: 2 },
+];
 
 const create = async (req, res) => {
   try {
@@ -202,15 +374,37 @@ const create = async (req, res) => {
     //   uuid: payload.uuid,
     //   questForeignKey: payload.questForeignKey,
     // });
+
+    let updateData = {
+      $set: { ...payload }, // Base the update object on the incoming payload
+    };
+
+    // Add 'hiddenTime' conditionally
+    if (payload.hidden === true) {
+      updateData.$set.hiddenTime = new Date(); // Set to the current timestamp
+    }
+    //console.log(updateData);
     let userQuestSettingSaved;
     userQuestSettingSaved = await UserQuestSetting.findOneAndUpdate(
       // Query criteria
       { uuid: payload.uuid, questForeignKey: payload.questForeignKey },
       // Update or insert payload
-      { $set: payload },
+      updateData,
       // Options
       { new: true, upsert: true }
     );
+    const userQuestSettingExist = await UserQuestSetting.findOne({
+      uuid: payload.uuid,
+      questForeignKey: payload.questForeignKey,
+    });
+    // To check the record exist
+    if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
+
+    if (userQuestSettingExist && payload.hidden === true) {
+      // Document found, update hiddenTime and save
+      userQuestSettingExist.hiddenTime = new Date();
+      await userQuestSettingExist.save();
+    }
 
     // To check the record exist
     // if (userQuestSettingExist){
@@ -244,6 +438,48 @@ const create = async (req, res) => {
     if (payload.hidden) {
       await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
+
+      const suppression = await UserQuestSetting.aggregate([
+        {
+          $match: {
+            hidden: true,
+            questForeignKey: payload.questForeignKey,
+          },
+        },
+        {
+          $group: {
+            _id: "$hiddenMessage",
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+      let isSuppressed = false;
+
+      if (suppression) {
+        suppression.map((item) => {
+          if (suppression) {
+            suppressConditions.forEach((condition) => {
+              if (
+                item._id === condition.id &&
+                item.count >= condition.minCount
+              ) {
+                isSuppressed = true;
+              }
+            });
+          }
+        });
+      }
+
+      // // Properly setting the fields to update with $set
+      const resp = await InfoQuestQuestions.findOneAndUpdate(
+        { _id: payload.questForeignKey },
+        {
+          $set: {
+            suppressed: isSuppressed,
+          },
+        },
+        { new: true }
+      );
     } else if (payload.hidden === false) {
       await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
@@ -272,25 +508,38 @@ const update = async (req, res) => {
     // To check the record exist
     if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
 
+    if (userQuestSettingExist && payload.hidden === true) {
+      // Document found, update hiddenTime and save
+      userQuestSettingExist.hiddenTime = new Date();
+      await userQuestSettingExist.save();
+    }
+
     // if uniqueLink
     // if(payload.uniqueLink){
     //   await ledgerEntryPostLinkCreated(payload.uuid);
     //   payload.link = shortLink.generate(8);
     // }
+
+    let updateData = {
+      $set: { ...payload }, // Base the update object on the incoming payload
+    };
+
+    // Add 'hiddenTime' conditionally
+    if (payload.hidden === true) {
+      updateData.$set.hiddenTime = new Date(); // Set to the current timestamp
+    }
     // If the record exists, update it
     const updatedUserQuestSetting = await UserQuestSetting.findOneAndUpdate(
       {
         uuid: payload.uuid,
         questForeignKey: payload.questForeignKey,
       },
-      {
-        // Update fields and values here
-        $set: payload,
-      },
+      updateData,
       {
         new: true, // Return the modified document rather than the original
       }
     );
+
     // Get quest owner uuid
     const infoQuestQuestion = await InfoQuestQuestions.findOne({
       _id: payload.questForeignKey,
@@ -303,6 +552,47 @@ const update = async (req, res) => {
       await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
     }
+
+    //QUERY TO CHECK SUPPRESSION OF post
+    const suppression = await UserQuestSetting.aggregate([
+      {
+        $match: {
+          hidden: true,
+          questForeignKey: payload.questForeignKey,
+        },
+      },
+      {
+        $group: {
+          _id: "$hiddenMessage",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    let isSuppressed = false;
+
+    if (suppression) {
+      suppression.map((item) => {
+        if (suppression) {
+          suppressConditions.forEach((condition) => {
+            if (item._id === condition.id && item.count >= condition.minCount) {
+              isSuppressed = true;
+            }
+          });
+        }
+      });
+    }
+
+    // // Properly setting the fields to update with $set
+    const resp = await InfoQuestQuestions.findOneAndUpdate(
+      { _id: payload.questForeignKey },
+      {
+        $set: {
+          suppressed: isSuppressed,
+        },
+      },
+      { new: true }
+    );
+
     return res.status(201).json({
       message: "UserQuestSetting Updated Successfully!",
       data: updatedUserQuestSetting,
@@ -356,7 +646,7 @@ const getAllHiddenQuests = async (req, res) => {
     const Questions = await BookmarkQuests.find({
       uuid: req.cookies.uuid,
     });
-    // console.log(Questions);
+    // //console.log(Questions);
     res.status(200).json(Questions);
   } catch (err) {
     res.status(500).send(err);
@@ -394,16 +684,67 @@ const ledgerEntryPostLinkCreated = async (uuid) => {
   }
 };
 
+const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
+  try {
+
+
+    const txID = crypto.randomBytes(11).toString("hex")
+    // Create Ledger
+    await createLedger({
+      uuid: uuid,
+      txUserAction: "postLinkCreatedCustom",
+      txID: txID,
+      txAuth: "User",
+      txFrom: uuid,
+      txTo: "dao",
+      txAmount: 0,
+      txData: userQuestSetting_id,
+      txDate: Date.now(),
+      txDescription: "Quest Link Customized",
+    });
+    // Create Ledger
+    await createLedger({
+      uuid: uuid,
+      txUserAction: "postLinkCreatedCustom",
+      txID: txID,
+      txAuth: "DAO",
+      txFrom: "DAO Treasury",
+      txTo: uuid,
+      txAmount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+      txData: userQuestSetting_id,
+      txDate: Date.now(),
+      txDescription: "Quest Link Customized",
+    });
+    // Increment the Treasury
+    await updateTreasury({
+      amount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+      inc: true,
+    });
+    // Decrement the UserBalance
+    await updateUserBalance({
+      uuid: uuid,
+      amount: USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+      dec: true,
+    });
+    const userSpent = await UserModel.findOne({ uuid: uuid });
+    userSpent.fdxSpent = userSpent.fdxSpent + USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
+    await userSpent.save();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const ledgerEntryAdded = async (uuid, questOwnerUuid) => {
   try {
+
     // User
     await createLedger({
       uuid: uuid,
       txUserAction: "postHiddenAdded",
       txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "DAO",
-      txFrom: "dao",
-      txTo: uuid,
+      txAuth: "User",
+      txFrom: uuid,
+      txTo: "dao",
       txAmount: "0",
       txData: uuid,
       // txDescription : "User creates a new account"
@@ -426,6 +767,8 @@ const ledgerEntryAdded = async (uuid, questOwnerUuid) => {
 
 const ledgerEntryRemoved = async (uuid, questOwnerUuid) => {
   try {
+
+
     // User
     await createLedger({
       uuid: uuid,
@@ -468,6 +811,159 @@ const ledgerEntryRemoved = async (uuid, questOwnerUuid) => {
 //   }
 // };
 
+const sharedLinkDynamicImage = async (req, res) => {
+  try {
+    //console.log("Req body", req.body);
+    const { questStartData, link } = req.body;
+
+    // Generate a image name for the image file
+    const imgName = link + ".png";
+
+    // Set Puppeteer options with --no-sandbox flag
+    const puppeteerOptions = {
+      args: ["--no-sandbox"],
+    };
+
+    nodeHtmlToImage({
+      output: `./assets/uploads/images/${imgName}`,
+      html: sharedLinkDynamicImageHTML(questStartData),
+      puppeteerArgs: puppeteerOptions,
+    })
+      .then(async () => {
+        //console.log("The image was created successfully!");
+
+        // Read the image file from the backend directory
+        const filePath = `./assets/uploads/images/${imgName}`;
+        const fileBuffer = fs.readFileSync(filePath);
+
+        // Upload the file to S3 bucket
+        const s3UploadData = await s3ImageUpload({
+          fileBuffer,
+          fileName: imgName,
+        });
+
+        if (!s3UploadData) throw new Error("File not uploaded");
+
+        //console.log("s3UploadData", s3UploadData);
+
+        const { imageName, s3Url } = s3UploadData;
+
+        // Delete the file from the backend directory after uploading to S3
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error("Error deleting file:", err);
+            return;
+          }
+          //console.log("File deleted successfully");
+        });
+
+        //console.log(imageName);
+
+        const userQuestSettingUpdate = await UserQuestSetting.findOneAndUpdate(
+          { link: req.body.link },
+          { image: s3Url },
+          { new: true }
+        );
+
+        if (!userQuestSettingUpdate)
+          throw new Error("userQuestSetting not updated");
+
+        return res.status(200).json({
+          success: true,
+          imageName: imageName,
+          s3Url: s3Url,
+          userQuestSetting: userQuestSettingUpdate,
+        });
+      })
+      .catch((error) => {
+        console.error("Error generating image:", error);
+        return res.status(500).json({
+          message: `An error occurred while generating image: ${error.message}`,
+        });
+      });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: `An error occurred on shaedLinkDynamicImage: ${error.message}`,
+    });
+  }
+};
+
+async function sharedLinkDynamicImageUserList(link, questStartData) {
+  try {
+    // Generate a image name for the image file
+    const imgName = link + ".png";
+
+    // Set Puppeteer options with --no-sandbox flag
+    const puppeteerOptions = {
+      args: ["--no-sandbox"],
+    };
+
+    nodeHtmlToImage({
+      output: `./assets/uploads/images/${imgName}`,
+      html: sharedLinkDynamicImageHTML(questStartData),
+      puppeteerArgs: puppeteerOptions,
+    })
+      .then(async () => {
+        //console.log("The image was created successfully!");
+
+        // Read the image file from the backend directory
+        const filePath = `./assets/uploads/images/${imgName}`;
+        const fileBuffer = fs.readFileSync(filePath);
+
+        // Upload the file to S3 bucket
+        const s3UploadData = await s3ImageUpload({
+          fileBuffer,
+          fileName: imgName,
+        });
+
+        if (!s3UploadData) throw new Error("File not uploaded");
+
+        //console.log("s3UploadData", s3UploadData);
+
+        const { imageName, s3Url } = s3UploadData;
+
+        // Delete the file from the backend directory after uploading to S3
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error("Error deleting file:", err);
+            return;
+          }
+          //console.log("File deleted successfully");
+        });
+
+        //console.log(imageName);
+
+        const userQuestSettingUpdate = await UserQuestSetting.findOneAndUpdate(
+          { link: link },
+          { image: s3Url },
+          { new: true }
+        );
+
+        if (!userQuestSettingUpdate)
+          throw new Error("userQuestSetting not updated");
+
+        return {
+          success: true,
+          imageName: imageName,
+          s3Url: s3Url,
+          userQuestSetting: userQuestSettingUpdate,
+        };
+      })
+      .catch((error) => {
+        console.error("Error generating image:", error);
+        throw new Error({
+          message: `An error occurred while generating image: ${error.message}`,
+        });
+      });
+  } catch (error) {
+    console.error(error);
+    return {
+      message: `An error occurred on shaedLinkDynamicImage: ${error.message}`,
+    }
+  }
+};
+
 module.exports = {
   create,
   createOrUpdate,
@@ -475,5 +971,10 @@ module.exports = {
   link,
   impression,
   status,
+  ledgerDeductionPostLinkCustomized,
+  sharedLinkDynamicImage,
+  customLink,
+  linkUserList,
+  sharedLinkDynamicImageUserList,
   // get,
 };

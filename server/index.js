@@ -1,15 +1,23 @@
 const express = require("express");
-const sessionExpress = require('express-session');
+const sessionExpress = require("express-session");
 const cookieSession = require("cookie-session");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const app = express();
 const dotenv = require("dotenv");
 const colors = require("colors");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
-const { BASE_PORT, FRONTEND_URL, FRONTEND_URL_1, rpID } = require("../config/env");
+const {
+  BASE_PORT,
+  FRONTEND_URL,
+  FRONTEND_URL_1,
+  rpID,
+} = require("../config/env");
 const passport = require("passport");
+const swaggerUI = require("swagger-ui-express");
+const swaggerSpec = require("../swagger");
+const cronIntialize = require("../service/cron");
 
 const {
   // Authentication
@@ -18,8 +26,11 @@ const {
   generateRegistrationOptions,
   verifyAuthenticationResponse,
   verifyRegistrationResponse,
-} = require('@simplewebauthn/server');
-const { isoBase64URL, isoUint8Array } = require('@simplewebauthn/server/helpers');
+} = require("@simplewebauthn/server");
+const {
+  isoBase64URL,
+  isoUint8Array,
+} = require("@simplewebauthn/server/helpers");
 const {
   GenerateAuthenticationOptionsOpts,
   GenerateRegistrationOptionsOpts,
@@ -27,37 +38,45 @@ const {
   VerifiedRegistrationResponse,
   VerifyAuthenticationResponseOpts,
   VerifyRegistrationResponseOpts,
-} = require('@simplewebauthn/server');
+} = require("@simplewebauthn/server");
 
 const {
   AuthenticationResponseJSON,
   AuthenticatorDevice,
   RegistrationResponseJSON,
-} = require('@simplewebauthn/types');
+} = require("@simplewebauthn/types");
 // import passport from "passport"
 // import '../service/passport'
-require("../service/passport")
+require("../service/passport");
 // require("../service/test")
 
 dotenv.config();
 
 // app.use(cors());
-app.use(cors({
-  origin: FRONTEND_URL.split(','),
+
+// cron initialize
+
+cronIntialize();
+
+app.use(
+  cors({
+    origin: FRONTEND_URL.split(","),
     // methods: "GET,POST,PUT,DELETE",
     credentials: true,
-  }));
+  })
+);
 
-app.use(sessionExpress({
-  secret: 'somethingsecretgoeshere',
-  resave: false,
-  saveUninitialized: true,
-  // cookie: { secure: true }
-}))
+app.use(
+  sessionExpress({
+    secret: "somethingsecretgoeshere",
+    resave: false,
+    saveUninitialized: true,
+    // cookie: { secure: true }
+  })
+);
 // app.use(
 //   cookieSession({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
 // );
-
 
 // middlewares
 // app.use(cors());
@@ -67,17 +86,24 @@ app.use(sessionExpress({
 //     credentials: true,
 //   }));
 app.use(cookieParser());
-  
-  // passport
-  app.use(passport.initialize())
-  // app.use(passport.session()) //important because deserializeUser has to decode the information from the session id
+
+// passport
+app.use(passport.initialize());
+// app.use(passport.session()) //important because deserializeUser has to decode the information from the session id
 
 app.use(express.json());
 app.use(helmet());
 app.use(morgan("common"));
 
-// All Routes
-require("../start/routes")(app)
+// // All Routes
+require("../start/routes")(app);
+
+// Serve Swagger documentation
+app.use(
+  "/foundation-api-documentation-swagger",
+  swaggerUI.serve,
+  swaggerUI.setup(swaggerSpec)
+);
 
 // A unique identifier for your website
 // const rpID = rpID;
@@ -87,7 +113,7 @@ const origin = `https://${rpID}`;
 /**
  * Registration (a.k.a. "Registration")
  */
-app.get('/generate-registration-options', async (req, res) => {
+app.get("/generate-registration-options", async (req, res) => {
   // const user = inMemoryUserDeviceDB[loggedInUserId];
 
   // const {
@@ -142,30 +168,30 @@ app.get('/generate-registration-options', async (req, res) => {
 
   // const options = await generateRegistrationOptions(opts);
 
-const options = await generateRegistrationOptions({
-  rpName: "SimpleWebAuthn Example",
-  rpID: rpID,
-  userID: "userID",
-  userName: "userName",
-  // Don't prompt users for additional information about the authenticator
-  // (Recommended for smoother UX)
-  attestationType: 'none',
-  // Prevent users from re-registering existing authenticators
-  // excludeCredentials: userAuthenticators.map(authenticator => ({
-  //   id: authenticator.credentialID,
-  //   type: 'public-key',
-  //   // Optional
-  //   transports: authenticator.transports,
-  // })),
-  // See "Guiding use of authenticators via authenticatorSelection" below
-  authenticatorSelection: {
-    // Defaults
-    residentKey: 'preferred',
-    userVerification: 'preferred',
-    // Optional
-    authenticatorAttachment: 'platform',
-  },
-});
+  const options = await generateRegistrationOptions({
+    rpName: "SimpleWebAuthn Example",
+    rpID: rpID,
+    userID: "userID",
+    userName: "foundationUser",
+    // Don't prompt users for additional information about the authenticator
+    // (Recommended for smoother UX)
+    attestationType: "none",
+    // Prevent users from re-registering existing authenticators
+    // excludeCredentials: userAuthenticators.map(authenticator => ({
+    //   id: authenticator.credentialID,
+    //   type: 'public-key',
+    //   // Optional
+    //   transports: authenticator.transports,
+    // })),
+    // See "Guiding use of authenticators via authenticatorSelection" below
+    authenticatorSelection: {
+      // Defaults
+      residentKey: "preferred",
+      userVerification: "preferred",
+      // Optional
+      authenticatorAttachment: "platform",
+    },
+  });
   /**
    * The server needs to temporarily remember this value for verification, so don't lose it until
    * after you verify an authenticator response.
@@ -175,7 +201,7 @@ const options = await generateRegistrationOptions({
   res.send(options);
 });
 
-app.post('/verify-registration', async (req, res) => {
+app.post("/verify-registration", async (req, res) => {
   const body = req.body;
 
   // const user = inMemoryUserDeviceDB[loggedInUserId];
@@ -311,6 +337,5 @@ app.post('/verify-registration', async (req, res) => {
 
 //   res.send({ verified });
 // });
-
 
 module.exports = app;

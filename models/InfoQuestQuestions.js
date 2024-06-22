@@ -75,13 +75,24 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
       type: Number,
       // default: 0,
     },
-    url: {
+    suppressed: {
+      type: Boolean,
+      default: false,
+    },
+    suppressedReason: {
       type: String,
       default: "",
+    },
+    url: {
+      type: [String],
+      default: [],
     },
     description: {
       type: String,
       default: "",
+    },
+    isActive: {
+      type: Boolean,
     },
   },
   { timestamps: true }

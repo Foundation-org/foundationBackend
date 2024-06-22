@@ -2,11 +2,9 @@ const shortlink = require("shortlink");
 const Redeem = require("../models/Redeem");
 const UserModel = require("../models/UserModel");
 const { createLedger } = require("../utils/createLedger");
-const {
-  updateUserBalance,
-  getUserBalance,
-} = require("../utils/userServices");
+const { updateUserBalance, getUserBalance } = require("../utils/userServices");
 const crypto = require("crypto");
+const Ledgers = require("../models/Ledgers")
 
 const create = async (req, res) => {
   try {
@@ -18,16 +16,30 @@ const create = async (req, res) => {
 
     // check user balance
     const userBalance = await getUserBalance(req.body.uuid);
-    if (userBalance <= amount)
+    if (userBalance <= amount * 1)
       throw new Error("Your balance is insufficient to create this redemption");
+
+    const txID = crypto.randomBytes(11).toString("hex")
+
+    await createLedger({
+      uuid: req.body.uuid,
+      txUserAction: "redemptionCreated",
+      txID: txID,
+      txAuth: "User",
+      txFrom: req.body.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      // txDescription : "User create redemption code"
+      type: "redemption",
+    });
     // Create Ledger
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionCreated",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: req.body.uuid,
-      txTo: req.body.uuid,
+      txTo: "DAO Treasury",
       txAmount: amount,
       // txDescription : "User create redemption code"
       type: "redemption",
@@ -38,6 +50,12 @@ const create = async (req, res) => {
       amount: amount,
       dec: true,
     });
+    User.fdxSpent = User.fdxSpent + Number(amount);
+    User.redemptionStatistics.myTotalRedemptionCodeCreationCount =
+      User.redemptionStatistics.myTotalRedemptionCodeCreationCount + 1;
+    User.redemptionStatistics.createCodeFdxSpent =
+      User.redemptionStatistics.createCodeFdxSpent + Number(amount);
+    await User.save();
     //   Generate unique code
     req.body.code = shortlink.generate(10);
     // convert into integer
@@ -73,26 +91,52 @@ const transfer = async (req, res) => {
     //   throw new Error("You're already the owner of this redemption");
 
     // Create Ledger
-    // sender
+    const txID = crypto.randomBytes(11).toString("hex")
+
     await createLedger({
       uuid: getRedeem.owner.uuid,
       txUserAction: "redemptionTransferred",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "DAO",
-      txFrom: getRedeem.owner.uuid,
-      txTo: req.body.uuid,
-      txAmount: getRedeem.amount,
+      txID: txID,
+      txAuth: "User",
+      txFrom: "dao",
+      txTo: uuid,
+      txAmount: "0",
       // txDescription : "User update redemption code"
       type: "redemption",
     });
-    // Create Ledger
+    // sender
+    // await createLedger({
+    //   uuid: getRedeem.owner.uuid,
+    //   txUserAction: "redemptionTransferred",
+    //   txID: txID,
+    //   txAuth: "DAO",
+    //   txFrom: "DAO Treasury",
+    //   txTo: req.body.uuid,
+    //   txAmount: getRedeem.amount,
+    //   type: "redemption",
+    // });
+    // const senderSpent = await UserModel.findOne({uuid: getRedeem.owner.uuid});
+    // senderSpent.fdxSpent = senderSpent.fdxSpent + getRedeem.amount;
+    // await senderSpent.save();
+
     // receiver
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "redemptionReceived",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
-      txFrom: getRedeem.owner.uuid,
+      txFrom: "dao",
+      txTo: req.body.uuid,
+      txAmount: "0",
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
+    await createLedger({
+      uuid: req.body.uuid,
+      txUserAction: "redemptionReceived",
+      txID: txID,
+      txAuth: "User",
+      txFrom: "DAO Treasury",
       txTo: req.body.uuid,
       txAmount: getRedeem.amount,
       // txDescription : "User update redemption code"
@@ -104,6 +148,13 @@ const transfer = async (req, res) => {
       amount: getRedeem.amount,
       inc: true,
     });
+    const receiverEarned = await UserModel.findOne({ uuid: req.body.uuid });
+    receiverEarned.fdxEarned =
+      receiverEarned.fdxEarned + Number(getRedeem.amount);
+    receiverEarned.redemptionStatistics.codeRedeemedFdxEarned =
+      receiverEarned.redemptionStatistics.codeRedeemedFdxEarned +
+      Number(getRedeem.amount);
+    await receiverEarned.save();
     // Update the Redeem
     // getRedeem.code = shortlink.generate(10),
     getRedeem.owner = User._id;
@@ -132,12 +183,13 @@ const deleteRedeem = async (req, res) => {
       "uuid"
     );
     // if (!deletedRedeem) throw new Error("Code is invalid!");
+    const txID = crypto.randomBytes(11).toString("hex")
 
     // Create ledger
     await createLedger({
       uuid: uuid,
       txUserAction: "redemptionDeleted",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: deletedRedeem.owner.uuid,
       txTo: req.body.uuid,
@@ -170,11 +222,25 @@ const balance = async (req, res) => {
     if (getRedeem.owner.uuid !== uuid) throw new Error("You cannot redeem!");
 
     // Create Ledger
+
+    const txID = crypto.randomBytes(11).toString("hex")
+
+    await createLedger({
+      uuid: req.body.uuid,
+      txUserAction: "balanceRedeem",
+      txID: txID,
+      txAuth: "User",
+      txFrom: getRedeem.owner.uuid,
+      txTo: "dao",
+      txAmount: "0",
+      // txDescription : "User update redemption code"
+      type: "redemption",
+    });
     // receiver
     await createLedger({
       uuid: req.body.uuid,
       txUserAction: "balanceRedeem",
-      txID: crypto.randomBytes(11).toString("hex"),
+      txID: txID,
       txAuth: "DAO",
       txFrom: getRedeem.owner.uuid,
       txTo: req.body.uuid,
@@ -189,6 +255,9 @@ const balance = async (req, res) => {
       amount: getRedeem.amount,
       inc: true,
     });
+
+    User.fdxEarned = User.fdxEarned + getRedeem.amount;
+    await User.save();
 
     // Delete the Redeem
     const deletedRedeem = await getRedeem.deleteOne();
@@ -321,8 +390,8 @@ const getAll = async (req, res) => {
 //       ],
 //     });
 //     const pageCount = Math.ceil(totalCount / limit);
-//     console.log(pageCount);
-//     console.log(totalCount);
+//     //console.log(pageCount);
+//     //console.log(totalCount);
 
 //     res.status(200).json({
 //       data: redeem,

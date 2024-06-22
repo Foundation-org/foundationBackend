@@ -37,6 +37,9 @@
     "mongodb": "^5.5.0",
     "mongoose": "^7.2.0",
     "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "node-html-to-image": "^4.0.0",
     "nodemon": "^3.0.1",
     "openai": "^4.29.2",
     "passport": "^0.6.0",
@@ -50,7 +53,12 @@
     "passport-linkedin-oauth2": "^2.0.0",
     "passport-local": "^1.0.0",
     "passport-twitter": "^1.0.4",
+    "paypal-rest-sdk": "^1.8.1",
     "shortlink": "^1.1.0",
+    "stripe": "^15.8.0",
+    "swagger": "^0.7.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
     "to-words": "^4.0.0"
   },
   "devDependencies": {

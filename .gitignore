@@ -25,3 +25,5 @@ yarn-debug.log*
 yarn-error.log*
 routes/BookmarkQuest.zip
 global-bundle.pem
+
+/assets
