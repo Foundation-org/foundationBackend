@@ -300,7 +300,7 @@ const signUpUserBySocialLogin = async (req, res) => {
         });
         throw new Error("User not created due to list");
       }
-    } d
+    }
     // Create Ledger
     await createLedger({
       uuid: uuid,
