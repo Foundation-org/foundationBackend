@@ -1706,7 +1706,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
       id: "guest_notification",
       icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
       header: "Someone wants your thoughts on this.",
-      text: "Welcome to Foundation - where you can post anonymously while building your data profile. The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later.",
+      text: ["Welcome to Foundation - where you can post anonymously while building your data profile.", "The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later."],
       buttonText: "Join Foundation",
       buttonUrl: "/guest-signup",
       category: "",
