@@ -91,7 +91,6 @@ const search = async (req, res) => {
     if(txAuth){
       const ledger = await Ledgers.find({
         txAuth,
-        uuid,
         $or: [
           { txUserAction: { $regex: searchTerm, $options: "i" } },
           { txID: { $regex: searchTerm, $options: "i" } },
@@ -103,8 +102,7 @@ const search = async (req, res) => {
         .limit(parseInt(limit));
   
       const totalCount = await Ledgers.countDocuments({
-        // type,
-        uuid,
+        txAuth,
         $or: [
           { txUserAction: { $regex: searchTerm, $options: "i" } },
           { txID: { $regex: searchTerm, $options: "i" } },
@@ -134,8 +132,6 @@ const search = async (req, res) => {
         .limit(parseInt(limit));
   
       const totalCount = await Ledgers.countDocuments({
-        // type,
-        txAuth,
         uuid,
         $or: [
           { txUserAction: { $regex: searchTerm, $options: "i" } },

@@ -2273,7 +2273,7 @@ const checkMediaDuplicateUrl = async (req, res) => {
     const regex = new RegExp(`${id}`, "i");
 
     // Use the regex pattern in the find query
-    const question = await InfoQuestQuestions.findOne({ url: regex });
+    const question = await InfoQuestQuestions.findOne({ url: regex, isActive: true });
 
     if (question) {
       // ID exists in the URL field, return an error
