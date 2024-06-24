@@ -1467,6 +1467,10 @@ const updateChangeAnsStartQuest = async (req, res) => {
         // });
       } else {
         responseMsg = "Answer has not changed";
+        User.findOneAndUpdate(
+          { uuid: req.body.uuid },
+          { $inc: { changedAnswers: -1 } }
+        ).exec();        
       }
     } else {
       responseMsg = "You can change your answer once every 1 hour";
@@ -2020,6 +2024,10 @@ const updateChangeAnsStartQuestUserList = async (req) => {
         // });
       } else {
         responseMsg = "Answer has not changed";
+        User.findOneAndUpdate(
+          { uuid: req.body.uuid },
+          { $inc: { changedAnswers: -1 } }
+        ).exec();        
       }
     } else {
       responseMsg = "You can change your answer once every 1 hour";

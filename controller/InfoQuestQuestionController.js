@@ -1358,7 +1358,7 @@ const getQuestsAll = async (req, res) => {
               id: "system_notification",
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
               header: "Ready to start growing your FDX balance?",
-              text: "The more FDX you have, the more opportunity you have in the future to monetize from it. Invest your time by engaging now, to cash out later!",
+              text: ["The more FDX you have, the more opportunity you have in the future to monetize from it. Invest your time by engaging now, to cash out later!"],
               buttonText: "Join Foundation",
               buttonUrl: "/guest-signup",
               category: "Home",
@@ -1372,7 +1372,7 @@ const getQuestsAll = async (req, res) => {
               id: "system_notification",
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
               header: "What is Foundation?",
-              text: "You know you have personal data - it's all over the internet - but did you know you can sell it and monetize from it? Foundation is a platform where data gate-keeping is no more. It puts the ownership of your data back in your control.",
+              text: ["You know you have personal data - it's all over the internet - but did you know you can sell it and monetize from it? Foundation is a platform where data gate-keeping is no more. It puts the ownership of your data back in your control."],
               buttonText: "Learn More",
               buttonUrl: "/welcome",
               category: "Home",
@@ -1387,7 +1387,7 @@ const getQuestsAll = async (req, res) => {
               id: "system_notification",
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
               header: "Get verified, start growing your FDX balance",
-              text: "Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!",
+              text: ["Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!"],
               buttonText: "Add verification badges!",
               buttonUrl: "/dashboard/profile/verification-badges",
               category: "Home",
@@ -1401,7 +1401,7 @@ const getQuestsAll = async (req, res) => {
               id: "system_notification",
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
               header: "Not sure what to post?",
-              text: "You can post whatever your heart desires - but keep in mind not everyone may engage with it. The more people that engage with your posts, the more FDX you earn!",
+              text: ["You can post whatever your heart desires - but keep in mind not everyone may engage with it. The more people that engage with your posts, the more FDX you earn!"],
               buttonText: "Create a post!",
               buttonUrl: "/dashboard/quest",
               category: "Home",
@@ -1701,6 +1701,22 @@ const getQuestByUniqueShareLink = async (req, res) => {
       selectedPercentage: item.selectedPercentage,
       contendedPercentage: item.contendedPercentage,
     }));
+
+    notification = {
+      id: "guest_notification",
+      icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
+      header: "Someone wants your thoughts on this.",
+      text: ["Welcome to Foundation - where you can post anonymously while building your data profile.", "The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later."],
+      buttonText: "Join Foundation",
+      buttonUrl: "/guest-signup",
+      category: "",
+      position: "Full screen post",
+      priority: 2,
+      mode: "Guest",
+      timestamp: new Date().toISOString(),
+    };
+
+    desiredArray.push(notification)
 
     res.status(200).json({
       data: desiredArray,
@@ -2273,7 +2289,7 @@ const checkMediaDuplicateUrl = async (req, res) => {
     const regex = new RegExp(`${id}`, "i");
 
     // Use the regex pattern in the find query
-    const question = await InfoQuestQuestions.findOne({ url: regex });
+    const question = await InfoQuestQuestions.findOne({ url: regex, isActive: true });
 
     if (question) {
       // ID exists in the URL field, return an error

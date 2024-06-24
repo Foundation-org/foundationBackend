@@ -46,7 +46,7 @@ module.exports = {
   QUEST_COMPLETED_AMOUNT: 10,       // postCompleted
   QUEST_OWNER_ACCOUNT: 1,          // postCompletedUser
   QUEST_COMPLETED_CHANGE_AMOUNT: 0, // postCompletedChange
-  QUEST_CREATED_AMOUNT: 1,           // postCreated
+  QUEST_CREATED_AMOUNT: 10,           // postCreated
   QUEST_OPTION_ADDED_AMOUNT: 1,       // postOptionAdded
   QUEST_OPTION_CONTENTION_GIVEN_AMOUNT: 1,  // postOptionContentionGiven
   QUEST_OPTION_CONTENTION_REMOVED_AMOUNT: 1,  // postOptionContentionRemoved
@@ -69,5 +69,5 @@ module.exports = {
   MY_POST_ENGAGEMENT: "+1",
   SHARED_POST_ENGAGEMENT: "+1",
   HIDE_POST: 0,
-  TRANSACTION: "4%"
+  TRANSACTION: "0%"
 };
