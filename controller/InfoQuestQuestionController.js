@@ -1708,7 +1708,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
       header: "Someone wants your thoughts on this.",
       text: "Welcome to Foundation - where you can post anonymously while building your data profile. The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later.",
       buttonText: "Join Foundation",
-      buttonUrl: "/signup",
+      buttonUrl: "/guest-signup",
       category: "",
       position: "Full screen post",
       priority: 2,
