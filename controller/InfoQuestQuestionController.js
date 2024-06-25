@@ -58,7 +58,7 @@ const createInfoQuestQuest = async (req, res) => {
     }
 
     // Increment the questsCreated field by one
-    user.questsCreated += 1;
+    user.questsCreated += QUEST_CREATED_AMOUNT;
 
     // Push the ID of the created question into the createdQuests array
     user.createdQuests?.push(createdQuestion._id);
@@ -146,7 +146,7 @@ const deleteInfoQuestQuest = async (req, res) => {
     const user = await User.findOne({ uuid: req.params.userUuid });
 
     // Decrement the questsCreated field by one
-    user.questsCreated -= 1;
+    user.questsCreated -= QUEST_CREATED_AMOUNT;
     await user.save();
 
     const txID = crypto.randomBytes(11).toString("hex")
