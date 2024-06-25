@@ -1702,21 +1702,24 @@ const getQuestByUniqueShareLink = async (req, res) => {
       contendedPercentage: item.contendedPercentage,
     }));
 
-    notification = {
-      id: "guest_notification",
-      icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
-      header: "Someone wants your thoughts on this.",
-      text: ["Welcome to Foundation - where you can post anonymously while building your data profile.", "The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later."],
-      buttonText: "Join Foundation",
-      buttonUrl: "/guest-signup",
-      category: "",
-      position: "Full screen post",
-      priority: 2,
-      mode: "Guest",
-      timestamp: new Date().toISOString(),
-    };
-
-    desiredArray.push(notification)
+    const user = await User.findOne({ uuid: uuid})
+    if(user.role === 'guest'){
+      notification = {
+        id: "guest_notification",
+        icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
+        header: "Someone wants your thoughts on this.",
+        text: ["Welcome to Foundation - where you can post anonymously while building your data profile.", "The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later."],
+        buttonText: "Join Foundation",
+        buttonUrl: "/guest-signup",
+        category: "",
+        position: "Full screen post",
+        priority: 2,
+        mode: "Guest",
+        timestamp: new Date().toISOString(),
+      };
+  
+      desiredArray.push(notification)
+    }
 
     res.status(200).json({
       data: desiredArray,
