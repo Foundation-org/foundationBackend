@@ -70,11 +70,13 @@ const createStartQuest = async (req, res) => {
       { uuid: matchingUuid },
       { $inc: { usersAnswered: 1 } }
     );
-    // Your Post Engaged
-    await User.findOneAndUpdate(
-      { uuid: req.body.uuid },
-      { $inc: { yourPostEngaged: 1 } }
-    );
+    if (req.body.uuid !== checkSuppression.uuid) {
+      // Your Post Engaged
+      await User.findOneAndUpdate(
+        { uuid: checkSuppression.uuid },
+        { $inc: { yourPostEngaged: 1 } }
+      );
+    }
 
     if (req.body.isSharedLinkAns) {// Increament $inc userQuest submtted count if questForeignKey exist in UserQuestSetting Model
       await UserQuestSetting.findOneAndUpdate(
@@ -538,11 +540,13 @@ async function createStartQuestUserList(req, res) {
       { uuid: matchingUuid },
       { $inc: { usersAnswered: 1 } }
     );
-    // Your Post Engaged
-    await User.findOneAndUpdate(
-      { uuid: req.body.uuid },
-      { $inc: { yourPostEngaged: 1 } }
-    );
+    if (req.body.uuid !== checkSuppression.uuid) {
+      // Your Post Engaged
+      await User.findOneAndUpdate(
+        { uuid: checkSuppression.uuid },
+        { $inc: { yourPostEngaged: 1 } }
+      );
+    }
 
     if (req.body.isSharedLinkAns) {
       // Increament $inc userQuest submtted count if questForeignKey exist in UserQuestSetting Model
