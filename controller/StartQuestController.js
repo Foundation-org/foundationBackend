@@ -70,11 +70,13 @@ const createStartQuest = async (req, res) => {
       { uuid: matchingUuid },
       { $inc: { usersAnswered: 1 } }
     );
-    // Your Post Engaged
-    await User.findOneAndUpdate(
-      { uuid: req.body.uuid },
-      { $inc: { yourPostEngaged: 1 } }
-    );
+    if (req.body.uuid !== checkSuppression.uuid) {
+      // Your Post Engaged
+      await User.findOneAndUpdate(
+        { uuid: checkSuppression.uuid },
+        { $inc: { yourPostEngaged: 1 } }
+      );
+    }
 
     if (req.body.isSharedLinkAns) {// Increament $inc userQuest submtted count if questForeignKey exist in UserQuestSetting Model
       await UserQuestSetting.findOneAndUpdate(
@@ -137,30 +139,63 @@ const createStartQuest = async (req, res) => {
       { $inc: { contentionsGiven: contentionsGivenIncrement } }
     );
 
-    if (getInfoQuestQuestion.whichTypeQuestion !== "ranked choise") {
-      await User.findOneAndUpdate(
-        { uuid: matchingUuid },
-        {
-          $inc: {
-            selectionsOnAddedAns:
-              getInfoQuestQuestion.whichTypeQuestion === "open choice"
-                ? req.body.data.selected.length
-                : 1,
-          },
+    if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
+
+      if (req.body.isAddedAnsSelected) {
+        await User.findOneAndUpdate(
+          { uuid: req.body.uuid },
+          {
+            $inc: {
+              selectionsOnAddedAns: 1,
+            },
+          }
+        );
+      } else {
+
+
+        for (const item of req.body.data?.selected) {
+          const matchingStartQuest = await StartQuests.findOne({
+            addedAnswer: item.question,
+          });
+
+          if (matchingStartQuest) {
+            await User.findOneAndUpdate(
+              { uuid: matchingStartQuest.uuid },
+              {
+                $inc: {
+                  selectionsOnAddedAns: 1,
+                },
+              }
+            );
+          }
         }
-      );
+      }
     }
 
-    if (req.body.data.contended) {
-      await User.findOneAndUpdate(
-        { uuid: matchingUuid },
-        {
-          $inc: {
-            contentionsOnAddedAns: req.body.data.contended.length,
-          },
+    if (
+      getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+      getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
+      getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
+    ) {
+
+      for (const item of req.body.data?.contended) {
+        const matchingStartQuest = await StartQuests.findOne({
+          addedAnswer: item.question,
+        });
+
+        if (matchingStartQuest) {
+          await User.findOneAndUpdate(
+            { uuid: matchingStartQuest.uuid },
+            {
+              $inc: {
+                contentionsOnAddedAns: 1,
+              },
+            }
+          );
         }
-      );
+      }
     }
+
 
     // // Function to process an array
     // const processArray = async (array, fieldToUpdate) => {
@@ -538,11 +573,13 @@ async function createStartQuestUserList(req, res) {
       { uuid: matchingUuid },
       { $inc: { usersAnswered: 1 } }
     );
-    // Your Post Engaged
-    await User.findOneAndUpdate(
-      { uuid: req.body.uuid },
-      { $inc: { yourPostEngaged: 1 } }
-    );
+    if (req.body.uuid !== checkSuppression.uuid) {
+      // Your Post Engaged
+      await User.findOneAndUpdate(
+        { uuid: checkSuppression.uuid },
+        { $inc: { yourPostEngaged: 1 } }
+      );
+    }
 
     if (req.body.isSharedLinkAns) {
       // Increament $inc userQuest submtted count if questForeignKey exist in UserQuestSetting Model
@@ -608,30 +645,88 @@ async function createStartQuestUserList(req, res) {
       { $inc: { contentionsGiven: contentionsGivenIncrement } }
     );
 
-    if (getInfoQuestQuestion.whichTypeQuestion !== "ranked choise") {
-      await User.findOneAndUpdate(
-        { uuid: matchingUuid },
-        {
-          $inc: {
-            selectionsOnAddedAns:
-              getInfoQuestQuestion.whichTypeQuestion === "open choice"
-                ? req.body.data.selected.length
-                : 1,
-          },
+    if (getInfoQuestQuestion.whichTypeQuestion === "multiple choise" || getInfoQuestQuestion.whichTypeQuestion === "open choice") {
+
+      if (req.body.isAddedAnsSelected) {
+        await User.findOneAndUpdate(
+          { uuid: req.body.uuid },
+          {
+            $inc: {
+              selectionsOnAddedAns: 1,
+            },
+          }
+        );
+      } else {
+
+
+        for (const item of req.body.data?.selected) {
+          const matchingStartQuest = await StartQuests.findOne({
+            addedAnswer: item.question,
+          });
+
+          if (matchingStartQuest) {
+            await User.findOneAndUpdate(
+              { uuid: matchingStartQuest.uuid },
+              {
+                $inc: {
+                  selectionsOnAddedAns: 1,
+                },
+              }
+            );
+          }
         }
-      );
+      }
     }
 
-    if (req.body.data.contended) {
-      await User.findOneAndUpdate(
-        { uuid: matchingUuid },
-        {
-          $inc: {
-            contentionsOnAddedAns: req.body.data.contended.length,
-          },
+    if (
+      getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+      getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
+      getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
+    ) {
+
+      for (const item of req.body.data?.contended) {
+        const matchingStartQuest = await StartQuests.findOne({
+          addedAnswer: item.question,
+        });
+
+        if (matchingStartQuest) {
+          await User.findOneAndUpdate(
+            { uuid: matchingStartQuest.uuid },
+            {
+              $inc: {
+                contentionsOnAddedAns: 1,
+              },
+            }
+          );
         }
-      );
+      }
     }
+
+
+    // if (getInfoQuestQuestion.whichTypeQuestion !== "ranked choise") {
+    //   await User.findOneAndUpdate(
+    //     { uuid: matchingUuid },
+    //     {
+    //       $inc: {
+    //         selectionsOnAddedAns:
+    //           getInfoQuestQuestion.whichTypeQuestion === "open choice"
+    //             ? req.body.data.selected.length
+    //             : 1,
+    //       },
+    //     }
+    //   );
+    // }
+
+    // if (req.body.data.contended) {
+    //   await User.findOneAndUpdate(
+    //     { uuid: matchingUuid },
+    //     {
+    //       $inc: {
+    //         contentionsOnAddedAns: req.body.data.contended.length,
+    //       },
+    //     }
+    //   );
+    // }
 
     // // Function to process an array
     // const processArray = async (array, fieldToUpdate) => {
@@ -1005,52 +1100,208 @@ const updateChangeAnsStartQuest = async (req, res) => {
     ).exec();
 
     // Check req.body.data and the last element's contended and selected arrays objects
-    const lastDataElement = req.body.changeAnswerAddedObj;
-    if (
-      getInfoQuestQuestion.whichTypeQuestion === "open choice" &&
-      getInfoQuestQuestion.whichTypeQuestion !== "ranked choise"
-    ) {
-      const beforeAnsLength =
-        startQuestQuestion.data[startQuestQuestion.data.length - 1].selected
-          .length;
-      const afterAnsLength = lastDataElement.selected.length;
+    // const lastDataElement = req.body.changeAnswerAddedObj;
+    // if (
+    //   getInfoQuestQuestion.whichTypeQuestion === "open choice" &&
+    //   getInfoQuestQuestion.whichTypeQuestion !== "ranked choise"
+    // ) {
+    //   const beforeAnsLength =
+    //     startQuestQuestion.data[startQuestQuestion.data.length - 1].selected
+    //       .length;
+    //   const afterAnsLength = lastDataElement.selected.length;
 
-      if (beforeAnsLength !== afterAnsLength) {
-        const actualAnsLength = afterAnsLength - beforeAnsLength;
+    //   if (beforeAnsLength !== afterAnsLength) {
+    //     const actualAnsLength = afterAnsLength - beforeAnsLength;
 
-        await User.findOneAndUpdate(
-          { uuid: getInfoQuestQuestion.uuid },
-          {
-            $inc: {
-              selectionsOnAddedAns: actualAnsLength,
-            },
-          }
-        );
-      }
-    }
+    //     await User.findOneAndUpdate(
+    //       { uuid: getInfoQuestQuestion.uuid },
+    //       {
+    //         $inc: {
+    //           selectionsOnAddedAns: actualAnsLength,
+    //         },
+    //       }
+    //     );
+    //   }
+    // }
+
+    //For Agreements recieved
 
     if (
       getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
-      getInfoQuestQuestion.whichTypeQuestion === "ranked choise" ||
       getInfoQuestQuestion.whichTypeQuestion === "multiple choise"
     ) {
-      const beforeAnsLength =
-        startQuestQuestion.data[startQuestQuestion.data.length - 1].contended
-          .length;
-      const afterAnsLength = lastDataElement.contended.length;
-      if (beforeAnsLength !== afterAnsLength) {
-        const actualAnsLength = afterAnsLength - beforeAnsLength;
-
+      //first time if user adds an option
+      if (req.body.isAddedAnsSelected === true) {
         await User.findOneAndUpdate(
-          { uuid: getInfoQuestQuestion.uuid },
+          { uuid: req.body.uuid },
           {
             $inc: {
-              contentionsOnAddedAns: actualAnsLength,
+              selectionsOnAddedAns: 1,
             },
           }
         );
+
+        await StartQuests.findByIdAndUpdate(
+          { _id: startQuestQuestion._id },
+          {
+            $set: {
+              addedAnswer: req.body.addedAnswer,
+            },
+          }
+        );
+
+      } else {
+        // Previous selected answers array
+        let previousAnswers = startQuestQuestion?.data[startQuestQuestion.data.length - 1]?.selected;
+
+        // New selected answers array
+        let newAnswers = req.body.changeAnswerAddedObj?.selected;
+
+        // Find common elements
+        const commonAnswers = previousAnswers?.filter(prevItem =>
+          newAnswers?.some(newItem => newItem.question === prevItem.question)
+        );
+
+
+
+        // Remove common elements from both arrays
+        previousAnswers = previousAnswers?.filter(prevItem =>
+          !commonAnswers?.some(commonItem => commonItem.question === prevItem.question)
+        );
+
+        newAnswers = newAnswers?.filter(newItem =>
+          !commonAnswers?.some(commonItem => commonItem.question === newItem.question)
+        );
+
+
+        previousAnswers?.map(async (item) => {
+          const option = await InfoQuestQuestions.findOne(
+            {
+              _id: req.body.questId,
+              "QuestAnswers.question": item.question
+            },
+            {
+              QuestAnswers: { $elemMatch: { question: item.question } }
+            }
+          );
+
+          if (option?.QuestAnswers[0]?.uuid) {
+
+            await User.findOneAndUpdate(
+              { uuid: option.QuestAnswers[0].uuid },
+              {
+                $inc: {
+                  selectionsOnAddedAns: -1,
+                },
+              }
+            );
+          }
+        })
+
+        newAnswers?.map(async (item) => {
+          const option = await InfoQuestQuestions.findOne(
+            {
+              _id: req.body.questId,
+              "QuestAnswers.question": item.question
+            },
+            {
+              QuestAnswers: { $elemMatch: { question: item.question } }
+            }
+          );
+          if (option?.QuestAnswers[0]?.uuid) {
+            await User.findOneAndUpdate(
+              { uuid: option.QuestAnswers[0].uuid },
+              {
+                $inc: {
+                  selectionsOnAddedAns: 1,
+                },
+              }
+            );
+          }
+        })
       }
     }
+
+    //For Contentions recieved`
+    if (
+      getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
+      getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+      getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
+    ) {
+      // Previous selected answers array
+      let previousAnswers = startQuestQuestion?.data[startQuestQuestion.data.length - 1]?.contended;
+
+      // New selected answers array
+      let newAnswers = req.body.changeAnswerAddedObj?.contended || [];
+
+      // Find common elements
+      const commonAnswers = previousAnswers?.filter(prevItem =>
+        newAnswers?.some(newItem => newItem.question === prevItem.question)
+      );
+
+
+
+      // Remove common elements from both arrays
+      previousAnswers = previousAnswers?.filter(prevItem =>
+        !commonAnswers?.some(commonItem => commonItem.question === prevItem.question)
+      );
+
+      newAnswers = newAnswers?.filter(newItem =>
+        !commonAnswers?.some(commonItem => commonItem.question === newItem.question)
+      );
+
+
+      previousAnswers?.map(async (item) => {
+        const option = await InfoQuestQuestions.findOne(
+          {
+            _id: req.body.questId,
+            "QuestAnswers.question": item.question
+          },
+          {
+            QuestAnswers: { $elemMatch: { question: item.question } }
+          }
+        );
+
+
+        if (option?.QuestAnswers[0]?.uuid) {
+
+          await User.findOneAndUpdate(
+            { uuid: option.QuestAnswers[0].uuid },
+            {
+              $inc: {
+                contentionsOnAddedAns: -1,
+              },
+            }
+          );
+        }
+      })
+
+      newAnswers?.map(async (item) => {
+        const option = await InfoQuestQuestions.findOne(
+          {
+            _id: req.body.questId,
+            "QuestAnswers.question": item.question
+          },
+          {
+            QuestAnswers: { $elemMatch: { question: item.question } }
+          }
+        );
+
+        if (option?.QuestAnswers[0]?.uuid) {
+          await User.findOneAndUpdate(
+            { uuid: option.QuestAnswers[0].uuid },
+            {
+              $inc: {
+                contentionsOnAddedAns: 1,
+              },
+            }
+          );
+        }
+      })
+    }
+
+
+
 
     // INCREMENT
     // Function to process an array
@@ -1470,7 +1721,7 @@ const updateChangeAnsStartQuest = async (req, res) => {
         User.findOneAndUpdate(
           { uuid: req.body.uuid },
           { $inc: { changedAnswers: -1 } }
-        ).exec();        
+        ).exec();
       }
     } else {
       responseMsg = "You can change your answer once every 1 hour";
@@ -1557,53 +1808,228 @@ const updateChangeAnsStartQuestUserList = async (req) => {
       { $inc: { changedAnswers: 1 } }
     ).exec();
 
-    // Check req.body.data and the last element's contended and selected arrays objects
-    const lastDataElement = req.body.changeAnswerAddedObj;
-    if (
-      getInfoQuestQuestion.whichTypeQuestion === "open choice" &&
-      getInfoQuestQuestion.whichTypeQuestion !== "ranked choise"
-    ) {
-      const beforeAnsLength =
-        startQuestQuestion.data[startQuestQuestion.data.length - 1].selected
-          .length;
-      const afterAnsLength = lastDataElement.selected.length;
-
-      if (beforeAnsLength !== afterAnsLength) {
-        const actualAnsLength = afterAnsLength - beforeAnsLength;
-
-        await User.findOneAndUpdate(
-          { uuid: getInfoQuestQuestion.uuid },
-          {
-            $inc: {
-              selectionsOnAddedAns: actualAnsLength,
-            },
-          }
-        );
-      }
-    }
-
     if (
       getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
-      getInfoQuestQuestion.whichTypeQuestion === "ranked choise" ||
       getInfoQuestQuestion.whichTypeQuestion === "multiple choise"
     ) {
-      const beforeAnsLength =
-        startQuestQuestion.data[startQuestQuestion.data.length - 1].contended
-          .length;
-      const afterAnsLength = lastDataElement.contended.length;
-      if (beforeAnsLength !== afterAnsLength) {
-        const actualAnsLength = afterAnsLength - beforeAnsLength;
-
+      //first time if user adds an option
+      if (req.body.isAddedAnsSelected === true) {
         await User.findOneAndUpdate(
-          { uuid: getInfoQuestQuestion.uuid },
+          { uuid: req.body.uuid },
           {
             $inc: {
-              contentionsOnAddedAns: actualAnsLength,
+              selectionsOnAddedAns: 1,
             },
           }
         );
+
+        await StartQuests.findByIdAndUpdate(
+          { _id: startQuestQuestion._id },
+          {
+            $set: {
+              addedAnswer: req.body.addedAnswer,
+            },
+          }
+        );
+
+      } else {
+        // Previous selected answers array
+        let previousAnswers = startQuestQuestion?.data[startQuestQuestion.data.length - 1]?.selected;
+
+        // New selected answers array
+        let newAnswers = req.body.changeAnswerAddedObj?.selected;
+
+        // Find common elements
+        const commonAnswers = previousAnswers?.filter(prevItem =>
+          newAnswers?.some(newItem => newItem.question === prevItem.question)
+        );
+
+
+
+        // Remove common elements from both arrays
+        previousAnswers = previousAnswers?.filter(prevItem =>
+          !commonAnswers?.some(commonItem => commonItem.question === prevItem.question)
+        );
+
+        newAnswers = newAnswers?.filter(newItem =>
+          !commonAnswers?.some(commonItem => commonItem.question === newItem.question)
+        );
+
+
+        previousAnswers?.map(async (item) => {
+          const option = await InfoQuestQuestions.findOne(
+            {
+              _id: req.body.questId,
+              "QuestAnswers.question": item.question
+            },
+            {
+              QuestAnswers: { $elemMatch: { question: item.question } }
+            }
+          );
+
+          if (option?.QuestAnswers[0]?.uuid) {
+
+            await User.findOneAndUpdate(
+              { uuid: option.QuestAnswers[0].uuid },
+              {
+                $inc: {
+                  selectionsOnAddedAns: -1,
+                },
+              }
+            );
+          }
+        })
+
+        newAnswers?.map(async (item) => {
+          const option = await InfoQuestQuestions.findOne(
+            {
+              _id: req.body.questId,
+              "QuestAnswers.question": item.question
+            },
+            {
+              QuestAnswers: { $elemMatch: { question: item.question } }
+            }
+          );
+          if (option?.QuestAnswers[0]?.uuid) {
+            await User.findOneAndUpdate(
+              { uuid: option.QuestAnswers[0].uuid },
+              {
+                $inc: {
+                  selectionsOnAddedAns: 1,
+                },
+              }
+            );
+          }
+        })
       }
     }
+
+    //For Contentions recieved`
+    if (
+      getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
+      getInfoQuestQuestion.whichTypeQuestion === "multiple choise" ||
+      getInfoQuestQuestion.whichTypeQuestion === "ranked choise"
+    ) {
+      // Previous selected answers array
+      let previousAnswers = startQuestQuestion?.data[startQuestQuestion.data.length - 1]?.contended;
+
+      // New selected answers array
+      let newAnswers = req.body.changeAnswerAddedObj?.contended;
+
+      // Find common elements
+      const commonAnswers = previousAnswers?.filter(prevItem =>
+        newAnswers?.some(newItem => newItem.question === prevItem.question)
+      );
+
+
+
+      // Remove common elements from both arrays
+      previousAnswers = previousAnswers?.filter(prevItem =>
+        !commonAnswers?.some(commonItem => commonItem.question === prevItem.question)
+      );
+
+      newAnswers = newAnswers?.filter(newItem =>
+        !commonAnswers?.some(commonItem => commonItem.question === newItem.question)
+      );
+
+
+      previousAnswers?.map(async (item) => {
+        const option = await InfoQuestQuestions.findOne(
+          {
+            _id: req.body.questId,
+            "QuestAnswers.question": item.question
+          },
+          {
+            QuestAnswers: { $elemMatch: { question: item.question } }
+          }
+        );
+
+
+        if (option?.QuestAnswers[0]?.uuid) {
+
+          await User.findOneAndUpdate(
+            { uuid: option.QuestAnswers[0].uuid },
+            {
+              $inc: {
+                contentionsOnAddedAns: -1,
+              },
+            }
+          );
+        }
+      })
+
+      newAnswers?.map(async (item) => {
+        const option = await InfoQuestQuestions.findOne(
+          {
+            _id: req.body.questId,
+            "QuestAnswers.question": item.question
+          },
+          {
+            QuestAnswers: { $elemMatch: { question: item.question } }
+          }
+        );
+
+        if (option.QuestAnswers[0]?.uuid) {
+          await User.findOneAndUpdate(
+            { uuid: option.QuestAnswers[0].uuid },
+            {
+              $inc: {
+                contentionsOnAddedAns: 1,
+              },
+            }
+          );
+        }
+      })
+    }
+
+
+    // Check req.body.data and the last element's contended and selected arrays objects
+    // const lastDataElement = req.body.changeAnswerAddedObj;
+    // if (
+    //   getInfoQuestQuestion.whichTypeQuestion === "open choice" &&
+    //   getInfoQuestQuestion.whichTypeQuestion !== "ranked choise"
+    // ) {
+    //   const beforeAnsLength =
+    //     startQuestQuestion.data[startQuestQuestion.data.length - 1].selected
+    //       .length;
+    //   const afterAnsLength = lastDataElement.selected.length;
+
+    //   if (beforeAnsLength !== afterAnsLength) {
+    //     const actualAnsLength = afterAnsLength - beforeAnsLength;
+
+    //     await User.findOneAndUpdate(
+    //       { uuid: getInfoQuestQuestion.uuid },
+    //       {
+    //         $inc: {
+    //           selectionsOnAddedAns: actualAnsLength,
+    //         },
+    //       }
+    //     );
+    //   }
+    // }
+
+    // if (
+    //   getInfoQuestQuestion.whichTypeQuestion === "open choice" ||
+    //   getInfoQuestQuestion.whichTypeQuestion === "ranked choise" ||
+    //   getInfoQuestQuestion.whichTypeQuestion === "multiple choise"
+    // ) {
+    //   const beforeAnsLength =
+    //     startQuestQuestion.data[startQuestQuestion.data.length - 1].contended
+    //       .length;
+    //   const afterAnsLength = lastDataElement.contended.length;
+    //   if (beforeAnsLength !== afterAnsLength) {
+    //     const actualAnsLength = afterAnsLength - beforeAnsLength;
+
+    //     await User.findOneAndUpdate(
+    //       { uuid: getInfoQuestQuestion.uuid },
+    //       {
+    //         $inc: {
+    //           contentionsOnAddedAns: actualAnsLength,
+    //         },
+    //       }
+    //     );
+    //   }
+    // }
 
     // INCREMENT
     // Function to process an array
@@ -2027,7 +2453,7 @@ const updateChangeAnsStartQuestUserList = async (req) => {
         User.findOneAndUpdate(
           { uuid: req.body.uuid },
           { $inc: { changedAnswers: -1 } }
-        ).exec();        
+        ).exec();
       }
     } else {
       responseMsg = "You can change your answer once every 1 hour";

@@ -234,7 +234,7 @@ const getLstActAndEmailForAllUsers = async () => {
             Body: {
               Html: {
                 Charset: "UTF-8",
-                Data: `You are inactive from the last seven days, Click <a href = "https://on.foundation/dashboard/">here</a> to visit your app.`,
+                Data: `You are inactive from the last seven days, Click <a href = "https://on.foundation/">here</a> to visit your app.`,
               },
               Text: {
                 Charset: "UTF-8",

@@ -1389,7 +1389,7 @@ const getQuestsAll = async (req, res) => {
               header: "Get verified, start growing your FDX balance",
               text: ["Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!"],
               buttonText: "Add verification badges!",
-              buttonUrl: "/dashboard/profile/verification-badges",
+              buttonUrl: "/profile/verification-badges",
               category: "Home",
               position: "Feed",
               priority: priority,
@@ -1403,7 +1403,7 @@ const getQuestsAll = async (req, res) => {
               header: "Not sure what to post?",
               text: ["You can post whatever your heart desires - but keep in mind not everyone may engage with it. The more people that engage with your posts, the more FDX you earn!"],
               buttonText: "Create a post!",
-              buttonUrl: "/dashboard/quest",
+              buttonUrl: "/quest",
               category: "Home",
               position: "Feed",
               priority: priority,
@@ -1702,21 +1702,24 @@ const getQuestByUniqueShareLink = async (req, res) => {
       contendedPercentage: item.contendedPercentage,
     }));
 
-    notification = {
-      id: "guest_notification",
-      icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
-      header: "Someone wants your thoughts on this.",
-      text: ["Welcome to Foundation - where you can post anonymously while building your data profile.", "The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later."],
-      buttonText: "Join Foundation",
-      buttonUrl: "/guest-signup",
-      category: "",
-      position: "Full screen post",
-      priority: 2,
-      mode: "Guest",
-      timestamp: new Date().toISOString(),
-    };
-
-    desiredArray.push(notification)
+    const user = await User.findOne({ uuid: uuid})
+    if(user.role === 'guest'){
+      notification = {
+        id: "guest_notification",
+        icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
+        header: "Someone wants your thoughts on this.",
+        text: ["Welcome to Foundation - where you can post anonymously while building your data profile.", "The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later."],
+        buttonText: "Join Foundation",
+        buttonUrl: "/guest-signup",
+        category: "",
+        position: "Full screen post",
+        priority: 2,
+        mode: "Guest",
+        timestamp: new Date().toISOString(),
+      };
+  
+      desiredArray.push(notification)
+    }
 
     res.status(200).json({
       data: desiredArray,
