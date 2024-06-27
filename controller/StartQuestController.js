@@ -25,7 +25,7 @@ const Ledgers = require("../models/Ledgers");
 const updateViolationCounter = async (req, res) => {
   try {
     const result = await User.updateOne(
-      { uuid: req.cookies.uuid },
+      { uuid: req.params.uuid },
       { $inc: { violationCounter: 1 } }
     );
     if (result.nModified === 0) {
