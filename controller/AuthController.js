@@ -426,7 +426,6 @@ const signUpUserBySocialBadges = async (req, res) => {
 
     const uuid = crypto.randomBytes(11).toString("hex");
     const user = await new User({
-      email: payload.data.email ? payload.data.email : null,
       uuid: uuid,
       role: "user",
     });
@@ -444,24 +443,24 @@ const signUpUserBySocialBadges = async (req, res) => {
     // Update user verification status to true
     await user.save();
 
-    if (
-      user.email !== null &&
-      user.email !== undefined &&
-      user.email !== "" &&
-      !guestUserEmailRegex.test(user.email)
-    ) {
-      const userEmailModel = new Email({
-        userUuid: user.uuid,
-        email: user.email,
-      });
-      const userEmail = await userEmailModel.save();
-      if (!userEmail) {
-        await user.deleteOne({
-          uuid: user.uuid,
-        });
-        throw new Error("User not created due to Email");
-      }
-    }
+    // if (
+    //   user.email !== null &&
+    //   user.email !== undefined &&
+    //   user.email !== "" &&
+    //   !guestUserEmailRegex.test(user.email)
+    // ) {
+    //   const userEmailModel = new Email({
+    //     userUuid: user.uuid,
+    //     email: user.email,
+    //   });
+    //   const userEmail = await userEmailModel.save();
+    //   if (!userEmail) {
+    //     await user.deleteOne({
+    //       uuid: user.uuid,
+    //     });
+    //     throw new Error("User not created due to Email");
+    //   }
+    // }
 
     const userList = await UserListSchema.findOne({
       userUuid: user.uuid,
@@ -546,10 +545,10 @@ const signUpUserBySocialBadges = async (req, res) => {
     // Generate a JWT token
     const token = createToken({ uuid: user.uuid });
 
-    if (payload.data.email && user.badges[0].type !== "Education") {
-      user.requiredAction = true;
-      await user.save();
-    }
+    // if (payload.data.email && user.badges[0].type !== "Education") {
+    //   user.requiredAction = true;
+    //   await user.save();
+    // }
 
     // Decrypt Saved Data
     const decryptUser = user._doc;
@@ -996,7 +995,6 @@ const signUpGuestBySocialBadges = async (req, res) => {
       { uuid: uuid },
       {
         $set: {
-          email: payload.email ? payload.email : null,
           role: "user",
           isGuestMode: false,
         },
@@ -1016,24 +1014,24 @@ const signUpGuestBySocialBadges = async (req, res) => {
     // Update user verification status to true
     await user.save();
 
-    if (
-      user.email !== null &&
-      user.email !== undefined &&
-      user.email !== "" &&
-      !guestUserEmailRegex.test(user.email)
-    ) {
-      const userEmailModel = new Email({
-        userUuid: user.uuid,
-        email: user.email,
-      });
-      const userEmail = await userEmailModel.save();
-      if (!userEmail) {
-        await user.deleteOne({
-          uuid: user.uuid,
-        });
-        throw new Error("User not created due to Email");
-      }
-    }
+    // if (
+    //   user.email !== null &&
+    //   user.email !== undefined &&
+    //   user.email !== "" &&
+    //   !guestUserEmailRegex.test(user.email)
+    // ) {
+    //   const userEmailModel = new Email({
+    //     userUuid: user.uuid,
+    //     email: user.email,
+    //   });
+    //   const userEmail = await userEmailModel.save();
+    //   if (!userEmail) {
+    //     await user.deleteOne({
+    //       uuid: user.uuid,
+    //     });
+    //     throw new Error("User not created due to Email");
+    //   }
+    // }
 
     const userList = await UserListSchema.findOne({
       userUuid: user.uuid,
