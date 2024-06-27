@@ -256,7 +256,7 @@ const signUpUserBySocialLogin = async (req, res) => {
     // Create a Badge at starting index
     user.badges.unshift({
       accountId: payload.sub,
-      accountName: payload.type,
+      accountName: payload.provider,
       isVerified: true,
       details: encryptData(req.body),
       type: type,
@@ -810,7 +810,7 @@ const signUpSocialGuestMode = async (req, res) => {
     // Create a Badge at starting index
     updatedUser.badges.unshift({
       accountId: payload.sub,
-      accountName: payload.type,
+      accountName: payload.provider,
       details: encryptData(payload),
       isVerified: true,
       type: type,
