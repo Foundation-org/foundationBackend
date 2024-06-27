@@ -968,7 +968,7 @@ const signUpGuestBySocialBadges = async (req, res) => {
       type = payload.type;
     }
 
-    if (payload.provider === "linkedin") {
+    if (payload.type === "linkedin") {
       id = payload.data.sub;
       type = payload.type;
     }
