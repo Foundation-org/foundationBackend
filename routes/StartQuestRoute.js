@@ -13,10 +13,10 @@ const isUrlSharedPostValidToInteract = require("../middleware/isUrlSharedPostVal
  *   description: Endpoints for starting and managing quests
  */
 
-router.post("/updateViolationCounter",
+router.post("/updateViolationCounter/:uuid",
   /**
    * @swagger
-   * /startQuest/updateViolationCounter:
+   * /startQuest/updateViolationCounter/{uuid}:
    *   post:
    *     tags:
    *       - Start Quest
