@@ -1763,7 +1763,7 @@ const userInfo = async (req, res) => {
 
     const sharedQuests = await UserQuestSetting.find({
       uuid: userUuid,
-      linkStatus: { $ne: 'Delete' }
+      linkStatus: 'Enable'
     });
     const totals = sharedQuests.reduce(
       (acc, quest) => {
