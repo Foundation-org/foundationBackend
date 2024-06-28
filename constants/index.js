@@ -12,7 +12,7 @@ module.exports = {
     "please provide",
     "did you mean",
     "I cannot understand this message"
-  ],
+  ], 
   SYSTEM_MESSAGES: [
     // Q/S
     // "Correct provided statement to standard English without contractions. Shortest responses only.",
