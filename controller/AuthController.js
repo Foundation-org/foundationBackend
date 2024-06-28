@@ -403,7 +403,7 @@ const signUpUserBySocialBadges = async (req, res) => {
     }
 
     if (payload.type === "github") {
-      id = payload.data.user.uid;
+      id = payload.data.id;
     }
 
     if (payload.type === "instagram") {
@@ -958,7 +958,7 @@ const signUpGuestBySocialBadges = async (req, res) => {
     }
 
     if (payload.type === "github") {
-      id = payload.data.user.uid;
+      id = payload.data.id;
       type = payload.type;
     }
 
@@ -1246,7 +1246,7 @@ const signInUserBySocialBadges = async (req, res) => {
     }
 
     if (payload.type === "github") {
-      id = payload.data.user.uid;
+      id = payload.data.id;
     }
 
     if (payload.type === "instagram") {
