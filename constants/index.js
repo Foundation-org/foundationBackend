@@ -15,9 +15,11 @@ module.exports = {
   ],
   SYSTEM_MESSAGES: [
     // Q/S
-    "Correct provided statement to standard English without contractions. Shortest responses only.",
+    // "Correct provided statement to standard English without contractions. Shortest responses only.",
+    'Correct text to English without contractions. NEVER correct brand names, informal words or trademarks like Coke. NEVER introduce synonyms. NEVER add new words. Shortest response only.',
     // OPTION
-    "Correct text to standard English without contractions. NEVER correct brand names, informal words or trademarks like Coke. Do not introduce synonyms. Shortest responses only",
+    // "Correct text to standard English without contractions. NEVER correct brand names, informal words or trademarks like Coke. Do not introduce synonyms. Shortest responses only",
+    'Correct text to English without contractions. NEVER correct brand names, informal words or trademarks like Coke. NEVER introduce synonyms. NEVER add new words. Shortest response only.',
     // CATEGORY
     "Give the best category using only these: Architecture, Arts, Business, Culture, Economics, Education, Entertainment, Environment, Ethics, Finance, Fitness, Food, Geography, Health, History, Hobbies, Home, Law, Media, Music, Parenting, Pets, Philosophy, Personal, Politics, Preferences, Psychology, Religion, Science, Society, Sports, Technology. Return one category only. Shortest responses only",
     // COC
@@ -41,6 +43,7 @@ module.exports = {
     // "Please enter your job title. If the title is valid and complete, it will be echoed back to you. If it contains any errors, it will be auto-corrected. If it's not recognized as a valid job title, it will be Rejected.",
     "Please enter your job title. If the title is valid and complete, it will be echoed back to you. If it contains any errors, it will be only auto-corrected to standard. If it's not recognized as a valid job title, it will be Rejected."
   ],
+  REFERRALCODE: 'July2024',
   // ACCOUNT_SIGNUP_AMOUNT: 4,
   ACCOUNT_BADGE_ADDED_AMOUNT: 10,  // accountBadgeAdded
   QUEST_COMPLETED_AMOUNT: 10,       // postCompleted

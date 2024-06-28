@@ -49,7 +49,8 @@ const {
   ADD_OBJECTION_TO_POST,
   HIDE_POST,
   MY_POST_ENGAGEMENT,
-  SHARED_POST_ENGAGEMENT
+  SHARED_POST_ENGAGEMENT,
+  REFERRALCODE
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
@@ -2329,7 +2330,7 @@ const sendEmail = async (req, res) => {
 
 const verifyReferralCode = async (req, res) => {
   try {
-    const referralCode = "Jan2024";
+    const referralCode = REFERRALCODE;
     const { code } = req.body;
     if (code !== referralCode) throw new Error("Referral code not exist!");
     // Generate a token
