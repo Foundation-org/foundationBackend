@@ -229,8 +229,13 @@ router.get(
     if (req.user) {
       res.status(200).json({
         success: true,
-        message: "successfull",
+        message: "successful",
         user: req.user,
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
       });
     }
   }
