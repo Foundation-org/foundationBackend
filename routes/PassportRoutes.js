@@ -86,7 +86,7 @@ router.get(
     failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.googleHandler
+  PassportController.oauthSuccessHandler
 );
 
 // LinkedIn
@@ -125,7 +125,7 @@ router.get(
     failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.linkedinHandler
+  PassportController.oauthSuccessHandler
 );
 
 // Twitter
@@ -209,6 +209,7 @@ router.get(
 // Google
 router.get(
   "/login/success",
+  protect,
   /**
    * @swagger
    * /auth/login/success:
@@ -276,7 +277,7 @@ router.get(
     failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.googleHandler
+  PassportController.oauthSuccessHandler
 );
 
 router.get(
@@ -314,6 +315,6 @@ router.get(
     failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.googleHandler
+  PassportController.oauthSuccessHandler
 );
 module.exports = router;

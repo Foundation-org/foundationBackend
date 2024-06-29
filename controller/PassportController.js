@@ -18,9 +18,9 @@ const {
 const { FRONTEND_URL } = require("../config/env");
 const UserModel = require("../models/UserModel");
 
-const googleHandler = async (req, res) => {
+const oauthSuccessHandler = async (req, res) => {
   try {
-    console.log("hamza2", req.user);
+    // console.log("hamza2", req.user);
     // Check Google Account
     // const payload = req.user;
     // //console.log("🚀 ~ googleHandler ~ payload:", payload)
@@ -106,7 +106,8 @@ const googleHandler = async (req, res) => {
     //   // //console.log(req.get('host'));
     //   res.cookie("jwt", token, cookieConfiguration());
     //   res.cookie("uuid", newUser.uuid, cookieConfiguration());
-    res.redirect(`${FRONTEND_URL}`);
+    const token = createToken(req.user);
+    res.redirect(`${FRONTEND_URL}?token=${token}`);
     return;
   } catch (error) {
     //   Sign in User
@@ -137,18 +138,18 @@ const googleHandler = async (req, res) => {
   }
 };
 
-const linkedinHandler = async (req, res) => {
-  try {
-    console.log("hamza2", req.user);
-    res.redirect(`${FRONTEND_URL}/`);
-    return;
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({
-      message: `An error occurred while signUpUser Auth: ${error.message}`,
-    });
-  }
-};
+// const linkedinHandler = async (req, res) => {
+//   try {
+//     console.log("hamza2", req.user);
+//     res.redirect(`${FRONTEND_URL}/`);
+//     return;
+//   } catch (error) {
+//     console.error(error.message);
+//     res.status(500).json({
+//       message: `An error occurred while signUpUser Auth: ${error.message}`,
+//     });
+//   }
+// };
 
 const addBadge = async (req, res) => {
   try {
@@ -219,13 +220,12 @@ const socialBadgeToken = async (req, res) => {
     _json: req.user._json,
     provider: req.user.provider,
   });
-  res.cookie("social", token, { httpOnly: true, maxAge: 1000 * 60 });
+  res.cookie("social", token, { httpOnly: true, maxAge: 10000 * 60 });
   res.redirect(`${FRONTEND_URL}/profile/verification-badges/?social=true`);
 };
 
 module.exports = {
-  googleHandler,
-  linkedinHandler,
+  oauthSuccessHandler,
   addBadge,
   socialBadgeToken,
 };
