@@ -20,112 +20,128 @@ const UserModel = require("../models/UserModel");
 
 const googleHandler = async (req, res) => {
   try {
+    console.log("hamza2", req.user);
     // Check Google Account
-    const payload = req.user;
-    //console.log("🚀 ~ googleHandler ~ payload:", payload)
-    // Check if email already exist
-    const user = await User.findOne({ email: payload._json.email });
+    // const payload = req.user;
+    // //console.log("🚀 ~ googleHandler ~ payload:", payload)
+    // // Check if email already exist
+    // const user = await User.findOne({ email: payload._json.email });
 
-    //   Signup User
-    if (!user) {
-      const uuid = crypto.randomBytes(11).toString("hex");
-      const newUser = await new User({
-        email: payload._json.email,
-        uuid: uuid,
-        role: 'user'
-      });
+    // //   Signup User
+    // if (!user) {
+    //   const uuid = crypto.randomBytes(11).toString("hex");
+    //   const newUser = await new User({
+    //     email: payload._json.email,
+    //     uuid: uuid,
+    //     role: "user",
+    //   });
 
-      let type = "";
-      // Check Email Category
-      if (payload._json.email === "google") {
-        const emailStatus = await eduEmailCheck(req, res, payload._json.email);
-        if (emailStatus.status === "OK") type = "Education";
-      } else {
-        type = 'default'
-      }
+    //   let type = "";
+    //   // Check Email Category
+    //   if (payload._json.email === "google") {
+    //     const emailStatus = await eduEmailCheck(req, res, payload._json.email);
+    //     if (emailStatus.status === "OK") type = "Education";
+    //   } else {
+    //     type = "default";
+    //   }
 
-      // Create a Badge at starting index
-      newUser.badges.unshift({
-        accountName: req.user.provider,
-        isVerified: true,
-        type: type,
-      });
+    //   // Create a Badge at starting index
+    //   newUser.badges.unshift({
+    //     accountName: req.user.provider,
+    //     isVerified: true,
+    //     type: type,
+    //   });
 
-      // Update newUser verification status to true
-      newUser.gmailVerified = payload._json.email_verified;
-      const txID = crypto.randomBytes(11).toString("hex");
-      // Create Ledger
-      await createLedger({
-        uuid: uuid,
-        txUserAction: "accountBadgeAdded",
-        txID: txID,
-        txAuth: "User",
-        txFrom: uuid,
-        txTo: "dao",
-        txAmount: "0",
-        txData: newUser.badges[0]._id,
-        // txDescription : "User adds a verification badge"
-      });
-      await createLedger({
-        uuid: uuid,
-        txUserAction: "accountBadgeAdded",
-        txID: txID,
-        txAuth: "DAO",
-        txFrom: "DAO Treasury",
-        txTo: uuid,
-        txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-        // txData : newUser.badges[0]._id,
-        // txDescription : "Incentive for adding badges"
-      });
-      //
+    //   // Update newUser verification status to true
+    //   newUser.gmailVerified = payload._json.email_verified;
+    //   const txID = crypto.randomBytes(11).toString("hex");
+    //   // Create Ledger
+    //   await createLedger({
+    //     uuid: uuid,
+    //     txUserAction: "accountBadgeAdded",
+    //     txID: txID,
+    //     txAuth: "User",
+    //     txFrom: uuid,
+    //     txTo: "dao",
+    //     txAmount: "0",
+    //     txData: newUser.badges[0]._id,
+    //     // txDescription : "User adds a verification badge"
+    //   });
+    //   await createLedger({
+    //     uuid: uuid,
+    //     txUserAction: "accountBadgeAdded",
+    //     txID: txID,
+    //     txAuth: "DAO",
+    //     txFrom: "DAO Treasury",
+    //     txTo: uuid,
+    //     txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
+    //     // txData : newUser.badges[0]._id,
+    //     // txDescription : "Incentive for adding badges"
+    //   });
+    //   //
 
-      if (newUser.badges[0].type !== "Education" && req.user.provider === "google") {
-        newUser.requiredAction = true;
-      }
-      await newUser.save();
+    //   if (
+    //     newUser.badges[0].type !== "Education" &&
+    //     req.user.provider === "google"
+    //   ) {
+    //     newUser.requiredAction = true;
+    //   }
+    //   await newUser.save();
 
-      // Decrement the Treasury
-      await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
+    //   // Decrement the Treasury
+    //   await updateTreasury({ amount: ACCOUNT_BADGE_ADDED_AMOUNT, dec: true });
 
-      // Increment the UserBalance
-      await updateUserBalance({
-        uuid: newUser.uuid,
-        amount: ACCOUNT_BADGE_ADDED_AMOUNT,
-        inc: true,
-      });
+    //   // Increment the UserBalance
+    //   await updateUserBalance({
+    //     uuid: newUser.uuid,
+    //     amount: ACCOUNT_BADGE_ADDED_AMOUNT,
+    //     inc: true,
+    //   });
 
-      newUser.fdxEarned = newUser.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
-      await newUser.save();
+    //   newUser.fdxEarned = newUser.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
+    //   await newUser.save();
 
-      // Generate a JWT token
-      const token = createToken({ uuid: newUser.uuid });
-      // //console.log(req.get('host'));
-      res.cookie("jwt", token, cookieConfiguration());
-      res.cookie("uuid", newUser.uuid, cookieConfiguration());
-      res.redirect(`${FRONTEND_URL}/auth0`);
-      return;
-    }
+    //   // Generate a JWT token
+    //   const token = createToken({ uuid: newUser.uuid });
+    //   // //console.log(req.get('host'));
+    //   res.cookie("jwt", token, cookieConfiguration());
+    //   res.cookie("uuid", newUser.uuid, cookieConfiguration());
+    res.redirect(`${FRONTEND_URL}`);
+    return;
+  } catch (error) {
     //   Sign in User
 
     // Generate a JWT token
-    const token = createToken({ uuid: user.uuid });
+    // const token = createToken({ uuid: user.uuid });
 
-    // Create Ledger
-    await createLedger({
-      uuid: user.uuid,
-      txUserAction: "accountLogin",
-      txID: crypto.randomBytes(11).toString("hex"),
-      txAuth: "User",
-      txFrom: user.uuid,
-      txTo: "dao",
-      txAmount: "0",
-      txData: user.uuid,
-      // txDescription : "user logs in"
+    // // Create Ledger
+    // await createLedger({
+    //   uuid: user.uuid,
+    //   txUserAction: "accountLogin",
+    //   txID: crypto.randomBytes(11).toString("hex"),
+    //   txAuth: "User",
+    //   txFrom: user.uuid,
+    //   txTo: "dao",
+    //   txAmount: "0",
+    //   txData: user.uuid,
+    //   // txDescription : "user logs in"
+    // });
+
+    // res.cookie("jwt", token, cookieConfiguration());
+    // res.cookie("uuid", user.uuid), cookieConfiguration();
+    // res.redirect(`${FRONTEND_URL}/`);
+    console.error(error.message);
+    res.status(500).json({
+      message: `An error occurred while signUpUser Auth: ${error.message}`,
     });
+  }
+};
 
-    res.cookie("jwt", token, cookieConfiguration());
-    res.cookie("uuid", user.uuid), cookieConfiguration();
-    res.redirect(`${FRONTEND_URL}/auth0`);
+const linkedinHandler = async (req, res) => {
+  try {
+    console.log("hamza2", req.user);
+    res.redirect(`${FRONTEND_URL}/`);
+    return;
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
@@ -153,7 +169,7 @@ const addBadge = async (req, res) => {
     // Update the action
     await User.save();
 
-    const txID = crypto.randomBytes(11).toString("hex")
+    const txID = crypto.randomBytes(11).toString("hex");
     // Create Ledger
     await createLedger({
       uuid: User.uuid,
@@ -209,6 +225,7 @@ const socialBadgeToken = async (req, res) => {
 
 module.exports = {
   googleHandler,
+  linkedinHandler,
   addBadge,
   socialBadgeToken,
 };

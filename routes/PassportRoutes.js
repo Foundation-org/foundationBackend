@@ -17,7 +17,8 @@ const CLIENT_URL = `${FRONTEND_URL}/profile/verification-badges`;
  *   description: Endpoints for authentication using third-party providers
  */
 
-router.get("/login/failed",
+router.get(
+  "/login/failed",
   /**
    * @swagger
    * /auth/login/failed:
@@ -50,7 +51,8 @@ router.get("/login/failed",
 );
 
 // Github
-router.get("/github",
+router.get(
+  "/github",
   /**
    * @swagger
    * /auth/github:
@@ -66,7 +68,8 @@ router.get("/github",
   passport.authenticate("github", { scope: ["user:email"] })
 );
 
-router.get("/github/callback",
+router.get(
+  "/github/callback",
   /**
    * @swagger
    * /auth/github/callback:
@@ -83,11 +86,12 @@ router.get("/github/callback",
     failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.socialBadgeToken
+  PassportController.googleHandler
 );
 
 // LinkedIn
-router.get("/linkedin",
+router.get(
+  "/linkedin",
   /**
    * @swagger
    * /auth/linkedin:
@@ -100,10 +104,11 @@ router.get("/linkedin",
    *       '302':
    *         description: Redirect to LinkedIn authentication page
    */
-  passport.authenticate("linkedin", { scope: ["profile"] })
+  passport.authenticate("linkedin")
 );
 
-router.get("/linkedin/callback",
+router.get(
+  "/linkedin/callback",
   /**
    * @swagger
    * /auth/linkedin/callback:
@@ -120,11 +125,12 @@ router.get("/linkedin/callback",
     failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.socialBadgeToken
+  PassportController.linkedinHandler
 );
 
 // Twitter
-router.get("/twitter",
+router.get(
+  "/twitter",
   /**
    * @swagger
    * /auth/twitter:
@@ -140,7 +146,8 @@ router.get("/twitter",
   passport.authenticate("twitter", { session: false })
 );
 
-router.get("/twitter/callback",
+router.get(
+  "/twitter/callback",
   /**
    * @swagger
    * /auth/twitter/callback:
@@ -161,7 +168,8 @@ router.get("/twitter/callback",
 );
 
 // Instagram
-router.get("/instagram",
+router.get(
+  "/instagram",
   /**
    * @swagger
    * /auth/instagram:
@@ -177,7 +185,8 @@ router.get("/instagram",
   passport.authenticate("instagram")
 );
 
-router.get("/instagram/callback",
+router.get(
+  "/instagram/callback",
   /**
    * @swagger
    * /auth/instagram/callback:
@@ -198,7 +207,8 @@ router.get("/instagram/callback",
 );
 
 // Google
-router.get("/login/success",
+router.get(
+  "/login/success",
   /**
    * @swagger
    * /auth/login/success:
@@ -226,7 +236,8 @@ router.get("/login/success",
   }
 );
 
-router.get("/google",
+router.get(
+  "/google",
   /**
    * @swagger
    * /auth/google:
@@ -242,7 +253,8 @@ router.get("/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-router.get("/google/callback",
+router.get(
+  "/google/callback",
   /**
    * @swagger
    * /auth/google/callback:
@@ -262,7 +274,8 @@ router.get("/google/callback",
   PassportController.googleHandler
 );
 
-router.get("/facebook",
+router.get(
+  "/facebook",
   /**
    * @swagger
    * /auth/facebook:
@@ -278,7 +291,8 @@ router.get("/facebook",
   passport.authenticate("facebook", { scope: ["email"] })
 );
 
-router.get("/facebook/callback",
+router.get(
+  "/facebook/callback",
   /**
    * @swagger
    * /auth/facebook/callback:
