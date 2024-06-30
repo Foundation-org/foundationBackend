@@ -236,27 +236,28 @@ const signUpUserBySocialLogin = async (req, res) => {
     // if(req.query.GoogleAccount){
     //   signUpUserBySocialLogin(req, res)
     // }
+
     // Check Google Account
     const payload = req.body;
     // Check if email already exist
-    const alreadyUser = await User.findOne({ email: payload.email });
+    const alreadyUser = await User.findOne({ email: payload._json.email });
     if (alreadyUser) throw new Error("Email Already Exists");
 
     const uuid = crypto.randomBytes(11).toString("hex");
     const user = await new User({
-      email: payload.email,
+      email: payload._json.email,
       uuid: uuid,
       role: "user",
     });
 
     // Check Email Category
-    const emailStatus = await eduEmailCheck(req, res, payload.email);
+    const emailStatus = await eduEmailCheck(req, res, payload._json.email);
     let type = "";
     if (emailStatus.status === "OK") type = "Education";
 
     // Create a Badge at starting index
     user.badges.unshift({
-      accountId: payload.sub,
+      accountId: payload.id,
       accountName: payload.provider,
       isVerified: true,
       details: encryptData(req.body),
@@ -411,7 +412,7 @@ const signUpUserBySocialBadges = async (req, res) => {
       id = payload.data.user_id;
     }
     if (payload.type === "linkedin") {
-      id = payload.data.sub;
+      id = payload.data.id;
     }
 
     const usersWithBadge = await User.find({
@@ -780,7 +781,7 @@ const signUpSocialGuestMode = async (req, res) => {
     const payload = req.body;
 
     // Check if email already exist
-    const AlreadyUser = await User.findOne({ email: payload.email });
+    const AlreadyUser = await User.findOne({ email: payload._json.email });
     if (AlreadyUser) throw new Error("Email Already Exist");
 
     //if user doesnot exist
@@ -795,7 +796,7 @@ const signUpSocialGuestMode = async (req, res) => {
       { uuid: uuid },
       {
         $set: {
-          email: payload.email,
+          email: payload._json.email,
           role: "user",
           isGuestMode: false,
         },
@@ -803,13 +804,13 @@ const signUpSocialGuestMode = async (req, res) => {
     );
     const updatedUser = await User.findOne({ uuid: payload.uuid });
     // Check Email Category
-    const emailStatus = await eduEmailCheck(req, res, payload.email);
+    const emailStatus = await eduEmailCheck(req, res, payload._json.email);
     let type = "";
     if (emailStatus.status === "OK") type = "Education";
 
     // Create a Badge at starting index
     updatedUser.badges.unshift({
-      accountId: payload.sub,
+      accountId: payload.id,
       accountName: payload.provider,
       details: encryptData(payload),
       isVerified: true,
@@ -969,7 +970,7 @@ const signUpGuestBySocialBadges = async (req, res) => {
     }
 
     if (payload.type === "linkedin") {
-      id = payload.data.sub;
+      id = payload.data.id;
       type = payload.type;
     }
 
@@ -1133,13 +1134,13 @@ const signUpGuestBySocialBadges = async (req, res) => {
 
 const signInUserBySocialLogin = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.data.email });
+    const payload = req.body.data;
+    const user = await User.findOne({ email: payload._json.email });
     if (!user) throw new Error("User not Found");
 
     // Check Google Account
-    const payload = req.body.data;
     // Check if email already exist
-    const alreadyUser = await User.findOne({ email: payload.email });
+    const alreadyUser = await User.findOne({ email: payload._json.email });
     if (!alreadyUser) throw new Error("Please Signup!");
 
     // Generate a JWT token
@@ -1254,7 +1255,7 @@ const signInUserBySocialBadges = async (req, res) => {
       id = payload.data.user_id;
     }
     if (payload.type === "linkedin") {
-      id = payload.data.sub;
+      id = payload.data.id;
     }
 
     const user = await User.findOne({ "badges.0.accountId": id });

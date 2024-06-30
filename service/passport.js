@@ -65,6 +65,8 @@ passport.use(
       callbackURL: `${BACKEND_URL}/auth/github/callback`,
     },
     function (accessToken, refreshToken, profile, done) {
+      console.log("hamza", profile);
+
       done(null, profile);
       // UserModel.findOne({ githubId: profile.id }, async (err, user) => {
       //   if (err) return done(err, null)
@@ -93,6 +95,8 @@ passport.use(
       state: true,
     },
     function (accessToken, refreshToken, profile, done) {
+      console.log("hamza", profile);
+
       // asynchronous verification, for effect...
       process.nextTick(function () {
         // To keep the example simple, the user's LinkedIn profile is returned to
@@ -126,6 +130,8 @@ passport.use(
       profileFields: ["id", "displayName", "photos", "email"],
     },
     function (accessToken, refreshToken, profile, cb) {
+      console.log("hamza", profile);
+
       return cb(null, profile);
       // User.findOrCreate({ facebookId: profile.id }, function (err, user) {
       //   return cb(err, user);
@@ -143,6 +149,8 @@ passport.use(
       callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
     },
     function (accessToken, refreshToken, profile, done) {
+      console.log("hamza", profile);
+
       // User.findOrCreate({ instagramId: profile.id }, function (err, user) {
       return done(err, user);
       // });
@@ -159,6 +167,8 @@ passport.use(
       includeEmail: true,
     },
     function (token, tokenSecret, profile, cb) {
+      console.log("hamza", profile);
+
       return cb(null, profile);
       // User.findOrCreate({ twitterId: profile.id }, function (err, user) {
       //   return cb(err, user);
