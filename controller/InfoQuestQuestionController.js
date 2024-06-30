@@ -1118,13 +1118,22 @@ const getQuestsAll = async (req, res) => {
 
     query = query.sort(
       sort === "Newest First"
-        ? { createdAt: -1 }
+        ? { createdAt: -1, _id: 1 }
         : sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
+          ? { lastInteractedAt: -1, _id: 1 }
           : sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : { createdAt: -1 } // Default sort
+            ? { interactingCounter: -1, _id: 1 }
+            : { createdAt: -1, _id: 1 }
     );
+    // query = query.sort(
+    //   sort === "Newest First"
+    //     ? { createdAt: -1 }
+    //     : sort === "Last Updated"
+    //       ? { lastInteractedAt: -1 }
+    //       : sort === "Most Popular"
+    //         ? { interactingCounter: -1 }
+    //         : { createdAt: -1 } // Default sort
+    // );
     if (participated === "All") {
       query = query.skip(skip).limit(pageSize);
     }
@@ -1702,8 +1711,8 @@ const getQuestByUniqueShareLink = async (req, res) => {
       contendedPercentage: item.contendedPercentage,
     }));
 
-    const user = await User.findOne({ uuid: uuid})
-    if(user.role === 'guest'){
+    const user = await User.findOne({ uuid: uuid })
+    if (user.role === 'guest') {
       notification = {
         id: "guest_notification",
         icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
@@ -1717,7 +1726,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
         mode: "Guest",
         timestamp: new Date().toISOString(),
       };
-  
+
       desiredArray.push(notification)
     }
 
