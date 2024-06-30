@@ -1,40 +1,53 @@
-const passport = require("passport")
-const gitHubStrategy = require("passport-github2")
-const googleStrategy = require("passport-google-oauth20")
-const twitterStrategy = require("passport-twitter")
-var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
+const passport = require("passport");
+const gitHubStrategy = require("passport-github2");
+const googleStrategy = require("passport-google-oauth20");
+const twitterStrategy = require("passport-twitter");
+var LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 // var LinkedInStrategy = require('passport-linkedin').Strategy;
-var InstagramStrategy = require('passport-instagram').Strategy;
+var InstagramStrategy = require("passport-instagram").Strategy;
 const localStrategy = require("passport-local");
 const JwtStrategy = require("passport-jwt").Strategy;
-  ExtractJwt = require('passport-jwt').ExtractJwt;
-var opts = {}
-const dotenv = require("dotenv")
+ExtractJwt = require("passport-jwt").ExtractJwt;
+var opts = {};
+const dotenv = require("dotenv");
 // const UserModel = require("../models/UserModel")
-const bcrypt = require("bcrypt")
-const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, LINKEDIN_KEY, LINKEDIN_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BACKEND_URL, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET } = require("../config/env")
+const bcrypt = require("bcrypt");
+const {
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  LINKEDIN_KEY,
+  LINKEDIN_SECRET,
+  TWITTER_CONSUMER_KEY,
+  TWITTER_CONSUMER_SECRET,
+  INSTAGRAM_CLIENT_ID,
+  INSTAGRAM_CLIENT_SECRET,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  BACKEND_URL,
+  FACEBOOK_APP_ID,
+  FACEBOOK_APP_SECRET,
+} = require("../config/env");
 
-dotenv.config()
+dotenv.config();
 
-const GitHub = gitHubStrategy.Strategy
-const Google = googleStrategy.Strategy
-const Twitter = twitterStrategy.Strategy
+const GitHub = gitHubStrategy.Strategy;
+const Google = googleStrategy.Strategy;
+const Twitter = twitterStrategy.Strategy;
 // const Local = localStrategy.Strategy
 
 passport.serializeUser(function (user, done) {
   // done(null, user._id)
-  done(null, user)
-})
+  done(null, user);
+});
 
 passport.deserializeUser(async function (user, done) {
-  done(null, user)
+  done(null, user);
   // UserModel.findById(id, (err, user) => {
   //   if (err) return done(err, null)
   //   return done(null, user)
   // })
-})
-
+});
 
 // opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 // opts.secretOrKey = 'secret';
@@ -43,7 +56,7 @@ passport.deserializeUser(async function (user, done) {
 // passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
 //     done(null, jwt_payload)
 // }));
- 
+
 passport.use(
   new GitHub(
     {
@@ -52,7 +65,7 @@ passport.use(
       callbackURL: `${BACKEND_URL}/auth/github/callback`,
     },
     function (accessToken, refreshToken, profile, done) {
-      done(null, profile)
+      done(null, profile);
       // UserModel.findOne({ githubId: profile.id }, async (err, user) => {
       //   if (err) return done(err, null)
       //   if (!user) {
@@ -68,23 +81,29 @@ passport.use(
       // })
     }
   )
-)
+);
 
-passport.use(new LinkedInStrategy({
-  clientID: LINKEDIN_KEY,
-  clientSecret: LINKEDIN_SECRET,
-  callbackURL: `${BACKEND_URL}/auth/linkedin/callback`,
-  scope: ['r_emailaddress', 'r_liteprofile'],
-}, function(accessToken, refreshToken, profile, done) {
-  // asynchronous verification, for effect...
-  process.nextTick(function () {
-    // To keep the example simple, the user's LinkedIn profile is returned to
-    // represent the logged-in user. In a typical application, you would want
-    // to associate the LinkedIn account with a user record in your database,
-    // and return that user instead.
-    return done(null, profile);
-  });
-}));
+passport.use(
+  new LinkedInStrategy(
+    {
+      clientID: LINKEDIN_KEY,
+      clientSecret: LINKEDIN_SECRET,
+      callbackURL: `${BACKEND_URL}/auth/linkedin/callback`,
+      scope: ["email", "profile", "openid"],
+      state: true,
+    },
+    function (accessToken, refreshToken, profile, done) {
+      // asynchronous verification, for effect...
+      process.nextTick(function () {
+        // To keep the example simple, the user's LinkedIn profile is returned to
+        // represent the logged-in user. In a typical application, you would want
+        // to associate the LinkedIn account with a user record in your database,
+        // and return that user instead.
+        return done(null, profile);
+      });
+    }
+  )
+);
 // passport.use(new LinkedInStrategy({
 //   consumerKey: LINKEDIN_KEY,
 //   consumerSecret: LINKEDIN_SECRET,
@@ -97,48 +116,56 @@ passport.use(new LinkedInStrategy({
 //   // });
 // }
 // ));
-passport.use(new FacebookStrategy({
-  clientID: FACEBOOK_APP_ID,
-  clientSecret: FACEBOOK_APP_SECRET,
-  // callbackURL: "http://localhost:3000/auth/facebook/callback"
-  callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
-  profileFields: ['id', 'displayName', 'photos', 'email']
-},
-function(accessToken, refreshToken, profile, cb) {
-  return cb(null, profile)
-  // User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-  //   return cb(err, user);
-  // });
-}
-));
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: FACEBOOK_APP_ID,
+      clientSecret: FACEBOOK_APP_SECRET,
+      // callbackURL: "http://localhost:3000/auth/facebook/callback"
+      callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
+      profileFields: ["id", "displayName", "photos", "email"],
+    },
+    function (accessToken, refreshToken, profile, cb) {
+      return cb(null, profile);
+      // User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+      //   return cb(err, user);
+      // });
+    }
+  )
+);
 
-passport.use(new InstagramStrategy({
-  clientID: INSTAGRAM_CLIENT_ID,
-  clientSecret: INSTAGRAM_CLIENT_SECRET,
-  // callbackURL: "http://127.0.0.1:3000/auth/instagram/callback"
-  callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
-},
-function(accessToken, refreshToken, profile, done) {
-  // User.findOrCreate({ instagramId: profile.id }, function (err, user) {
-    return done(err, user);
-  // });
-}
-));
+passport.use(
+  new InstagramStrategy(
+    {
+      clientID: INSTAGRAM_CLIENT_ID,
+      clientSecret: INSTAGRAM_CLIENT_SECRET,
+      // callbackURL: "http://127.0.0.1:3000/auth/instagram/callback"
+      callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
+    },
+    function (accessToken, refreshToken, profile, done) {
+      // User.findOrCreate({ instagramId: profile.id }, function (err, user) {
+      return done(err, user);
+      // });
+    }
+  )
+);
 
-
-passport.use(new Twitter({
-  consumerKey: TWITTER_CONSUMER_KEY,
-  consumerSecret: TWITTER_CONSUMER_SECRET,
-  callbackURL: `${BACKEND_URL}/auth/twitter/callback`,
-  includeEmail: true,
-},
-function(token, tokenSecret, profile, cb) {
-  return cb(null, profile);
-  // User.findOrCreate({ twitterId: profile.id }, function (err, user) {
-  //   return cb(err, user);
-  // });
-}
-));
+passport.use(
+  new Twitter(
+    {
+      consumerKey: TWITTER_CONSUMER_KEY,
+      consumerSecret: TWITTER_CONSUMER_SECRET,
+      callbackURL: `${BACKEND_URL}/auth/twitter/callback`,
+      includeEmail: true,
+    },
+    function (token, tokenSecret, profile, cb) {
+      return cb(null, profile);
+      // User.findOrCreate({ twitterId: profile.id }, function (err, user) {
+      //   return cb(err, user);
+      // });
+    }
+  )
+);
 
 // passport.use(new InstagramStrategy({
 //   clientID: INSTAGRAM_CLIENT_ID,
@@ -153,19 +180,22 @@ function(token, tokenSecret, profile, cb) {
 // }
 // ));
 
-
-passport.use(new Google({
-  clientID: GOOGLE_CLIENT_ID,
-  clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: `${BACKEND_URL}/auth/google/callback`,
-},
-function(accessToken, refreshToken, profile, cb) {
-  cb(null, profile)
-  // User.findOrCreate({ googleId: profile.id }, function (err, user) {
-  //   return cb(err, user);
-  // });
-}
-));
+passport.use(
+  new Google(
+    {
+      clientID: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
+      callbackURL: `${BACKEND_URL}/auth/google/callback`,
+    },
+    function (accessToken, refreshToken, profile, cb) {
+      console.log("hamza", profile);
+      cb(null, profile);
+      // User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      //   return cb(err, user);
+      // });
+    }
+  )
+);
 
 // passport.use(
 //   new Google(
@@ -228,4 +258,3 @@ function(accessToken, refreshToken, profile, cb) {
 //     })
 //   })
 // )
-

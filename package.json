@@ -50,7 +50,7 @@
     "passport-instagram": "^1.0.0",
     "passport-jwt": "^4.0.1",
     "passport-linkedin": "^1.0.0",
-    "passport-linkedin-oauth2": "^2.0.0",
+    "passport-linkedin-oauth2": "github:auth0/passport-linkedin-oauth2#v3.0.0",
     "passport-local": "^1.0.0",
     "passport-twitter": "^1.0.4",
     "paypal-rest-sdk": "^1.8.1",
