@@ -72,7 +72,7 @@ const createInfoQuestQuest = async (req, res) => {
     // Save the updated user object
     await user.save();
 
-    const txID = crypto.randomBytes(11).toString("hex")
+    const txID = crypto.randomBytes(11).toString("hex");
 
     // Create Ledger
     await createLedger({
@@ -108,13 +108,14 @@ const createInfoQuestQuest = async (req, res) => {
     });
 
     user.fdxSpent = user.fdxSpent + QUEST_CREATED_AMOUNT;
-    user.feeSchedual.creatingPostFdx = user.feeSchedual.creatingPostFdx + QUEST_CREATED_AMOUNT;
-    await user.save()
+    user.feeSchedual.creatingPostFdx =
+      user.feeSchedual.creatingPostFdx + QUEST_CREATED_AMOUNT;
+    await user.save();
 
     res.status(201).json({
       message: "Quest has been Created",
       questID: createdQuestion._id,
-      moderationRatingCount: req.body.moderationRatingCount
+      moderationRatingCount: req.body.moderationRatingCount,
     });
   } catch (error) {
     console.error(error.message);
@@ -149,8 +150,7 @@ const deleteInfoQuestQuest = async (req, res) => {
     user.questsCreated -= 1;
     await user.save();
 
-    const txID = crypto.randomBytes(11).toString("hex")
-
+    const txID = crypto.randomBytes(11).toString("hex");
 
     // Create Ledger
     await createLedger({
@@ -204,9 +204,15 @@ const constraintForUniqueQuestion = async (req, res) => {
     // Get the question from the query parameters and convert it to lowercase
     const queryQuestion = req.query.question?.toLowerCase();
 
+    // Escape special characters in the input query to ensure a literal match
+    const escapedQuery = queryQuestion.replace(
+      /[-[\]{}()*+?.,\\^$|#\s]/g,
+      "\\$&"
+    );
+
     // Check for a matching question in a case-insensitive manner
     const matchingQuestion = await InfoQuestQuestions.findOne({
-      Question: { $regex: new RegExp(queryQuestion, "i") },
+      Question: { $regex: new RegExp(`^${escapedQuery}$`, "i") },
     });
 
     if (matchingQuestion && matchingQuestion?.isActive) {
@@ -359,10 +365,10 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-              ? { lastInteractedAt: -1 }
-              : req.body.sort === "Most Popular"
-                ? { interactingCounter: -1 }
-                : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -538,10 +544,10 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-              ? { lastInteractedAt: -1 }
-              : req.body.sort === "Most Popular"
-                ? { interactingCounter: -1 }
-                : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -801,10 +807,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : sort === "Most Popular"
-              ? { interactingCounter: -1 }
-              : "createdAt"
+          ? { lastInteractedAt: -1 }
+          : sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
       )
       .skip(skip)
       .limit(pageSize)
@@ -822,21 +828,21 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
       ? [
-        Object.fromEntries(
-          Object.entries(item.selectedPercentage[0]).sort(
-            (a, b) => parseInt(b[1]) - parseInt(a[1])
-          )
-        ),
-      ]
+          Object.fromEntries(
+            Object.entries(item.selectedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
       : [],
     contendedPercentage: item?.contendedPercentage?.[0]
       ? [
-        Object.fromEntries(
-          Object.entries(item.contendedPercentage[0]).sort(
-            (a, b) => parseInt(b[1]) - parseInt(a[1])
-          )
-        ),
-      ]
+          Object.fromEntries(
+            Object.entries(item.contendedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
       : [],
   }));
   // Query the database with skip and limit options to get questions for the requested page
@@ -1120,10 +1126,10 @@ const getQuestsAll = async (req, res) => {
       sort === "Newest First"
         ? { createdAt: -1, _id: 1 }
         : sort === "Last Updated"
-          ? { lastInteractedAt: -1, _id: 1 }
-          : sort === "Most Popular"
-            ? { interactingCounter: -1, _id: 1 }
-            : { createdAt: -1, _id: 1 }
+        ? { lastInteractedAt: -1, _id: 1 }
+        : sort === "Most Popular"
+        ? { interactingCounter: -1, _id: 1 }
+        : { createdAt: -1, _id: 1 }
     );
     // query = query.sort(
     //   sort === "Newest First"
@@ -1315,21 +1321,21 @@ const getQuestsAll = async (req, res) => {
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
       ? [
-        Object.fromEntries(
-          Object.entries(item.selectedPercentage[0]).sort(
-            (a, b) => parseInt(b[1]) - parseInt(a[1])
-          )
-        ),
-      ]
+          Object.fromEntries(
+            Object.entries(item.selectedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
       : [],
     contendedPercentage: item?.contendedPercentage?.[0]
       ? [
-        Object.fromEntries(
-          Object.entries(item.contendedPercentage[0]).sort(
-            (a, b) => parseInt(b[1]) - parseInt(a[1])
-          )
-        ),
-      ]
+          Object.fromEntries(
+            Object.entries(item.contendedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
       : [],
   }));
   // Query the database with skip and limit options to get questions for the requested page
@@ -1367,7 +1373,9 @@ const getQuestsAll = async (req, res) => {
               id: "system_notification",
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
               header: "Ready to start growing your FDX balance?",
-              text: ["The more FDX you have, the more opportunity you have in the future to monetize from it. Invest your time by engaging now, to cash out later!"],
+              text: [
+                "The more FDX you have, the more opportunity you have in the future to monetize from it. Invest your time by engaging now, to cash out later!",
+              ],
               buttonText: "Join Foundation",
               buttonUrl: "/guest-signup",
               category: "Home",
@@ -1381,7 +1389,9 @@ const getQuestsAll = async (req, res) => {
               id: "system_notification",
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
               header: "What is Foundation?",
-              text: ["You know you have personal data - it's all over the internet - but did you know you can sell it and monetize from it? Foundation is a platform where data gate-keeping is no more. It puts the ownership of your data back in your control."],
+              text: [
+                "You know you have personal data - it's all over the internet - but did you know you can sell it and monetize from it? Foundation is a platform where data gate-keeping is no more. It puts the ownership of your data back in your control.",
+              ],
               buttonText: "Learn More",
               buttonUrl: "/welcome",
               category: "Home",
@@ -1396,7 +1406,9 @@ const getQuestsAll = async (req, res) => {
               id: "system_notification",
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
               header: "Get verified, start growing your FDX balance",
-              text: ["Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!"],
+              text: [
+                "Have your data be more desirable for brands or research firms to purchase with more verified info- and earn more FDX while you're at it!",
+              ],
               buttonText: "Add verification badges!",
               buttonUrl: "/profile/verification-badges",
               category: "Home",
@@ -1410,7 +1422,9 @@ const getQuestsAll = async (req, res) => {
               id: "system_notification",
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
               header: "Not sure what to post?",
-              text: ["You can post whatever your heart desires - but keep in mind not everyone may engage with it. The more people that engage with your posts, the more FDX you earn!"],
+              text: [
+                "You can post whatever your heart desires - but keep in mind not everyone may engage with it. The more people that engage with your posts, the more FDX you earn!",
+              ],
               buttonText: "Create a post!",
               buttonUrl: "/quest",
               category: "Home",
@@ -1559,10 +1573,10 @@ const getAllQuestsWithResult = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : sort === "Most Popular"
-              ? { interactingCounter: -1 }
-              : "createdAt"
+          ? { lastInteractedAt: -1 }
+          : sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
       .limit(pageSize);
@@ -1711,13 +1725,16 @@ const getQuestByUniqueShareLink = async (req, res) => {
       contendedPercentage: item.contendedPercentage,
     }));
 
-    const user = await User.findOne({ uuid: uuid })
-    if (user.role === 'guest') {
+    const user = await User.findOne({ uuid: uuid });
+    if (user.role === "guest") {
       notification = {
         id: "guest_notification",
         icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
         header: "Someone wants your thoughts on this.",
-        text: ["Welcome to Foundation - where you can post anonymously while building your data profile.", "The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later."],
+        text: [
+          "Welcome to Foundation - where you can post anonymously while building your data profile.",
+          "The more data you add, the more FDX you earn, and the more ooportunity you have to monetize it later.",
+        ],
         buttonText: "Join Foundation",
         buttonUrl: "/guest-signup",
         category: "",
@@ -1727,7 +1744,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
         timestamp: new Date().toISOString(),
       };
 
-      desiredArray.push(notification)
+      desiredArray.push(notification);
     }
 
     res.status(200).json({
@@ -1891,10 +1908,10 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-              ? { lastInteractedAt: -1 }
-              : req.body.sort === "Most Popular"
-                ? { interactingCounter: -1 }
-                : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -2075,10 +2092,10 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-              ? { lastInteractedAt: -1 }
-              : req.body.sort === "Most Popular"
-                ? { interactingCounter: -1 }
-                : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -2301,7 +2318,10 @@ const checkMediaDuplicateUrl = async (req, res) => {
     const regex = new RegExp(`${id}`, "i");
 
     // Use the regex pattern in the find query
-    const question = await InfoQuestQuestions.findOne({ url: regex, isActive: true });
+    const question = await InfoQuestQuestions.findOne({
+      url: regex,
+      isActive: true,
+    });
 
     if (question) {
       // ID exists in the URL field, return an error
@@ -2357,13 +2377,17 @@ const getFlickerUrl = async (req, res) => {
 
     // Make a GET request to Flickr's API with the dynamic URL
     const response = await fetch(
-      `http://www.flickr.com/services/oembed/?format=json&url=${encodeURIComponent(flickrUrl)}`
+      `http://www.flickr.com/services/oembed/?format=json&url=${encodeURIComponent(
+        flickrUrl
+      )}`
     );
 
     // Check if the response is successful
     if (!response.ok) {
       if (response.status === 429) {
-        return res.status(429).json({ message: "Too many requests. Please try again later." });
+        return res
+          .status(429)
+          .json({ message: "Too many requests. Please try again later." });
       }
       throw new Error("Invalid Flickr photo URL");
     }

@@ -107,7 +107,7 @@ const oauthSuccessHandler = async (req, res) => {
     //   res.cookie("jwt", token, cookieConfiguration());
     //   res.cookie("uuid", newUser.uuid, cookieConfiguration());
     const token = createToken(req.user);
-    res.redirect(`${FRONTEND_URL}?token=${token}`);
+    res.redirect(`${FRONTEND_URL}/authenticating?token=${token}`);
     return;
   } catch (error) {
     //   Sign in User
