@@ -6,8 +6,8 @@ var LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 // var LinkedInStrategy = require('passport-linkedin').Strategy;
 var InstagramStrategy = require("passport-instagram").Strategy;
-const localStrategy = require("passport-local");
-const JwtStrategy = require("passport-jwt").Strategy;
+// const localStrategy = require("passport-local");
+// const JwtStrategy = require("passport-jwt").Strategy;
 ExtractJwt = require("passport-jwt").ExtractJwt;
 var opts = {};
 const dotenv = require("dotenv");
@@ -57,6 +57,7 @@ passport.deserializeUser(async function (user, done) {
 //     done(null, jwt_payload)
 // }));
 
+// GITHUB
 passport.use(
   new GitHub(
     {
@@ -65,8 +66,6 @@ passport.use(
       callbackURL: `${BACKEND_URL}/auth/github/callback`,
     },
     function (accessToken, refreshToken, profile, done) {
-      console.log("hamza", profile);
-
       done(null, profile);
       // UserModel.findOne({ githubId: profile.id }, async (err, user) => {
       //   if (err) return done(err, null)
@@ -85,6 +84,7 @@ passport.use(
   )
 );
 
+// LINKEDIN
 passport.use(
   new LinkedInStrategy(
     {
@@ -95,8 +95,6 @@ passport.use(
       state: true,
     },
     function (accessToken, refreshToken, profile, done) {
-      console.log("hamza", profile);
-
       // asynchronous verification, for effect...
       process.nextTick(function () {
         // To keep the example simple, the user's LinkedIn profile is returned to
@@ -108,6 +106,7 @@ passport.use(
     }
   )
 );
+
 // passport.use(new LinkedInStrategy({
 //   consumerKey: LINKEDIN_KEY,
 //   consumerSecret: LINKEDIN_SECRET,
@@ -120,6 +119,8 @@ passport.use(
 //   // });
 // }
 // ));
+
+// FACEBOOK
 passport.use(
   new FacebookStrategy(
     {
@@ -130,8 +131,6 @@ passport.use(
       profileFields: ["id", "displayName", "photos", "email"],
     },
     function (accessToken, refreshToken, profile, cb) {
-      console.log("hamza", profile);
-
       return cb(null, profile);
       // User.findOrCreate({ facebookId: profile.id }, function (err, user) {
       //   return cb(err, user);
@@ -140,6 +139,7 @@ passport.use(
   )
 );
 
+// INSTAGRAM
 passport.use(
   new InstagramStrategy(
     {
@@ -149,8 +149,6 @@ passport.use(
       callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
     },
     function (accessToken, refreshToken, profile, done) {
-      console.log("hamza", profile);
-
       // User.findOrCreate({ instagramId: profile.id }, function (err, user) {
       return done(err, user);
       // });
@@ -158,6 +156,7 @@ passport.use(
   )
 );
 
+// TWITTER
 passport.use(
   new Twitter(
     {
@@ -167,8 +166,6 @@ passport.use(
       includeEmail: true,
     },
     function (token, tokenSecret, profile, cb) {
-      console.log("hamza", profile);
-
       return cb(null, profile);
       // User.findOrCreate({ twitterId: profile.id }, function (err, user) {
       //   return cb(err, user);
@@ -190,6 +187,7 @@ passport.use(
 // }
 // ));
 
+// GOOGLE
 passport.use(
   new Google(
     {
@@ -198,7 +196,6 @@ passport.use(
       callbackURL: `${BACKEND_URL}/auth/google/callback`,
     },
     function (accessToken, refreshToken, profile, cb) {
-      console.log("hamza", profile);
       cb(null, profile);
       // User.findOrCreate({ googleId: profile.id }, function (err, user) {
       //   return cb(err, user);

@@ -164,7 +164,7 @@ router.get(
     failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.socialBadgeToken
+  PassportController.oauthSuccessHandler
 );
 
 // Instagram
@@ -206,7 +206,7 @@ router.get(
   PassportController.socialBadgeToken
 );
 
-// Google
+// Auth Success
 router.get(
   "/login/success",
   protect,
@@ -242,6 +242,7 @@ router.get(
   }
 );
 
+// Google
 router.get(
   "/google",
   /**
@@ -280,6 +281,7 @@ router.get(
   PassportController.oauthSuccessHandler
 );
 
+// FACEBOOK
 router.get(
   "/facebook",
   /**
@@ -317,4 +319,5 @@ router.get(
   }),
   PassportController.oauthSuccessHandler
 );
+
 module.exports = router;
