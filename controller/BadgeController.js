@@ -177,7 +177,7 @@ const addContactBadge = async (req, res) => {
     // Check education Email
     if (req.body.type === "education") {
       // Check Email Category
-      const emailStatus = await eduEmailCheck(req, res, req.body.email);
+      const emailStatus = await eduEmailCheck(req, res, req.body._json.email);
       //console.log("🚀 ~ addContactBadge ~ emailStatus:", emailStatus);
       if (emailStatus.status !== "OK") throw new Error(emailStatus.message);
     }
@@ -266,7 +266,7 @@ const addContactBadge = async (req, res) => {
     // Find the Badge
     const usersWithBadge = await UserModel.find({
       badges: {
-        $elemMatch: { accountId: req.body.sub, accountName: req.body.provider },
+        $elemMatch: { accountId: req.body.id, accountName: req.body.provider },
       },
     });
     if (usersWithBadge.length !== 0)
