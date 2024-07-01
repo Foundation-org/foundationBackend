@@ -17,6 +17,7 @@ const { execSync } = require("child_process");
 const UserQuestSetting = require("../models/UserQuestSetting");
 const axios = require("axios");
 const mongoose = require("mongoose");
+const { UserListSchema, CategorySchema, PostSchema, } = require("../models/UserList");
 
 const createInfoQuestQuest = async (req, res) => {
   try {
@@ -139,14 +140,50 @@ const deleteInfoQuestQuest = async (req, res) => {
         message: "Quest is involved in Discussion, Quest can't be deleted.",
       }); // Not neccessry if we add the check at FE to remove the delete icon from those who have { usersAddTheirAns: true }
 
+    await InfoQuestQuestions.deleteOne({
+      _id: req.params.questId,
+      uuid: req.params.userUuid,
+    });
+
     // Delete and Save Info Quest
-    infoQuest.isActive = false;
-    await infoQuest.save();
+    // infoQuest.isActive = false;
+    // await infoQuest.save();
 
     // Remove from hiddens and shared
     await UserQuestSetting.deleteMany({
       questForeignKey: req.params.questId
     }).exec()
+
+    // Remove Relative Bookmarks
+    await BookmarkQuests.deleteMany({
+      questForeignKey: req.params.questId
+    }).exec()
+
+    // Remove Posts from Relative Lists
+        const userLists = await UserListSchema.aggregate([
+          { $unwind: "$list" },
+          { $unwind: "$list.post" },
+          { $match: { "list.post.questForeginKey": new mongoose.Types.ObjectId(req.params.questId) } },
+          { $group: { _id: "$_id", count: { $sum: 1 } } }
+      ]);
+
+      // Step 2: Remove the posts
+      await UserListSchema.updateMany(
+          { "list.post.questForeginKey": new mongoose.Types.ObjectId(req.params.questId) },
+          { $pull: { "list.$[].post": { questForeginKey: new mongoose.Types.ObjectId(req.params.questId) } } }
+      );
+
+      // Step 3: Decrement the postCounter
+      for (const userList of userLists) {
+          await UserListSchema.updateOne(
+              { _id: userList._id },
+              {
+                  $inc: {
+                      "list.$[].postCounter": -1
+                  }
+              }
+          );
+      }
 
     // Set Up User's Details
     const user = await User.findOne({ uuid: req.params.userUuid });
