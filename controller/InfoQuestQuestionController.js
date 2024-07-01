@@ -143,6 +143,11 @@ const deleteInfoQuestQuest = async (req, res) => {
     infoQuest.isActive = false;
     await infoQuest.save();
 
+    // Remove from hiddens and shared
+    await UserQuestSetting.deleteMany({
+      questForeignKey: req.params.questId
+    }).exec()
+
     // Set Up User's Details
     const user = await User.findOne({ uuid: req.params.userUuid });
 
