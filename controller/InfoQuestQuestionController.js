@@ -143,7 +143,7 @@ const deleteInfoQuestQuest = async (req, res) => {
     await InfoQuestQuestions.deleteOne({
       _id: req.params.questId,
       uuid: req.params.userUuid,
-    });
+    }).exec()
 
     // Delete and Save Info Quest
     // infoQuest.isActive = false;
