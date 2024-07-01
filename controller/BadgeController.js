@@ -283,7 +283,7 @@ const addContactBadge = async (req, res) => {
       updatedUserBadges = [
         ...userBadges,
         {
-          accountId: req.body.sub,
+          accountId: req.body.id,
           accountName: req.body.provider,
           isVerified: true,
           type: req.body.type,
@@ -294,7 +294,7 @@ const addContactBadge = async (req, res) => {
       updatedUserBadges = [
         ...userBadges,
         {
-          accountId: req.body.sub,
+          accountId: req.body.id,
           accountName: req.body.provider,
           isVerified: true,
           type: req.body.type,
