@@ -132,9 +132,11 @@ const oauthSuccessHandler = async (req, res) => {
     // res.cookie("uuid", user.uuid), cookieConfiguration();
     // res.redirect(`${FRONTEND_URL}/`);
     console.error(error.message);
-    res.status(500).json({
-      message: `An error occurred while signUpUser Auth: ${error.message}`,
-    });
+    // res.status(500).json({
+    //   message: `An error occurred while signUpUser Auth: ${error.message}`,
+    // });
+    res.redirect(`${FRONTEND_URL}/authenticating`);
+
   }
 };
 
