@@ -296,7 +296,7 @@ router.get(
    *       '302':
    *         description: Redirect to Facebook authentication page
    */
-  passport.authenticate("facebook", { scope: ["email"] })
+  passport.authenticate("facebook", { scope: ["public_profile", "email"] })
 );
 
 router.get(
