@@ -155,7 +155,10 @@ router.get(
    *       '302':
    *         description: Redirect to Twitter authentication page
    */
-  passport.authenticate("twitter")
+  passport.authenticate("twitter", {
+    forceLogin: true,
+    screenName: ''
+  })
 );
 
 router.get(

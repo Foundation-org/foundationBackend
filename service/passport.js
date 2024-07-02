@@ -163,6 +163,7 @@ passport.use(
       consumerKey: TWITTER_CONSUMER_KEY,
       consumerSecret: TWITTER_CONSUMER_SECRET,
       callbackURL: `${BACKEND_URL}/auth/twitter/callback`,
+      userAuthorizationURL: 'https://twitter.com/oauth/authorize?force_login=true',
       includeEmail: true,
     },
     function (token, tokenSecret, profile, cb) {
