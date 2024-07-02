@@ -12,12 +12,8 @@ module.exports.hashedPassword = async (password) => {
 module.exports.comparePassword = async (password, dbPassword) => {
   return await bcrypt.compare(password, dbPassword);
 };
-module.exports.createToken = (user) => {
-  const payload = {
-    id: user.id,
-    provider: user.provider
-  }
-  return jwt.sign(payload, JWT_SECRET, {
+module.exports.createToken = ({ _raw, ...user }) => {
+  return jwt.sign(user, JWT_SECRET, {
     expiresIn: "7d",
   });
 };
