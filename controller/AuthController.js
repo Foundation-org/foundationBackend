@@ -1165,7 +1165,7 @@ const signInUserBySocialLogin = async (req, res) => {
       res.status(200).json({ ...user._doc, token, isPasswordEncryption: true });
     } else {
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email") {
+        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details) ) {
           return;
         }
         const typesToDecrypt = [
@@ -1288,7 +1288,7 @@ const signInUserBySocialBadges = async (req, res) => {
       res.status(200).json({ ...user._doc, token, isPasswordEncryption: true });
     } else {
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email") {
+        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
           return;
         }
         const typesToDecrypt = [
@@ -1649,7 +1649,7 @@ const userInfo = async (req, res) => {
         );
 
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email") {
+        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
           return;
         }
         const typesToDecrypt = [
@@ -1707,7 +1707,7 @@ const userInfo = async (req, res) => {
     }
 
     user.badges.forEach((badge) => {
-      if (badge.legacy || badge.accountName === "Email") {
+      if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
         return;
       }
       const typesToDecrypt = [
@@ -1913,7 +1913,7 @@ const runtimeSignInPassword = async (req, res) => {
         );
 
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email") {
+        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
           return;
         }
         const typesToDecrypt = [
@@ -1972,7 +1972,7 @@ const runtimeSignInPassword = async (req, res) => {
 
     // Decrypt the 'personal' field or the 'work' array in each badge
     user.badges.forEach((badge) => {
-      if (badge.legacy || badge.accountName === "Email") {
+      if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
         return;
       }
       const typesToDecrypt = [

@@ -2041,7 +2041,7 @@ const addPasswordBadgesUpdate = async (req, res) => {
 
       // As Legacy Password is added so we need to Remove it.
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email") {
+        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
           return;
         } else if (badge.type && badge.type === "cell-phone") {
           badge.details = userCustomizedDecryptData(badge.details, eyk);
@@ -2121,7 +2121,7 @@ const addPasswordBadgesUpdate = async (req, res) => {
 
       // As Legacy Password is removed so we need to Add it.
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email") {
+        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
           return;
         } else if (badge.type && badge.type === "cell-phone") {
           badge.details = userCustomizedEncryptData(badge.details, eyk);
