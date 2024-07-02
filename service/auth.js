@@ -12,9 +12,25 @@ module.exports.hashedPassword = async (password) => {
 module.exports.comparePassword = async (password, dbPassword) => {
   return await bcrypt.compare(password, dbPassword);
 };
-module.exports.createToken = ({ _raw, ...user }) => {
-  return jwt.sign(user, JWT_SECRET, {
-    expiresIn: "7d",
+module.exports.createToken = (user) => {
+  // Destructure _raw and _json from user, and keep the rest of the user properties
+  const { _raw, _json, ...restOfUser } = user;
+
+  // Check if provider is twitter, and if so, remove the status property from _json
+  let sanitizedJson = _json;
+  if (user.provider === 'twitter' && _json && _json.status) {
+    const { status, ...restOfJson } = _json;
+    sanitizedJson = restOfJson;
+  }
+
+  // Combine the rest of user properties with the sanitized _json
+  const sanitizedUser = {
+    ...restOfUser,
+    _json: sanitizedJson,
+  };
+
+  return jwt.sign(sanitizedUser, JWT_SECRET, {
+    expiresIn: '7d',
   });
 };
 
