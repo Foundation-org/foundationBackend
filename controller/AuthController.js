@@ -50,7 +50,7 @@ const {
   HIDE_POST,
   MY_POST_ENGAGEMENT,
   SHARED_POST_ENGAGEMENT,
-  REFERRALCODE
+  REFERRALCODE,
 } = require("../constants");
 const { getUserBalance, updateUserBalance } = require("../utils/userServices");
 const { eduEmailCheck } = require("../utils/eduEmailCheck");
@@ -363,7 +363,8 @@ const signUpUserBySocialLogin = async (req, res) => {
     });
 
     user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
-    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    user.rewardSchedual.addingBadgeFdx =
+      user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
     await user.save();
 
     // Generate a JWT token
@@ -541,7 +542,8 @@ const signUpUserBySocialBadges = async (req, res) => {
     });
 
     user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
-    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    user.rewardSchedual.addingBadgeFdx =
+      user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
     await user.save();
 
     // Generate a JWT token
@@ -583,7 +585,10 @@ const signInUser = async (req, res) => {
 
     const compPass = await bcrypt.compare(req.body.password, user.password);
 
-    const txID = crypto.randomBytes(11).toString("hex");
+    if (!user.gmailVerified) {
+      await sendVerifyEmail(req, res);
+      return;
+    }
 
     if (!compPass) {
       // Create Ledger
@@ -917,7 +922,8 @@ const signUpSocialGuestMode = async (req, res) => {
     });
 
     updatedUser.fdxEarned = updatedUser.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
-    updatedUser.rewardSchedual.addingBadgeFdx = updatedUser.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    updatedUser.rewardSchedual.addingBadgeFdx =
+      updatedUser.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
     await updatedUser.save();
 
     // Generate a JWT token
@@ -1111,7 +1117,8 @@ const signUpGuestBySocialBadges = async (req, res) => {
     });
 
     user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
-    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    user.rewardSchedual.addingBadgeFdx =
+      user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
     await user.save();
 
     // Generate a JWT token
@@ -1165,7 +1172,12 @@ const signInUserBySocialLogin = async (req, res) => {
       res.status(200).json({ ...user._doc, token, isPasswordEncryption: true });
     } else {
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details) ) {
+        if (
+          badge.legacy ||
+          badge.accountName === "Email" ||
+          (badge.type === "work" && !badge.details) ||
+          (badge.type === "education" && !badge.details)
+        ) {
           return;
         }
         const typesToDecrypt = [
@@ -1288,7 +1300,12 @@ const signInUserBySocialBadges = async (req, res) => {
       res.status(200).json({ ...user._doc, token, isPasswordEncryption: true });
     } else {
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
+        if (
+          badge.legacy ||
+          badge.accountName === "Email" ||
+          (badge.type === "work" && !badge.details) ||
+          (badge.type === "education" && !badge.details)
+        ) {
           return;
         }
         const typesToDecrypt = [
@@ -1649,7 +1666,12 @@ const userInfo = async (req, res) => {
         );
 
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
+        if (
+          badge.legacy ||
+          badge.accountName === "Email" ||
+          (badge.type === "work" && !badge.details) ||
+          (badge.type === "education" && !badge.details)
+        ) {
           return;
         }
         const typesToDecrypt = [
@@ -1707,7 +1729,12 @@ const userInfo = async (req, res) => {
     }
 
     user.badges.forEach((badge) => {
-      if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
+      if (
+        badge.legacy ||
+        badge.accountName === "Email" ||
+        (badge.type === "work" && !badge.details) ||
+        (badge.type === "education" && !badge.details)
+      ) {
         return;
       }
       const typesToDecrypt = [
@@ -1763,7 +1790,7 @@ const userInfo = async (req, res) => {
 
     const sharedQuests = await UserQuestSetting.find({
       uuid: userUuid,
-      linkStatus: 'Enable'
+      linkStatus: "Enable",
     });
     const totals = sharedQuests.reduce(
       (acc, quest) => {
@@ -1781,8 +1808,16 @@ const userInfo = async (req, res) => {
     const questsIdsArray = questsIds.map((doc) => doc._id.toString());
 
     const result = await UserQuestSetting.aggregate([
-      { $match: { hidden: true, questForeignKey: { $in: questsIdsArray }, uuid: { $ne: userUuid } } },
-      { $group: { _id: null, uniqueQuests: { $addToSet: "$questForeignKey" } } },
+      {
+        $match: {
+          hidden: true,
+          questForeignKey: { $in: questsIdsArray },
+          uuid: { $ne: userUuid },
+        },
+      },
+      {
+        $group: { _id: null, uniqueQuests: { $addToSet: "$questForeignKey" } },
+      },
       { $project: { _id: 0, totalCount: { $size: "$uniqueQuests" } } },
     ]);
 
@@ -1790,26 +1825,33 @@ const userInfo = async (req, res) => {
       result.length > 0 ? result[0].totalCount : 0;
 
     const suppressedPosts = await UserQuestSetting.aggregate([
-      { $match: { hidden: true, questForeignKey: { $in: questsIdsArray }, uuid: { $ne: userUuid } } },
+      {
+        $match: {
+          hidden: true,
+          questForeignKey: { $in: questsIdsArray },
+          uuid: { $ne: userUuid },
+        },
+      },
       {
         $group: {
           _id: {
             questId: "$questForeignKey",
-            hiddenMessage: "$hiddenMessage"
+            hiddenMessage: "$hiddenMessage",
           },
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
       {
         $match: {
-          count: { $gt: 1 }
-        }
+          count: { $gt: 1 },
+        },
       },
       {
-        $count: "suppressedPostCount"
-      }
+        $count: "suppressedPostCount",
+      },
     ]);
-    const suppressQuestsCount = suppressedPosts.length > 0 ? suppressedPosts[0].suppressedPostCount : 0;
+    const suppressQuestsCount =
+      suppressedPosts.length > 0 ? suppressedPosts[0].suppressedPostCount : 0;
 
     // Total shared lists count for a specific user
     const totalSharedListsCount = await UserListSchema.aggregate([
@@ -1913,7 +1955,12 @@ const runtimeSignInPassword = async (req, res) => {
         );
 
       user.badges.forEach((badge) => {
-        if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
+        if (
+          badge.legacy ||
+          badge.accountName === "Email" ||
+          (badge.type === "work" && !badge.details) ||
+          (badge.type === "education" && !badge.details)
+        ) {
           return;
         }
         const typesToDecrypt = [
@@ -1972,7 +2019,12 @@ const runtimeSignInPassword = async (req, res) => {
 
     // Decrypt the 'personal' field or the 'work' array in each badge
     user.badges.forEach((badge) => {
-      if (badge.legacy || badge.accountName === "Email" || (badge.type === "work" && !badge.details) || (badge.type === "education" && !badge.details)) {
+      if (
+        badge.legacy ||
+        badge.accountName === "Email" ||
+        (badge.type === "work" && !badge.details) ||
+        (badge.type === "education" && !badge.details)
+      ) {
         return;
       }
       const typesToDecrypt = [
@@ -2113,8 +2165,9 @@ const sendVerifyEmailGuest = async (req, res) => {
     );
 
     // Step 3 - Email the user a unique verification link
-    const url = `${FRONTEND_URL.split(",")[0]
-      }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${
+      FRONTEND_URL.split(",")[0]
+    }/VerifyCode/?${verificationTokenFull}`;
     // console.log("url", url);
     // return res.status(200).json({ url });
 
@@ -2195,8 +2248,9 @@ const sendVerifyEmail = async (req, res) => {
     //console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
-    const url = `${FRONTEND_URL.split(",")[0]
-      }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${
+      FRONTEND_URL.split(",")[0]
+    }/VerifyCode/?${verificationTokenFull}`;
     // console.log("url", url);
     // return res.status(200).json({ url });
     // //console.log("url", url);
@@ -2412,7 +2466,6 @@ const verify = async (req, res) => {
     user.verification = true;
     await user.save();
 
-
     const txID = crypto.randomBytes(11).toString("hex");
     // Create Ledger
     await createLedger({
@@ -2434,7 +2487,7 @@ const verify = async (req, res) => {
       txFrom: "DAO Treasury",
       txTo: user.uuid,
       txAmount: ACCOUNT_BADGE_ADDED_AMOUNT,
-      txData: user.badges[0]?.accountName,      // txDescription : "Incentive for adding badges"
+      txData: user.badges[0]?.accountName, // txDescription : "Incentive for adding badges"
     });
 
     await createLedger({
@@ -2445,7 +2498,7 @@ const verify = async (req, res) => {
       txFrom: user.uuid,
       txTo: "dao",
       txAmount: "0",
-      txData: user.badges[0]?.accountName,      // txDescription : "user logs in"
+      txData: user.badges[0]?.accountName, // txDescription : "user logs in"
     });
     //
     // Decrement the Treasury
@@ -2459,7 +2512,8 @@ const verify = async (req, res) => {
     });
 
     user.fdxEarned = user.fdxEarned + ACCOUNT_BADGE_ADDED_AMOUNT;
-    user.rewardSchedual.addingBadgeFdx = user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
+    user.rewardSchedual.addingBadgeFdx =
+      user.rewardSchedual.addingBadgeFdx + ACCOUNT_BADGE_ADDED_AMOUNT;
     // return res.status(200).send({
     //   message: "Gmail Account verified",
     //   uuid: req.user.uuid,
@@ -2467,6 +2521,7 @@ const verify = async (req, res) => {
     user.verification = true;
     await user.save();
     // Generate a token
+    console.log("userUUID", req.user.uuid);
     const generateToken = createToken({ uuid: req.user.uuid });
 
     res.cookie("uuid", req.user.uuid, cookieConfiguration());
@@ -2747,7 +2802,8 @@ const getFacebookUserInfo = async (req, res) => {
     // if token found
     // // Second Axios request to get user info using the access token
     const response = await axios.get(
-      `https://graph.facebook.com/v19.0/me?access_token=${responseAccessToken.data.access_token
+      `https://graph.facebook.com/v19.0/me?access_token=${
+        responseAccessToken.data.access_token
       }&fields=${"id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender,age_range,friends,link,birthday"}`,
       {
         // headers: {
@@ -2781,7 +2837,7 @@ const getConstants = async (req, res) => {
       USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
       USER_LIST_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
       FDX_CONVERSION_RATE_WRT_USD: TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX,
-      TREASURY_BALANCE: getTreasury ? (getTreasury?.amount?.toString()) : '0',
+      TREASURY_BALANCE: getTreasury ? getTreasury?.amount?.toString() : "0",
       POST_LINK,
       POST_SHARE,
       LIST_CREATE,
@@ -2797,7 +2853,7 @@ const getConstants = async (req, res) => {
       ADD_OBJECTION_TO_POST,
       HIDE_POST,
       MY_POST_ENGAGEMENT,
-      SHARED_POST_ENGAGEMENT
+      SHARED_POST_ENGAGEMENT,
     };
     // console.log(variables);
     res.status(200).json(variables);
