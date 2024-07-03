@@ -225,7 +225,7 @@ const deleteInfoQuestQuest = async (req, res) => {
     await updateTreasury({ amount: QUEST_CREATED_AMOUNT, dec: true });
     // Decrement the UserBalance
     await updateUserBalance({
-      uuid: req.body.uuid,
+      uuid: req.params.userUuid,
       amount: QUEST_CREATED_AMOUNT,
       inc: true,
     });
