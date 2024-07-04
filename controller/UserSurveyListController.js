@@ -651,38 +651,60 @@ const addPostInCategoryInUserList = async (req, res) => {
         })
         if (!userList) throw new Error(`No list is found for User: ${userUuid}`);
 
-        let categoryDoc;
+        let postExistAlready = true;  // Initialize the flag to true
+
+        // First loop to check if questForeginKey exists in all categories
         for (const categoryId of categoryIdArray) {
-            categoryDoc = userList.list.id(categoryId);
+            const categoryDoc = userList.list.id(categoryId);
             if (!categoryDoc) {
                 return res.status(404).json({ message: `Category not found: ${categoryId}` });
             }
 
             const questForeginKeyExists = categoryDoc.post.some(obj => obj.questForeginKey.equals(questForeginKey));
-            if (questForeginKeyExists) continue;
-
-            const newPost = new PostSchema({
-                questForeginKey: questForeginKey,
-                order: categoryDoc.postCounter,
-            });
-            categoryDoc.post.push(newPost);
-            categoryDoc.postCounter = categoryDoc.postCounter + 1;
-            categoryDoc.updatedAt = new Date().toISOString();
+            if (!questForeginKeyExists) {
+                postExistAlready = false;
+                break;  // No need to check further if it doesn't exist in one category
+            }
         }
-        userList.updatedAt = new Date().toISOString();
 
-        await userList.save();
+        // If questForeginKey does not exist in all categories, proceed with the original logic
+        if (!postExistAlready) {
+            let categoryDoc;
+            for (const categoryId of categoryIdArray) {
+                categoryDoc = userList.list.id(categoryId);
+                if (!categoryDoc) {
+                    return res.status(404).json({ message: `Category not found: ${categoryId}` });
+                }
 
-        const populatedUserList = await UserListSchema.findOne({ userUuid: userUuid })
-            .populate({
-                path: 'list.post.questForeginKey',
-                model: 'InfoQuestQuestions'
+                const questForeginKeyExists = categoryDoc.post.some(obj => obj.questForeginKey.equals(questForeginKey));
+                if (questForeginKeyExists) continue;
+
+                const newPost = new PostSchema({
+                    questForeginKey: questForeginKey,
+                    order: categoryDoc.postCounter,
+                });
+                categoryDoc.post.push(newPost);
+                categoryDoc.postCounter = categoryDoc.postCounter + 1;
+                categoryDoc.updatedAt = new Date().toISOString();
+            }
+            userList.updatedAt = new Date().toISOString();
+
+            await userList.save();
+
+            const populatedUserList = await UserListSchema.findOne({ userUuid: userUuid })
+                .populate({
+                    path: 'list.post.questForeginKey',
+                    model: 'InfoQuestQuestions'
+                });
+
+            res.status(200).json({
+                message: `Post is added successfully into your category: ${categoryDoc.category}`,
+                userList: populatedUserList.list,
             });
-
-        res.status(200).json({
-            message: `Post is added successfully into your category: ${categoryDoc.category}`,
-            userList: populatedUserList.list,
-        });
+        } else {
+            // Handle the case when the questForeginKey exists in all categories, if needed
+            return res.status(409).json({ message: 'Post already exists in category' });
+        }
 
     } catch (error) {
         console.error(error.message);
