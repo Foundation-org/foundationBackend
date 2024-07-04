@@ -1468,7 +1468,7 @@ const getQuestsAll = async (req, res) => {
                 "You can post whatever your heart desires - but keep in mind not everyone may engage with it. The more people that engage with your posts, the more FDX you earn!",
               ],
               buttonText: "Create a post!",
-              buttonUrl: "/quest",
+              buttonUrl: "/post",
               category: "Home",
               position: "Feed",
               priority: priority,
