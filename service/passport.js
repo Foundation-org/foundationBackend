@@ -6,8 +6,8 @@ var LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 // var LinkedInStrategy = require('passport-linkedin').Strategy;
 var InstagramStrategy = require("passport-instagram").Strategy;
-const localStrategy = require("passport-local");
-const JwtStrategy = require("passport-jwt").Strategy;
+// const localStrategy = require("passport-local");
+// const JwtStrategy = require("passport-jwt").Strategy;
 ExtractJwt = require("passport-jwt").ExtractJwt;
 var opts = {};
 const dotenv = require("dotenv");
@@ -57,6 +57,7 @@ passport.deserializeUser(async function (user, done) {
 //     done(null, jwt_payload)
 // }));
 
+// GITHUB
 passport.use(
   new GitHub(
     {
@@ -83,6 +84,7 @@ passport.use(
   )
 );
 
+// LINKEDIN
 passport.use(
   new LinkedInStrategy(
     {
@@ -104,6 +106,7 @@ passport.use(
     }
   )
 );
+
 // passport.use(new LinkedInStrategy({
 //   consumerKey: LINKEDIN_KEY,
 //   consumerSecret: LINKEDIN_SECRET,
@@ -116,6 +119,8 @@ passport.use(
 //   // });
 // }
 // ));
+
+// FACEBOOK
 passport.use(
   new FacebookStrategy(
     {
@@ -134,6 +139,7 @@ passport.use(
   )
 );
 
+// INSTAGRAM
 passport.use(
   new InstagramStrategy(
     {
@@ -150,12 +156,14 @@ passport.use(
   )
 );
 
+// TWITTER
 passport.use(
   new Twitter(
     {
       consumerKey: TWITTER_CONSUMER_KEY,
       consumerSecret: TWITTER_CONSUMER_SECRET,
       callbackURL: `${BACKEND_URL}/auth/twitter/callback`,
+      userAuthorizationURL: 'https://twitter.com/oauth/authorize?force_login=true',
       includeEmail: true,
     },
     function (token, tokenSecret, profile, cb) {
@@ -180,6 +188,7 @@ passport.use(
 // }
 // ));
 
+// GOOGLE
 passport.use(
   new Google(
     {
@@ -188,7 +197,6 @@ passport.use(
       callbackURL: `${BACKEND_URL}/auth/google/callback`,
     },
     function (accessToken, refreshToken, profile, cb) {
-      console.log("hamza", profile);
       cb(null, profile);
       // User.findOrCreate({ googleId: profile.id }, function (err, user) {
       //   return cb(err, user);

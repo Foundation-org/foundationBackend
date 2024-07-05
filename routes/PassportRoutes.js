@@ -82,6 +82,12 @@ router.get(
    *       '302':
    *         description: Redirect to client URL
    */
+  (req, res, next) => {
+    if (req.query.error) {
+      return res.redirect(`${CLIENT_URL}`);
+    }
+    next();
+  },
   passport.authenticate("github", {
     failureRedirect: CLIENT_URL,
     session: false,
@@ -121,6 +127,12 @@ router.get(
    *       '302':
    *         description: Redirect to client URL
    */
+  (req, res, next) => {
+    if (req.query.error) {
+      return res.redirect(`${CLIENT_URL}`);
+    }
+    next();
+  },
   passport.authenticate("linkedin", {
     failureRedirect: CLIENT_URL,
     session: false,
@@ -143,7 +155,10 @@ router.get(
    *       '302':
    *         description: Redirect to Twitter authentication page
    */
-  passport.authenticate("twitter", { session: false })
+  passport.authenticate("twitter", {
+    forceLogin: true,
+    screenName: ''
+  })
 );
 
 router.get(
@@ -160,11 +175,17 @@ router.get(
    *       '302':
    *         description: Redirect to client URL
    */
+  (req, res, next) => {
+    if (req.query.error) {
+      return res.redirect(`${CLIENT_URL}`);
+    }
+    next();
+  },
   passport.authenticate("twitter", {
     failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.socialBadgeToken
+  PassportController.oauthSuccessHandler
 );
 
 // Instagram
@@ -199,6 +220,12 @@ router.get(
    *       '302':
    *         description: Redirect to client URL
    */
+  (req, res, next) => {
+    if (req.query.error) {
+      return res.redirect(`${CLIENT_URL}`);
+    }
+    next();
+  },
   passport.authenticate("instagram", {
     failureRedirect: CLIENT_URL,
     session: false,
@@ -206,7 +233,7 @@ router.get(
   PassportController.socialBadgeToken
 );
 
-// Google
+// Auth Success
 router.get(
   "/login/success",
   protect,
@@ -242,6 +269,7 @@ router.get(
   }
 );
 
+// Google
 router.get(
   "/google",
   /**
@@ -273,6 +301,12 @@ router.get(
    *       '302':
    *         description: Redirect to client URL
    */
+  (req, res, next) => {
+    if (req.query.error) {
+      return res.redirect(`${CLIENT_URL}`);
+    }
+    next();
+  },
   passport.authenticate("google", {
     failureRedirect: CLIENT_URL,
     session: false,
@@ -280,6 +314,7 @@ router.get(
   PassportController.oauthSuccessHandler
 );
 
+// FACEBOOK
 router.get(
   "/facebook",
   /**
@@ -294,6 +329,7 @@ router.get(
    *       '302':
    *         description: Redirect to Facebook authentication page
    */
+
   passport.authenticate("facebook", { scope: ["email"] })
 );
 
@@ -311,10 +347,17 @@ router.get(
    *       '302':
    *         description: Redirect to client URL
    */
+  (req, res, next) => {
+    if (req.query.error) {
+      return res.redirect(`${CLIENT_URL}`);
+    }
+    next();
+  },
   passport.authenticate("facebook", {
     failureRedirect: CLIENT_URL,
     session: false,
   }),
   PassportController.oauthSuccessHandler
 );
+
 module.exports = router;
