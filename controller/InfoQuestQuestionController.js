@@ -427,10 +427,10 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -606,10 +606,10 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -869,10 +869,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : sort === "Most Popular"
+              ? { interactingCounter: -1 }
+              : "createdAt"
       )
       .skip(skip)
       .limit(pageSize)
@@ -890,21 +890,21 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.selectedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.selectedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
     contendedPercentage: item?.contendedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.contendedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.contendedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
   }));
   // Query the database with skip and limit options to get questions for the requested page
@@ -1188,10 +1188,10 @@ const getQuestsAll = async (req, res) => {
       sort === "Newest First"
         ? { createdAt: -1, _id: 1 }
         : sort === "Last Updated"
-        ? { lastInteractedAt: -1, _id: 1 }
-        : sort === "Most Popular"
-        ? { interactingCounter: -1, _id: 1 }
-        : { createdAt: -1, _id: 1 }
+          ? { lastInteractedAt: -1, _id: 1 }
+          : sort === "Most Popular"
+            ? { interactingCounter: -1, _id: 1 }
+            : { createdAt: -1, _id: 1 }
     );
     // query = query.sort(
     //   sort === "Newest First"
@@ -1383,21 +1383,21 @@ const getQuestsAll = async (req, res) => {
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.selectedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.selectedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
     contendedPercentage: item?.contendedPercentage?.[0]
       ? [
-          Object.fromEntries(
-            Object.entries(item.contendedPercentage[0]).sort(
-              (a, b) => parseInt(b[1]) - parseInt(a[1])
-            )
-          ),
-        ]
+        Object.fromEntries(
+          Object.entries(item.contendedPercentage[0]).sort(
+            (a, b) => parseInt(b[1]) - parseInt(a[1])
+          )
+        ),
+      ]
       : [],
   }));
   // Query the database with skip and limit options to get questions for the requested page
@@ -1462,6 +1462,8 @@ const getQuestsAll = async (req, res) => {
               mode: "Guest",
               timestamp: new Date().toISOString(),
             };
+            result1.splice(0, 0, notification1);
+            result1.splice(2, 0, notification2);
           } else {
             notification1 = {
               id: "system_notification",
@@ -1590,73 +1592,72 @@ const getQuestsAll = async (req, res) => {
               mode: "User",
               timestamp: new Date().toISOString(),
             };
-          }
-
-          // Page 1
-          if (page === 1 && nextPage === false) {
-            if (result1.length < 2) {
-              result1.splice(0, 0, notification1);
-            } else if (result1.length < 5) {
-              result1.splice(0, 0, notification1);
-              result1.splice(3, 0, notification2);
-            } else {
+            // Page 1
+            if (page === 1 && nextPage === false) {
+              if (result1.length < 2) {
+                result1.splice(0, 0, notification1);
+              } else if (result1.length < 5) {
+                result1.splice(0, 0, notification1);
+                result1.splice(3, 0, notification2);
+              } else {
+                result1.splice(0, 0, notification1);
+                result1.splice(3, 0, notification2);
+                result1.splice(7, 0, notification3);
+              }
+            }
+            if (page === 1 && nextPage === true) {
               result1.splice(0, 0, notification1);
               result1.splice(3, 0, notification2);
               result1.splice(7, 0, notification3);
             }
-          }
-          if (page === 1 && nextPage === true) {
-            result1.splice(0, 0, notification1);
-            result1.splice(3, 0, notification2);
-            result1.splice(7, 0, notification3);
-          }
 
-          // Page 2
-          if (page === 2 && nextPage === false) {
-            if (result1.length >= 3) {
+            // Page 2
+            if (page === 2 && nextPage === false) {
+              if (result1.length >= 3) {
+                result1.splice(3, 0, notification4);
+              }
+            }
+            if (page === 2 && nextPage === true) {
               result1.splice(3, 0, notification4);
             }
-          }
-          if (page === 2 && nextPage === true) {
-            result1.splice(3, 0, notification4);
-          }
 
-          // Page 3
-          if (page === 3 && nextPage === false) {
-            if (result1.length < 4) {
-              result1.splice(1, 0, notification5);
+            // Page 3
+            if (page === 3 && nextPage === false) {
+              if (result1.length < 4) {
+                result1.splice(1, 0, notification5);
+              }
+
+              else if (result1.length >= 4) {
+                result1.splice(1, 0, notification5);
+                result1.splice(5, 0, notification6);
+              }
             }
-
-            else if(result1.length >= 4 ){
+            if (page === 3 && nextPage === true) {
               result1.splice(1, 0, notification5);
               result1.splice(5, 0, notification6);
             }
-          }
-          if (page === 3 && nextPage === true) {
-            result1.splice(1, 0, notification5);
-            result1.splice(5, 0, notification6);
-          }
 
-          // Page 4
-          if (page === 4 && nextPage === false) {
-            if (result1.length > 2 && result1.length < 5) {
-              result1.splice(2, 0, notification7);
+            // Page 4
+            if (page === 4 && nextPage === false) {
+              if (result1.length > 2 && result1.length < 5) {
+                result1.splice(2, 0, notification7);
+              }
+              else if (result1.length === 5) {
+                result1.splice(2, 0, notification7);
+                result1.splice(6, 0, notification8);
+              }
             }
-            else if (result1.length === 5) {
+            if (page === 4 && nextPage === true) {
               result1.splice(2, 0, notification7);
               result1.splice(6, 0, notification8);
             }
-          }
-          if (page === 4 && nextPage === true) {
-            result1.splice(2, 0, notification7);
-            result1.splice(6, 0, notification8);
           }
         }
       }
     }
   }
 
-  res.status(200).json({
+  return res.status(200).json({
     data: result1,
     hasNextPage: nextPage,
   });
@@ -1779,10 +1780,10 @@ const getAllQuestsWithResult = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-          ? { lastInteractedAt: -1 }
-          : sort === "Most Popular"
-          ? { interactingCounter: -1 }
-          : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : sort === "Most Popular"
+              ? { interactingCounter: -1 }
+              : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
       .limit(pageSize);
@@ -2114,10 +2115,10 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -2298,10 +2299,10 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : req.body.sort === "Most Popular"
-            ? { interactingCounter: -1 }
-            : "createdAt"
+              ? { lastInteractedAt: -1 }
+              : req.body.sort === "Most Popular"
+                ? { interactingCounter: -1 }
+                : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
