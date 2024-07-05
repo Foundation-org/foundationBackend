@@ -1429,7 +1429,7 @@ const getQuestsAll = async (req, res) => {
             notification7,
             notification8;
 
-          if (mode) {
+          if (mode && page === 1) {
             // Define Guest's notification1 properties
             notification1 = {
               id: "system_notification",
@@ -1464,7 +1464,7 @@ const getQuestsAll = async (req, res) => {
             };
             result1.splice(0, 0, notification1);
             result1.splice(2, 0, notification2);
-          } else {
+          } else if (!mode) {
             notification1 = {
               id: "system_notification",
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
