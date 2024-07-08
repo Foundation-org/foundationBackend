@@ -1826,7 +1826,7 @@ const getQuestById = async (req, res) => {
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage ? item.selectedPercentage : [],
-      contendedPercentage: item.contendedPercentage ? item.selectedPercentage : [],
+      contendedPercentage: item.contendedPercentage ? item.contendedPercentage : [],
       userQuestSetting: item.userQuestSetting,
     }));
 
