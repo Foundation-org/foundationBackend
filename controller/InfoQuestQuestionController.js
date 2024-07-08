@@ -1582,7 +1582,7 @@ const getQuestsAll = async (req, res) => {
               icon: "https://www.flickr.com/photos/160246067@N08/39735543880/",
               header: "Integrity matters",
               text: [
-                "Foundation values integrity and transparency. If users attempt to manipulate the system by adding misleading options or unfairly objecting to good options, they risk damaging their reputation. This can lead to reduced visibility of their posts and options, as well as lower earnings of tokens.",
+                "Foundation values integrity and transparency. If users attempt to manipulate the system by adding misleading options or unfairly objecting to good answers, they risk damaging their reputation. This can lead to reduced visibility of their posts and answers, as well as lower earnings of tokens.",
               ],
               buttonText: "",
               buttonUrl: "",
