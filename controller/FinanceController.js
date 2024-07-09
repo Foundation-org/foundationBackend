@@ -1,4 +1,4 @@
-const { STRIPE_CLIENT_ID, STRIPE_SECRET_KEY, BACKEND_URL, PAYPAL_CLIENT_ID, PAYPAL_SECRET_KEY } = require("../config/env");
+const { STRIPE_CLIENT_ID, STRIPE_SECRET_KEY, BACKEND_URL, PAYPAL_URL, PAYPAL_CLIENT_ID, PAYPAL_SECRET_KEY } = require("../config/env");
 const Treasury = require("../models/Treasury");
 const { PaymentSchema, ProviderSchema } = require("../models/Payment");
 const { createLedger } = require("../utils/createLedger");
@@ -17,7 +17,7 @@ paypal.configure({
   'client_id': PAYPAL_CLIENT_ID,
   'client_secret': PAYPAL_SECRET_KEY
 });
-const base = "https://api-m.sandbox.paypal.com";
+const base = PAYPAL_URL;
 
 // const checkConnectedAccounts = async (req, res) => {
 //   try {
