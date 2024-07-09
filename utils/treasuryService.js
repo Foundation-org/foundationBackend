@@ -16,6 +16,11 @@ module.exports.createTreasury = async (req, res) => {
 
 module.exports.updateTreasury = async ({ amount, inc, dec }) => {
     try {
+        if(dec){
+          const checkTreasury = await Treasury.findOne();
+          if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+          if (Math.round(checkTreasury.amount) <= Number(amount) || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+        }
         const treasury = await Treasury.updateOne({ $inc: { amount: inc ? amount : -amount } });
         if(!treasury) throw new Error("No such Treasury!");
         return treasury.modifiedCount;
