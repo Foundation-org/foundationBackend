@@ -574,7 +574,7 @@ async function createStartQuestUserList(req, res) {
     // Your Post Engaged
     await User.findOneAndUpdate(
       { uuid: checkSuppression.uuid },
-       { $inc: { yourPostEngaged: 1 } }
+      { $inc: { yourPostEngaged: 1 } }
     );
 
     if (req.body.isSharedLinkAns) {
