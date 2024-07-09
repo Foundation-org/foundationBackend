@@ -74,21 +74,21 @@ router.post(
   "/supressPost/:id",
   /**
    * @swagger
-   * /userQuestImpression/{link}:
+   * /infoquestions/supressPost/{id}:
    *   post:
    *     tags:
-   *       - User Quest Setting
-   *     summary: Record user quest impression
-   *     description: Endpoint to record user quest impression
-   *     parameters:
-   *       - in: path
-   *         name: link
-   *         required: true
-   *         schema:
-   *           type: string
+   *       - Info Quest Question
+   *     summary: Create info quest question
+   *     description: Endpoint to create a new info quest question
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/InfoQuestQuestionCreationRequest'
    *     responses:
    *       '200':
-   *         description: User quest impression recorded successfully
+   *         description: Info quest question created successfully
    *       '500':
    *         description: Internal server error
    */

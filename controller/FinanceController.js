@@ -185,6 +185,12 @@ const spay = async (req, res) => {
 
     const dollars = (charge.amount / 100);
     const fdxRequired = dollars / TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX;
+
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= fdxRequired || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     // if (Math.round(checkTreasury.amount) <= fdxRequired || Math.round(checkTreasury.amount) <= 0) throw new Error(`Treasury is not enough, FDX can't be purchased.`)
     const ledgerCode = crypto.randomBytes(11).toString("hex");
 
@@ -432,6 +438,12 @@ const ppay = async (req, res) => {
 
     const dollars = charge.purchase_units[0].payments.captures[0].amount.value;
     const fdxRequired = dollars / TWO_POINT_FIVE_DOLLARS_EQUALS_TO_ONE_FDX;
+
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= fdxRequired || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     // if (Math.round(checkTreasury.amount) <= fdxRequired || Math.round(checkTreasury.amount) <= 0) throw new Error(`Treasury is not enough, FDX can't be purchased.`)
     const ledgerCode = crypto.randomBytes(11).toString("hex");
 

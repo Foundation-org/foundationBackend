@@ -152,7 +152,7 @@ router.post(
   "/signInUser/socialBadges",
   /**
    * @swagger
-   * /user/signInUser/social:
+   * /user/signInUser/socialBadges:
    *   post:
    *     tags:
    *       - Authentication
@@ -337,7 +337,32 @@ router.post(
   AuthController.signUpGuestBySocialBadges
 );
 
-router.post("/updateUserSettings", AuthController.updateUserSettings);
+router.post(
+  "/updateUserSettings",
+  /**
+   * @swagger
+   * /user/updateUserSettings:
+   *   post:
+   *     tags:
+   *       - Authentication
+   *     summary: Update user settings
+   *     description: Endpoint to update the settings of a user
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/UpdateUserSettingsRequest'
+   *     responses:
+   *       '200':
+   *         description: User settings updated successfully
+   *       '400':
+   *         description: Invalid request body
+   *       '500':
+   *         description: Internal server error
+   */
+  AuthController.updateUserSettings
+);
 
 router.get(
   "/userInfo/:userUuid/:infoc?",

@@ -17,6 +17,7 @@ const {
 } = require("../service/auth");
 const { FRONTEND_URL } = require("../config/env");
 const UserModel = require("../models/UserModel");
+const Treasury = require("../models/Treasury");
 
 const oauthSuccessHandler = async (req, res) => {
   try {
@@ -155,6 +156,12 @@ const oauthSuccessHandler = async (req, res) => {
 
 const addBadge = async (req, res) => {
   try {
+
+    // Check Treasury
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     //console.log(req.user);
     // return
     // const { userId, badgeId } = req.params;

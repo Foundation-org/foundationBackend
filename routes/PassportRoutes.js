@@ -157,7 +157,7 @@ router.get(
    */
   passport.authenticate("twitter", {
     forceLogin: true,
-    screenName: ''
+    screenName: "",
   })
 );
 
@@ -230,7 +230,7 @@ router.get(
     failureRedirect: CLIENT_URL,
     session: false,
   }),
-  PassportController.socialBadgeToken
+  PassportController.oauthSuccessHandler
 );
 
 // Auth Success

@@ -146,11 +146,11 @@ passport.use(
       clientID: INSTAGRAM_CLIENT_ID,
       clientSecret: INSTAGRAM_CLIENT_SECRET,
       // callbackURL: "http://127.0.0.1:3000/auth/instagram/callback"
-      callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
+      callbackURL: `${BACKEND_URL}/auth/instagram/callback`,
     },
     function (accessToken, refreshToken, profile, done) {
       // User.findOrCreate({ instagramId: profile.id }, function (err, user) {
-      return done(err, user);
+      return cb(null, profile);
       // });
     }
   )
@@ -163,7 +163,8 @@ passport.use(
       consumerKey: TWITTER_CONSUMER_KEY,
       consumerSecret: TWITTER_CONSUMER_SECRET,
       callbackURL: `${BACKEND_URL}/auth/twitter/callback`,
-      userAuthorizationURL: 'https://twitter.com/oauth/authorize?force_login=true',
+      userAuthorizationURL:
+        "https://twitter.com/oauth/authorize?force_login=true",
       includeEmail: true,
     },
     function (token, tokenSecret, profile, cb) {

@@ -227,7 +227,7 @@ router.put("/addBadge/personal/add",
   /**
    * @swagger
    * /addBadge/personal/add:
-   *   post:
+   *   put:
    *     tags:
    *       - Badge
    *     summary: Add personal badge (additional)

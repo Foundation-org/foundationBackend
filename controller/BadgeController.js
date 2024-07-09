@@ -36,6 +36,8 @@ const {
   userCustomizedDecryptData,
 } = require("../utils/security");
 
+const Treasury = require("../models/Treasury");
+
 const update = async (req, res) => {
   try {
     let legacyEmail = false;
@@ -99,6 +101,11 @@ const getBadges = async (req, res) => {
 
 const addBadgeSocial = async (req, res) => {
   try {
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const User = await UserModel.findOne({ uuid: req.cookies.uuid });
     if (!User) throw new Error("No such User!");
     // Find the Badge
@@ -171,6 +178,12 @@ const addBadgeSocial = async (req, res) => {
 
 const addContactBadge = async (req, res) => {
   try {
+
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
     const eyk = req.body.infoc;
@@ -356,6 +369,11 @@ const addContactBadge = async (req, res) => {
 
 const addBadge = async (req, res) => {
   try {
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
     const eyk = req.body.infoc;
@@ -503,6 +521,11 @@ const addDegreesAndFields = async (req, res) => {
 };
 const addPersonalBadge = async (req, res) => {
   try {
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
 
@@ -1143,6 +1166,12 @@ const updateWorkAndEducationBadge = async (req, res) => {
 
 const addWorkEducationBadge = async (req, res) => {
   try {
+
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
     const newData = req.body.data;
@@ -1235,6 +1264,12 @@ const addWorkEducationBadge = async (req, res) => {
 };
 const addWeb3Badge = async (req, res) => {
   try {
+
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
 
@@ -1738,6 +1773,12 @@ const addContactBadgeAdd = async (req, res) => {
 
 const addPasskeyBadge = async (req, res) => {
   try {
+
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
 
@@ -1844,6 +1885,12 @@ const addPasskeyBadge = async (req, res) => {
 
 const addFarCasterBadge = async (req, res) => {
   try {
+
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const User = await UserModel.findOne({ uuid: req.body.uuid });
     if (!User) throw new Error("No such User!");
 
@@ -2118,6 +2165,11 @@ const addPasswordBadgesUpdate = async (req, res) => {
       });
     } else if (!user.isPasswordEncryption) {
       // console.log("Apply Legacy Encryption!");
+
+      // Treasury Check
+      const checkTreasury = await Treasury.findOne();
+      if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+      if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
 
       // As Legacy Password is removed so we need to Add it.
       user.badges.forEach((badge) => {
