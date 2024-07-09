@@ -22,6 +22,7 @@ const {
   CategorySchema,
   PostSchema,
 } = require("../models/UserList");
+const Treasury = require("../models/Treasury");
 
 const createInfoQuestQuest = async (req, res) => {
   try {
@@ -132,6 +133,12 @@ const createInfoQuestQuest = async (req, res) => {
 
 const deleteInfoQuestQuest = async (req, res) => {
   try {
+
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= QUEST_CREATED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const infoQuest = await InfoQuestQuestions.findOne({
       _id: req.params.questId,
       uuid: req.params.userUuid,

@@ -236,7 +236,10 @@ const signUpUserBySocialLogin = async (req, res) => {
     // if(req.query.GoogleAccount){
     //   signUpUserBySocialLogin(req, res)
     // }
-
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
     // Check Google Account
     const payload = req.body;
     // Check if email already exist
@@ -392,6 +395,10 @@ const signUpUserBySocialLogin = async (req, res) => {
 
 const signUpUserBySocialBadges = async (req, res) => {
   try {
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
     // Check Google Account
     const payload = req.body;
     // Check if email already exist
@@ -783,6 +790,11 @@ const signUpGuestMode = async (req, res) => {
 
 const signUpSocialGuestMode = async (req, res) => {
   try {
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+
     const payload = req.body;
 
     // Check if email already exist
@@ -951,6 +963,10 @@ const signUpSocialGuestMode = async (req, res) => {
 
 const signUpGuestBySocialBadges = async (req, res) => {
   try {
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
     const payload = req.body;
 
     let id;
@@ -2446,6 +2462,10 @@ const verify = async (req, res) => {
   // }
 
   try {
+    // Treasury Check
+    const checkTreasury = await Treasury.findOne();
+    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
     // Step 2 - Find user with matching ID
     const user = await User.findOne({ uuid: req.user.uuid }).exec();
     if (!user) {
