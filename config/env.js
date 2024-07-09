@@ -37,6 +37,7 @@ module.exports = {
     // AWS_SES_ReceiverEmails: process.env.AWS_SES_ReceiverEmails,
     STRIPE_CLIENT_ID: process.env.STRIPE_CLIENT_ID,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    PAYPAL_URL: process.env.PAYPAL_URL,
     PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID,
     PAYPAL_SECRET_KEY: process.env.PAYPAL_SECRET_KEY,
     rpID: process.env.rpID,
