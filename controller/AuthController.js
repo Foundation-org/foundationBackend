@@ -2067,7 +2067,13 @@ const runtimeSignInPassword = async (req, res) => {
         typesToDecrypt.includes(badge.type) ||
         accountsToDecrypt.includes(badge.accountName)
       ) {
-        badge.details = decryptData(badge.details);
+        if (badge.data) {
+          badge.data = decryptData(badge.data);
+        } else if (badge.details) {
+          badge.details = decryptData(badge.details);
+        } else {
+          throw new Error("Neither Badge Details nor Data is found");
+        }
       }
       // if (badge.personal && badge.personal.work) {
       //   badge.personal.work = badge.personal.work.map(decryptData);
