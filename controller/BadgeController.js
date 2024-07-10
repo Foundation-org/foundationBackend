@@ -1920,7 +1920,7 @@ const addFarCasterBadge = async (req, res) => {
           accountName: req.body.accountName,
           isVerified: req.body.isVerified,
           type: req.body.type,
-          data: userCustomizedEncryptData(encryptData(req.body.data), eyk),
+          data: userCustomizedEncryptData(encryptData(req.body.data), req.body.eyk),
         },
       ];
     } else {
