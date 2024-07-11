@@ -55,7 +55,7 @@ const uploadS3Bucket = async ({ fileName, description }) => {
     title: "Foundation",
     type: "website",
     url: "https://on.foundation",
-    image: "https://foundation-seo.s3.amazonaws.com/foundation-seo-logo.png",
+    image: `https://foundation-seo.s3.amazonaws.com/${fileName}.png`,
   }
   const { title, type, url, image } = metaTags;
   const params = {
