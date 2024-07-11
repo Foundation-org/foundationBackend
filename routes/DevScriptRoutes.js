@@ -67,4 +67,35 @@ router.get(
   DevScriptController.createUserListForAllUsers
 );
 
+router.post(
+  "/dbReset",
+  /**
+   * @swagger
+   * /devscript/dbReset:
+   *   post:
+   *     tags:
+   *       - DevScriptRoutes
+   *     summary: Reset the database
+   *     description: Endpoint to reset the database
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               db:
+   *                 type: string
+   *                 enum: [main, stag, dev]
+   *                 example: main
+   *                 description: The database to reset
+   *     responses:
+   *       '200':
+   *         description: Database reset successfully
+   *       '500':
+   *         description: Internal server error
+   */
+  DevScriptController.dbReset
+);
+
 module.exports = router;
