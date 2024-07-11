@@ -51,11 +51,13 @@ const s3ImageUpload = async ({ fileBuffer, fileName }) => {
 
 
 const uploadS3Bucket = async ({ fileName, description }) => {
+  // Specify the folder name within the S3 bucket
+  const folderName = 'dynamicImages';
   const metaTags = {
     title: "Foundation",
     type: "website",
     url: "https://on.foundation",
-    image: `https://foundation-seo.s3.amazonaws.com/${fileName}.png`,
+    image: `https://${bucketName}.s3.amazonaws.com/${folderName}/${fileName}.png`,
   }
   const { title, type, url, image } = metaTags;
   const params = {
