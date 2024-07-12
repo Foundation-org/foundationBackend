@@ -40,7 +40,8 @@ const isUrlSharedPostValidToInteract = async (req, res, next) => {
         if(!infoQuestQuestion){
             return res.status(404).send(
                 {
-                    message: "Sorry, this post has been deleted by the user who created it."
+                    message: "Sorry, this post has been deleted by the user who created it.",
+                    _id: questForeignKeyValue
                 }
             );
         }
