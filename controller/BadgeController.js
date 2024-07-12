@@ -189,8 +189,15 @@ const addContactBadge = async (req, res) => {
     const eyk = req.body.infoc;
     // Check education Email
     if (req.body.type === "education") {
-      // Check Email Category
-      const emailStatus = await eduEmailCheck(req, res, req.body._json.email);
+      let emailStatus;
+      if(req.body.provider){
+        // Check Email Category
+        emailStatus = await eduEmailCheck(req, res, req.body._json.email);
+      }
+      else {
+        // Check Email Category
+        emailStatus = await eduEmailCheck(req, res, req.body.email);
+      }
       //console.log("🚀 ~ addContactBadge ~ emailStatus:", emailStatus);
       if (emailStatus.status !== "OK") throw new Error(emailStatus.message);
     }
