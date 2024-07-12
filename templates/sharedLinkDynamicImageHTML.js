@@ -8,7 +8,7 @@ const sharedLinkDynamicImageHTML = (questStartData) => {
       <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body
-    class="flex flex-col min-h-screen items-center w-1080 h-720 justify-center gap-[25px]"
+    class="flex flex-col min-h-screen items-center w-full justify-center gap-[25px]"
   >
     <svg
       width="370"
