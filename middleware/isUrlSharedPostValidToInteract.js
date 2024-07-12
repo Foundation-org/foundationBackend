@@ -37,10 +37,10 @@ const isUrlSharedPostValidToInteract = async (req, res, next) => {
             }
         )
 
-        if(infoQuestQuestion.isActive === false){
-            return res.status(403).send(
+        if(!infoQuestQuestion){
+            return res.status(404).send(
                 {
-                    message: "Post is not Valid anymore, Can't interact :|"
+                    message: "Sorry, this post has been deleted by the user who created it."
                 }
             );
         }
