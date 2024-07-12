@@ -1,5 +1,7 @@
 const User = require("../models/UserModel");
 const { UserListSchema, CategorySchema, PostSchema } = require("../models/UserList");
+const { MONGO_URI_MAIN, MONGO_URI_STAG, MONGO_URI_DEV } = require("../config/env");
+const { MongoClient } = require('mongodb');
 
 // const excep = async (req, res) => {
 //   try {
@@ -148,6 +150,114 @@ const createUserListForAllUsers = async (req, res) => {
     }
 }
 
+const resetDatabase = async (dbURL) => {
+    const client = new MongoClient(dbURL, { useNewUrlParser: true, useUnifiedTopology: true });
+    const excludedCollections = [
+        'cities',
+        'companies',
+        'degreesandfields',
+        'educations',
+        'jobtitles',
+        'questtopics',
+        'treasuries'
+    ];
+
+    try {
+        await client.connect();
+        const db = client.db();
+        const collections = await db.collections();
+
+        // Drop collections not in the excluded list
+        for (let collection of collections) {
+            if (!excludedCollections.includes(collection.collectionName)) {
+                await collection.drop();
+            }
+        }
+
+        // Update the 'amount' field in the 'treasuries' collection
+        const treasuriesCollection = db.collection('treasuries');
+        await treasuriesCollection.updateOne({}, { $set: { amount: 10000000 } });
+
+    } catch (error) {
+        console.error(`Error resetting database at ${dbURL}: ${error.message}`);
+        throw error;
+    } finally {
+        await client.close();
+    }
+};
+
+const resetMainDatabase = async () => {
+    try {
+        // const mainURL = MONGO_URI_MAIN;
+        // await resetDatabase(mainURL);
+        const localURL = "mongodb://0.0.0.0:27017/localDBName";
+        await resetDatabase(localURL);
+    } catch (error) {
+        console.error(`Error resetting main database: ${error.message}`);
+        throw new Error(`Error resetting main database: ${error.message}`);
+    }
+};
+
+const resetStagingDatabase = async () => {
+    try {
+        // const stagURL = MONGO_URI_STAG;
+        // await resetDatabase(stagURL);
+        const localURL = "mongodb://0.0.0.0:27017/localDBName";
+        await resetDatabase(localURL);
+    } catch (error) {
+        console.error(`Error resetting staging database: ${error.message}`);
+        throw new Error(`Error resetting staging database: ${error.message}`);
+    }
+};
+
+const resetDevelopmentDatabase = async () => {
+    try {
+        // const devURL = MONGO_URI_DEV;
+        // await resetDatabase(devURL);
+        const localURL = "mongodb://0.0.0.0:27017/localDBName";
+        await resetDatabase(localURL);
+    } catch (error) {
+        console.error(`Error resetting development database: ${error.message}`);
+        throw new Error(`Error resetting development database: ${error.message}`);
+    }
+};
+
+const dbReset = async (req, res) => {
+    try {
+        const { db } = req.body;  // Assuming db is coming from the request body
+        const validDbs = ["main", "stag", "dev"];
+        
+        if (!validDbs.includes(db)) {
+            return res.status(404).json({ message: `DB ${db} does not exist` });
+        }
+
+        switch (db) {
+            case "main":
+                // Logic for resetting the main database
+                await resetMainDatabase();
+                break;
+            case "stag":
+                // Logic for resetting the staging database
+                await resetStagingDatabase();
+                break;
+            case "dev":
+                // Logic for resetting the development database
+                await resetDevelopmentDatabase();
+                break;
+            default:
+                return res.status(404).json({ message: `DB ${db} does not exist` });
+        }
+
+        res.status(200).json({ message: `Database ${db} reset successfully` });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({
+            message: `An error occurred: ${error.message}`,
+        });
+    }
+};
+
 module.exports = {
     createUserListForAllUsers,
+    dbReset,
 };

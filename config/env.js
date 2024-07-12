@@ -42,4 +42,7 @@ module.exports = {
     PAYPAL_SECRET_KEY: process.env.PAYPAL_SECRET_KEY,
     rpID: process.env.rpID,
     ALGORITHM: process.env.ALGORITHM,
+    MONGO_URI_MAIN: process.env.MONGO_URI_MAIN,
+    MONGO_URI_STAG: process.env.MONGO_URI_STAG,
+    MONGO_URI_DEV: process.env.MONGO_URI_DEV,
   };
