@@ -45,4 +45,5 @@ module.exports = {
     MONGO_URI_MAIN: process.env.MONGO_URI_MAIN,
     MONGO_URI_STAG: process.env.MONGO_URI_STAG,
     MONGO_URI_DEV: process.env.MONGO_URI_DEV,
+    FE_URLS: process.env.FE_URLS,
   };

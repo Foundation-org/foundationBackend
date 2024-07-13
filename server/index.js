@@ -12,6 +12,7 @@ const {
   BASE_PORT,
   FRONTEND_URL,
   FRONTEND_URL_1,
+  FE_URLS,
   rpID,
 } = require("../config/env");
 const passport = require("passport");
@@ -58,10 +59,27 @@ dotenv.config();
 
 cronIntialize();
 
+// app.use(
+//   cors({
+//     origin: FRONTEND_URL.split(","),
+//     // methods: "GET,POST,PUT,DELETE",
+//     credentials: true,
+//   })
+// );
+
+// Parse the FE_URLS environment variable to an array
+const ORIGINS = JSON.parse(FE_URLS);
+
+// CORS middleware setup
 app.use(
   cors({
-    origin: FRONTEND_URL.split(","),
-    // methods: "GET,POST,PUT,DELETE",
+    origin: function (origin, callback) {
+      if (ORIGINS.includes(origin) || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
