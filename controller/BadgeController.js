@@ -260,7 +260,7 @@ const addContactBadge = async (req, res) => {
       const userBadges = User.badges;
       let updatedUserBadges;
       if (User.isPasswordEncryption) {
-        if (!req.body.eyk)
+        if (!eyk)
           throw new Error(
             "No eyk Provided in request body, Request can't be proceeded."
           );
@@ -1418,7 +1418,7 @@ const removePersonalBadge = async (req, res) => {
 
     // Find if badgeName already exists in badgeRemoved array
     const badgeIndex = User.badgeRemoved.findIndex(
-      (b) => b.badgeName === req.body.badgeName
+      (b) => b.badgeName === req.body.badgeName && b.type === "personal"
     );
 
     if (badgeIndex !== -1) {
@@ -1485,7 +1485,7 @@ const removeWeb3Badge = async (req, res) => {
       User.badgeRemoved.push({
         badgeName: req.body.badgeName,
         deletedAt: new Date(),
-        type: "web3",
+        type: "etherium-wallet",
       });
     }
 
