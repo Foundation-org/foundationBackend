@@ -1449,10 +1449,12 @@ const removeWeb3Badge = async (req, res) => {
     if (!User) throw new Error("No such User!");
 
     const userBadges = User.badges;
-    const updatedUserBadges =
-      userBadges?.filter(
-        (badge) => !badge?.web3?.hasOwnProperty(req.body.type)
-      ) || [];
+    const updatedUserBadges = userBadges.filter((badge) => {
+      if (!badge.web3) {
+        return badge;
+      }
+    });
+
     // Update the user badges
 
     // Create Ledger
