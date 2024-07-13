@@ -2337,6 +2337,7 @@ const addPasswordBadgesUpdate = async (req, res) => {
         user.badgeRemoved.push({
           badgeName: req.body.badgeName,
           deletedAt: new Date(),
+          type: "password",
         });
       }
       await user.save();
