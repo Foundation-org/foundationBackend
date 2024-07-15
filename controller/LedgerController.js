@@ -29,7 +29,7 @@ const getById = async (req, res) => {
       //   { txTo: { $regex: "DAO Treasury", $options: "i" } }    // Case-insensitive match for txTo
       // ]
     } else {
-      filterObj.uuid = uuid
+      filterObj.uuid = uuid;
     }
     const skip = (page - 1) * limit;
 
@@ -87,7 +87,7 @@ const search = async (req, res) => {
     const skip = (page - 1) * limit;
     const searchTerm = term || "";
 
-    if(txAuth){
+    if (txAuth) {
       const ledger = await Ledgers.find({
         txAuth,
         $or: [
@@ -96,10 +96,10 @@ const search = async (req, res) => {
           { txData: { $regex: searchTerm, $options: "i" } },
         ],
       })
-        .sort(sort === "newest" ? { _id: 1 } : { _id: -1 })
+        .sort(sort === "newest" ? { _id: -1 } : { _id: 1 })
         .skip(skip)
         .limit(parseInt(limit));
-  
+
       const totalCount = await Ledgers.countDocuments({
         txAuth,
         $or: [
@@ -111,7 +111,7 @@ const search = async (req, res) => {
       const pageCount = Math.ceil(totalCount / limit);
       //console.log(pageCount);
       //console.log(totalCount);
-  
+
       res.status(200).json({
         data: ledger,
         pageCount,
@@ -129,7 +129,7 @@ const search = async (req, res) => {
         .sort(sort === "newest" ? { _id: 1 } : { _id: -1 })
         .skip(skip)
         .limit(parseInt(limit));
-  
+
       const totalCount = await Ledgers.countDocuments({
         uuid,
         $or: [
@@ -141,13 +141,12 @@ const search = async (req, res) => {
       const pageCount = Math.ceil(totalCount / limit);
       //console.log(pageCount);
       //console.log(totalCount);
-  
+
       res.status(200).json({
         data: ledger,
         pageCount,
         totalCount,
       });
-
     }
   } catch (error) {
     console.error(error);
@@ -173,7 +172,7 @@ const remove = async (req, res) => {
 const getLstActAndEmailForAllUsers = async () => {
   try {
     //console.log("getLstActAndEmailForAllUsers")
-    
+
     // Calculate the date 7 days ago
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -183,31 +182,38 @@ const getLstActAndEmailForAllUsers = async () => {
       {
         $group: {
           _id: "$uuid",
-          lastActiveTime: { $max: "$updatedAt" }
-        }
+          lastActiveTime: { $max: "$updatedAt" },
+        },
       },
       {
         $match: {
-          lastActiveTime: { $lte: sevenDaysAgo }
-        }
-      }
+          lastActiveTime: { $lte: sevenDaysAgo },
+        },
+      },
     ]);
 
     // Fetch user emails from the users table for the filtered UUIDs
-    const usersWithEmails = await Users.find({ uuid: { $in: filteredUUIDs.map(item => item._id) } }, { uuid: 1, email: 1 });
+    const usersWithEmails = await Users.find(
+      { uuid: { $in: filteredUUIDs.map((item) => item._id) } },
+      { uuid: 1, email: 1 }
+    );
 
     // Create a map to store email for each UUID
-    const uuidToEmailMap = new Map(usersWithEmails.map(user => [user.uuid, user.email]));
+    const uuidToEmailMap = new Map(
+      usersWithEmails.map((user) => [user.uuid, user.email])
+    );
 
     // Filter out objects where email is not found or contains '@guest.com'
-    const finalFilteredUUIDs = filteredUUIDs.filter(item => {
-      const email = uuidToEmailMap.get(item._id);
-      return email && !email.includes('@guest.com');
-    }).map(item => ({
-      uuid: item._id,
-      lastActiveTime: item.lastActiveTime,
-      email: uuidToEmailMap.get(item._id)
-    }));
+    const finalFilteredUUIDs = filteredUUIDs
+      .filter((item) => {
+        const email = uuidToEmailMap.get(item._id);
+        return email && !email.includes("@guest.com");
+      })
+      .map((item) => ({
+        uuid: item._id,
+        lastActiveTime: item.lastActiveTime,
+        email: uuidToEmailMap.get(item._id),
+      }));
 
     if (finalFilteredUUIDs.length > 0) {
       // SES configuration
@@ -223,37 +229,39 @@ const getLstActAndEmailForAllUsers = async () => {
       const sesClient = new AWS.SES(SES_CONFIG);
 
       // Iterate over each email and send an email
-      await Promise.all(finalFilteredUUIDs.map(async (item) => {
-        const params = {
-          Source: process.env.AWS_SES_SENDER,
-          Destination: {
-            // ToAddresses: [item.email],
-            ToAddresses: ['sameer192.official@gmail.com'],
-          },
-          Message: {
-            Body: {
-              Html: {
-                Charset: "UTF-8",
-                Data: `You are inactive from the last seven days, Click <a href = "https://on.foundation/">here</a> to visit your app.`,
+      await Promise.all(
+        finalFilteredUUIDs.map(async (item) => {
+          const params = {
+            Source: process.env.AWS_SES_SENDER,
+            Destination: {
+              // ToAddresses: [item.email],
+              ToAddresses: ["sameer192.official@gmail.com"],
+            },
+            Message: {
+              Body: {
+                Html: {
+                  Charset: "UTF-8",
+                  Data: `You are inactive from the last seven days, Click <a href = "https://on.foundation/">here</a> to visit your app.`,
+                },
+                Text: {
+                  Charset: "UTF-8",
+                  Data: "Inactivity",
+                },
               },
-              Text: {
+              Subject: {
                 Charset: "UTF-8",
                 Data: "Inactivity",
               },
             },
-            Subject: {
-              Charset: "UTF-8",
-              Data: "Inactivity",
-            },
-          },
-        };
-        try {
-          await sesClient.sendEmail(params).promise();
-          //console.log(`Email has been sent to ${item.email}`);
-        } catch (error) {
-          console.error(`Error sending email to ${item.email}:`, error);
-        }
-      }));
+          };
+          try {
+            await sesClient.sendEmail(params).promise();
+            //console.log(`Email has been sent to ${item.email}`);
+          } catch (error) {
+            console.error(`Error sending email to ${item.email}:`, error);
+          }
+        })
+      );
 
       // Send the response after all emails have been sent
       // res.json({ lastActiveTimes: finalFilteredUUIDs });
@@ -267,10 +275,12 @@ const getLstActAndEmailForAllUsers = async () => {
     //console.log('Completed==============')
   } catch (error) {
     // If an error occurs during the database query, send an error response
-    console.error('Error occurred while fetching last active times for all users:', error);
+    console.error(
+      "Error occurred while fetching last active times for all users:",
+      error
+    );
   }
 };
-
 
 module.exports = {
   create,
@@ -278,5 +288,5 @@ module.exports = {
   getAll,
   search,
   remove,
-  getLstActAndEmailForAllUsers
+  getLstActAndEmailForAllUsers,
 };
