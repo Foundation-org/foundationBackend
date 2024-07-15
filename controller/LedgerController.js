@@ -126,7 +126,7 @@ const search = async (req, res) => {
           { txData: { $regex: searchTerm, $options: "i" } },
         ],
       })
-        .sort(sort === "newest" ? { _id: 1 } : { _id: -1 })
+        .sort(sort === "newest" ? { _id: -1 } : { _id: 1 })
         .skip(skip)
         .limit(parseInt(limit));
 
