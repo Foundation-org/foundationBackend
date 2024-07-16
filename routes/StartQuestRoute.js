@@ -5,6 +5,7 @@ const StartQuestController = require("../controller/StartQuestController");
 // middleware
 const protect = require("../middleware/protect");
 const isUrlSharedPostValidToInteract = require("../middleware/isUrlSharedPostValidToInteract");
+const isGuest = require("../middleware/isGuest");
 
 /**
  * @swagger
@@ -40,6 +41,7 @@ router.post("/updateViolationCounter/:uuid",
 router.post(
   "/createStartQuest",
   isUrlSharedPostValidToInteract,
+  isGuest,
   /**
    * @swagger
    * /startQuest/createStartQuest:
@@ -64,6 +66,7 @@ router.post(
 );
 
 router.post("/updateChangeAnsStartQuest",
+  isGuest,
   /**
    * @swagger
    * /startQuest/updateChangeAnsStartQuest:

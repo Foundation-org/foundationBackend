@@ -7,6 +7,7 @@ const protect = require("../middleware/protect");
 const socialProtect = require("../middleware/socialProtect");
 const { uploadSingle } = require("../middleware/uploadSingle");
 const isUrlSharedPostValidToInteract = require("../middleware/isUrlSharedPostValidToInteract");
+const isGuest = require("../middleware/isGuest");
 
 /**
  * @swagger
@@ -68,6 +69,7 @@ router.post(
 
 router.post(
   "/userQuestSetting/update",
+  isGuest,
   /**
    * @swagger
    * /userQuestSetting/update:
@@ -94,6 +96,7 @@ router.post(
 router.post(
   "/userQuestSetting/link",
   isUrlSharedPostValidToInteract,
+  isGuest,
   /**
    * @swagger
    * /userQuestSetting/link:

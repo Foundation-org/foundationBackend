@@ -6,6 +6,7 @@ const BookmarkQuestController = require("../controller/BookmarkQuestController")
 const protect = require("../middleware/protect");
 const cache = require("../middleware/cache");
 const isUrlSharedPostValidToInteract = require("../middleware/isUrlSharedPostValidToInteract");
+const isGuest = require("../middleware/isGuest");
 
 /**
  * @swagger
@@ -17,6 +18,7 @@ const isUrlSharedPostValidToInteract = require("../middleware/isUrlSharedPostVal
 router.post(
   "/createBookmarkQuest",
   isUrlSharedPostValidToInteract,
+  isGuest,
   /**
    * @swagger
    * /bookmarkQuest/createBookmarkQuest:
