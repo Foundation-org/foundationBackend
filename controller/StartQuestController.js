@@ -1509,6 +1509,47 @@ const updateChangeAnsStartQuest = async (req, res) => {
       { $inc: { contentionsGiven: contentionGivenCounter } }
     );
 
+    if (req.body.addedAnswer !== "") {
+      const txID2 = crypto.randomBytes(11).toString("hex");
+
+      // Create Ledger
+      await createLedger({
+        uuid: req.body.uuid,
+        txUserAction: "postOptionAdded",
+        txID: txID2,
+        txAuth: "User",
+        txFrom: req.body.questForeignKey,
+        txTo: "dao",
+        txAmount: "0",
+        txData: req.body.questForeignKey,
+        // txDescription : "User adds an answer to a quest"
+      });
+      // Create Ledger
+      await createLedger({
+        uuid: req.body.uuid,
+        txUserAction: "postOptionAdded",
+        txID: txID2,
+        txAuth: "DAO",
+        txFrom: "DAO Treasury",
+        txTo: req.body.uuid,
+        txAmount: QUEST_OPTION_ADDED_AMOUNT,
+        txData: req.body.questForeignKey,
+        // txDescription : "Incentive for adding answer to quest"
+      });
+      // Decrement the Treasury
+      await updateTreasury({ amount: QUEST_OPTION_ADDED_AMOUNT, dec: true });
+      // Increment the UserBalance
+      await updateUserBalance({
+        uuid: req.body.uuid,
+        amount: QUEST_OPTION_ADDED_AMOUNT,
+        inc: true,
+      });
+      const userEarned = await User.findOne({ uuid: req.body.uuid });
+      userEarned.fdxEarned = userEarned.fdxEarned + QUEST_OPTION_ADDED_AMOUNT;
+      userEarned.rewardSchedual.postParticipationFdx = userEarned.rewardSchedual.postParticipationFdx + QUEST_OPTION_ADDED_AMOUNT;
+      await userEarned.save();
+    }
+
     let startQuestAnswersSelected = startQuestQuestion?.data;
     let responseMsg = "";
 
