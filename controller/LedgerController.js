@@ -202,6 +202,20 @@ const deleteGuestOver30Days = async () => {
         txAmount: item.balance,
         txData: item.uuid,
       });
+
+      await updateTreasury({
+        amount: item.balance,
+        inc: true,
+      });
+      // Decrement the UserBalance
+      await updateUserBalance({
+        uuid: req.body.uuid,
+        amount: item.balance,
+        dec: true,
+      });
+      const userSpent = await Users.findOne({ uuid: item.uuid });
+      userSpent.fdxSpent = userSpent.fdxSpent + item.balance;
+      await userSpent.save();
     });
 
     const result = await Users.deleteMany({
