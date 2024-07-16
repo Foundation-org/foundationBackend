@@ -508,6 +508,12 @@ const update = async (req, res) => {
     // To check the record exist
     if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
 
+    const isPostSuppressed = await InfoQuestQuestions.findOne({
+      _id: payload.questForeignKey,
+      suppressed: true
+    })
+    if(isPostSuppressed) throw new Error("Post is Suppressed cant be unhide.");
+
     if (userQuestSettingExist && payload.hidden === true) {
       // Document found, update hiddenTime and save
       userQuestSettingExist.hiddenTime = new Date();
