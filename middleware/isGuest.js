@@ -5,8 +5,8 @@ const UserModel = require("../models/UserModel");
 const isGuest = async (req, res, next) => {
     try {
         let uuid;
-        if(req.cookie.uuid){
-            uuid = req.cookie.uuid;
+        if(req.cookies.uuid){
+            uuid = req.cookies.uuid;
         }
         else if (req.body.uuid){
             uuid = req.body.uuid;
@@ -23,7 +23,7 @@ const isGuest = async (req, res, next) => {
         if(isUserGuest){
             return res.status(403).send(
                 {
-                    message: "Unfortuanatly you are using guest account, Guest is not allowed to perform such actions. Please Join Foundation.",
+                    message: `Please Create an Account to unlock this feature`,
                 }
             );
         }
