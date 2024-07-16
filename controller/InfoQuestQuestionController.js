@@ -133,11 +133,15 @@ const createInfoQuestQuest = async (req, res) => {
 
 const deleteInfoQuestQuest = async (req, res) => {
   try {
-
     // Treasury Check
     const checkTreasury = await Treasury.findOne();
-    if (!checkTreasury) return res.status(404).json({ message: "Treasury is not found." });
-    if (Math.round(checkTreasury.amount) <= QUEST_CREATED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({ message: "Treasury is not enough." })
+    if (!checkTreasury)
+      return res.status(404).json({ message: "Treasury is not found." });
+    if (
+      Math.round(checkTreasury.amount) <= QUEST_CREATED_AMOUNT ||
+      Math.round(checkTreasury.amount) <= 0
+    )
+      return res.status(404).json({ message: "Treasury is not enough." });
 
     const infoQuest = await InfoQuestQuestions.findOne({
       _id: req.params.questId,
@@ -434,10 +438,10 @@ const getAllQuestsWithOpenInfoQuestStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-              ? { lastInteractedAt: -1 }
-              : req.body.sort === "Most Popular"
-                ? { interactingCounter: -1 }
-                : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -613,10 +617,10 @@ const getAllQuestsWithAnsweredStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-              ? { lastInteractedAt: -1 }
-              : req.body.sort === "Most Popular"
-                ? { interactingCounter: -1 }
-                : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -876,10 +880,10 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : sort === "Most Popular"
-              ? { interactingCounter: -1 }
-              : "createdAt"
+          ? { lastInteractedAt: -1 }
+          : sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
       )
       .skip(skip)
       .limit(pageSize)
@@ -897,21 +901,21 @@ const getAllQuestsWithDefaultStatus = async (req, res) => {
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
       ? [
-        Object.fromEntries(
-          Object.entries(item.selectedPercentage[0]).sort(
-            (a, b) => parseInt(b[1]) - parseInt(a[1])
-          )
-        ),
-      ]
+          Object.fromEntries(
+            Object.entries(item.selectedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
       : [],
     contendedPercentage: item?.contendedPercentage?.[0]
       ? [
-        Object.fromEntries(
-          Object.entries(item.contendedPercentage[0]).sort(
-            (a, b) => parseInt(b[1]) - parseInt(a[1])
-          )
-        ),
-      ]
+          Object.fromEntries(
+            Object.entries(item.contendedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
       : [],
   }));
   // Query the database with skip and limit options to get questions for the requested page
@@ -961,6 +965,13 @@ const getQuestsAll = async (req, res) => {
   let allQuestions = [];
   let filterObj = {};
   let totalQuestionsCount;
+
+  if (sort === "Most Popular") {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    console.log("date", sevenDaysAgo);
+    filterObj.createdAt = { $gte: sevenDaysAgo };
+  }
 
   if (filter === "true") {
     //console.log("filter");
@@ -1195,10 +1206,10 @@ const getQuestsAll = async (req, res) => {
       sort === "Newest First"
         ? { createdAt: -1, _id: 1 }
         : sort === "Last Updated"
-          ? { lastInteractedAt: -1, _id: 1 }
-          : sort === "Most Popular"
-            ? { interactingCounter: -1, _id: 1 }
-            : { createdAt: -1, _id: 1 }
+        ? { lastInteractedAt: -1, _id: 1 }
+        : sort === "Most Popular"
+        ? { interactingCounter: -1, _id: 1 }
+        : { createdAt: -1, _id: 1 }
     );
     // query = query.sort(
     //   sort === "Newest First"
@@ -1390,21 +1401,21 @@ const getQuestsAll = async (req, res) => {
     ...item._doc,
     selectedPercentage: item?.selectedPercentage?.[0]
       ? [
-        Object.fromEntries(
-          Object.entries(item.selectedPercentage[0]).sort(
-            (a, b) => parseInt(b[1]) - parseInt(a[1])
-          )
-        ),
-      ]
+          Object.fromEntries(
+            Object.entries(item.selectedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
       : [],
     contendedPercentage: item?.contendedPercentage?.[0]
       ? [
-        Object.fromEntries(
-          Object.entries(item.contendedPercentage[0]).sort(
-            (a, b) => parseInt(b[1]) - parseInt(a[1])
-          )
-        ),
-      ]
+          Object.fromEntries(
+            Object.entries(item.contendedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
       : [],
   }));
   // Query the database with skip and limit options to get questions for the requested page
@@ -1784,10 +1795,10 @@ const getAllQuestsWithResult = async (req, res) => {
         sort === "Newest First"
           ? { createdAt: -1 }
           : sort === "Last Updated"
-            ? { lastInteractedAt: -1 }
-            : sort === "Most Popular"
-              ? { interactingCounter: -1 }
-              : "createdAt"
+          ? { lastInteractedAt: -1 }
+          : sort === "Most Popular"
+          ? { interactingCounter: -1 }
+          : "createdAt"
       ) // Sort by createdAt field in descending order
       .skip(skip)
       .limit(pageSize);
@@ -1832,8 +1843,12 @@ const getQuestById = async (req, res) => {
 
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
-      selectedPercentage: item.selectedPercentage ? item.selectedPercentage : [],
-      contendedPercentage: item.contendedPercentage ? item.contendedPercentage : [],
+      selectedPercentage: item.selectedPercentage
+        ? item.selectedPercentage
+        : [],
+      contendedPercentage: item.contendedPercentage
+        ? item.contendedPercentage
+        : [],
       userQuestSetting: item.userQuestSetting,
     }));
 
@@ -2119,10 +2134,10 @@ const getAllQuestsWithCompletedStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-              ? { lastInteractedAt: -1 }
-              : req.body.sort === "Most Popular"
-                ? { interactingCounter: -1 }
-                : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
@@ -2303,10 +2318,10 @@ const getAllQuestsWithChangeAnsStatus = async (req, res) => {
           req.body.sort === "Newest First"
             ? { createdAt: -1 }
             : req.body.sort === "Last Updated"
-              ? { lastInteractedAt: -1 }
-              : req.body.sort === "Most Popular"
-                ? { interactingCounter: -1 }
-                : "createdAt"
+            ? { lastInteractedAt: -1 }
+            : req.body.sort === "Most Popular"
+            ? { interactingCounter: -1 }
+            : "createdAt"
         )
         .populate("getUserBadge", "badges");
     }
