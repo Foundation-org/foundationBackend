@@ -286,7 +286,8 @@ const constraintForUniqueQuestion = async (req, res) => {
     // Check for a matching question in a case-insensitive manner
     const matchingQuestion = await InfoQuestQuestions.findOne({
       Question: { $regex: new RegExp(`^${escapedQuery}$`, "i") },
-    });
+      suppressed: { $ne: true }
+    });    
 
     if (matchingQuestion && matchingQuestion?.isActive) {
       // If a matching question is found, it's not unique
