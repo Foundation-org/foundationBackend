@@ -1840,34 +1840,39 @@ const userInfo = async (req, res) => {
     const otherHidingOurQuestsCount =
       result.length > 0 ? result[0].totalCount : 0;
 
-    const suppressedPosts = await UserQuestSetting.aggregate([
-      {
-        $match: {
-          hidden: true,
-          questForeignKey: { $in: questsIdsArray },
-          uuid: { $ne: userUuid },
-        },
-      },
-      {
-        $group: {
-          _id: {
-            questId: "$questForeignKey",
-            hiddenMessage: "$hiddenMessage",
-          },
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $match: {
-          count: { $gt: 1 },
-        },
-      },
-      {
-        $count: "suppressedPostCount",
-      },
-    ]);
-    const suppressQuestsCount =
-      suppressedPosts.length > 0 ? suppressedPosts[0].suppressedPostCount : 0;
+    // const suppressedPosts = await UserQuestSetting.aggregate([
+    //   {
+    //     $match: {
+    //       hidden: true,
+    //       questForeignKey: { $in: questsIdsArray },
+    //       uuid: { $ne: userUuid },
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: {
+    //         questId: "$questForeignKey",
+    //         hiddenMessage: "$hiddenMessage",
+    //       },
+    //       count: { $sum: 1 },
+    //     },
+    //   },
+    //   {
+    //     $match: {
+    //       count: { $gt: 1 },
+    //     },
+    //   },
+    //   {
+    //     $count: "suppressedPostCount",
+    //   },
+    // ]);
+    // const suppressQuestsCount =
+    //   suppressedPosts.length > 0 ? suppressedPosts[0].suppressedPostCount : 0;
+
+    const suppressQuestsCount = await InfoQuestQuestions.countDocuments({
+      uuid: userUuid,
+      suppressed: true
+    })
 
     // Total shared lists count for a specific user
     const totalSharedListsCount = await UserListSchema.aggregate([
