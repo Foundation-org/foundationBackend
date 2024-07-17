@@ -1972,7 +1972,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
         timestamp: new Date().toISOString(),
       };
 
-      desiredArray.splice(0, 0, notification);
+      desiredArray.splice(1, 0, notification);
     }
 
     res.status(200).json({
