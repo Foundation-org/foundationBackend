@@ -70,11 +70,11 @@ async function handleRequest(
       userMessage = userMessage.replace(/&/g, "and");
     }
 
-    if (callType == 1 || callType == 2) {
+    if (callType == 1 || callType == 2 || callType == 10) {
       userMessage = removeTrailingPeriods(userMessage);
       userMessage = removeTrailingQuestionMarks(userMessage);
     }
-    if (callType == 2) {
+    if (callType == 2 || callType == 10) {
       isAllNumbers(userMessage) && { message: userMessage, status: "OK" };
     }
 
@@ -127,7 +127,7 @@ function checkResponse(responseData, userMessage, callType, req, res) {
   let status = "OK";
 
   let found;
-  // if (callType == 2) {
+  // if (callType == 2 || callType == 10) {
   //   filtered = removeQuotes(filtered);
   //   console.log("fitered", filtered);
   // }
@@ -144,7 +144,7 @@ function checkResponse(responseData, userMessage, callType, req, res) {
     status = "VIOLATION";
   }
 
-  if (callType == 2) {
+  if (callType == 2 || callType == 10) {
     filtered = removeCorrected(filtered);
     if (filtered == "Correct.") filtered = userMessage;
     filtered = capitalizeFirstLetter(filtered);
