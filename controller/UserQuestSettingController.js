@@ -529,7 +529,10 @@ const update = async (req, res) => {
       _id: payload.questForeignKey,
       suppressed: true,
     });
-    if (isPostSuppressed) throw new Error("Post is Suppressed cant be unhide.");
+    if (isPostSuppressed)
+      throw new Error(
+        "Unfortunately, this post has been suppressed and cannot be unhidden."
+      );
 
     if (userQuestSettingExist && payload.hidden === true) {
       // Document found, update hiddenTime and save
