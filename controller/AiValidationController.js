@@ -127,9 +127,10 @@ function checkResponse(responseData, userMessage, callType, req, res) {
   let status = "OK";
 
   let found;
-  if (callType == 2) {
-    filtered = removeQuotes(filtered);
-  }
+  // if (callType == 2) {
+  //   filtered = removeQuotes(filtered);
+  //   console.log("fitered", filtered);
+  // }
 
   found = checkViolationInSentence(filtered);
 
