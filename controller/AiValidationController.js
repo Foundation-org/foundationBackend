@@ -149,7 +149,7 @@ function checkResponse(responseData, userMessage, callType, req, res) {
     filtered = capitalizeFirstLetter(filtered);
     filtered = removeTrailingPeriods(filtered);
     filtered = removeTrailingQuestionMarks(filtered);
-    filtered = extractAndSanitizeDollar(filtered);
+    // filtered = extractAndSanitizeDollar(filtered);
     // filtered = numberToWords(filtered)
   }
 
