@@ -469,8 +469,12 @@ const create = async (req, res) => {
                 item._id === "Needs More Options" &&
                 item.count >= condition.minCount
               ) {
-                infoQuestQuestion.usersAddTheirAns = true;
-                await infoQuestQuestion.save();
+                await InfoQuestQuestions.findOneAndUpdate(
+                  {
+                    _id: payload.questForeignKey,
+                  },
+                  { $set: { usersAddTheirAns: true } }
+                ).exec();
               } else if (
                 item._id === condition.id &&
                 item.count >= condition.minCount &&
@@ -597,8 +601,12 @@ const update = async (req, res) => {
               item._id === "Needs More Options" &&
               item.count >= condition.minCount
             ) {
-              infoQuestQuestion.usersAddTheirAns = true;
-              await infoQuestQuestion.save();
+              await InfoQuestQuestions.findOneAndUpdate(
+                {
+                  _id: payload.questForeignKey,
+                },
+                { $set: { usersAddTheirAns: true } }
+              ).exec();
             } else if (
               item._id === condition.id &&
               item.count >= condition.minCount &&
