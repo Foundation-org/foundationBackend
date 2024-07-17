@@ -5,10 +5,6 @@ const nodeHtmlToImage = require("node-html-to-image");
 const { indexHTML, } = require("./templates/indexHTML");
 dotenv.config();
 
-// EJS views Setting
-app.set('view engine', 'ejs');
-app.set('views', './views');
-
 // Connect to database
 connectDB();
 
