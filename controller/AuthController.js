@@ -238,8 +238,8 @@ const signUpUserBySocialLogin = async (req, res) => {
     // }
     // Treasury Check
     const checkTreasury = await Treasury.findOne();
-    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
-    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+    if (!checkTreasury) return res.status(404).json({ message: "Treasury is not found." });
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({ message: "Treasury is not enough." })
     // Check Google Account
     const payload = req.body;
     // Check if email already exist
@@ -397,8 +397,8 @@ const signUpUserBySocialBadges = async (req, res) => {
   try {
     // Treasury Check
     const checkTreasury = await Treasury.findOne();
-    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
-    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+    if (!checkTreasury) return res.status(404).json({ message: "Treasury is not found." });
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({ message: "Treasury is not enough." })
     // Check Google Account
     const payload = req.body;
     // Check if email already exist
@@ -792,8 +792,8 @@ const signUpSocialGuestMode = async (req, res) => {
   try {
     // Treasury Check
     const checkTreasury = await Treasury.findOne();
-    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
-    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+    if (!checkTreasury) return res.status(404).json({ message: "Treasury is not found." });
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({ message: "Treasury is not enough." })
 
     const payload = req.body;
 
@@ -965,8 +965,8 @@ const signUpGuestBySocialBadges = async (req, res) => {
   try {
     // Treasury Check
     const checkTreasury = await Treasury.findOne();
-    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
-    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+    if (!checkTreasury) return res.status(404).json({ message: "Treasury is not found." });
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({ message: "Treasury is not enough." })
     const payload = req.body;
 
     let id;
@@ -1404,9 +1404,11 @@ const updateUserSettings = async (req, res) => {
       (req.body.email && !typeof req.body.emailNotifications === "boolean") ||
       (!req.body.email && typeof req.body.emailNotifications === "boolean")
     )
+    {
       throw new Error(
         "Please provide both email and emailNotifications for email"
       );
+    }
 
     if (req.body.email && typeof req.body.emailNotifications === "boolean") {
       const emailExists = await Email.findOne({
@@ -1414,7 +1416,7 @@ const updateUserSettings = async (req, res) => {
         userUuid: req.body.uuid,
       });
       if (!emailExists) {
-        res.status(403).json({
+        return res.status(403).json({
           message: `No Email Found Against the User.`,
         });
       } else {
@@ -1422,39 +1424,34 @@ const updateUserSettings = async (req, res) => {
           req.body.emailNotifications;
         await user.save();
         // Respond with updated user settings
-        res.status(200).json({
+        return res.status(200).json({
           message: {
             userSettings: user.userSettings,
             notificationSettings: user.notificationSettings,
           },
         });
       }
-    } else if (
-      typeof req.body.darkMode === "boolean" ||
-      typeof req.body.defaultSort === "boolean" ||
-      typeof req.body.systemNotifications === "boolean"
-    ) {
-      // Update user settings
-      user.userSettings.darkMode = req.body.darkMode;
-      user.userSettings.defaultSort = req.body.defaultSort;
-      user.notificationSettings.systemNotifications =
-        req.body.systemNotifications;
-      await user.save();
-
-      // Respond with updated user settings
-      res.status(200).json({
-        message: {
-          userSettings: user.userSettings,
-          notificationSettings: user.notificationSettings,
-        },
-      });
     }
+
+    user.userSettings.darkMode = req.body.darkMode ?? user.userSettings.darkMode;
+    user.userSettings.defaultSort = req.body.defaultSort ?? user.userSettings.defaultSort;
+    user.notificationSettings.systemNotifications = req.body.systemNotifications ?? user.notificationSettings.systemNotifications;
+    await user.save();
+
+    // Respond with updated user settings
+    res.status(200).json({
+      message: {
+        userSettings: user.userSettings,
+        notificationSettings: user.notificationSettings,
+      },
+    });
+
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
-      message: `An error occurred while updating user settings: ${error.message}`,
+      message: `An error occurred while updating user: ${error.message}`,
     });
-  }
+  }    
 };
 
 // const userInfo = async (req, res) => {
@@ -2192,9 +2189,8 @@ const sendVerifyEmailGuest = async (req, res) => {
     );
 
     // Step 3 - Email the user a unique verification link
-    const url = `${
-      FRONTEND_URL.split(",")[0]
-    }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${FRONTEND_URL.split(",")[0]
+      }/VerifyCode/?${verificationTokenFull}`;
     // console.log("url", url);
     // return res.status(200).json({ url });
 
@@ -2275,9 +2271,8 @@ const sendVerifyEmail = async (req, res) => {
     //console.log("verificationToken", verificationToken);
 
     // Step 3 - Email the user a unique verification link
-    const url = `${
-      FRONTEND_URL.split(",")[0]
-    }/VerifyCode/?${verificationTokenFull}`;
+    const url = `${FRONTEND_URL.split(",")[0]
+      }/VerifyCode/?${verificationTokenFull}`;
     // console.log("url", url);
     // return res.status(200).json({ url });
     // //console.log("url", url);
@@ -2475,8 +2470,8 @@ const verify = async (req, res) => {
   try {
     // Treasury Check
     const checkTreasury = await Treasury.findOne();
-    if (!checkTreasury) return res.status(404).json({message: "Treasury is not found."});
-    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({message: "Treasury is not enough."})
+    if (!checkTreasury) return res.status(404).json({ message: "Treasury is not found." });
+    if (Math.round(checkTreasury.amount) <= ACCOUNT_BADGE_ADDED_AMOUNT || Math.round(checkTreasury.amount) <= 0) return res.status(404).json({ message: "Treasury is not enough." })
     // Step 2 - Find user with matching ID
     const user = await User.findOne({ uuid: req.user.uuid }).exec();
     if (!user) {
@@ -2833,8 +2828,7 @@ const getFacebookUserInfo = async (req, res) => {
     // if token found
     // // Second Axios request to get user info using the access token
     const response = await axios.get(
-      `https://graph.facebook.com/v19.0/me?access_token=${
-        responseAccessToken.data.access_token
+      `https://graph.facebook.com/v19.0/me?access_token=${responseAccessToken.data.access_token
       }&fields=${"id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender,age_range,friends,link,birthday"}`,
       {
         // headers: {
