@@ -25,10 +25,9 @@ const QuestTopics = require("../models/QuestTopics");
 const OpenAI = require("openai");
 const openai = new OpenAI({ apiKey: OPEN_AI_KEY });
 
-
 const validation = async (req, res) => {
   const callType = req.params.callType;
-  if (callType >= 1 && callType <= 9) {
+  if (callType >= 1 && callType <= 10) {
     await handleRequest(
       req,
       res,
@@ -71,11 +70,11 @@ async function handleRequest(
       userMessage = userMessage.replace(/&/g, "and");
     }
 
-    if (callType == 1 || callType == 2) {
+    if (callType == 1 || callType == 2 || callType == 10) {
       userMessage = removeTrailingPeriods(userMessage);
       userMessage = removeTrailingQuestionMarks(userMessage);
     }
-    if (callType == 2) {
+    if (callType == 2 || callType == 10) {
       isAllNumbers(userMessage) && { message: userMessage, status: "OK" };
     }
 
@@ -89,7 +88,7 @@ async function handleRequest(
     const response = await axios.post(
       OPEN_AI_URL,
       {
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         // model: "gpt-3.5-turbo-1106",
         messages: [
           { role: "system", content: SYSTEM_MESSAGES },
@@ -128,9 +127,10 @@ function checkResponse(responseData, userMessage, callType, req, res) {
   let status = "OK";
 
   let found;
-  if (callType == 2) {
-    filtered = removeQuotes(filtered);
-  }
+  // if (callType == 2 || callType == 10) {
+  //   filtered = removeQuotes(filtered);
+  //   console.log("fitered", filtered);
+  // }
 
   found = checkViolationInSentence(filtered);
 
@@ -144,14 +144,14 @@ function checkResponse(responseData, userMessage, callType, req, res) {
     status = "VIOLATION";
   }
 
-  if (callType == 2) {
+  if (callType == 2 || callType == 10) {
     filtered = removeCorrected(filtered);
     if (filtered == "Correct.") filtered = userMessage;
     filtered = capitalizeFirstLetter(filtered);
     filtered = removeTrailingPeriods(filtered);
     filtered = removeTrailingQuestionMarks(filtered);
-    filtered = extractAndSanitizeDollar(filtered);
-    filtered = numberToWords(filtered)
+    // filtered = extractAndSanitizeDollar(filtered);
+    // filtered = numberToWords(filtered)
   }
 
   if (callType == 3) {
@@ -188,7 +188,7 @@ function handleErrorResponse(res, error) {
     .json({ message: "GPT Request Error", status: "ERROR" });
 }
 
-const moderator = async(req, res) => {
+const moderator = async (req, res) => {
   try {
     let userMessage = req.query.userMessage;
     const moderation = await openai.moderations.create({ input: userMessage });
@@ -206,13 +206,15 @@ const moderator = async(req, res) => {
       }
     }
 
-    res.status(200).json({ moderationRatingCount: Math.floor(maxScore.toFixed(2)) })
+    res
+      .status(200)
+      .json({ moderationRatingCount: Math.floor(maxScore.toFixed(2)) });
   } catch (error) {
     res.status(500).json({
       message: `An error occurred while create moderation: ${error.message}`,
     });
   }
-}
+};
 
 // new
 function checkNonsenseInSentence(sentence) {
@@ -246,5 +248,5 @@ function checkNonsenseInSentence(sentence) {
 
 module.exports = {
   validation,
-  moderator
+  moderator,
 };

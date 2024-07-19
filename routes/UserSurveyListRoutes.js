@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 // controller
 const UserSurveyListController = require("../controller/UserSurveyListController");
+const isGuest = require("../middleware/isGuest");
 
 /**
  * @swagger
@@ -46,6 +47,7 @@ router.get(
 
 router.post(
   "/userList/addCategoryInUserList",
+  isGuest,
   /**
    * @swagger
    * /userlists/userList/addCategoryInUserList:
@@ -448,6 +450,7 @@ router.post(
 
 router.post(
   "/userList/addPostInCategoryInUserList",
+  isGuest,
   /**
    * @swagger
    * /userlists/userList/addPostInCategoryInUserList:

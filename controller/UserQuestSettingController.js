@@ -12,7 +12,8 @@ const fs = require("fs");
 const { updateUserBalance } = require("../utils/userServices");
 const { updateTreasury } = require("../utils/treasuryService");
 const {
-  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT, POST_LINK
+  USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+  POST_LINK,
 } = require("../constants/index");
 const nodeHtmlToImage = require("node-html-to-image");
 const puppeteer = require("puppeteer");
@@ -117,7 +118,8 @@ const link = async (req, res) => {
     }
 
     const userSpent = await UserModel.findOne({ uuid: payload.uuid });
-    userSpent.feeSchedual.creatingPostLinkFdx = userSpent.feeSchedual.creatingPostLinkFdx + POST_LINK;
+    userSpent.feeSchedual.creatingPostLinkFdx =
+      userSpent.feeSchedual.creatingPostLinkFdx + POST_LINK;
     await userSpent.save();
 
     return res.status(201).json({
@@ -184,14 +186,14 @@ async function linkUserList(payload) {
     return {
       message: "UserQuestSetting link Created Successfully!",
       data: savedOrUpdatedUserQuestSetting,
-    }
+    };
   } catch (error) {
     console.error(error);
     res.status(500).json({
       message: ` An error occurred while create UserQuestSetting link: ${error.message}`,
     });
   }
-};
+}
 
 const customLink = async (req, res) => {
   try {
@@ -227,8 +229,11 @@ const customLink = async (req, res) => {
     // As link is unique Create Ledger and Proceed Normally like before with custom link.
     await ledgerDeductionPostLinkCustomized(payload.uuid);
 
-    user.fdxSpent = user.fdxSpent + USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
-    user.feeSchedual.creatingPostCustomLinkFdx = user.feeSchedual.creatingPostCustomLinkFdx + USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
+    user.fdxSpent =
+      user.fdxSpent + USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
+    user.feeSchedual.creatingPostCustomLinkFdx =
+      user.feeSchedual.creatingPostCustomLinkFdx +
+      USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
     await user.save();
 
     const userQuestSettingExist = await UserQuestSetting.findOne({
@@ -338,12 +343,13 @@ const status = async (req, res) => {
       return res.status(404).json({ message: "Share link not found" });
     }
     return res.status(200).json({
-      message: `Share link ${status === "Disable"
-        ? "Disabled"
-        : status === "Delete"
+      message: `Share link ${
+        status === "Disable"
+          ? "Disabled"
+          : status === "Delete"
           ? "Deleted"
           : "Enabled"
-        } Successfully`,
+      } Successfully`,
       data: updatedUserQuestSetting,
     });
   } catch (error) {
@@ -458,10 +464,21 @@ const create = async (req, res) => {
       if (suppression) {
         suppression.map((item) => {
           if (suppression) {
-            suppressConditions.forEach((condition) => {
+            suppressConditions.forEach(async (condition) => {
               if (
-                item._id === condition.id &&
+                item._id === "Needs More Options" &&
                 item.count >= condition.minCount
+              ) {
+                await InfoQuestQuestions.findOneAndUpdate(
+                  {
+                    _id: payload.questForeignKey,
+                  },
+                  { $set: { usersAddTheirAns: true } }
+                ).exec();
+              } else if (
+                item._id === condition.id &&
+                item.count >= condition.minCount &&
+                item._id !== "Needs More Options"
               ) {
                 isSuppressed = true;
               }
@@ -471,7 +488,7 @@ const create = async (req, res) => {
       }
 
       // // Properly setting the fields to update with $set
-      const resp = await InfoQuestQuestions.findOneAndUpdate(
+      await InfoQuestQuestions.findOneAndUpdate(
         { _id: payload.questForeignKey },
         {
           $set: {
@@ -507,6 +524,15 @@ const update = async (req, res) => {
     });
     // To check the record exist
     if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
+
+    const isPostSuppressed = await InfoQuestQuestions.findOne({
+      _id: payload.questForeignKey,
+      suppressed: true,
+    });
+    if (isPostSuppressed)
+      throw new Error(
+        "Unfortunately, this post has been suppressed and cannot be unhidden."
+      );
 
     if (userQuestSettingExist && payload.hidden === true) {
       // Document found, update hiddenTime and save
@@ -573,8 +599,22 @@ const update = async (req, res) => {
     if (suppression) {
       suppression.map((item) => {
         if (suppression) {
-          suppressConditions.forEach((condition) => {
-            if (item._id === condition.id && item.count >= condition.minCount) {
+          suppressConditions.forEach(async (condition) => {
+            if (
+              item._id === "Needs More Options" &&
+              item.count >= condition.minCount
+            ) {
+              await InfoQuestQuestions.findOneAndUpdate(
+                {
+                  _id: payload.questForeignKey,
+                },
+                { $set: { usersAddTheirAns: true } }
+              ).exec();
+            } else if (
+              item._id === condition.id &&
+              item.count >= condition.minCount &&
+              item._id !== "Needs More Options"
+            ) {
               isSuppressed = true;
             }
           });
@@ -583,7 +623,7 @@ const update = async (req, res) => {
     }
 
     // // Properly setting the fields to update with $set
-    const resp = await InfoQuestQuestions.findOneAndUpdate(
+    await InfoQuestQuestions.findOneAndUpdate(
       { _id: payload.questForeignKey },
       {
         $set: {
@@ -686,9 +726,7 @@ const ledgerEntryPostLinkCreated = async (uuid) => {
 
 const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
   try {
-
-
-    const txID = crypto.randomBytes(11).toString("hex")
+    const txID = crypto.randomBytes(11).toString("hex");
     // Create Ledger
     await createLedger({
       uuid: uuid,
@@ -727,7 +765,9 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
       dec: true,
     });
     const userSpent = await UserModel.findOne({ uuid: uuid });
-    userSpent.fdxSpent = userSpent.fdxSpent + USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
+    userSpent.fdxSpent =
+      userSpent.fdxSpent +
+      USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT;
     await userSpent.save();
   } catch (error) {
     console.error(error);
@@ -736,7 +776,6 @@ const ledgerDeductionPostLinkCustomized = async (uuid, userQuestSetting_id) => {
 
 const ledgerEntryAdded = async (uuid, questOwnerUuid) => {
   try {
-
     // User
     await createLedger({
       uuid: uuid,
@@ -767,8 +806,6 @@ const ledgerEntryAdded = async (uuid, questOwnerUuid) => {
 
 const ledgerEntryRemoved = async (uuid, questOwnerUuid) => {
   try {
-
-
     // User
     await createLedger({
       uuid: uuid,
@@ -960,9 +997,9 @@ async function sharedLinkDynamicImageUserList(link, questStartData) {
     console.error(error);
     return {
       message: `An error occurred on shaedLinkDynamicImage: ${error.message}`,
-    }
+    };
   }
-};
+}
 
 module.exports = {
   create,

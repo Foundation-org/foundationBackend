@@ -169,6 +169,66 @@ const remove = async (req, res) => {
   }
 };
 
+const deleteGuestOver30Days = async () => {
+  try {
+    const date30DaysAgo = new Date();
+    date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
+
+    // Find guest users who need to be deleted
+    const users = await Users.find({
+      role: "guest",
+      created: { $lte: date30DaysAgo },
+    });
+
+    users.map(async (item) => {
+      await createLedger({
+        uuid: item.uuid,
+        txUserAction: "accountExpiredGuest",
+        txID: crypto.randomBytes(11).toString("hex"),
+        txAuth: "User",
+        txFrom: item.uuid,
+        txTo: "dao",
+        txAmount: "0",
+        txData: item.uuid,
+      });
+
+      await createLedger({
+        uuid: item.uuid,
+        txUserAction: "accountExpiredGuest",
+        txID: crypto.randomBytes(11).toString("hex"),
+        txAuth: "DAO",
+        txFrom: item.uuid,
+        txTo: "DAO Treasury",
+        txAmount: item.balance,
+        txData: item.uuid,
+      });
+
+      await updateTreasury({
+        amount: item.balance,
+        inc: true,
+      });
+      // Decrement the UserBalance
+      await updateUserBalance({
+        uuid: req.body.uuid,
+        amount: item.balance,
+        dec: true,
+      });
+      const userSpent = await Users.findOne({ uuid: item.uuid });
+      userSpent.fdxSpent = userSpent.fdxSpent + item.balance;
+      await userSpent.save();
+    });
+
+    const result = await Users.deleteMany({
+      role: "guest",
+      created: { $lte: date30DaysAgo },
+    });
+
+    console.log("Guest Cron Results", result);
+  } catch (error) {
+    console.error(`Error deleting guests`, error);
+  }
+};
+
 const getLstActAndEmailForAllUsers = async () => {
   try {
     //console.log("getLstActAndEmailForAllUsers")
@@ -289,4 +349,5 @@ module.exports = {
   search,
   remove,
   getLstActAndEmailForAllUsers,
+  deleteGuestOver30Days,
 };
