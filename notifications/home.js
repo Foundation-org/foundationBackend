@@ -17,7 +17,7 @@ let notification2 = {
     id: "system_notification",
     header: "Anonymity is key",
     text: [
-        "All data you generate by participating, creating and adding vericiationbadges on Foundation is anonymous. There is no way for others to link your activity to your identity. Your data is encrypted, even from us!",
+        "All data you generate by participating, creating and adding vericiation badges on Foundation is anonymous. There is no way for others to link your activity to your identity. Your data is encrypted, even from us!",
     ],
     buttonText: "",
     buttonUrl: "",
