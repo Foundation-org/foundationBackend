@@ -1177,7 +1177,7 @@ const findCategoryByLink = async (req, res) => {
                 updatedPosts.splice(0, 0, notification1);
                 updatedPosts.splice(3, 0, notification2);
             }
-            else {
+            else if (updatedPosts.length >= 5) {
                 updatedPosts.splice(0, 0, notification1);
                 updatedPosts.splice(3, 0, notification2);
                 updatedPosts.splice(7, 0, notification3);
