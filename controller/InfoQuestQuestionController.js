@@ -1205,7 +1205,9 @@ const getQuestsAll = async (req, res) => {
     });
 
     query = query.sort(
-      sort === "Newest First"
+          sort === "Oldest First"
+        ? { createdAt: 1, _id: 1 }
+        :  sort === "Newest First"
         ? { createdAt: -1, _id: 1 }
         : sort === "Last Updated"
         ? { lastInteractedAt: -1, _id: 1 }
