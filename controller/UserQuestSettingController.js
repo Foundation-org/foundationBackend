@@ -104,6 +104,8 @@ const link = async (req, res) => {
       await uploadS3Bucket({
         fileName: savedOrUpdatedUserQuestSetting.link,
         description: savedOrUpdatedUserQuestSetting.Question,
+        route: "static_pages",
+        title: "Foundation",
       });
     } else {
       // Create a short link
@@ -114,6 +116,8 @@ const link = async (req, res) => {
       await uploadS3Bucket({
         fileName: savedOrUpdatedUserQuestSetting.link,
         description: savedOrUpdatedUserQuestSetting.Question,
+        route: "static_pages",
+        title: "Foundation",
       });
     }
 
@@ -262,6 +266,8 @@ const customLink = async (req, res) => {
       await uploadS3Bucket({
         fileName: savedOrUpdatedUserQuestSetting.link,
         description: savedOrUpdatedUserQuestSetting.Question,
+        route: "static_pages",
+        title: "Foundation",
       });
     } else {
       // Create a short link
@@ -272,6 +278,8 @@ const customLink = async (req, res) => {
       await uploadS3Bucket({
         fileName: savedOrUpdatedUserQuestSetting.link,
         description: savedOrUpdatedUserQuestSetting.Question,
+        route: "static_pages",
+        title: "Foundation",
       });
     }
 
