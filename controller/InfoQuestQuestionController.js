@@ -118,15 +118,15 @@ const createInfoQuestQuest = async (req, res) => {
       // txDescription : "Incentive for creating a quest"
     });
     // Increment the Treasury
-    await updateTreasury({ amount: QUEST_CREATED_AMOUNT, inc: true });
+    await updateTreasury({ amount: QUEST_CREATED_AMOUNT, dec: true });
     // Decrement the UserBalance
     await updateUserBalance({
       uuid: req.body.uuid,
       amount: QUEST_CREATED_AMOUNT,
-      dec: true,
+      inc: true,
     });
 
-    user.fdxSpent = user.fdxSpent + QUEST_CREATED_AMOUNT;
+    user.fdxEarned = user.fdxEarned + QUEST_CREATED_AMOUNT;
     user.feeSchedual.creatingPostFdx =
       user.feeSchedual.creatingPostFdx + QUEST_CREATED_AMOUNT;
     await user.save();
@@ -147,14 +147,19 @@ const createInfoQuestQuest = async (req, res) => {
 const deleteInfoQuestQuest = async (req, res) => {
   try {
     // Treasury Check
-    const checkTreasury = await Treasury.findOne();
-    if (!checkTreasury)
-      return res.status(404).json({ message: "Treasury is not found." });
-    if (
-      Math.round(checkTreasury.amount) <= QUEST_CREATED_AMOUNT ||
-      Math.round(checkTreasury.amount) <= 0
-    )
-      return res.status(404).json({ message: "Treasury is not enough." });
+    // const checkTreasury = await Treasury.findOne();
+    // if (!checkTreasury)
+    //   return res.status(404).json({ message: "Treasury is not found." });
+    // if (
+    //   Math.round(checkTreasury.amount) <= QUEST_CREATED_AMOUNT ||
+    //   Math.round(checkTreasury.amount) <= 0
+    // )
+    //   return res.status(404).json({ message: "Treasury is not enough." });
+
+    const userBalanceCheck = await User.findOne({
+      uuid: req.params.userUuid
+    })
+    if(userBalanceCheck.balance < QUEST_CREATED_AMOUNT) return res.status(404).json({ message: "Balance is not enough." });
 
     const infoQuest = await InfoQuestQuestions.findOne({
       _id: req.params.questId,
@@ -266,15 +271,15 @@ const deleteInfoQuestQuest = async (req, res) => {
       // txDescription : "Incentive for creating a quest"
     });
     // Increment the Treasury
-    await updateTreasury({ amount: QUEST_CREATED_AMOUNT, dec: true });
+    await updateTreasury({ amount: QUEST_CREATED_AMOUNT, inc: true });
     // Decrement the UserBalance
     await updateUserBalance({
       uuid: req.params.userUuid,
       amount: QUEST_CREATED_AMOUNT,
-      inc: true,
+      dec: true,
     });
 
-    user.fdxEarned = user.fdxEarned + QUEST_CREATED_AMOUNT;
+    user.fdxSpent = user.fdxSpent + QUEST_CREATED_AMOUNT;
     await user.save();
 
     res
