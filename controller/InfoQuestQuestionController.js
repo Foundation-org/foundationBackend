@@ -40,8 +40,8 @@ const {
 const createInfoQuestQuest = async (req, res) => {
   try {
     const userBalance = await getUserBalance(req.body.uuid);
-    if (userBalance < QUEST_CREATED_AMOUNT)
-      throw new Error("The balance is insufficient to create a Quest!");
+    // if (userBalance < QUEST_CREATED_AMOUNT)
+    //   throw new Error("The balance is insufficient to create a Quest!");
     // Find the user by uuid
     const user = await User.findOne({ uuid: req.body.uuid });
 
@@ -99,8 +99,8 @@ const createInfoQuestQuest = async (req, res) => {
       txUserAction: "postCreated",
       txID: txID,
       txAuth: "User",
-      txFrom: "dao",
-      txTo: user.uuid,
+      txFrom: user.uuid,
+      txTo: "dao",
       txAmount: "0",
       txData: createdQuestion._id,
       // txDescription : "User creates a new quest"
