@@ -23,7 +23,19 @@ const {
   PostSchema,
 } = require("../models/UserList");
 const Treasury = require("../models/Treasury");
-const {notification1, notification2, notification3, notification4, notification5, notification6, notification7, notification8, notification9, notification10, notification11,} = require("../notifications/home")
+const {
+  notification1,
+  notification2,
+  notification3,
+  notification4,
+  notification5,
+  notification6,
+  notification7,
+  notification8,
+  notification9,
+  notification10,
+  notification11,
+} = require("../notifications/home");
 
 const createInfoQuestQuest = async (req, res) => {
   try {
@@ -938,6 +950,7 @@ const suppressConditions = [
   { id: "Duplicate / Similar Post", minCount: 2 },
   { id: "Not interested", minCount: Number.POSITIVE_INFINITY },
   { id: "Does not apply to me", minCount: Number.POSITIVE_INFINITY },
+  { id: "Historical / Past Event", minCount: Number.POSITIVE_INFINITY },
 ];
 const getQuestsAll = async (req, res) => {
   const {
@@ -1205,9 +1218,9 @@ const getQuestsAll = async (req, res) => {
     });
 
     query = query.sort(
-          sort === "Oldest First"
+      sort === "Oldest First"
         ? { createdAt: 1, _id: 1 }
-        :  sort === "Newest First"
+        : sort === "Newest First"
         ? { createdAt: -1, _id: 1 }
         : sort === "Last Updated"
         ? { lastInteractedAt: -1, _id: 1 }
@@ -1552,8 +1565,7 @@ const getQuestsAll = async (req, res) => {
             if (page === 6 && nextPage === false) {
               if (result1.length >= 1 && result1.length < 4) {
                 result1.splice(1, 0, notification10);
-              }
-              else if(result1.length >= 4){
+              } else if (result1.length >= 4) {
                 result1.splice(1, 0, notification10);
                 result1.splice(5, 0, notification11);
               }
