@@ -1384,7 +1384,8 @@ const getQuestsAll = async (req, res) => {
                 suppressItem.count >= condition.minCount &&
                 condition.id !== "Does not apply to me" &&
                 condition.id !== "Not interested" &&
-                condition.id !== "Needs More Options";
+                condition.id !== "Needs More Options" &&
+                condition.id !== "Historical / Past Event";
               feedback.push({
                 id: suppressItem._id,
                 count: suppressItem.count,
