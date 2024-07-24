@@ -1852,12 +1852,18 @@ const getQuestByUniqueShareLink = async (req, res) => {
     // getQuestionsWithUserSettings
     const result1 = await getQuestionsWithUserSettings(result, uuid);
 
+    const userQuestSettingForTerminal = await UserQuestSetting.findOne({
+      uuid: uuid,
+      questForeignKey: userQuestSetting.questForeignKey,
+      linkStatus: "Enable",
+    });
+
     const resultArray = result1.map(getPercentage);
     const desiredArray = resultArray.map((item) => ({
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
       contendedPercentage: item.contendedPercentage,
-      userQuestSetting: userQuestSetting,
+      userQuestSetting: userQuestSettingForTerminal,
     }));
 
     const user = await User.findOne({ uuid: uuid });
