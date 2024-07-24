@@ -99,8 +99,8 @@ const createInfoQuestQuest = async (req, res) => {
       txUserAction: "postCreated",
       txID: txID,
       txAuth: "User",
-      txFrom: user.uuid,
-      txTo: "dao",
+      txFrom: "dao",
+      txTo: user.uuid,
       txAmount: "0",
       txData: createdQuestion._id,
       // txDescription : "User creates a new quest"
@@ -111,8 +111,8 @@ const createInfoQuestQuest = async (req, res) => {
       txUserAction: "postCreated",
       txID: txID,
       txAuth: "DAO",
-      txFrom: user.uuid,
-      txTo: "DAO Treasury",
+      txFrom: "DAO Treasury",
+      txTo: user.uuid,
       txAmount: QUEST_CREATED_AMOUNT,
       txData: createdQuestion._id,
       // txDescription : "Incentive for creating a quest"
@@ -157,9 +157,10 @@ const deleteInfoQuestQuest = async (req, res) => {
     //   return res.status(404).json({ message: "Treasury is not enough." });
 
     const userBalanceCheck = await User.findOne({
-      uuid: req.params.userUuid
-    })
-    if(userBalanceCheck.balance < QUEST_CREATED_AMOUNT) return res.status(404).json({ message: "Balance is not enough." });
+      uuid: req.params.userUuid,
+    });
+    if (userBalanceCheck.balance < QUEST_CREATED_AMOUNT)
+      return res.status(404).json({ message: "Balance is not enough." });
 
     const infoQuest = await InfoQuestQuestions.findOne({
       _id: req.params.questId,
@@ -262,8 +263,8 @@ const deleteInfoQuestQuest = async (req, res) => {
       txUserAction: "postDeleted",
       txID: txID,
       txAuth: "DAO",
-      txFrom: "DAO Treasury",
-      txTo: user.uuid,
+      txFrom: user.uuid,
+      txTo: "DAO Treasury",
       txAmount: QUEST_CREATED_AMOUNT,
       txDate: Date.now(),
       txDescription: "User deleted a Post",
