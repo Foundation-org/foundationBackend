@@ -1845,6 +1845,7 @@ const getQuestByUniqueShareLink = async (req, res) => {
       ...item._doc,
       selectedPercentage: item.selectedPercentage,
       contendedPercentage: item.contendedPercentage,
+      userQuestSetting: userQuestSetting,
     }));
 
     const user = await User.findOne({ uuid: uuid });

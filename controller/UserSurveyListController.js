@@ -813,6 +813,11 @@ const findCategoryByLink = async (req, res) => {
         });
         const user = await User.findOne({ uuid: userList.userUuid });
 
+        const userQuestSetting = await UserQuestSetting.findOne({
+          questForeignKey: post.questForeginKey._id.toString(),
+          linkStatus: "Enable",
+        });
+
         const postData = await PostDataSchema.findOne({ postId: postId });
         if (!postData) {
           const questForeginKeyWithStartQuestData = {
@@ -822,6 +827,7 @@ const findCategoryByLink = async (req, res) => {
               _id: user._id,
               badges: user.badges,
             },
+            userQuestSetting: userQuestSetting,
           };
           // Add the updated post to the array
           updatedPosts.push({
@@ -840,6 +846,7 @@ const findCategoryByLink = async (req, res) => {
                 _id: user._id,
                 badges: user.badges,
               },
+              userQuestSetting: userQuestSetting,
             };
             // Add the updated post to the array
             updatedPosts.push({
@@ -1112,6 +1119,7 @@ const findCategoryByLink = async (req, res) => {
                   },
                 ],
                 selectedPercentage: [formattedPercentages],
+                userQuestSetting: userQuestSetting,
               };
             } else if (
               isPostChoice.whichTypeQuestion === "multiple choise" ||
@@ -1192,6 +1200,7 @@ const findCategoryByLink = async (req, res) => {
                   },
                 ],
                 selectedPercentage: [percentages],
+                userQuestSetting: userQuestSetting,
               };
             } else if (responseDataStats[0].yesNo) {
               questForeginKeyWithStartQuestData = {
@@ -1228,6 +1237,7 @@ const findCategoryByLink = async (req, res) => {
                   _id: user._id,
                   badges: user.badges,
                 },
+                userQuestSetting: userQuestSetting,
               };
             } else if (responseDataStats[0].agreeDisagree) {
               questForeginKeyWithStartQuestData = {
@@ -1264,6 +1274,7 @@ const findCategoryByLink = async (req, res) => {
                   _id: user._id,
                   badges: user.badges,
                 },
+                userQuestSetting: userQuestSetting,
               };
             } else if (responseDataStats[0].likeDislike) {
               questForeginKeyWithStartQuestData = {
@@ -1300,6 +1311,7 @@ const findCategoryByLink = async (req, res) => {
                   _id: user._id,
                   badges: user.badges,
                 },
+                userQuestSetting: userQuestSetting,
               };
             } else {
               questForeginKeyWithStartQuestData = {
@@ -1316,6 +1328,7 @@ const findCategoryByLink = async (req, res) => {
                   _id: user._id,
                   badges: user.badges,
                 },
+                userQuestSetting: userQuestSetting,
               };
             }
             // Add the updated post to the array
