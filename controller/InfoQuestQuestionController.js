@@ -1144,7 +1144,7 @@ const getQuestsAll = async (req, res) => {
     filterObj.uuid = uuid;
     filterObj.hidden = true;
     const Questions = await UserQuestSetting.find(filterObj)
-      .sort({ createdAt: -1 })
+      .sort({ hiddenTime: -1 })
       // .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
       .skip(skip)
       .limit(pageSize);
