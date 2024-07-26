@@ -379,7 +379,7 @@ router.get(
    *       '500':
    *         description: Internal server error
    */
-  InfoQuestQuestionController.checkGifDuplicateUrl
+  InfoQuestQuestionController.checkMediaDuplicateUrl
 );
 
 router.get(
@@ -407,7 +407,7 @@ router.get(
    *       '500':
    *         description: Internal server error
    */
-  InfoQuestQuestionController.checkMediaDuplicateUrl
+  InfoQuestQuestionController.checkGifDuplicateUrl
 );
 router.get(
   "/getFullSoundcloudUrlFromShortUrl",
