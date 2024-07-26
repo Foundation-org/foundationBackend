@@ -2498,24 +2498,18 @@ const checkGifDuplicateUrl = async (req, res) => {
   try {
     const { url } = req.params;
 
-    // Construct a regex pattern to match the YouTube URL format
-    // const regex = new RegExp(`${id}`, "i");
-
-    // Use the regex pattern in the find query
+    const decodedUrl = decodeURIComponent(url);
+    console.log("decoded url", decodedUrl);
     const question = await InfoQuestQuestions.findOne({
-      url: url,
+      url: decodedUrl,
       isActive: true,
     });
 
     if (question) {
-      // ID exists in the URL field, return an error
       return res
         .status(400)
         .json({ error: "This link already exists.", duplicate: true });
     }
-
-    // ID does not exist in the URL field, continue with other operations
-    // For example, you can insert the ID into the database here
 
     res.status(200).json({
       message:
