@@ -2497,11 +2497,8 @@ const checkMediaDuplicateUrl = async (req, res) => {
 const checkGifDuplicateUrl = async (req, res) => {
   try {
     const { url } = req.params;
-
-    const decodedUrl = decodeURIComponent(url);
-    console.log("decoded url", decodedUrl);
     const question = await InfoQuestQuestions.findOne({
-      url: decodedUrl,
+      url: url,
       isActive: true,
     });
 
@@ -2510,7 +2507,6 @@ const checkGifDuplicateUrl = async (req, res) => {
         .status(400)
         .json({ error: "This link already exists.", duplicate: true });
     }
-
     res.status(200).json({
       message:
         "Link does not exist in the URL field. Proceed with other operations.",
