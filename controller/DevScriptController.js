@@ -350,7 +350,6 @@ const setFeedback = async (req, res) => {
                     {
                         uuid: quest.uuid,
                         questForeignKey: quest.questForeignKey,
-                        isFeedback: true
                     }
                 )
                 if (!startQuestExist) {
@@ -364,6 +363,9 @@ const setFeedback = async (req, res) => {
                         isFeedback: true
                     })
                     await startQuestModel.save();
+                } else {
+                    startQuestExist.isFeedback = true;
+                    await startQuestExist.save();
                 }
             }
 
