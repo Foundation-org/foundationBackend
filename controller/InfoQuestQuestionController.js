@@ -1147,7 +1147,7 @@ const getQuestsAll = async (req, res) => {
     //console.log("running");
     filterObj.uuid = uuid;
     // filterObj.hidden = true;
-    filterObj.feedbackMessage = { $ne: "" };
+    filterObj.feedbackMessage = { $ne: '', $exists: true };
     const Questions = await UserQuestSetting.find(filterObj)
       .sort({ feedbackTime: -1 })
       // .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
