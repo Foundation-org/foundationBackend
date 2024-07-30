@@ -22,6 +22,10 @@ const {
   sharedLinkDynamicImageHTML,
 } = require("../templates/sharedLinkDynamicImageHTML");
 const StartQuests = require("../models/StartQuests");
+const {
+  getPercentage,
+  getPercentageQuestForeignKey,
+} = require("../utils/getPercentage");
 
 const createOrUpdate = async (req, res) => {
   try {
@@ -383,7 +387,7 @@ const createFeedback = async (req, res) => {
       _id: questForeignKey,
       uuid: uuid,
     })
-    if(isOwner) res.status(403).json({ message: "You cannot give feedback or hide your own post."});
+    if (isOwner) res.status(403).json({ message: "You cannot give feedback or hide your own post." });
 
     const userQuestSetting = await UserQuestSetting.findOne(
       {
@@ -485,9 +489,29 @@ const createFeedback = async (req, res) => {
         _id: questSetting.questForeignKey,
       }).populate("getUserBadge", "badges");
 
+      const resultDoc = getPercentageQuestForeignKey(formatSetting);
+
       const formattedDoc = {
         ...formatSetting._doc,
         startStatus: "completed",
+        selectedPercentage: resultDoc?.selectedPercentage?.[0]
+          ? [
+            Object.fromEntries(
+              Object.entries(resultDoc.selectedPercentage[0]).sort(
+                (a, b) => parseInt(b[1]) - parseInt(a[1])
+              )
+            ),
+          ]
+          : [],
+        contendedPercentage: resultDoc?.contendedPercentage?.[0]
+          ? [
+            Object.fromEntries(
+              Object.entries(resultDoc.contendedPercentage[0]).sort(
+                (a, b) => parseInt(b[1]) - parseInt(a[1])
+              )
+            ),
+          ]
+          : [],
         startQuestData: await StartQuests.findOne({
           uuid: uuid,
           questForeignKey: questForeignKey,
@@ -580,6 +604,8 @@ const createFeedback = async (req, res) => {
         _id: updatedUserQuestSetting.questForeignKey,
       }).populate("getUserBadge", "badges");
 
+      const resultDoc = getPercentageQuestForeignKey(formatSetting);
+
       const formattedDoc = {
         ...formatSetting._doc,
         startStatus: "completed",
@@ -589,6 +615,24 @@ const createFeedback = async (req, res) => {
           isFeedback: true
         }),
         userQuestSetting: updatedUserQuestSetting,
+        selectedPercentage: resultDoc?.selectedPercentage?.[0]
+        ? [
+          Object.fromEntries(
+            Object.entries(resultDoc.selectedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
+        : [],
+      contendedPercentage: resultDoc?.contendedPercentage?.[0]
+        ? [
+          Object.fromEntries(
+            Object.entries(resultDoc.contendedPercentage[0]).sort(
+              (a, b) => parseInt(b[1]) - parseInt(a[1])
+            )
+          ),
+        ]
+        : [],
       }
 
       return res.status(201).json({
@@ -682,7 +726,7 @@ const create = async (req, res) => {
       _id: req.body.questForeignKey,
       uuid: req.body.uuid,
     })
-    if(isOwner) res.status(403).json({ message: "You cannot give feedback or hide your own post."});
+    if (isOwner) res.status(403).json({ message: "You cannot give feedback or hide your own post." });
 
     let userQuestSettingSaved = await UserQuestSetting.findOne(
       { uuid: req.body.uuid, questForeignKey: req.body.questForeignKey },
