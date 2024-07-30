@@ -408,16 +408,27 @@ const createFeedback = async (req, res) => {
         historyDate: historyDate ? historyDate : null,
       });
       questSetting = await userQuestSettingModel.save()
-      const startQuestModel = new StartQuests({
-        addedAnswer: "",
-        addedAnswerUuid: "",
-        data: [],
-        isAddedAnsSelected: "",
-        questForeignKey: questForeignKey,
-        uuid: uuid,
-        isFeedback: true
-      })
-      await startQuestModel.save();
+      const startQuestExist = await StartQuests.findOne(
+        {
+          uuid: uuid,
+          questForeignKey: questForeignKey,
+        }
+      )
+      if (!startQuestExist) {
+        const startQuestModel = new StartQuests({
+          addedAnswer: "",
+          addedAnswerUuid: "",
+          data: [],
+          isAddedAnsSelected: "",
+          questForeignKey: questForeignKey,
+          uuid: uuid,
+          isFeedback: true
+        })
+        await startQuestModel.save();
+      } else {
+        startQuestExist.isFeedback = true;
+        await startQuestExist.save();
+      }
 
       if (isHistorical) {
         await InfoQuestQuestions.findOneAndUpdate(
@@ -464,9 +475,24 @@ const createFeedback = async (req, res) => {
         inc: true,
       });
 
+      const formatSetting = await InfoQuestQuestions.findOne({
+        _id: questSetting.questForeignKey,
+      }).populate("getUserBadge", "badges");
+
+      const formattedDoc = {
+        ...formatSetting._doc,
+        startStatus: "completed",
+        startQuestData: await StartQuests.findOne({
+          uuid: uuid,
+          questForeignKey: questForeignKey,
+          isFeedback: true
+        }),
+        userQuestSetting: questSetting,
+      }
+
       return res.status(201).json({
         message: "Feedback Submitted Successfully!",
-        data: questSetting,
+        data: formattedDoc,
       });
     }
     else {
@@ -477,16 +503,27 @@ const createFeedback = async (req, res) => {
       userQuestSetting.historyDate = historyDate ? historyDate : userQuestSetting.historyDate;
       const updatedUserQuestSetting = await userQuestSetting.save();
 
-      const startQuestModel = new StartQuests({
-        addedAnswer: "",
-        addedAnswerUuid: "",
-        data: [],
-        isAddedAnsSelected: "",
-        questForeignKey: questForeignKey,
-        uuid: uuid,
-        isFeedback: true
-      })
-      await startQuestModel.save();
+      const startQuestExist = await StartQuests.findOne(
+        {
+          uuid: uuid,
+          questForeignKey: questForeignKey,
+        }
+      )
+      if (!startQuestExist) {
+        const startQuestModel = new StartQuests({
+          addedAnswer: "",
+          addedAnswerUuid: "",
+          data: [],
+          isAddedAnsSelected: "",
+          questForeignKey: questForeignKey,
+          uuid: uuid,
+          isFeedback: true
+        })
+        await startQuestModel.save();
+      } else {
+        startQuestExist.isFeedback = true;
+        await startQuestExist.save();
+      }
 
       if (isHistorical) {
         await InfoQuestQuestions.findOneAndUpdate(
@@ -533,9 +570,24 @@ const createFeedback = async (req, res) => {
         inc: true,
       });
 
+      const formatSetting = await InfoQuestQuestions.findOne({
+        _id: updatedUserQuestSetting.questForeignKey,
+      }).populate("getUserBadge", "badges");
+
+      const formattedDoc = {
+        ...formatSetting._doc,
+        startStatus: "completed",
+        startQuestData: await StartQuests.findOne({
+          uuid: uuid,
+          questForeignKey: questForeignKey,
+          isFeedback: true
+        }),
+        userQuestSetting: updatedUserQuestSetting,
+      }
+
       return res.status(201).json({
         message: "Feedback Submitted Successfully!",
-        data: updatedUserQuestSetting,
+        data: formattedDoc,
       });
     }
 
