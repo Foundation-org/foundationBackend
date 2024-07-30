@@ -379,6 +379,12 @@ const createFeedback = async (req, res) => {
   try {
     const { feedbackMessage, questForeignKey, uuid, Question, historyDate } = req.body;
 
+    const isOwner = await InfoQuestQuestions.findOne({
+      _id: questForeignKey,
+      uuid: uuid,
+    })
+    if(isOwner) res.status(403).json({ message: "You cannot give feedback or hide your own post."});
+
     const userQuestSetting = await UserQuestSetting.findOne(
       {
         uuid: uuid,
@@ -671,6 +677,12 @@ const create = async (req, res) => {
     //   userQuestSettingExist.hiddenTime = new Date();
     //   await userQuestSettingExist.save();
     // }
+
+    const isOwner = await InfoQuestQuestions.findOne({
+      _id: req.body.questForeignKey,
+      uuid: req.body.uuid,
+    })
+    if(isOwner) res.status(403).json({ message: "You cannot give feedback or hide your own post."});
 
     let userQuestSettingSaved = await UserQuestSetting.findOne(
       { uuid: req.body.uuid, questForeignKey: req.body.questForeignKey },
