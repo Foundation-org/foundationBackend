@@ -2326,7 +2326,6 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
       const startedQuestions = await StartQuests.find({
         uuid: uuid,
       });
-      console.log("quees", startedQuestions);
       let Result = [];
       await allQuestions.map(async function (rcrd) {
         await startedQuestions.map(function (rec) {
