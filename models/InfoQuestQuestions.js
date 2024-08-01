@@ -94,6 +94,14 @@ const InfoQuestQuestionsSchema = mongoose.Schema(
     isActive: {
       type: Boolean,
     },
+    isClosed: {
+      type: Boolean,
+      default: false
+    },
+    isAddOptionFeedback: {
+      type: Boolean,
+      default: false
+    },
   },
   { timestamps: true }
 );

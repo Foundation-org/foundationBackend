@@ -13,6 +13,7 @@ const { updateUserBalance } = require("../utils/userServices");
 const { updateTreasury } = require("../utils/treasuryService");
 const {
   USER_QUEST_SETTING_LINK_CUSTOMIZATION_DEDUCTION_AMOUNT,
+  QUEST_COMPLETED_AMOUNT,
   POST_LINK,
 } = require("../constants/index");
 const nodeHtmlToImage = require("node-html-to-image");
@@ -20,6 +21,11 @@ const puppeteer = require("puppeteer");
 const {
   sharedLinkDynamicImageHTML,
 } = require("../templates/sharedLinkDynamicImageHTML");
+const StartQuests = require("../models/StartQuests");
+const {
+  getPercentage,
+  getPercentageQuestForeignKey,
+} = require("../utils/getPercentage");
 
 const createOrUpdate = async (req, res) => {
   try {
@@ -351,13 +357,12 @@ const status = async (req, res) => {
       return res.status(404).json({ message: "Share link not found" });
     }
     return res.status(200).json({
-      message: `Share link ${
-        status === "Disable"
+      message: `Share link ${status === "Disable"
           ? "Disabled"
           : status === "Delete"
-          ? "Deleted"
-          : "Enabled"
-      } Successfully`,
+            ? "Deleted"
+            : "Enabled"
+        } Successfully`,
       data: updatedUserQuestSetting,
     });
   } catch (error) {
@@ -374,6 +379,441 @@ const suppressConditions = [
   { id: "Duplicate / Similar Post", minCount: 2 },
 ];
 
+const createFeedback = async (req, res) => {
+  try {
+    const { feedbackMessage, questForeignKey, uuid, Question, historyDate } =
+      req.body;
+
+    const isOwner = await InfoQuestQuestions.findOne({
+      _id: questForeignKey,
+      uuid: uuid,
+    });
+    if (isOwner)
+      res
+        .status(403)
+        .json({ message: "You cannot give feedback or hide your own post." });
+
+    const userQuestSetting = await UserQuestSetting.findOne({
+      uuid: uuid,
+      questForeignKey: questForeignKey,
+    });
+
+    let isHistorical = false;
+    if (feedbackMessage === "Historical / Past Event") {
+      const checkHistorical = await UserQuestSetting.findOne({
+        questForeignKey: questForeignKey,
+        feedbackMessage: feedbackMessage,
+        historyDate: historyDate,
+      });
+      if (checkHistorical) isHistorical = true;
+    }
+
+    let addOption = false;
+    if (feedbackMessage === "Needs More Options") {
+      const checkNeedsMoreOptions = await UserQuestSetting.findOne({
+        questForeignKey: questForeignKey,
+        feedbackMessage: feedbackMessage,
+      });
+      if (checkNeedsMoreOptions) addOption = true;
+    }
+
+    let questSetting;
+    if (!userQuestSetting) {
+      const userQuestSettingModel = new UserQuestSetting({
+        feedbackMessage: feedbackMessage,
+        questForeignKey: questForeignKey,
+        uuid: uuid,
+        Question: Question,
+        feedbackTime: new Date(),
+        historyDate: historyDate ? historyDate : null,
+      });
+      questSetting = await userQuestSettingModel.save();
+      const startQuestExist = await StartQuests.findOne({
+        uuid: uuid,
+        questForeignKey: questForeignKey,
+      });
+      if (!startQuestExist) {
+        const startQuestModel = new StartQuests({
+          addedAnswer: "",
+          addedAnswerUuid: "",
+          data: [],
+          isAddedAnsSelected: "",
+          questForeignKey: questForeignKey,
+          uuid: uuid,
+          isFeedback: true,
+        });
+        await startQuestModel.save();
+      } else {
+        startQuestExist.isFeedback = true;
+        await startQuestExist.save();
+      }
+
+      if (isHistorical) {
+        await InfoQuestQuestions.findOneAndUpdate(
+          {
+            _id: questForeignKey,
+          },
+          {
+            isClosed: true,
+          }
+        ).exec();
+      }
+
+      if (addOption) {
+        await InfoQuestQuestions.findOneAndUpdate(
+          {
+            _id: questForeignKey,
+          },
+          {
+            isAddOptionFeedback: true,
+            usersAddTheirAns: true,
+          }
+        ).exec();
+      }
+
+      const suppression = await UserQuestSetting.aggregate([
+        {
+          $match: {
+            feedbackMessage: { $ne: "", $exists: true },
+            questForeignKey: questForeignKey,
+          },
+        },
+        {
+          $group: {
+            _id: "$feedbackMessage",
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+      let isSuppressed = false;
+
+      if (suppression) {
+        suppression.map((item) => {
+          if (suppression) {
+            suppressConditions.forEach(async (condition) => {
+              if (
+                item._id === "Needs More Options" &&
+                item.count >= condition.minCount
+              ) {
+                await InfoQuestQuestions.findOneAndUpdate(
+                  {
+                    _id: questForeignKey,
+                  },
+                  { $set: { usersAddTheirAns: true } }
+                ).exec();
+              } else if (
+                item._id === condition.id &&
+                item.count >= condition.minCount &&
+                item._id !== "Needs More Options"
+              ) {
+                isSuppressed = true;
+              }
+            });
+          }
+        });
+      }
+
+      // // Properly setting the fields to update with $set
+      await InfoQuestQuestions.findOneAndUpdate(
+        { _id: questForeignKey },
+        {
+          $set: {
+            suppressed: isSuppressed,
+            suppressedReason: isSuppressed ? feedbackMessage : ""
+          },
+        },
+        { new: true }
+      );
+
+      const txID = crypto.randomBytes(11).toString("hex");
+      // Create Ledger
+      await createLedger({
+        uuid: uuid,
+        txUserAction: "postFeedBackGiven",
+        txID: txID,
+        txAuth: "User",
+        txFrom: uuid,
+        txTo: "dao",
+        txAmount: "0",
+        txData: questForeignKey,
+        // txDescription : "User completes a quest"
+      });
+      // Create Ledger
+      await createLedger({
+        uuid: uuid,
+        txUserAction: "postFeedBackGiven",
+        txID: txID,
+        txAuth: "DAO",
+        txFrom: "DAO Treasury",
+        txTo: uuid,
+        txAmount: QUEST_COMPLETED_AMOUNT,
+        txData: questForeignKey,
+        // txDescription : "Incentive for completing quests"
+      });
+      // Decrement the Treasury
+      await updateTreasury({ amount: QUEST_COMPLETED_AMOUNT, dec: true });
+      // Increment the UserBalance
+      await updateUserBalance({
+        uuid: uuid,
+        amount: QUEST_COMPLETED_AMOUNT,
+        inc: true,
+      });
+
+      const formatSetting = await InfoQuestQuestions.findOne({
+        _id: questSetting.questForeignKey,
+      }).populate("getUserBadge", "badges");
+
+      const resultDoc = getPercentageQuestForeignKey(formatSetting);
+
+      const formattedDoc = {
+        ...formatSetting._doc,
+        startStatus:
+          feedbackMessage === "Needs More Options" ? "continue" : "completed",
+        selectedPercentage: resultDoc?.selectedPercentage?.[0]
+          ? [
+            Object.fromEntries(
+              Object.entries(resultDoc.selectedPercentage[0]).sort(
+                (a, b) => parseInt(b[1]) - parseInt(a[1])
+              )
+            ),
+          ]
+          : [],
+        contendedPercentage: resultDoc?.contendedPercentage?.[0]
+          ? [
+            Object.fromEntries(
+              Object.entries(resultDoc.contendedPercentage[0]).sort(
+                (a, b) => parseInt(b[1]) - parseInt(a[1])
+              )
+            ),
+          ]
+          : [],
+        startQuestData: await StartQuests.findOne({
+          uuid: uuid,
+          questForeignKey: questForeignKey,
+          isFeedback: true,
+        }),
+        userQuestSetting: questSetting,
+      };
+
+      return res.status(201).json({
+        message: "Feedback Submitted Successfully!",
+        data: formattedDoc,
+      });
+    } else {
+      if (userQuestSetting.feedbackMessage !== "")
+        return res.status(403).json({ message: "Feedback is already given" });
+
+      userQuestSetting.feedbackTime = new Date();
+      userQuestSetting.feedbackMessage = feedbackMessage;
+      userQuestSetting.historyDate = historyDate
+        ? historyDate
+        : userQuestSetting.historyDate;
+      const updatedUserQuestSetting = await userQuestSetting.save();
+
+      const startQuestExist = await StartQuests.findOne({
+        uuid: uuid,
+        questForeignKey: questForeignKey,
+      });
+      if (!startQuestExist) {
+        const startQuestModel = new StartQuests({
+          addedAnswer: "",
+          addedAnswerUuid: "",
+          data: [],
+          isAddedAnsSelected: "",
+          questForeignKey: questForeignKey,
+          uuid: uuid,
+          isFeedback: true,
+        });
+        await startQuestModel.save();
+      } else {
+        startQuestExist.isFeedback = true;
+        await startQuestExist.save();
+      }
+
+      if (isHistorical) {
+        await InfoQuestQuestions.findOneAndUpdate(
+          {
+            _id: questForeignKey,
+          },
+          {
+            isClosed: true,
+          }
+        ).exec();
+      }
+
+      if (addOption) {
+        await InfoQuestQuestions.findOneAndUpdate(
+          {
+            _id: questForeignKey,
+          },
+          {
+            isAddOptionFeedback: true,
+            usersAddTheirAns: true,
+          }
+        ).exec();
+      }
+
+      const suppression = await UserQuestSetting.aggregate([
+        {
+          $match: {
+            feedbackMessage: { $ne: "", $exists: true },
+            questForeignKey: questForeignKey,
+          },
+        },
+        {
+          $group: {
+            _id: "$feedbackMessage",
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+      let isSuppressed = false;
+
+      if (suppression) {
+        suppression.map((item) => {
+          if (suppression) {
+            suppressConditions.forEach(async (condition) => {
+              if (
+                item._id === "Needs More Options" &&
+                item.count >= condition.minCount
+              ) {
+                await InfoQuestQuestions.findOneAndUpdate(
+                  {
+                    _id: questForeignKey,
+                  },
+                  { $set: { usersAddTheirAns: true } }
+                ).exec();
+              } else if (
+                item._id === condition.id &&
+                item.count >= condition.minCount &&
+                item._id !== "Needs More Options"
+              ) {
+                isSuppressed = true;
+              }
+            });
+          }
+        });
+      }
+
+      // // Properly setting the fields to update with $set
+      await InfoQuestQuestions.findOneAndUpdate(
+        { _id: questForeignKey },
+        {
+          $set: {
+            suppressed: isSuppressed,
+            suppressedReason: isSuppressed ? feedbackMessage : ""
+          },
+        },
+        { new: true }
+      );
+
+      const txID = crypto.randomBytes(11).toString("hex");
+      // Create Ledger
+      await createLedger({
+        uuid: uuid,
+        txUserAction: "postFeedBackGiven",
+        txID: txID,
+        txAuth: "User",
+        txFrom: uuid,
+        txTo: "dao",
+        txAmount: "0",
+        txData: questForeignKey,
+        // txDescription : "User completes a quest"
+      });
+      // Create Ledger
+      await createLedger({
+        uuid: uuid,
+        txUserAction: "postFeedBackGiven",
+        txID: txID,
+        txAuth: "DAO",
+        txFrom: "DAO Treasury",
+        txTo: uuid,
+        txAmount: QUEST_COMPLETED_AMOUNT,
+        txData: questForeignKey,
+        // txDescription : "Incentive for completing quests"
+      });
+      // Decrement the Treasury
+      await updateTreasury({ amount: QUEST_COMPLETED_AMOUNT, dec: true });
+      // Increment the UserBalance
+      await updateUserBalance({
+        uuid: uuid,
+        amount: QUEST_COMPLETED_AMOUNT,
+        inc: true,
+      });
+
+      const formatSetting = await InfoQuestQuestions.findOne({
+        _id: updatedUserQuestSetting.questForeignKey,
+      }).populate("getUserBadge", "badges");
+
+      const resultDoc = getPercentageQuestForeignKey(formatSetting);
+
+      const formattedDoc = {
+        ...formatSetting._doc,
+        startStatus:
+          feedbackMessage === "Needs More Options" ? "continue" : "completed",
+        startQuestData: await StartQuests.findOne({
+          uuid: uuid,
+          questForeignKey: questForeignKey,
+          isFeedback: true,
+        }),
+        userQuestSetting: updatedUserQuestSetting,
+        selectedPercentage: resultDoc?.selectedPercentage?.[0]
+          ? [
+            Object.fromEntries(
+              Object.entries(resultDoc.selectedPercentage[0]).sort(
+                (a, b) => parseInt(b[1]) - parseInt(a[1])
+              )
+            ),
+          ]
+          : [],
+        contendedPercentage: resultDoc?.contendedPercentage?.[0]
+          ? [
+            Object.fromEntries(
+              Object.entries(resultDoc.contendedPercentage[0]).sort(
+                (a, b) => parseInt(b[1]) - parseInt(a[1])
+              )
+            ),
+          ]
+          : [],
+      };
+
+      return res.status(201).json({
+        message: "Feedback Submitted Successfully!",
+        data: formattedDoc,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: ` An error occurred while Feedback UserQuestSetting: ${error.message}`,
+    });
+  }
+};
+
+const updateFeedback = async (req, res) => {
+  try {
+    const { feedbackMessage, questForeignKey, uuid } = req.body;
+
+    const userQuestSetting = await UserQuestSetting.findOne({
+      uuid: uuid,
+      questForeignKey: questForeignKey,
+    });
+    userQuestSetting.feedbackTime = new Date();
+    userQuestSetting.feedbackMessage = feedbackMessage;
+    const updatedUserQuestSetting = await userQuestSetting.save();
+
+    return res.status(201).json({
+      message: "Feedback Updated Successfully!",
+      data: updatedUserQuestSetting,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: ` An error occurred while Feedback UserQuestSetting: ${error.message}`,
+    });
+  }
+};
+
 const create = async (req, res) => {
   try {
     const payload = req.body;
@@ -389,36 +829,58 @@ const create = async (req, res) => {
     //   questForeignKey: payload.questForeignKey,
     // });
 
-    let updateData = {
-      $set: { ...payload }, // Base the update object on the incoming payload
-    };
+    // let updateData = {
+    //   $set: { ...payload }, // Base the update object on the incoming payload
+    // };
 
-    // Add 'hiddenTime' conditionally
-    if (payload.hidden === true) {
-      updateData.$set.hiddenTime = new Date(); // Set to the current timestamp
-    }
-    //console.log(updateData);
-    let userQuestSettingSaved;
-    userQuestSettingSaved = await UserQuestSetting.findOneAndUpdate(
-      // Query criteria
-      { uuid: payload.uuid, questForeignKey: payload.questForeignKey },
-      // Update or insert payload
-      updateData,
-      // Options
-      { new: true, upsert: true }
-    );
-    const userQuestSettingExist = await UserQuestSetting.findOne({
-      uuid: payload.uuid,
-      questForeignKey: payload.questForeignKey,
+    // // Add 'hiddenTime' conditionally
+    // if (payload.hidden === true) {
+    //   updateData.$set.hiddenTime = new Date(); // Set to the current timestamp
+    // }
+    // //console.log(updateData);
+    // let userQuestSettingSaved;
+    // userQuestSettingSaved = await UserQuestSetting.findOneAndUpdate(
+    //   // Query criteria
+    //   { uuid: payload.uuid, questForeignKey: payload.questForeignKey },
+    //   // Update or insert payload
+    //   updateData,
+    //   // Options
+    //   { new: true, upsert: true }
+    // );
+    // const userQuestSettingExist = await UserQuestSetting.findOne({
+    //   uuid: payload.uuid,
+    //   questForeignKey: payload.questForeignKey,
+    // });
+    // // To check the record exist
+    // if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
+
+    // if (userQuestSettingExist && payload.hidden === true) {
+    //   // Document found, update hiddenTime and save
+    //   userQuestSettingExist.hiddenTime = new Date();
+    //   await userQuestSettingExist.save();
+    // }
+
+    const isOwner = await InfoQuestQuestions.findOne({
+      _id: req.body.questForeignKey,
+      uuid: req.body.uuid,
     });
-    // To check the record exist
-    if (!userQuestSettingExist) throw new Error("userQuestSetting not exist");
+    if (isOwner)
+      res
+        .status(403)
+        .json({ message: "You cannot give feedback or hide your own post." });
 
-    if (userQuestSettingExist && payload.hidden === true) {
-      // Document found, update hiddenTime and save
-      userQuestSettingExist.hiddenTime = new Date();
-      await userQuestSettingExist.save();
-    }
+    let userQuestSettingSaved = await UserQuestSetting.findOne({
+      uuid: req.body.uuid,
+      questForeignKey: req.body.questForeignKey,
+    });
+    if (!userQuestSettingSaved)
+      return res.status(404).json({ message: "userQuestSetting not exist" });
+
+    userQuestSettingSaved.Question = payload.Question;
+    userQuestSettingSaved.hidden = payload.hidden;
+    userQuestSettingSaved.hiddenMessage = payload.hiddenMessage;
+    userQuestSettingSaved.hiddenTime = new Date();
+    await userQuestSettingSaved.save();
 
     // To check the record exist
     // if (userQuestSettingExist){
@@ -448,63 +910,63 @@ const create = async (req, res) => {
     const infoQuestQuestion = await InfoQuestQuestions.findOne({
       _id: payload.questForeignKey,
     });
+
+    // const suppression = await UserQuestSetting.aggregate([
+    //   {
+    //     $match: {
+    //       feedbackMessage: { $ne: "", $exists: true },
+    //       questForeignKey: payload.questForeignKey,
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$feedbackMessage",
+    //       count: { $sum: 1 },
+    //     },
+    //   },
+    // ]);
+    // let isSuppressed = false;
+
+    // if (suppression) {
+    //   suppression.map((item) => {
+    //     if (suppression) {
+    //       suppressConditions.forEach(async (condition) => {
+    //         if (
+    //           item._id === "Needs More Options" &&
+    //           item.count >= condition.minCount
+    //         ) {
+    //           await InfoQuestQuestions.findOneAndUpdate(
+    //             {
+    //               _id: payload.questForeignKey,
+    //             },
+    //             { $set: { usersAddTheirAns: true } }
+    //           ).exec();
+    //         } else if (
+    //           item._id === condition.id &&
+    //           item.count >= condition.minCount &&
+    //           item._id !== "Needs More Options"
+    //         ) {
+    //           isSuppressed = true;
+    //         }
+    //       });
+    //     }
+    //   });
+    // }
+
+    // // Properly setting the fields to update with $set
+    // await InfoQuestQuestions.findOneAndUpdate(
+    //   { _id: payload.questForeignKey },
+    //   {
+    //     $set: {
+    //       suppressed: isSuppressed,
+    //     },
+    //   },
+    //   { new: true }
+    // );
     // if hidden
     if (payload.hidden) {
       await hiddenPostCount(infoQuestQuestion.uuid, true);
       await ledgerEntryAdded(payload.uuid, infoQuestQuestion.uuid);
-
-      const suppression = await UserQuestSetting.aggregate([
-        {
-          $match: {
-            hidden: true,
-            questForeignKey: payload.questForeignKey,
-          },
-        },
-        {
-          $group: {
-            _id: "$hiddenMessage",
-            count: { $sum: 1 },
-          },
-        },
-      ]);
-      let isSuppressed = false;
-
-      if (suppression) {
-        suppression.map((item) => {
-          if (suppression) {
-            suppressConditions.forEach(async (condition) => {
-              if (
-                item._id === "Needs More Options" &&
-                item.count >= condition.minCount
-              ) {
-                await InfoQuestQuestions.findOneAndUpdate(
-                  {
-                    _id: payload.questForeignKey,
-                  },
-                  { $set: { usersAddTheirAns: true } }
-                ).exec();
-              } else if (
-                item._id === condition.id &&
-                item.count >= condition.minCount &&
-                item._id !== "Needs More Options"
-              ) {
-                isSuppressed = true;
-              }
-            });
-          }
-        });
-      }
-
-      // // Properly setting the fields to update with $set
-      await InfoQuestQuestions.findOneAndUpdate(
-        { _id: payload.questForeignKey },
-        {
-          $set: {
-            suppressed: isSuppressed,
-          },
-        },
-        { new: true }
-      );
     } else if (payload.hidden === false) {
       await hiddenPostCount(infoQuestQuestion.uuid, false);
       await ledgerEntryRemoved(payload.uuid, infoQuestQuestion.uuid);
@@ -1025,5 +1487,7 @@ module.exports = {
   customLink,
   linkUserList,
   sharedLinkDynamicImageUserList,
+  createFeedback,
+  updateFeedback,
   // get,
 };

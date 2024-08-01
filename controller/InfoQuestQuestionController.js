@@ -1024,6 +1024,10 @@ const getQuestsAll = async (req, res) => {
     if (media === "Music") {
       filterObj.url = { $regex: "soundcloud.com", $options: "i" };
     }
+
+    if (media === "Giphy") {
+      filterObj.url = { $regex: "giphy.com", $options: "i" };
+    }
   }
 
   if (terms) {
@@ -1142,9 +1146,10 @@ const getQuestsAll = async (req, res) => {
   } else if (Page === "Hidden") {
     //console.log("running");
     filterObj.uuid = uuid;
-    filterObj.hidden = true;
+    // filterObj.hidden = true;
+    filterObj.feedbackMessage = { $ne: "", $exists: true };
     const Questions = await UserQuestSetting.find(filterObj)
-      .sort({ hiddenTime: -1 })
+      .sort({ feedbackTime: -1 })
       // .sort(sort === "Newest First" ? { createdAt: -1 } : "createdAt")
       .skip(skip)
       .limit(pageSize);
@@ -1156,6 +1161,14 @@ const getQuestsAll = async (req, res) => {
     });
 
     allQuestions = await Promise.all(mapPromises);
+    // Filter out suppressed questions if req.query.uuid does not match uuid
+    // if (req.query.uuid) {
+    //   allQuestions = allQuestions.filter((question) => {
+    //     return !question.suppressed || question.uuid === req.query.uuid;
+    //   });
+    // } else {
+    //   allQuestions = allQuestions.filter((question) => !question.suppressed);
+    // }
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
   } else if (Page === "SharedLink") {
     //console.log("running");
@@ -1178,7 +1191,7 @@ const getQuestsAll = async (req, res) => {
     totalQuestionsCount = await UserQuestSetting.countDocuments(filterObj);
   } else if (Page === "Feedback") {
     const hiddenUserSettings = await UserQuestSetting.find({
-      hidden: true,
+      feedbackMessage: { $ne: "", $exists: true },
     });
 
     // Extract userSettingIds from hiddenUserSettings
@@ -1217,11 +1230,21 @@ const getQuestsAll = async (req, res) => {
     //console.log("🚀 ~ getQuestsAll ~ hiddenUserSettingIds:",hiddenUserSettingIds);
     //console.log("🚀 ~ getQuestsAll ~ filterObj:", filterObj);
 
+    // let query = InfoQuestQuestions.find({
+    //   _id: { $nin: hiddenUserSettingIds },
+    //   ...filterObj,
+    //   isActive: true,
+    // });
+
     let query = InfoQuestQuestions.find({
       _id: { $nin: hiddenUserSettingIds },
       ...filterObj,
       isActive: true,
-    });
+      $or: [
+        { suppressed: true, uuid: req.query.uuid },
+        { suppressed: false }
+      ]
+    });    
 
     query = query.sort(
       sort === "Oldest First"
@@ -1364,16 +1387,16 @@ const getQuestsAll = async (req, res) => {
 
     if (Page === "Feedback") {
       // Get the count of hidden items grouped by hidden message
-      const suppression = await UserQuestSetting.aggregate([
+      const feedbackReceived = await UserQuestSetting.aggregate([
         {
           $match: {
-            hidden: true,
+            feedbackMessage: { $ne: "", $exists: true },
             questForeignKey: item._doc._id.toString(),
           },
         },
         {
           $group: {
-            _id: "$hiddenMessage",
+            _id: "$feedbackMessage",
             count: { $sum: 1 },
           },
         },
@@ -1381,9 +1404,9 @@ const getQuestsAll = async (req, res) => {
 
       let feedback = [];
 
-      if (suppression) {
-        // For each suppression item, check against suppressConditions
-        suppression.forEach((suppressItem) => {
+      if (feedbackReceived) {
+        // For each feedbackReceived item, check against suppressConditions
+        feedbackReceived.forEach((suppressItem) => {
           suppressConditions.forEach((condition) => {
             if (suppressItem._id === condition.id) {
               const violated =
@@ -1407,18 +1430,26 @@ const getQuestsAll = async (req, res) => {
         hidden: true,
         questForeignKey: item._doc._id,
       });
-
-      if (resultArray[i]._doc.hiddenCount === 0) {
-        if (resultArray[i]._doc.suppressedReason) {
-          if (resultArray[i]._doc.suppressedReason === "") {
-            resultArray.splice(i, 1);
-            i--;
-          }
-        } else {
-          resultArray.splice(i, 1);
-          i--;
+      resultArray[i]._doc.feedbackCount = await UserQuestSetting.countDocuments(
+        {
+          feedbackMessage: { $ne: "", $exists: true },
+          questForeignKey: item._doc._id,
         }
-      }
+      );
+
+      // if(!resultArray[i]._doc.isAddOptionFeedback){
+      //   if (resultArray[i]._doc.hiddenCount === 0) {
+      //     if (resultArray[i]._doc.suppressedReason) {
+      //       if (resultArray[i]._doc.suppressedReason === "") {
+      //         resultArray.splice(i, 1);
+      //         i--;
+      //       }
+      //     } else {
+      //       resultArray.splice(i, 1);
+      //       i--;
+      //     }
+      //   }
+      // }
     }
   }
 
@@ -2305,12 +2336,20 @@ async function getQuestionsWithStatus(allQuestions, uuid) {
       const startedQuestions = await StartQuests.find({
         uuid: uuid,
       });
-
       let Result = [];
       await allQuestions.map(async function (rcrd) {
         await startedQuestions.map(function (rec) {
           if (rec.questForeignKey === rcrd?._id?.toString()) {
-            if (
+            if (rec.isFeedback && rec.data.length === 0) {
+              rcrd.startStatus = "continue";
+              rcrd.startQuestData = rec;
+            } else if (rec.isFeedback && rec.data.length > 0) {
+              rcrd.startStatus = "change answer";
+              rcrd.startQuestData = rec;
+            } else if (rec.isFeedback) {
+              rcrd.startStatus = "completed";
+              rcrd.startQuestData = rec;
+            } else if (
               rcrd.usersChangeTheirAns?.trim() !== "" ||
               rcrd.whichTypeQuestion === "ranked choise"
             ) {
@@ -2497,11 +2536,8 @@ const checkMediaDuplicateUrl = async (req, res) => {
 const checkGifDuplicateUrl = async (req, res) => {
   try {
     const { url } = req.params;
-
-    const decodedUrl = decodeURIComponent(url);
-    console.log("decoded url", decodedUrl);
     const question = await InfoQuestQuestions.findOne({
-      url: decodedUrl,
+      url: url,
       isActive: true,
     });
 
@@ -2510,7 +2546,6 @@ const checkGifDuplicateUrl = async (req, res) => {
         .status(400)
         .json({ error: "This link already exists.", duplicate: true });
     }
-
     res.status(200).json({
       message:
         "Link does not exist in the URL field. Proceed with other operations.",
