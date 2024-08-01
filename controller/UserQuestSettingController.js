@@ -410,7 +410,11 @@ const createFeedback = async (req, res) => {
 
     let addOption = false;
     if (feedbackMessage === "Needs More Options") {
-      addOption = true;
+      const checkNeedsMoreOptions = await UserQuestSetting.findOne({
+        questForeignKey: questForeignKey,
+        feedbackMessage: feedbackMessage,
+      });
+      if (checkNeedsMoreOptions) addOption = true;
     }
 
     let questSetting;
@@ -903,9 +907,9 @@ const create = async (req, res) => {
     // }
 
     // Get quest owner uuid
-    // const infoQuestQuestion = await InfoQuestQuestions.findOne({
-    //   _id: payload.questForeignKey,
-    // });
+    const infoQuestQuestion = await InfoQuestQuestions.findOne({
+      _id: payload.questForeignKey,
+    });
 
     // const suppression = await UserQuestSetting.aggregate([
     //   {
