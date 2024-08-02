@@ -35,6 +35,7 @@ const {
   notification9,
   notification10,
   notification11,
+  notification12,
 } = require("../notifications/home");
 
 const createInfoQuestQuest = async (req, res) => {
@@ -1624,6 +1625,16 @@ const getQuestsAll = async (req, res) => {
             if (page === 6 && nextPage === true) {
               result1.splice(1, 0, notification10);
               result1.splice(5, 0, notification11);
+            }
+
+            // Page 7
+            if (page === 7 && nextPage === false) {
+              if (result1.length >= 2) {
+                result1.splice(2, 0, notification12);
+              }
+            }
+            if (page === 7 && nextPage === true) {
+              result1.splice(2, 0, notification12);
             }
           }
         }
