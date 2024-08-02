@@ -1986,6 +1986,35 @@ const getQuestByUniqueId = async (req, res) => {
   }
 };
 
+const getEmbededPostByUniqueId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const infoQuest = await InfoQuestQuestions.find({
+      _id: id,
+    }).populate("getUserBadge", "badges");
+    if (!infoQuest) throw new Error("No Post Exist!");
+    const result1 = await getQuestionsWithStatus(infoQuest);
+
+    const resultArray = result1.map(getPercentage);
+    const desiredArray = resultArray.map((item) => ({
+      ...item._doc,
+      selectedPercentage: item.selectedPercentage,
+      contendedPercentage: item.contendedPercentage,
+      startStatus: "completed",
+      type: "embed",
+    }));
+
+    res.status(200).json({
+      data: desiredArray,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: `An error occurred while emdeding post: ${error.message}`,
+    });
+  }
+};
+
 const getAllQuestsWithCompletedStatus = async (req, res) => {
   try {
     let allQuestions;
@@ -2664,4 +2693,5 @@ module.exports = {
   getQuestByIdQuestForeignKey,
   getQuestionsWithStatusQuestForeignKey,
   getQuestionsWithUserSettingsQuestForeignKey,
+  getEmbededPostByUniqueId,
 };
